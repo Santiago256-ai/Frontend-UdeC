@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:4000/api", // cambia si tu backend corre en otro puerto/URL
+  baseURL: "https://backend-udec-production.up.railway.app/api",
 });
 
 // Interceptor para agregar token automáticamente

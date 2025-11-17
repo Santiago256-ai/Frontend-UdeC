@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import './Landing.css';
-import AuthModal from './AuthModal'; // <-- 1. IMPORTAR EL NUEVO MODAL
+import AuthModal from './AuthModal'; // <-- IMPORTADO: Se asume que existe este componente modal.
 import img1 from '../assets/carrusel1.jpg';
 import img2 from '../assets/carrusel2.jpg';
 import img3 from '../assets/carrusel3.jpg';
@@ -16,7 +16,7 @@ export default function Landing() {
     });
 
     const [showDropdown, setShowDropdown] = useState(false);
-    const [showAuthModal, setShowAuthModal] = useState(false); // <-- 2. NUEVO ESTADO PARA EL MODAL
+    const [showAuthModal, setShowAuthModal] = useState(false); // ESTADO: Para el nuevo modal
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
 
@@ -55,24 +55,24 @@ export default function Landing() {
         setShowDropdown(false);
     };
 
-    // 3. FUNCIÓN PARA ABRIR EL MODAL
+    // FUNCIÓN: Para abrir el modal de autenticación
     const handleLoginClick = () => {
         setShowAuthModal(true);
     };
 
     const slides = [
         {
-            title: "Informa a las personas adecuadas de que buscas empleo",
+            title: "Informa a las personas adecuadas de que buscas empleo 🚀",
             text: "La funcionalidad «Open To Work» te permite indicar que buscas empleo...",
             img: img1
         },
         {
-            title: "Las conversaciones de hoy podrían ser las oportunidades de mañana",
+            title: "Las conversaciones de hoy podrían ser las oportunidades de mañana 💡",
             text: "Enviar mensajes a personas que conoces es una gran manera de reforzar relaciones...",
             img: img2
         },
         {
-            title: "Tu red profesional crece contigo",
+            title: "Tu red profesional crece contigo 📈",
             text: "Conecta con expertos y descubre nuevas oportunidades laborales.",
             img: img3
         }
@@ -91,20 +91,21 @@ export default function Landing() {
             <header className="landing-header">
                 <div className="landing-logo">
                     <span className="landing-logo-express">Empres</span>
-                    <span className="landing-logo-365">360</span>
+                    <span className="landing-logo-360">360</span>
                     <span className="landing-logo-pro">PRO</span>
                 </div>
 
                 <div className="landing-menu">
-                    <Link to="/learning">Learning</Link>
-                    <Link to="/empleos">Empleos</Link>
-                    <Link to="/juegos">Juegos</Link>
-                    <Link to="/descargar">Descargar la aplicación</Link>
+                    {/* Emojis modernos en el menú de navegación */}
+                    <Link to="/learning">📚 Learning</Link>
+                    <Link to="/empleos">💼 Empleos</Link>
+                    <Link to="/juegos">🎮 Juegos</Link>
+                    <Link to="/descargar">📲 App</Link>
                 </div>
 
                 <div className="landing-auth-buttons">
                     
-                    {/* 4. MODIFICACIÓN: Usamos un botón y la función para abrir el modal */}
+                    {/* Botón que abre el Modal de Iniciar Sesión */}
                     <button 
                         className="landing-login-btn"
                         onClick={handleLoginClick} 
@@ -121,11 +122,12 @@ export default function Landing() {
                         </button>
                         
                         <div className={`landing-dropdown-menu ${showDropdown ? 'show' : ''}`}>
+                            {/* Emojis en el Dropdown de Registro */}
                             <button 
                                 className="landing-dropdown-item"
                                 onClick={handlePersonaClick}
                             >
-                                👤 Como Persona
+                                👥 Como Persona
                             </button>
                             <button 
                                 className="landing-dropdown-item"
@@ -138,26 +140,29 @@ export default function Landing() {
                 </div>
             </header>
 
+            {/* MAIN: Contenedor principal con centrado y sin ancho fijo total para el diseño de tarjetas unificadas */}
             <main className="landing-main">
-                {/* ... (Contenido principal - sin cambios) ... */}
                 <div className="landing-card">
                     <h1 className="landing-welcome">
-                        ¡Te damos la bienvenida a tu comunidad profesional!
+                        ¡Te damos la bienvenida a tu comunidad profesional! 🌐
                     </h1>
 
+                    {/* Botones de Autenticación actualizados para verse más limpios */}
                     <div className="landing-options">
                         <button 
-                            className={`landing-btn ${authMethod.google ? 'active' : ''}`}
+                            className={`landing-btn landing-auth-google ${authMethod.google ? 'active' : ''}`}
                             onClick={() => toggleAuth("google")}
                         >
-                            {authMethod.google && '✔ '}Continuar con Google
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" className="auth-icon" />
+                            Continuar con Google
                         </button>
 
                         <button 
-                            className={`landing-btn ${authMethod.microsoft ? 'active' : ''}`}
+                            className={`landing-btn landing-auth-microsoft ${authMethod.microsoft ? 'active' : ''}`}
                             onClick={() => toggleAuth("microsoft")}
                         >
-                            {authMethod.microsoft && '✔ '}Continuar con Microsoft
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/1024px-Microsoft_logo_%282012%29.svg.png" alt="Microsoft" className="auth-icon" />
+                            Continuar con Microsoft
                         </button>
                     </div>
 
@@ -166,102 +171,100 @@ export default function Landing() {
                     </button>
 
                     <p className="landing-legal">
-                        Al hacer clic en «Continuar» para unirte o iniciar sesión, aceptas las <a href="#">Condiciones de uso</a>, la <a href="#">Política de privacidad</a> y la <a href="#">Política de cookies</a> de <strong>Express365PRO</strong>.
+                        Al hacer clic en «Continuar» para unirte o iniciar sesión, aceptas las <a href="#">Condiciones de uso</a>, la <a href="#">Política de privacidad</a> y la <a href="#">Política de cookies</a> de <strong>Empres360PRO</strong>.
                     </p>
 
                     <div className="landing-separator">o</div>
 
                     <button 
-                        className={`landing-btn ${authMethod.email ? 'active' : ''}`}
+                        className={`landing-btn landing-auth-email ${authMethod.email ? 'active' : ''}`}
                         onClick={() => toggleAuth("email")}
                     >
-                        {authMethod.email && '✔ '}Iniciar sesión con el email
+                        <i className="fas fa-envelope auth-icon"></i>
+                        Iniciar sesión con el email
                     </button>
 
                     <p className="landing-signup-link">
-                        ¿Estás empezando a usar Express365PRO? <a href="#">Únete ahora</a>
+                        ¿Estás empezando a usar Empres360PRO? <a href="#">Únete ahora</a>
                     </p>
                 </div>
 
                 <div className="landing-image">
                     <img 
                         src= {imagenPrincipal}
-                        alt="Comunidad profesional Express365PRO" 
+                        alt="Comunidad profesional Empres360PRO" 
                     />
                 </div>
             </main>
             
-            {/* SECCIÓN ADICIONAL INFERIOR */}
+            {/* SECCIÓN ADICIONAL INFERIOR: Diseño de lado a lado */}
             <section className="landing-extra-section">
-                {/* === BLOQUE 1 === */}
+                
+                {/* === BLOQUE 1: Artículos === */}
                 <div className="landing-info-block">
                     <div className="landing-info-text">
-                        <h2>Echa un vistazo a los artículos colaborativos</h2>
+                        <h2>Echa un vistazo a los artículos colaborativos 📰</h2>
                         <p>
-                            Queremos impulsar los conocimientos de la comunidad de una forma nueva.
-                            Los expertos añadirán información directamente a cada artículo,
-                            generado inicialmente con inteligencia artificial.
+                            Queremos impulsar los conocimientos de la comunidad de una forma nueva. Los expertos añadirán información directamente a cada artículo, generado inicialmente con inteligencia artificial.
                         </p>
                     </div>
 
                     <div className="landing-tags">
                         {[
-                            { name: "Marketing", url: "https://www.linkedin.com/feed/topic/marketing" },
-                            { name: "Administración pública", url: "https://www.linkedin.com/feed/topic/public-administration" },
-                            { name: "Asistencia sanitaria", url: "https://www.linkedin.com/feed/topic/healthcare" },
-                            { name: "Ingeniería", url: "https://www.linkedin.com/feed/topic/engineering" },
-                            { name: "Servicios de TI", url: "https://www.linkedin.com/feed/topic/it-services" },
-                            { name: "Sostenibilidad", url: "https://www.linkedin.com/feed/topic/sustainability" },
-                            { name: "Administración de empresas", url: "https://www.linkedin.com/feed/topic/business-management" },
-                            { name: "Telecomunicaciones", url: "https://www.linkedin.com/feed/topic/telecommunications" },
-                            { name: "Gestión de recursos humanos", url: "https://www.linkedin.com/feed/topic/human-resources" },
+                            { name: "Marketing", url: "#" },
+                            { name: "Administración pública", url: "#" },
+                            { name: "Asistencia sanitaria", url: "#" },
+                            { name: "Ingeniería", url: "#" },
+                            { name: "Servicios de TI", url: "#" },
+                            { name: "Sostenibilidad", url: "#" },
+                            { name: "Administración de empresas", url: "#" },
+                            { name: "Telecomunicaciones", url: "#" },
+                            { name: "Gestión de RR. HH.", url: "#" },
                         ].map((tag) => (
-                            <a key={tag.name} href={tag.url} target="_blank" rel="noopener noreferrer" className="landing-tag">
+                            <a key={tag.name} href={tag.url} className="landing-tag">
                                 {tag.name}
                             </a>
                         ))}
-                        <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" className="landing-tag show-all">
-                            Mostrar todo
+                        <a href="#" className="landing-tag show-all">
+                            Mostrar todo »
                         </a>
                     </div>
                 </div>
 
-                {/* === BLOQUE 2 === */}
+                {/* === BLOQUE 2: Empleos === */}
                 <div className="landing-info-block">
                     <div className="landing-info-text">
-                        <h2>Encuentra el empleo o las prácticas adecuadas para ti</h2>
+                        <h2>Encuentra el empleo o las prácticas adecuadas para ti 🎯</h2>
                     </div>
 
                     <div className="landing-tags">
                         {[
-                            { name: "Ingeniería", url: "https://www.linkedin.com/jobs/search/?keywords=ingenieria" },
-                            { name: "Desarrollo empresarial", url: "https://www.linkedin.com/jobs/search/?keywords=business%20development" },
-                            { name: "Finanzas", url: "https://www.linkedin.com/jobs/search/?keywords=finanzas" },
-                            { name: "Asistente administrativo", url: "https://www.linkedin.com/jobs/search/?keywords=administrativo" },
-                            { name: "Empleado de tienda", url: "https://www.linkedin.com/jobs/search/?keywords=tienda" },
-                            { name: "Servicio al cliente", url: "https://www.linkedin.com/jobs/search/?keywords=cliente" },
-                            { name: "Operaciones", url: "https://www.linkedin.com/jobs/search/?keywords=operaciones" },
-                            { name: "TI", url: "https://www.linkedin.com/jobs/search/?keywords=tecnologia" },
-                            { name: "Marketing", url: "https://www.linkedin.com/jobs/search/?keywords=marketing" },
-                            { name: "Recursos humanos", url: "https://www.linkedin.com/jobs/search/?keywords=recursos%20humanos" },
+                            { name: "Ingeniería", url: "#" },
+                            { name: "Desarrollo empresarial", url: "#" },
+                            { name: "Finanzas", url: "#" },
+                            { name: "Asistente administrativo", url: "#" },
+                            { name: "Empleado de tienda", url: "#" },
+                            { name: "Servicio al cliente", url: "#" },
+                            { name: "Operaciones", url: "#" },
+                            { name: "TI", url: "#" },
+                            { name: "Marketing", url: "#" },
+                            { name: "Recursos humanos", url: "#" },
                         ].map((tag) => (
-                            <a key={tag.name} href={tag.url} target="_blank" rel="noopener noreferrer" className="landing-tag">
+                            <a key={tag.name} href={tag.url} className="landing-tag">
                                 {tag.name}
                             </a>
                         ))}
-                        <a href="https://www.linkedin.com/jobs/" target="_blank" rel="noopener noreferrer" className="landing-tag show-all">
-                            Mostrar más
+                        <a href="#" className="landing-tag show-all">
+                            Mostrar más »
                         </a>
                     </div>
                 </div>
 
-                {/* === BLOQUE 3 === */}
+                {/* === BLOQUE 3: Promo de Empleo === */}
                 <div className="landing-job-promo">
-                    <h3>Publica tu anuncio de empleo para que lo vean millones de personas</h3>
+                    <h3>Publica tu anuncio de empleo para que lo vean millones de personas 📢</h3>
                     <a
-                        href="https://www.linkedin.com/talent/post-a-job/"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href="#"
                         className="landing-publish-btn"
                     >
                         Publicar un empleo
@@ -270,7 +273,7 @@ export default function Landing() {
 
             </section>
 
-            {/* === CARRUSEL INFORMATIVO === */}
+            {/* === CARRUSEL INFORMATIVO: Diseño de lado a lado con margen === */}
             <div className="landing-carousel">
                 <button
                     className="carousel-btn prev"
@@ -295,7 +298,8 @@ export default function Landing() {
                                     <p>{slide.text}</p>
                                 </div>
                                 <div className="carousel-image">
-                                    <img src={slide.img} alt={slide.title} />
+                                    {/* Utilizamos un div para centrar la imagen circular */}
+                                    <img src={slide.img} alt={slide.title} /> 
                                 </div>
                             </div>
                         </div>
@@ -323,7 +327,7 @@ export default function Landing() {
             </div>
 
 
-            {/* === FOOTER === */}
+            {/* === FOOTER: Diseño de lado a lado === */}
             <footer className="landing-footer">
                 <div className="footer-container">
                     <div className="footer-section">
@@ -346,10 +350,11 @@ export default function Landing() {
                     <div className="footer-section">
                         <h4>Síguenos</h4>
                         <div className="footer-socials">
-                            <a href="#"><i className="fab fa-facebook"></i></a>
-                            <a href="#"><i className="fab fa-twitter"></i></a>
-                            <a href="#"><i className="fab fa-linkedin"></i></a>
-                            <a href="#"><i className="fab fa-instagram"></i></a>
+                            {/* Íconos de redes sociales modernos con emojis */}
+                            <a href="#">📘</a> 
+                            <a href="#">🐦</a> 
+                            <a href="#">🔗</a> 
+                            <a href="#">📸</a> 
                         </div>
                     </div>
                 </div>
@@ -359,7 +364,7 @@ export default function Landing() {
                 </div>
             </footer>
             
-            {/* 5. RENDERIZAR EL MODAL DE AUTENTICACIÓN */}
+            {/* RENDERIZAR EL MODAL DE AUTENTICACIÓN */}
             <AuthModal 
                 isVisible={showAuthModal} 
                 onClose={() => setShowAuthModal(false)}
