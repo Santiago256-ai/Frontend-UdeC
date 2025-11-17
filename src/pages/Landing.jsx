@@ -1,11 +1,21 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import './Landing.css';
-import AuthModal from './AuthModal'; // <-- IMPORTADO: Se asume que existe este componente modal.
+import AuthModal from './AuthModal'; 
+
+// 🚨 1. IMPORTACIONES DE FIREBASE
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider, microsoftProvider } from "./firebase"; 
+
+// 🚨 2. IMPORTACIÓN DE AXIOS/API
+import API from '../services/api'; 
+
+// Importaciones de imágenes (rutas relativas)
 import img1 from '../assets/carrusel1.jpg';
 import img2 from '../assets/carrusel2.jpg';
 import img3 from '../assets/carrusel3.jpg';
 import imagenPrincipal from '../assets/equipo.jpg';
+
 
 export default function Landing() {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -16,9 +26,106 @@ export default function Landing() {
     });
 
     const [showDropdown, setShowDropdown] = useState(false);
-    const [showAuthModal, setShowAuthModal] = useState(false); // ESTADO: Para el nuevo modal
+    const [showAuthModal, setShowAuthModal] = useState(false); 
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
+
+    // ------------------------------------------------------------------
+    // 🚨 FUNCIONES CENTRALES DE AUTENTICACIÓN Y REDIRECCIÓN
+    // ------------------------------------------------------------------
+
+    // Función de redirección centralizada
+    const redirectToDashboard = (usuario) => {
+        const userRole = usuario.rol?.toLowerCase(); // Aseguramos minúsculas
+
+        if (userRole === 'estudiante' || userRole === 'persona') {
+            navigate('/vacantes-dashboard', { state: { usuario } });
+        } else if (userRole === 'empresa' || userRole === 'compania') {
+            navigate('/empresa-dashboard', { state: { usuario } });
+        } else {
+            console.error("Tipo de usuario no reconocido después del login social:", usuario);
+            alert('Error: Rol de usuario desconocido. Contacta a soporte.');
+        }
+    };
+    
+    // 🚨 FUNCIÓN CLAVE: Envía el token de Firebase a tu Backend para login/registro
+    const registerOrLoginWithBackend = async (firebaseUser) => {
+        // 1. Obtener el token de ID de Firebase
+        const idToken = await firebaseUser.getIdToken();
+
+        try {
+            // 2. Enviar el token a tu endpoint de login social
+            const response = await API.post('/auth/social-login', { 
+                idToken: idToken,
+                email: firebaseUser.email 
+            });
+
+            // 3. El Backend devuelve el objeto de usuario final (con 'rol', 'id', etc.)
+            return response.data; 
+
+        } catch (error) {
+            console.error("Error al autenticar con el Backend:", error.response?.data || error.message);
+            // Re-lanzar error para manejarlo en la función llamante y mostrar un mensaje
+            throw new Error("Fallo la comunicación con el Backend. No se pudo iniciar sesión.");
+        }
+    };
+
+
+    // ------------------------------------------------------------------
+    // 🚨 MANEJADORES DE LOGIN SOCIAL (Actualizados)
+    // ------------------------------------------------------------------
+    
+    // Función para Iniciar Sesión con Google
+    const handleGoogleLogin = async () => {
+        try {
+            // 1. Autenticar con Firebase
+            const result = await signInWithPopup(auth, googleProvider);
+            const firebaseUser = result.user;
+
+            // 2. Autenticar/registrar en tu Backend
+            const backendUser = await registerOrLoginWithBackend(firebaseUser);
+            
+            // 3. Redirigir
+            redirectToDashboard(backendUser);
+
+        } catch (error) {
+            // Manejar error si el usuario cierra el pop-up o hay un error de Firebase/Backend
+            if (error.code !== 'auth/popup-closed-by-user') {
+                console.error("Error al iniciar sesión con Google:", error);
+                alert(`Error de autenticación con Google. Mensaje: ${error.message}`);
+            }
+        }
+    };
+
+    // Función para Iniciar Sesión con Microsoft
+    const handleMicrosoftLogin = async () => {
+        try {
+            // 1. Autenticar con Firebase
+            const result = await signInWithPopup(auth, microsoftProvider);
+            const firebaseUser = result.user;
+
+            // 2. Autenticar/registrar en tu Backend
+            const backendUser = await registerOrLoginWithBackend(firebaseUser);
+            
+            // 3. Redirigir
+            redirectToDashboard(backendUser);
+
+        } catch (error) {
+            if (error.code !== 'auth/popup-closed-by-user') {
+                console.error("Error al iniciar sesión con Microsoft:", error);
+                alert(`Error de autenticación con Microsoft. Mensaje: ${error.message}`);
+            }
+        }
+    };
+
+    // Función para Iniciar Sesión con Email (abre el modal)
+    const handleEmailLoginClick = () => {
+        setShowAuthModal(true); 
+    };
+    
+    // ------------------------------------------------------------------
+    // OTRAS FUNCIONES (Mantienen la lógica de UI)
+    // ------------------------------------------------------------------
 
     // Cerrar dropdown al hacer clic fuera
     useEffect(() => {
@@ -55,7 +162,7 @@ export default function Landing() {
         setShowDropdown(false);
     };
 
-    // FUNCIÓN: Para abrir el modal de autenticación
+    // FUNCIÓN: Para abrir el modal de autenticación (Se mantiene para el botón de la cabecera)
     const handleLoginClick = () => {
         setShowAuthModal(true);
     };
@@ -85,6 +192,9 @@ export default function Landing() {
         return () => clearInterval(interval);
     }, [slides.length]);
 
+    // ------------------------------------------------------------------
+    // JSX / RENDERIZADO
+    // ------------------------------------------------------------------
     return (
         <div className="landing-container">
             
@@ -96,7 +206,6 @@ export default function Landing() {
                 </div>
 
                 <div className="landing-menu">
-                    {/* Emojis modernos en el menú de navegación */}
                     <Link to="/learning">📚 Learning</Link>
                     <Link to="/empleos">💼 Empleos</Link>
                     <Link to="/juegos">🎮 Juegos</Link>
@@ -105,7 +214,6 @@ export default function Landing() {
 
                 <div className="landing-auth-buttons">
                     
-                    {/* Botón que abre el Modal de Iniciar Sesión */}
                     <button 
                         className="landing-login-btn"
                         onClick={handleLoginClick} 
@@ -122,7 +230,6 @@ export default function Landing() {
                         </button>
                         
                         <div className={`landing-dropdown-menu ${showDropdown ? 'show' : ''}`}>
-                            {/* Emojis en el Dropdown de Registro */}
                             <button 
                                 className="landing-dropdown-item"
                                 onClick={handlePersonaClick}
@@ -140,28 +247,38 @@ export default function Landing() {
                 </div>
             </header>
 
-            {/* MAIN: Contenedor principal con centrado y sin ancho fijo total para el diseño de tarjetas unificadas */}
+            {/* MAIN: Contenedor principal */}
             <main className="landing-main">
                 <div className="landing-card">
                     <h1 className="landing-welcome">
-                        ¡Te damos la bienvenida a tu comunidad profesional! 🌐
+                        ¡Te damos la bienvenida a tu comunidad profesional!
                     </h1>
 
-                    {/* Botones de Autenticación actualizados para verse más limpios */}
+                    {/* Botones de Autenticación actualizados */}
                     <div className="landing-options">
                         <button 
                             className={`landing-btn landing-auth-google ${authMethod.google ? 'active' : ''}`}
-                            onClick={() => toggleAuth("google")}
+                            onClick={handleGoogleLogin} 
                         >
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" className="auth-icon" />
+                            <svg class="auth-icon" viewBox="0 0 24 24" width="20px" height="20px">
+                                <path fill="#4285F4" d="M22.5 12.5c0-.6-.1-1.2-.2-1.7H12v3.4h5.6c-.3 1.7-1.3 3.1-2.9 4v2.7h3.5c2.1-1.9 3.4-4.8 3.4-8.4z"/>
+                                <path fill="#34A853" d="M12 24c3.3 0 6.1-1.1 8.2-3.1l-3.5-2.7c-1.1.7-2.5 1.1-4.7 1.1-3.6 0-6.7-2.4-7.8-5.6H.7v2.8C2.9 21.6 7.1 24 12 24z"/>
+                                <path fill="#FBBC05" d="M4.2 14.3c-.2-.7-.3-1.4-.3-2.3s.1-1.6.3-2.3V6.9H.7c-.5 1.1-.7 2.5-.7 4.1s.2 3 .7 4.1L4.2 14.3z"/>
+                                <path fill="#EA4335" d="M12 4.6c2.1 0 4.1.8 5.6 2.1l3.1-3.1C18.1 1.7 15.3 0 12 0 7.1 0 2.9 2.4.7 6.9l3.5 2.8c1.1-3.2 4.2-5.6 7.8-5.6z"/>
+                            </svg>
                             Continuar con Google
                         </button>
 
                         <button 
                             className={`landing-btn landing-auth-microsoft ${authMethod.microsoft ? 'active' : ''}`}
-                            onClick={() => toggleAuth("microsoft")}
+                            onClick={handleMicrosoftLogin}
                         >
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/1024px-Microsoft_logo_%282012%29.svg.png" alt="Microsoft" className="auth-icon" />
+                            <svg className="auth-icon" viewBox="0 0 240 240" width="20px" height="20px">
+                                <rect x="10" y="10" width="110" height="110" fill="#F25022"/>
+                                <rect x="120" y="10" width="110" height="110" fill="#7FBA00"/>
+                                <rect x="10" y="120" width="110" height="110" fill="#00A4EF"/>
+                                <rect x="120" y="120" width="110" height="110" fill="#FFB900"/>
+                            </svg>
                             Continuar con Microsoft
                         </button>
                     </div>
@@ -178,9 +295,9 @@ export default function Landing() {
 
                     <button 
                         className={`landing-btn landing-auth-email ${authMethod.email ? 'active' : ''}`}
-                        onClick={() => toggleAuth("email")}
+                        onClick={handleEmailLoginClick}
                     >
-                        <i className="fas fa-envelope auth-icon"></i>
+                        <i className="fas fa-envelope auth-icon"></i> 
                         Iniciar sesión con el email
                     </button>
 
@@ -197,13 +314,12 @@ export default function Landing() {
                 </div>
             </main>
             
-            {/* SECCIÓN ADICIONAL INFERIOR: Diseño de lado a lado */}
             <section className="landing-extra-section">
                 
                 {/* === BLOQUE 1: Artículos === */}
                 <div className="landing-info-block">
                     <div className="landing-info-text">
-                        <h2>Echa un vistazo a los artículos colaborativos 📰</h2>
+                        <h2>Echa un vistazo a los artículos colaborativos</h2>
                         <p>
                             Queremos impulsar los conocimientos de la comunidad de una forma nueva. Los expertos añadirán información directamente a cada artículo, generado inicialmente con inteligencia artificial.
                         </p>
@@ -234,7 +350,7 @@ export default function Landing() {
                 {/* === BLOQUE 2: Empleos === */}
                 <div className="landing-info-block">
                     <div className="landing-info-text">
-                        <h2>Encuentra el empleo o las prácticas adecuadas para ti 🎯</h2>
+                        <h2>Encuentra el empleo o las prácticas adecuadas para ti</h2>
                     </div>
 
                     <div className="landing-tags">
@@ -262,7 +378,7 @@ export default function Landing() {
 
                 {/* === BLOQUE 3: Promo de Empleo === */}
                 <div className="landing-job-promo">
-                    <h3>Publica tu anuncio de empleo para que lo vean millones de personas 📢</h3>
+                    <h3>Publica tu anuncio de empleo para que lo vean millones de personas</h3>
                     <a
                         href="#"
                         className="landing-publish-btn"
@@ -273,7 +389,7 @@ export default function Landing() {
 
             </section>
 
-            {/* === CARRUSEL INFORMATIVO: Diseño de lado a lado con margen === */}
+            {/* === CARRUSEL INFORMATIVO === */}
             <div className="landing-carousel">
                 <button
                     className="carousel-btn prev"
@@ -298,7 +414,6 @@ export default function Landing() {
                                     <p>{slide.text}</p>
                                 </div>
                                 <div className="carousel-image">
-                                    {/* Utilizamos un div para centrar la imagen circular */}
                                     <img src={slide.img} alt={slide.title} /> 
                                 </div>
                             </div>
@@ -327,7 +442,7 @@ export default function Landing() {
             </div>
 
 
-            {/* === FOOTER: Diseño de lado a lado === */}
+            {/* === FOOTER === */}
             <footer className="landing-footer">
                 <div className="footer-container">
                     <div className="footer-section">
@@ -350,7 +465,6 @@ export default function Landing() {
                     <div className="footer-section">
                         <h4>Síguenos</h4>
                         <div className="footer-socials">
-                            {/* Íconos de redes sociales modernos con emojis */}
                             <a href="#">📘</a> 
                             <a href="#">🐦</a> 
                             <a href="#">🔗</a> 

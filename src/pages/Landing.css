@@ -12,49 +12,54 @@
 | La variable 'secondary' será utilizada para fondos de bloques.
 */
 @layer base {
-  :root {
-    /* Color de fondo: Blanco, para modo claro */
-    --background: 0 0% 100%;
-    /* Color de frente (texto): Oscuro, para modo claro */
-    --foreground: 222.2 84% 4.9%;
+    :root {
+        /* Color de fondo: Blanco, para modo claro */
+        --background: 0 0% 100%;
+        /* Color de frente (texto): Oscuro, para modo claro */
+        --foreground: 222.2 84% 4.9%;
+        --card: 0 0% 100%; /* Fondo de tarjetas/modales, blanco */
+        --card-foreground: 222.2 84% 4.9%; /* Texto de tarjetas */
 
-    /* Color Verde Corporativo Oscuro (Primary) - Similar al verde de LinkedIn */
-    --primary: 150 40% 25%; /* Nuevo tono de verde corporativo para el modo claro */
-    --primary-foreground: 210 40% 98%; /* Texto blanco sobre verde */
 
-    /* Color de Fondo de Componentes (Secondary) - Un tono de verde/gris claro para bloques */
-    --secondary: 150 20% 90%; 
-    --secondary-foreground: 222.2 47.4% 11.2%; /* Texto oscuro sobre el fondo secundario */
+        /* Color Verde Corporativo Oscuro (Primary) - Similar al verde de LinkedIn */
+        --primary: 150 40% 25%; /* Nuevo tono de verde corporativo para el modo claro */
+        --primary-foreground: 210 40% 98%; /* Texto blanco sobre verde */
 
-    /* Color de Acento - Azul vibrante para botones (como el azul de LinkedIn) */
-    --accent: 210 90% 50%; /* Azul de acción */
-    --accent-foreground: 210 40% 98%; /* Texto blanco sobre azul */
+        /* Color de Fondo de Componentes (Secondary) - Un tono de verde/gris claro para bloques */
+        --secondary: 150 20% 90%; 
+        --secondary-foreground: 222.2 47.4% 11.2%; /* Texto oscuro sobre el fondo secundario */
 
-    --border: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-  }
+        /* Color de Acento - Azul vibrante para botones (como el azul de LinkedIn) */
+        --accent: 210 90% 50%; /* Azul de acción */
+        --accent-foreground: 210 40% 98%; /* Texto blanco sobre azul */
 
-  .dark {
-    /* Color de fondo: Oscuro, para modo oscuro */
-    --background: 222.2 84% 4.9%;
-    /* Color de frente (texto): Claro, para modo oscuro */
-    --foreground: 210 40% 98%; 
+        --border: 214.3 31.8% 91.4%;
+        --ring: 222.2 84% 4.9%;
+    }
 
-    /* Color Verde Corporativo Oscuro (Primary) - Más claro en Dark Mode */
-    --primary: 150 40% 75%; 
-    --primary-foreground: 222.2 47.4% 11.2%; /* Texto oscuro sobre verde */
+    .dark {
+        /* Color de fondo: Oscuro, para modo oscuro */
+        --background: 222.2 84% 4.9%;
+        /* Color de frente (texto): Claro, para modo oscuro */
+        --foreground: 210 40% 98%; 
+        --card: 222.2 84% 4.9%; /* Fondo de tarjetas/modales, oscuro */
+        --card-foreground: 210 40% 98%; /* Texto de tarjetas */
 
-    /* Color de Fondo de Componentes (Secondary) - Gris oscuro para bloques */
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%; /* Texto claro sobre el fondo secundario */
+        /* Color Verde Corporativo Oscuro (Primary) - Más claro en Dark Mode */
+        --primary: 150 40% 75%; 
+        --primary-foreground: 222.2 47.4% 11.2%; /* Texto oscuro sobre verde */
 
-    /* Color de Acento - Azul vibrante para botones */
-    --accent: 210 90% 50%;
-    --accent-foreground: 210 40% 98%;
-    
-    --border: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
+        /* Color de Fondo de Componentes (Secondary) - Gris oscuro para bloques */
+        --secondary: 217.2 32.6% 17.5%;
+        --secondary-foreground: 210 40% 98%; /* Texto claro sobre el fondo secundario */
+
+        /* Color de Acento - Azul vibrante para botones */
+        --accent: 210 90% 50%;
+        --accent-foreground: 210 40% 98%;
+        
+        --border: 217.2 32.6% 17.5%;
+        --ring: 212.7 26.8% 83.9%;
+    }
 }
 
 /*
@@ -63,708 +68,623 @@
 |--------------------------------------------------------------------------
 */
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
-  body {
-    /* Color de texto base */
-    @apply text-foreground; 
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        /* Color de texto base */
+        @apply text-foreground; 
 
-    /* 🟢 APLICACIÓN CLAVE: Fondo animado con tonos VERDES PROFESIONALES */
-    background: linear-gradient(-45deg, #007B3E, #79C000, #007B3E, #79C000); 
-    background-size: 400% 400%;
-    /* Animación más lenta para un toque elegante */
-    animation: gradientAnimation 20s ease infinite; 
-    font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  }
+        /* 🟢 APLICACIÓN CLAVE: Fondo animado con tonos VERDES PROFESIONALES */
+        background: linear-gradient(-45deg, #007B3E, #79C000, #007B3E, #79C000); 
+        background-size: 400% 400%;
+        /* Animación más lenta para un toque elegante */
+        animation: gradientAnimation 20s ease infinite; 
+        font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+    }
 }
 
 @keyframes gradientAnimation {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-/* Estilos generales */
+/*
+|--------------------------------------------------------------------------
+| ESTILOS DE LANDING PAGE
+|--------------------------------------------------------------------------
+*/
+
+/* === Contenedor Principal === */
 .landing-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    /* Asegura que el contenido flote sobre el fondo del body */
+    @apply bg-background/50; 
 }
 
-/* Header superior MÁS PROFESIONAL */
+/*
+|--------------------------------------------------------------------------
+| ESTRUCTURA PRINCIPAL (HEADER)
+|--------------------------------------------------------------------------
+*/
 .landing-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 10%; /* Ajuste de padding para un look más "de lado a lado" en desktop */
-  /* Fondo más opaco y profesional con soporte Dark Mode */
-  @apply bg-background border-b border-border shadow-md;
-  backdrop-filter: blur(5px);
-  position: sticky; /* Sticky para que se mantenga visible */
-  top: 0;
-  z-index: 1000;
+    /* Esto es CLAVE para que no se mueva y para que el z-index funcione */
+    position: sticky; 
+    top: 0;
+    width: 100%;
+    
+    /* 🔑 CLAVE: Asegura que el header esté encima de todo el contenido */
+    z-index: 1000; 
+    
+    /* 🎨 CLAVE: Asegura que el header tenga un fondo sólido */
+    @apply bg-background; 
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5%;
+    border-bottom: 1px solid hsl(var(--border));
 }
 
 .landing-logo {
-  font-size: 1.6rem;
-  font-weight: 800;
-  @apply text-primary; /* Usamos el verde corporativo */
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
 }
 
-.landing-logo-express, .landing-logo-pro {
-    @apply text-foreground; /* Se ajustan al modo oscuro/claro */
+.landing-logo-express {
+    @apply text-primary;
+    margin-right: 2px;
 }
 
 .landing-logo-360 {
-  @apply text-primary;
-  font-weight: 700;
+    @apply text-foreground;
 }
 
+.landing-logo-pro {
+    font-size: 0.9rem;
+    font-weight: 700;
+    @apply text-accent;
+    align-self: flex-start;
+    margin-top: -8px;
+}
+
+/* === Menú de Navegación === */
 .landing-menu {
-  display: flex;
-  gap: 2rem;
-  @apply text-muted-foreground;
-  margin: 0 auto;
+    display: none; /* Ocultar por defecto en móvil */
+    gap: 1.5rem;
 }
 
 .landing-menu a {
-  transition: color 0.2s ease;
-  font-size: 0.95rem;
-  font-weight: 500;
+    font-size: 1rem;
+    font-weight: 500;
+    @apply text-foreground/70 hover:text-accent transition-colors duration-200;
 }
 
-.landing-menu a:hover {
-  @apply text-primary;
-}
 
+/*
+|--------------------------------------------------------------------------
+| AUTENTICACIÓN Y DROP-DOWN
+|--------------------------------------------------------------------------
+*/
 .landing-auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .landing-login-btn {
-  @apply text-muted-foreground hover:text-foreground;
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    border: 1px solid hsl(var(--foreground)/20%);
+    @apply bg-transparent text-foreground/80 hover:bg-secondary transition-colors duration-200;
 }
 
 .landing-register-btn {
-  background-color: transparent;
-  @apply text-accent hover:bg-accent/10;
-  padding: 0.5rem 1rem;
-  border-radius: 1.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  @apply border border-accent;
-  transition: all 0.2s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    border: none;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200;
 }
 
-/* 🟢 MODIFICACIÓN CLAVE: Contenido principal (Formulario + Imagen) */
+.landing-register-dropdown {
+    position: relative;
+    /* Opcional: un z-index más alto para asegurar el apilamiento */
+    z-index: 1010; 
+}
+
+.landing-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 5px); /* Espacio debajo del botón */
+    right: 0;
+    min-width: 200px;
+    padding: 0.5rem 0;
+    
+    /* Fondo del dropdown */
+    @apply bg-card border border-border rounded-lg shadow-xl;
+    
+    /* Asegurar que el menú desplegable esté visible encima de todo */
+    z-index: 999; 
+
+    /* Estilos de transición */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s ease-out;
+}
+
+.landing-dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.landing-dropdown-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    @apply text-foreground hover:bg-secondary transition-colors duration-150;
+}
+
+/* === Estilos de la Sección Principal (MAIN) === */
 .landing-main {
-  flex: 1;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  padding: 3rem 10%; /* Padding lateral amplio para mantener el "de lado a lado" en la periferia */
-  width: 100%;
-  /* Reducimos el ancho máximo para centrar el bloque */
-  max-width: 1200px; 
-  margin: 0 auto;
-  gap: 0; 
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 5%;
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) 1.2fr;
+    gap: 4rem;
+    align-items: flex-start;
 }
 
-/* 🟢 MODIFICACIÓN: Tarjeta de registro (Lado Izquierdo) */
 .landing-card {
-  @apply bg-card text-card-foreground border border-r-0 border-border;
-  padding: 3rem;
-  border-radius: 0.5rem 0 0 0.5rem; /* Bordes redondeados solo a la izquierda */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 400px; /* Ancho ajustado para que la imagen tenga más espacio */
-  text-align: left;
+    /* Estilo de la tarjeta de bienvenida y auth */
+    @apply bg-card p-8 rounded-xl shadow-2xl;
+    border: 1px solid hsl(var(--border));
 }
 
 .landing-welcome {
-  font-size: 2.2rem;
-  font-weight: 700;
-  @apply text-primary;
-  margin-bottom: 2rem;
-  line-height: 1.25;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 2rem;
+    @apply text-primary;
 }
 
-/* Botones de autenticación social */
+/* === Botones de Autenticación === */
 .landing-options {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
 }
 
 .landing-btn {
-    @apply border border-input bg-background text-foreground hover:bg-muted/50;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 1.75rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-weight: 500;
-    width: 100%;
-}
-
-.landing-btn.active {
-    @apply border-primary bg-primary/10 text-primary;
 }
 
 .auth-icon {
     width: 20px;
     height: 20px;
+    margin-right: 0.75rem;
 }
 
-/* Botón continuar */
+.landing-auth-google {
+    @apply bg-transparent text-foreground border border-border hover:bg-secondary;
+}
+
+.landing-auth-microsoft {
+    @apply bg-transparent text-foreground border border-border hover:bg-secondary;
+}
+
 .landing-continue-btn {
-  width: 100%;
-  @apply bg-accent text-accent-foreground hover:bg-accent/90;
-  border: none;
-  border-radius: 1.75rem;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  margin-bottom: 1.5rem;
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-colors duration-200;
+    margin-top: 1rem;
 }
 
-/* Texto legal */
 .landing-legal {
-  font-size: 0.8rem;
-  @apply text-muted-foreground;
-  line-height: 1.4;
-  margin-bottom: 1.5rem;
-  text-align: left;
+    font-size: 0.8rem;
+    @apply text-primary;
+    margin-top: 1rem;
+    text-align: center;
 }
 
 .landing-legal a {
-  @apply text-primary hover:underline;
-  text-decoration: none;
-  font-weight: 500;
+    @apply text-primary/80 hover:underline;
 }
 
-/* Separador */
 .landing-separator {
-  display: flex;
-  align-items: center;
-  margin: 1.5rem 0;
-  @apply text-muted-foreground;
-  font-size: 0.875rem;
+    text-align: center;
+    position: relative;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    @apply text-muted-foreground;
 }
 
 .landing-separator::before,
 .landing-separator::after {
-  content: '';
-  flex: 1;
-  @apply border-b border-border;
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    @apply bg-border;
 }
 
-.landing-separator::before { margin-right: 1rem; }
-.landing-separator::after { margin-left: 1rem; }
+.landing-separator::before {
+    left: 0;
+}
 
+.landing-separator::after {
+    right: 0;
+}
 
-/* Enlace final */
+.landing-auth-email {
+    @apply bg-transparent text-foreground border border-border hover:bg-secondary;
+}
+
 .landing-signup-link {
-  font-size: 0.9rem;
-  @apply text-muted-foreground;
-  text-align: center;
-  font-weight: 600;
+    text-align: center;
+    margin-top: 1.5rem;
+    @apply text-foreground;
 }
 
 .landing-signup-link a {
-  @apply text-accent hover:underline;
-  text-decoration: none;
-  font-weight: 600;
+    font-weight: 600;
+    @apply text-accent hover:underline;
 }
 
-/* 🟢 MODIFICACIÓN: Imagen a la derecha */
-.landing-image {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 400px; 
-  /* Estilos para unir la imagen con la tarjeta */
-  @apply bg-card border border-l-0 border-border;
-  border-radius: 0 0.5rem 0.5rem 0; /* Bordes redondeados solo a la derecha */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  padding: 3rem;
-}
-
+/* === Imagen Principal === */
 .landing-image img {
-  width: 100%;
-  max-width: 100%; 
-  height: auto;
-  border-radius: 0.5rem; /* Pequeños bordes en la imagen */
-  object-fit: cover;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    width: 100%;
+    height: auto;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
-
-/* Dropdown de Registro */
-.landing-register-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.landing-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  @apply bg-card border border-border shadow-lg;
-  border-radius: 0.5rem;
-  min-width: 200px;
-  z-index: 1000;
-  margin-top: 0.5rem;
-  display: none;
-}
-
-.landing-dropdown-menu.show {
-  display: block;
-}
-
-.landing-dropdown-item {
-  display: block;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: none;
-  text-align: left;
-  cursor: pointer;
-  font-size: 0.9rem;
-  @apply text-foreground;
-  transition: background-color 0.2s ease;
-  @apply border-b border-border/50;
-}
-
-.landing-dropdown-item:last-child {
-  border-bottom: none;
-}
-
-.landing-dropdown-item:hover {
-  @apply bg-muted/50 text-accent;
-}
-
 
 /*
 |--------------------------------------------------------------------------
-| SECCIÓN INFERIOR (Artículos, Empleos, Promo) - LADO A LADO
+| SECCIÓN ADICIONAL INFERIOR
 |--------------------------------------------------------------------------
 */
 .landing-extra-section {
-  background-color: transparent; 
-  padding: 4rem 10%; /* LADO A LADO: Padding lateral para contener el contenido */
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-  width: 100%;
-  max-width: 1200px; /* Limita el ancho del contenido interno */
-  margin: 0 auto;
+    max-width: 1200px;
+    margin: 3rem auto;
+    padding: 0 5%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
 }
 
 .landing-info-block {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 3rem;
-  flex-wrap: wrap;
-  @apply bg-secondary text-secondary-foreground; 
-  padding: 2.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.landing-info-text {
-  flex: 1;
-  min-width: 280px;
+    @apply bg-card p-6 rounded-xl shadow-lg;
+    border: 1px solid hsl(var(--border));
 }
 
 .landing-info-text h2 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  @apply text-primary;
-  margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    @apply text-primary;
 }
 
 .landing-info-text p {
-  @apply text-secondary-foreground/80;
-  font-size: 1rem;
-  line-height: 1.5;
+    font-size: 0.95rem;
+    @apply text-foreground/80;
+    margin-bottom: 1.5rem;
 }
 
 .landing-tags {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: flex-start;
-  min-width: 280px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .landing-tag {
-  @apply border-primary text-primary-foreground bg-primary hover:bg-primary/90;
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/70 transition-colors duration-150;
+    white-space: nowrap;
 }
 
-.show-all {
-  @apply border-accent text-accent bg-background hover:bg-accent hover:text-accent-foreground;
+.landing-tag.show-all {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90;
 }
 
 .landing-job-promo {
-  text-align: center;
-  @apply bg-secondary text-secondary-foreground;
-  padding: 3rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    @apply bg-primary p-6 rounded-xl text-primary-foreground shadow-lg;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .landing-job-promo h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  @apply text-primary;
-  margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
 }
 
 .landing-publish-btn {
-  @apply border border-accent text-accent bg-background hover:bg-accent hover:text-accent-foreground;
-  padding: 10px 24px;
-  border-radius: 25px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    font-weight: 600;
+    align-self: flex-start;
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-colors duration-200;
 }
 
 /*
 |--------------------------------------------------------------------------
-| CARRUSEL INFORMATIVO - LADO A LADO
+| CARRUSEL
 |--------------------------------------------------------------------------
 */
 .landing-carousel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  @apply bg-background;
-  border-radius: 0; /* Sin bordes redondeados para que sea "de lado a lado" */
-  padding: 4rem 10%; /* LADO A LADO: Padding lateral para el contenido */
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  margin: 0; /* Eliminamos el margen superior/inferior para el look de lado a lado */
-  box-sizing: border-box;
+    max-width: 1200px;
+    margin: 4rem auto 6rem;
+    padding: 0 5%;
+    position: relative;
+    overflow: hidden; /* Muy importante para que no se vea el contenido desbordado */
+    @apply bg-card p-8 rounded-xl shadow-2xl;
+    border: 1px solid hsl(var(--border));
 }
 
-/* Contenedor que permite el desplazamiento horizontal */
 .carousel-wrapper {
-  display: flex;
-  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Curva de transición elegante */
-  width: 100%;
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    /* Ajuste para asegurar que solo se vea un item a la vez */
+    width: 100%; /* El wrapper ocupa todo el ancho del carrusel */
 }
 
 .carousel-item {
-  min-width: 100%;
-  display: flex;
-  justify-content: center;
+    flex-shrink: 0;
+    width: 100%; /* Cada item ocupa el 100% del wrapper */
+    /* Aseguramos que no haya espacio extra */
+    box-sizing: border-box; 
 }
 
 .carousel-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 1000px; /* Limita el ancho del contenido dentro del carrusel */
-  gap: 4rem;
-}
-
-.carousel-text {
-  flex: 1;
-  text-align: left;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
 }
 
 .carousel-text h2 {
-  @apply text-primary;
-  font-size: 2.2rem;
-  font-weight: 700;
-  line-height: 1.3;
-  margin-bottom: 1rem;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    @apply text-primary;
 }
 
 .carousel-text p {
-  @apply text-foreground/80; 
-  font-size: 1.1rem;
-  line-height: 1.6;
-  max-width: 90%;
+    font-size: 1rem;
+    @apply text-foreground/80;
 }
 
 .carousel-image {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 350px; 
+    overflow: hidden; 
 }
 
 .carousel-image img {
-  width: 320px;
-  height: 320px;
-  object-fit: cover;
-  border-radius: 50%;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  @apply bg-secondary;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    border-radius: 1rem; 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* === Botones de navegación === */
 .carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  @apply bg-primary text-primary-foreground hover:bg-primary/90;
-  border: none;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 2rem;
-  font-weight: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  z-index: 2;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%;
+    font-size: 1.8rem; 
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+    /* CAMBIO CLAVE: Eliminar el borde y aumentar aún más la transparencia */
+    @apply bg-primary/20 text-primary-foreground/60 border-0 hover:bg-primary/40 transition-all duration-300; /* border-0 para eliminar el borde */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1; 
 }
 
-.carousel-btn.prev { left: 4%; }
-.carousel-btn.next { right: 4%; }
+.carousel-btn.prev {
+    left: 20px;
+}
 
-/* === Indicadores === */
+.carousel-btn.next {
+    right: 20px;
+}
+
 .carousel-indicators {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
+    text-align: center;
+    margin-top: 1.5rem;
 }
 
 .carousel-indicators span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  @apply bg-border;
-  transition: all 0.3s ease;
-  cursor: pointer;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin: 0 0.5rem;
+    cursor: pointer;
+    @apply bg-border transition-colors duration-300;
 }
 
 .carousel-indicators span.active {
-  background-color: hsl(var(--primary)); /* Indicador activo verde */
+    @apply bg-accent;
 }
+
 
 /*
 |--------------------------------------------------------------------------
-| FOOTER - LADO A LADO
+| FOOTER
 |--------------------------------------------------------------------------
 */
 .landing-footer {
-  @apply bg-primary text-primary-foreground;
-  padding: 3rem 10%; /* LADO A LADO: Padding lateral para el contenido */
-  width: 100%;
+    padding: 3rem 5%;
+    @apply bg-primary text-primary-foreground;
 }
 
 .footer-container {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.footer-section {
-  min-width: 180px;
-  flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid hsl(var(--primary-foreground)/30%);
 }
 
 .footer-section h4 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
 }
 
 .footer-section p {
-  font-size: 0.9rem;
-  line-height: 1.5;
-  @apply text-primary-foreground/80;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    @apply text-primary-foreground/90;
 }
 
 .footer-section ul {
-  list-style: none;
-  padding: 0;
+    list-style: none;
+    padding: 0;
 }
 
 .footer-section ul li a {
-  font-size: 0.9rem;
-  display: block;
-  padding: 0.25rem 0;
-  @apply text-primary-foreground/90 hover:text-primary-foreground;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    @apply text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-150;
 }
 
 .footer-socials a {
-  font-size: 1.5rem;
-  margin-right: 1rem;
-  transition: transform 0.2s ease;
-  display: inline-block;
-}
-
-.footer-socials a:hover {
-  transform: translateY(-2px);
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    @apply text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-150;
 }
 
 .footer-bottom {
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
-  font-size: 0.8rem;
-  @apply text-primary-foreground/70;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    @apply text-primary-foreground/70;
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| RESPONSIVE DESIGN (Móviles)
+| RESPONSIVENESS
 |--------------------------------------------------------------------------
 */
-@media (max-width: 1024px) {
-    /* Ajustes generales */
-    .landing-header,
-    .landing-main,
-    .landing-extra-section,
-    .landing-carousel,
-    .landing-footer {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+@media (min-width: 768px) {
+    .landing-menu {
+        display: flex; /* Mostrar el menú en pantallas medianas/grandes */
     }
 }
 
-@media (max-width: 768px) {
-    /* Header */
-    .landing-menu {
-        display: none;
-    }
-    .landing-header {
-        padding: 1rem 1.5rem;
-    }
-
-    /* Main (Formulario + Imagen) */
+@media (max-width: 1024px) {
     .landing-main {
-        flex-direction: column;
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        max-width: 100%;
+        grid-template-columns: 1fr;
+        gap: 3rem;
     }
-
-    .landing-card {
-        border-radius: 0.5rem;
-        border-right: 1px solid hsl(var(--border));
-        max-width: 100%;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        z-index: 1;
-    }
-
+    
     .landing-image {
-        display: none; /* Ocultamos la imagen en móvil para priorizar el formulario */
+        order: -1; /* Mover la imagen arriba en la columna única */
+        padding-bottom: 1rem;
     }
-
-    /* Sección Extra (Artículos/Empleos) */
+    
     .landing-extra-section {
-        padding: 2rem 1.5rem;
-        gap: 2rem;
-    }
-
-    .landing-info-block {
-        flex-direction: column;
-        gap: 2rem;
-        padding: 2rem;
-    }
-
-    /* Carrusel */
-    .landing-carousel {
-        padding: 3rem 1.5rem;
-        text-align: center;
+        grid-template-columns: 1fr;
     }
 
     .carousel-content {
-        flex-direction: column;
-        gap: 2rem;
-        padding: 0 1rem;
-    }
-
-    .carousel-text {
+        grid-template-columns: 1fr;
         text-align: center;
     }
 
-    .carousel-text p {
-        max-width: 100%;
+    .carousel-image {
+        order: -1;
     }
 
-    .carousel-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 1.4rem;
-    }
-    
-    .carousel-btn.prev { left: 5px; }
-    .carousel-btn.next { right: 5px; }
-
-    .carousel-image img {
-        width: 200px;
-        height: 200px;
-    }
-
-    /* Footer */
-    .landing-footer {
-        padding: 2rem 1.5rem;
-    }
-    
     .footer-container {
-        flex-direction: column;
-    }
-
-    .footer-section {
-        min-width: 100%;
+        grid-template-columns: 1fr;
         text-align: center;
     }
-
-    .footer-section ul {
-        text-align: center;
-        margin-top: 1rem;
-    }
-
-    .footer-section ul li a {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-    }
-
+    
     .footer-socials {
-        text-align: center;
-        margin-top: 1rem;
+        justify-content: center;
+        display: flex;
+    }
+}
+
+@media (max-width: 600px) {
+    .landing-header {
+        padding: 0.75rem 4%;
+    }
+
+    .landing-logo {
+        font-size: 1.5rem;
+    }
+
+    .landing-auth-buttons {
+        gap: 0.5rem;
+    }
+
+    .landing-login-btn,
+    .landing-register-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .landing-main {
+        padding: 2rem 4%;
+    }
+
+    .landing-welcome {
+        font-size: 1.8rem;
+    }
+
+    .landing-extra-section {
+        padding: 0 4%;
+    }
+    
+    .carousel-btn {
+        width: 40px; 
+        height: 40px;
+        font-size: 1.5rem;
     }
 }
