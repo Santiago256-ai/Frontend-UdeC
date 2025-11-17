@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import axios from "axios";
+import API from "../services/api"; // ⚡ Usa la instancia de axios con URL de Railway
 
 export default function Estudiante() {
   const [formData, setFormData] = useState({
@@ -11,13 +11,10 @@ export default function Estudiante() {
   const [cv, setCv] = useState(null);
   const [mensaje, setMensaje] = useState("");
   const [loading, setLoading] = useState(false);
-  const fileInputRef = useRef(null); // Ref para limpiar input file
+  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
@@ -43,23 +40,15 @@ export default function Estudiante() {
       setLoading(true);
       setMensaje("");
 
-      const response = await axios.post(
-        "http://localhost:4000/api/postulaciones",
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const response = await API.post("/postulaciones", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.status === 201) {
         setMensaje("✅ Tu hoja de vida se ha enviado correctamente.");
         setFormData({ nombre: "", correo: "", programa: "", semestre: "" });
         setCv(null);
-
-        // Limpiar input file visualmente
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
+        if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
         setMensaje("❌ Error al enviar la información. Intenta de nuevo.");
       }
@@ -136,7 +125,7 @@ export default function Estudiante() {
           <input
             type="file"
             accept=".pdf"
-            ref={fileInputRef} // Asignar ref
+            ref={fileInputRef}
             onChange={handleFileChange}
             required
             className="w-full border border-gray-300 rounded-md p-2 mt-1"

@@ -1,10 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; 
-import axios from "axios";
-// Importa el nuevo CSS (Este archivo debe existir en la misma carpeta)
+import API from "../services/api"; // ⚡ Usar la URL configurada de Railway
 import "./EmpresaDashboard.css"; 
-
-const API_URL = "http://localhost:4000/api";
 
 export default function EmpresaDashboard() {
   const location = useLocation();
@@ -14,8 +11,6 @@ export default function EmpresaDashboard() {
   const [empresa, setEmpresa] = useState(() => {
       const storedUser = localStorage.getItem('usuario');
       const initialUser = location.state?.usuario || (storedUser ? JSON.parse(storedUser) : null);
-      
-      // Asume que la empresa tiene un rol 'empresa'
       if (initialUser && initialUser.rol === 'empresa') {
         localStorage.setItem('usuario', JSON.stringify(initialUser));
         return initialUser;
@@ -39,10 +34,9 @@ export default function EmpresaDashboard() {
     salario: "",
   });
 
-  // 🛑 CLAVE 1: Redirección si la sesión no es válida.
+  // 🔹 Redirección si la sesión no es válida
   useEffect(() => {
     if (!empresa) {
-        // Limpiar y redirigir al login si no hay sesión válida de empresa
         localStorage.removeItem('usuario');
         navigate('/'); 
     } else {
@@ -51,57 +45,32 @@ export default function EmpresaDashboard() {
   }, [empresa, navigate]);
 
   // --- Funciones de Data ---
-
-  // 1. Carga de Vacantes (Centralizada y Memoizada)
   const cargarVacantes = useCallback(() => {
     if (empresa?.id) {
-      axios
-        .get(`${API_URL}/vacantes/empresa/${empresa.id}`)
-        .then((res) => {
-          setVacantes(res.data);
-        })
+      API.get(`/vacantes/empresa/${empresa.id}`)
+        .then((res) => setVacantes(res.data))
         .catch((err) => console.error("Error al cargar vacantes:", err));
     }
   }, [empresa]); 
 
-  // 2. Carga Inicial de Vacantes
   useEffect(() => {
-    if (empresa) {
-      cargarVacantes();
-    }
+    if (empresa) cargarVacantes();
   }, [empresa, cargarVacantes]); 
 
-
-  // 🌟 FUNCIÓN AGREGADA 1: Manejar el envío del formulario de nueva vacante
+  // 🌟 Manejar envío de nueva vacante
   const handleSubmit = async (e) => {
     e.preventDefault(); 
     if (!empresa?.id) {
-        alert("Error: ID de empresa no encontrado. Por favor, reinicia la sesión.");
+        alert("Error: ID de empresa no encontrado. Reinicia la sesión.");
         return;
     }
 
     try {
-        const vacanteData = {
-            ...nuevaVacante,
-            empresaId: empresa.id, // Asegurar que enviamos el ID de la empresa
-        };
-
-        // Endpoint: POST /api/vacantes/
-        const res = await axios.post(`${API_URL}/vacantes`, vacanteData);
+        const vacanteData = { ...nuevaVacante, empresaId: empresa.id };
+        const res = await API.post(`/vacantes`, vacanteData);
 
         alert(`Vacante "${res.data.titulo}" publicada con éxito.`);
-        
-        // Limpiar el formulario
-        setNuevaVacante({
-            titulo: "",
-            descripcion: "",
-            ubicacion: "",
-            tipo: "",
-            modalidad: "",
-            salario: "",
-        });
-        
-        // Volver a la pestaña de gestión y refrescar la lista
+        setNuevaVacante({ titulo: "", descripcion: "", ubicacion: "", tipo: "", modalidad: "", salario: "" });
         cargarVacantes();
         setActiveTab("gestion");
 
@@ -111,19 +80,13 @@ export default function EmpresaDashboard() {
     }
   };
 
-  // 🌟 FUNCIÓN AGREGADA 2: Manejar la eliminación de una vacante
+  // 🌟 Manejar eliminación de vacante
   const handleEliminarVacante = async (vacanteId, titulo) => {
-    if (!window.confirm(`¿Está seguro de eliminar la vacante: "${titulo}"? Esta acción es irreversible.`)) {
-        return;
-    }
+    if (!window.confirm(`¿Eliminar la vacante: "${titulo}"?`)) return;
 
     try {
-        // Endpoint: DELETE /api/vacantes/:id
-        await axios.delete(`${API_URL}/vacantes/${vacanteId}`);
-        
+        await API.delete(`/vacantes/${vacanteId}`);
         alert(`Vacante "${titulo}" eliminada con éxito.`);
-        
-        // Refrescar la lista y limpiar la vista de postulaciones si era la seleccionada
         cargarVacantes();
         if (vacanteSeleccionadaId === vacanteId) {
             setVacanteSeleccionadaId(null);
@@ -136,105 +99,68 @@ export default function EmpresaDashboard() {
     }
   };
   
-  // 3. Cargar Postulaciones de una vacante
+  // Cargar postulaciones de una vacante
   const handleVerPostulaciones = async (vacanteId) => {
     setVacanteSeleccionadaId(vacanteId);
     setFiltroEstado("TODOS");
     try {
-      // Endpoint: /api/postulaciones/vacante/:vacanteId
-      const res = await axios.get(
-        `${API_URL}/postulaciones/vacante/${vacanteId}`
-      );
+      const res = await API.get(`/postulaciones/vacante/${vacanteId}`);
       setPostulaciones(res.data);
     } catch (err) {
       console.error(err);
-      setPostulaciones([]); // Limpiar si hay error o no hay data
+      setPostulaciones([]);
       alert("Error al cargar postulaciones o no hay ninguna.");
     }
   };
 
-  // 4. 🚀 FUNCIÓN CLAVE: Actualizar el estado de la postulación
+  // Actualizar estado de postulaciones
   const handleUpdateEstado = async (postulacionId, nuevoEstado) => {
     const tituloVacante = vacantes.find(v => v.id === vacanteSeleccionadaId)?.titulo || 'esta vacante';
     const postulacion = postulaciones.find(p => p.id === postulacionId);
-    
-    // 🚨 CORREGIDO: Usar nombres y apellidos para la confirmación
     const nombreCandidato = `${postulacion?.usuario?.nombres} ${postulacion?.usuario?.apellidos}`.trim() || 'el candidato';
     
-    if (!window.confirm(`¿Confirma cambiar el estado de la postulación de ${nombreCandidato} para la vacante "${tituloVacante}" a: **${nuevoEstado}**?`)) {
-        return;
-    }
+    if (!window.confirm(`Cambiar estado de ${nombreCandidato} para "${tituloVacante}" a: ${nuevoEstado}?`)) return;
     
     try {
-        // Endpoint: PATCH /api/postulaciones/:id/estado
-        await axios.patch(`${API_URL}/postulaciones/${postulacionId}/estado`, {
-            estado: nuevoEstado.toUpperCase()
-        });
-
-        // Actualizar el estado localmente
-        setPostulaciones(prevPostulaciones => 
-            prevPostulaciones.map(p => 
-                p.id === postulacionId ? { ...p, estado: nuevoEstado.toUpperCase() } : p
-            )
-        );
+        await API.patch(`/postulaciones/${postulacionId}/estado`, { estado: nuevoEstado.toUpperCase() });
+        setPostulaciones(prev => prev.map(p => p.id === postulacionId ? { ...p, estado: nuevoEstado.toUpperCase() } : p));
         alert(`Estado actualizado a: ${nuevoEstado.toUpperCase()}`);
-
     } catch (err) {
         console.error("Error al actualizar estado:", err);
         alert(`Fallo al actualizar el estado: ${err.response?.data?.error || "Error desconocido."}`);
     }
   };
 
-  // 5. Lógica para filtrar las postulaciones
+  // Filtrar postulaciones
   const postulacionesFiltradas = postulaciones.filter(p => {
     const estado = p.estado?.toUpperCase() || "PENDIENTE"; 
     return filtroEstado === "TODOS" || estado === filtroEstado;
   });
 
-  // 6. Función de Renderizado de Tags de Estado
   const getStatusTag = (estado) => {
     const status = estado?.toUpperCase() || 'PENDIENTE';
-    const baseClass = 'status-tag';
     let specificClass = '';
-    
     switch (status) {
         case 'ACEPTADA': specificClass = 'status-aceptada'; break;
         case 'RECHAZADA': specificClass = 'status-rechazada'; break;
         case 'REVISADO': specificClass = 'status-revisado'; break;
-        case 'PENDIENTE':
         default: specificClass = 'status-pendiente'; break;
     }
-
-    return (
-        <span className={`${baseClass} ${specificClass}`}>
-            {status}
-        </span>
-    );
+    return <span className={`status-tag ${specificClass}`}>{status}</span>;
   };
 
+  if (loading) return <div className="dashboard-layout"><h1>Cargando panel de empresa...</h1></div>;
+  if (!empresa) return null;
 
-  // --- Renderizado Condicional de Carga/Error ---
-
-  if (loading) {
-      return <div className="dashboard-layout"><h1 className="loading-message">Cargando panel de empresa...</h1></div>;
-  }
-  
-  if (!empresa) {
-    return null; // El useEffect manejará la redirección
-  }
-
-  // Se extrae la vacante actual para mostrar su título en la sección de postulaciones
   const vacanteActual = vacantes.find(v => v.id === vacanteSeleccionadaId);
-  
-  // --- Renderizado Principal ---
+
   return (
     <div className="dashboard-layout">
-      {/* Cabecera */}
       <header className="dashboard-header">
         <span className="logo-placeholder">💼</span>
         <div className="welcome-info">
             <h2>Panel de Control Empresarial</h2>
-            <h3>Bienvenida, **{empresa?.nombre || empresa?.razonSocial || "Empresa"}**</h3>
+            <h3>Bienvenida, {empresa?.nombre || empresa?.razonSocial || "Empresa"}</h3>
             <button className="logout-button" onClick={() => {
                 localStorage.removeItem('usuario');
                 navigate('/');
@@ -244,7 +170,6 @@ export default function EmpresaDashboard() {
 
       <hr className="divider" />
 
-      {/* Sistema de Pestañas */}
       <nav className="dashboard-tabs">
         <button 
           className={activeTab === "gestion" ? "active" : ""} 
@@ -265,17 +190,13 @@ export default function EmpresaDashboard() {
         </button>
       </nav>
 
-      {/* Contenido de la Pestaña Activa */}
       <main className="dashboard-content">
-        
-        {/* Pestaña de Creación (Con el handleSubmit ya referenciado) */}
         {activeTab === "creacion" && (
           <section className="dashboard-card form-card">
-            <h3>Fomulario de Publicación</h3>
+            <h3>Formulario de Publicación</h3>
             <form onSubmit={handleSubmit} className="form-grid">
-              
               <div className="form-group">
-                <label>Título de la Vacante <span className="required-star">*</span></label>
+                <label>Título de la Vacante *</label>
                 <input
                   type="text"
                   placeholder="Ej: Desarrollador Full-Stack"
@@ -286,7 +207,7 @@ export default function EmpresaDashboard() {
               </div>
 
               <div className="form-group full-width">
-                <label>Descripción del Puesto <span className="required-star">*</span></label>
+                <label>Descripción del Puesto *</label>
                 <textarea
                   placeholder="Detalla las responsabilidades, requisitos y beneficios..."
                   value={nuevaVacante.descripcion}
@@ -296,9 +217,8 @@ export default function EmpresaDashboard() {
                 />
               </div>
 
-              {/* Controles de Condiciones */}
               <div className="form-group">
-                <label>Ubicación <span className="required-star">*</span></label>
+                <label>Ubicación *</label>
                 <input
                   type="text"
                   placeholder="Ciudad, País"
@@ -309,7 +229,7 @@ export default function EmpresaDashboard() {
               </div>
               
               <div className="form-group">
-                <label>Tipo de Contrato <span className="required-star">*</span></label>
+                <label>Tipo de Contrato *</label>
                 <select
                   value={nuevaVacante.tipo}
                   onChange={(e) => setNuevaVacante({ ...nuevaVacante, tipo: e.target.value })}
@@ -323,7 +243,7 @@ export default function EmpresaDashboard() {
               </div>
               
               <div className="form-group">
-                <label>Modalidad <span className="required-star">*</span></label>
+                <label>Modalidad *</label>
                 <select
                   value={nuevaVacante.modalidad}
                   onChange={(e) => setNuevaVacante({ ...nuevaVacante, modalidad: e.target.value })}
@@ -353,11 +273,9 @@ export default function EmpresaDashboard() {
           </section>
         )}
 
-        {/* Pestaña de Gestión */}
         {activeTab === "gestion" && (
           <section className="dashboard-card management-view">
             <h3>Listado de Vacantes Activas</h3>
-            
             {vacantes.length === 0 ? (
               <p className="empty-state">Aún no has publicado ninguna vacante. ¡Comienza en la pestaña "Publicar Nueva Vacante"!</p>
             ) : (
@@ -369,36 +287,21 @@ export default function EmpresaDashboard() {
                       📍 {v.ubicacion} | 💻 {v.modalidad} | 💰 {v.salario || 'A Convenir'}
                     </p>
                     <div className="vacante-actions">
-                      <button 
-                        className="secondary-button"
-                        onClick={() => handleVerPostulaciones(v.id)}
-                      >
-                        Ver Postulaciones
-                      </button>
-                      <button
-                        className="delete-button"
-                        onClick={() => handleEliminarVacante(v.id, v.titulo)}
-                      >
-                        Eliminar
-                      </button>
+                      <button className="secondary-button" onClick={() => handleVerPostulaciones(v.id)}>Ver Postulaciones</button>
+                      <button className="delete-button" onClick={() => handleEliminarVacante(v.id, v.titulo)}>Eliminar</button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            
-            {/* Sección de Postulaciones Detalladas */}
+
             {vacanteSeleccionadaId && (
               <div className="postulaciones-detail">
-                <h4>Candidatos para: **{vacanteActual?.titulo || 'Vacante'}**</h4>
+                <h4>Candidatos para: {vacanteActual?.titulo || 'Vacante'}</h4>
                 
                 <div className="filter-controls">
                     <label htmlFor="estado-filter">Filtrar por Estado:</label>
-                    <select
-                        id="estado-filter"
-                        value={filtroEstado}
-                        onChange={(e) => setFiltroEstado(e.target.value)}
-                    >
+                    <select id="estado-filter" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
                         <option value="TODOS">Todos ({postulaciones.length})</option>
                         <option value="PENDIENTE">Pendiente</option>
                         <option value="REVISADO">Revisado</option>
@@ -412,10 +315,9 @@ export default function EmpresaDashboard() {
                       <ul className="postulaciones-list">
                           {postulacionesFiltradas.map((p) => (
                           <li key={p.id} className="postulacion-item">
-                            
                             <div className="candidate-info">
                                 <span className="candidate-name">
-                                    🧑‍💼 **{`${p.usuario?.nombres} ${p.usuario?.apellidos}`.trim() || 'Estudiante Sin Nombre'}**
+                                    {`${p.usuario?.nombres} ${p.usuario?.apellidos}`.trim() || 'Estudiante Sin Nombre'}
                                 </span>
                                 {getStatusTag(p.estado)}
                                 <span className="candidate-contact">📧 {p.usuario?.correo || 'Sin correo'}</span>
@@ -423,30 +325,9 @@ export default function EmpresaDashboard() {
                             </div>
 
                             <div className="action-links">
-                                <a 
-                                    href={p.cv_url || '#'} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    className="cv-link"
-                                >
-                                    📥 Ver CV
-                                </a>
-                                
-                                {/* 🎯 BOTONES DE ACCIÓN PARA ACTUALIZAR ESTADO */}
-                                <button 
-                                    className="action-button accept-button"
-                                    onClick={() => handleUpdateEstado(p.id, 'ACEPTADA')}
-                                    disabled={p.estado?.toUpperCase() === 'ACEPTADA'}
-                                >
-                                    ✅ Aceptar
-                                </button>
-                                <button
-                                    className="action-button reject-button"
-                                    onClick={() => handleUpdateEstado(p.id, 'RECHAZADA')}
-                                    disabled={p.estado?.toUpperCase() === 'RECHAZADA'}
-                                >
-                                    ❌ Rechazar
-                                </button>
+                                <a href={p.cv_url || '#'} target="_blank" rel="noopener noreferrer" className="cv-link">📥 Ver CV</a>
+                                <button className="action-button accept-button" onClick={() => handleUpdateEstado(p.id, 'ACEPTADA')} disabled={p.estado?.toUpperCase() === 'ACEPTADA'}>✅ Aceptar</button>
+                                <button className="action-button reject-button" onClick={() => handleUpdateEstado(p.id, 'RECHAZADA')} disabled={p.estado?.toUpperCase() === 'RECHAZADA'}>❌ Rechazar</button>
                             </div>
                           </li>
                           ))}
