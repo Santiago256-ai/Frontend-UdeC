@@ -1,0 +1,414 @@
+/* RegisterCompany.css */
+.register-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #395e41 0%, #00ff2a 100%);
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.register-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+  overflow: hidden;
+}
+
+.form-header {
+  background: linear-gradient(135deg, #00ff22 0%, #2f4e35 100%);
+  color: white;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.form-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+
+.form-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Progress Steps */
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 40px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 60%;
+  right: -40%;
+  height: 2px;
+  background: #e2e8f0;
+  z-index: 1;
+}
+
+.step.active:not(:last-child)::after {
+  background: #2f4e35;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+  background: #265e31;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.step-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  text-align: center;
+}
+
+.step.active .step-label {
+  color: #1a581f;
+  font-weight: 600;
+}
+
+/* Form Styles */
+.company-form {
+  padding: 40px;
+}
+
+.form-step {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #243b1e;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #1a581f;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.optional {
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: white;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #333;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+  color: #1e293b;
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Checkbox Styles */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+  padding: 20px;
+  background: #f0f9ff;
+  border-radius: 12px;
+  border: 1px solid #bae6fd;
+}
+
+.checkbox-input {
+  width: 20px;
+  height: 20px;
+  accent-color: #188321;
+}
+
+.checkbox-label {
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* Confirmation Section */
+.confirmation-content {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto 25px;
+  animation: bounce 1s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+.confirmation-content h3 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.confirmation-content p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+}
+
+.summary-section {
+  background: #f8fafc;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: left;
+  margin-top: 20px;
+}
+
+.summary-section h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 15px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item span {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.summary-item strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Navigation Buttons */
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  min-width: 140px;
+}
+
+.btn-secondary {
+  background: #64748b;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #475569;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+}
+
+.btn-primary {
+  background: #116e26;
+  color: white;
+  margin-left: auto;
+}
+
+.btn-primary:hover {
+  background: #11cc21;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+  margin-left: auto;
+}
+
+.btn-success:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .register-container {
+    padding: 10px;
+  }
+  
+  .form-header {
+    padding: 30px 20px;
+  }
+  
+  .form-title {
+    font-size: 2rem;
+  }
+  
+  .progress-steps {
+    padding: 20px;
+  }
+  
+  .step:not(:last-child)::after {
+    display: none;
+  }
+  
+  .step-label {
+    font-size: 0.75rem;
+  }
+  
+  .company-form {
+    padding: 25px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .form-navigation {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-header {
+    padding: 25px 15px;
+  }
+  
+  .company-form {
+    padding: 20px;
+  }
+  
+  .step-title {
+    font-size: 1.3rem;
+  }
+  
+  .form-input,
+  .form-select {
+    padding: 12px;
+  }
+}

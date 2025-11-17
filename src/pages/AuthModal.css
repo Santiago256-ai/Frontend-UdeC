@@ -1,0 +1,460 @@
+/* Paleta de Colores del Video (Manteniendo tus colores) */
+:root {
+    --fondo-oscuro: #1e2e38; /* Fondo principal de los formularios (Gris/Verde Oscuro) */
+    --panel-verde: #6bb859; /* Panel deslizante (Verde Brillante) */
+    --boton-oscuro: #2D545E; /* Botones de formulario original */
+    --texto-claro: #FFFFFF;
+    --input-fondo: #eeeeee;
+}
+
+/* -------------------- OVERLAY (FONDO DEL MODAL) -------------------- */
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Oscurece el fondo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* -------------------- CONTENEDOR PRINCIPAL (Altura Ajustada) -------------------- */
+.auth-contenedor-principal {
+    background-color: var(--fondo-oscuro);
+    border-radius: 10px;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4), 0 10px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    width: 768px;
+    max-width: 90%;
+    /* Altura aumentada para el formulario de Login moderno */
+    height: 680px; 
+    max-height: 95vh;
+}
+
+/* -------------------- PANELES BASE -------------------- */
+.panel-contenedor {
+    position: absolute;
+    top: 0;
+    width: 50%; /* Cada panel ocupa la mitad del ancho */
+    height: 100%;
+    transition: transform 0.6s ease-in-out;
+}
+
+/* Panel Deslizante (el bloque verde) */
+.panel-izquierdo {
+    left: 0;
+    background-color: var(--panel-verde);
+    z-index: 100;
+    transform: translateX(0); /* Posición inicial: a la izquierda */
+}
+
+/* Panel de Formularios (el bloque de color oscuro) */
+.panel-derecho {
+    left: 50%;
+}
+
+/* -------------------- CONTENIDO Y FORMS -------------------- */
+.contenido-panel {
+    color: var(--texto-claro);
+    height: 100%;
+    padding: 20px;
+    position: relative;
+}
+
+/* 📌 2. ESTILOS PARA EL CONTENEDOR DEL LOGO (NUEVO) */
+.logo-container-panel {
+    width: 100%;
+    height: 120px; /* Altura para el logo */
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Puedes añadir un borde o fondo si deseas visualizar el área */
+    /* border: 1px solid red; */ 
+}
+
+.panel-logo-img {
+    max-width: 80%; /* No dejar que la imagen sea demasiado grande */
+    max-height: 100%; /* Limita la altura de la imagen al contenedor */
+    object-fit: contain; /* Asegura que la imagen se ajuste sin cortarse */
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    /* 📌 Alinear al inicio para dejar espacio al logo. Antes era 'center' */
+    justify-content: flex-start; 
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    /* Aumentar padding vertical si el logo ocupa mucho espacio */
+    padding: 20px 40px; 
+}
+
+.auth-title {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.auth-paragraph {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: var(--texto-claro);
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+/* Estilos de los Formularios */
+.formulario-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    padding: 0 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--fondo-oscuro);
+    transition: all 0.6s ease-in-out;
+    text-align: center;
+}
+
+/* Título general para el formulario de registro */
+.formulario-container h2 {
+    color: var(--texto-claro);
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+/* Campos de entrada originales (para el formulario de registro) */
+.formulario-container input {
+    background-color: var(--input-fondo);
+    border: none;
+    padding: 12px 15px;
+    margin: 8px 0;
+    width: 100%;
+    border-radius: 5px;
+}
+
+.forgot-password {
+    color: #cccccc;
+    font-size: 0.8rem;
+    margin: 10px 0 20px;
+    text-decoration: none;
+}
+
+/* -------------------- BOTONES ESTÁNDAR -------------------- */
+.auth-button {
+    /* Botón 'fantasma' en el panel verde */
+    border-radius: 20px;
+    border: 1px solid var(--texto-claro);
+    background-color: transparent;
+    color: var(--texto-claro);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 12px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.auth-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.form-submit-btn {
+    /* Botón de envío de formulario (original) */
+    background-color: var(--boton-oscuro);
+    color: var(--texto-claro);
+    border: none;
+    padding: 10px 45px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.form-submit-btn:hover {
+    background-color: #523b70;
+}
+
+/* Ocultar/Mostrar formularios (estado inicial) */
+.registrarse-container {
+    opacity: 0; 
+    z-index: 1;
+    transform: translateX(0);
+}
+
+.iniciar-sesion-container {
+    z-index: 2;
+    transform: translateX(0);
+}
+
+/* -------------------- ESTILOS ESPECÍFICOS DE LOGIN (Diseño Moderno) -------------------- */
+
+.formulario-container.iniciar-sesion-container {
+    /* Asegurar que el Login ocupe toda la altura y esté alineado arriba */
+    display: flex; 
+    flex-direction: column;
+    padding: 30px; 
+    justify-content: flex-start; 
+    height: 100%;
+    text-align: left; /* Alineación del texto a la izquierda para el nuevo diseño */
+}
+
+/* 1. TÍTULO DE LOGIN (Desktop) */
+.login-title-desktop {
+    font-size: 1.8rem;
+    margin-bottom: 25px; 
+    color: var(--texto-claro); 
+    text-align: left;
+}
+
+/* 2. BOTONES SOCIALES */
+.social-login-btn {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px; /* Ajuste para que se parezca más a la imagen */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    border: 1px solid #cccccc; 
+}
+
+.google-btn {
+    background-color: white;
+    color: #424242;
+}
+.google-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.apple-btn {
+    background-color: transparent;
+    color: white;
+    border-color: white;
+}
+.apple-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.social-login-btn span {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    /* Necesitas iconos de Google y Apple aquí (por CSS o SVG) */
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+/* 3. TEXTO DE TÉRMINOS */
+.terms-text {
+    font-size: 0.75rem;
+    color: #cccccc;
+    margin: 15px 0 20px 0;
+    line-height: 1.4;
+    text-align: left;
+}
+.terms-link {
+    color: #8caffb;
+    text-decoration: none;
+}
+.terms-link:hover {
+    text-decoration: underline;
+}
+
+/* 4. SEPARADOR 'o' */
+.form-separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #cccccc;
+    margin: 15px 0;
+    font-size: 0.9rem;
+    width: 100%;
+}
+.form-separator::before,
+.form-separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+.form-separator:not(:empty)::before {
+    margin-right: .5em;
+}
+.form-separator:not(:empty)::after {
+    margin-left: .5em;
+}
+
+/* 5. INPUTS MODERNOS */
+.modern-input {
+    width: 100%;
+    padding: 15px 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Borde más sutil */
+    background-color: rgba(255, 255, 255, 0.1); /* Fondo más transparente/claro para simular el look */
+    color: white;
+    font-size: 1rem;
+}
+.modern-input::placeholder {
+    color: #cccccc;
+}
+
+.password-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+}
+.password-container .modern-input {
+    margin-bottom: 0;
+}
+
+/* 📌 ESTILOS DEL BOTÓN DEL OJO (CORREGIDO: Sin padding visible) */
+.show-password-btn {
+    position: absolute;
+    right: 5px; 
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #cccccc; 
+    font-size: 1.2rem; 
+    cursor: pointer;
+    padding: 0 8px; 
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.show-password-btn:hover {
+    color: #8caffb; 
+}
+
+/* 6. ENLACE DE CONTRASEÑA OLVIDADA */
+.forgot-password {
+    margin: 5px 0 10px 0;
+    text-align: left;
+    width: 100%;
+    text-decoration: none; 
+    color: #8caffb; 
+}
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* 7. CHECKBOX */
+.keep-logged-in-container {
+    display: flex;
+    align-items: center;
+    margin: 10px 0 30px 0;
+    font-size: 0.9rem;
+    color: white;
+    width: 100%;
+    text-align: left;
+}
+.keep-logged-in-container label {
+    cursor: pointer;
+}
+.keep-logged-in-container input[type="checkbox"] {
+    margin: 0 10px 0 0;
+    width: auto; 
+}
+
+/* 8. BOTÓN DE SUBMIT GRANDE */
+.large-blue-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 25px;
+    background-color: #8ea072; 
+    color: rgb(255, 255, 255);
+    border: none;
+    cursor: pointer;
+    margin-top: 10px; 
+}
+.large-blue-btn:hover {
+    background-color: #4f7832;
+}
+
+/* -------------------- ESTILOS DE OPCIONES FLOTANTES (Panel Verde) -------------------- */
+.register-action-area {
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px; 
+}
+
+.register-main-btn {
+    width: 80%; 
+    padding: 12px 15px;
+    margin-bottom: 0; 
+}
+
+.float-options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+    width: 80%; 
+    z-index: 101; 
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.1); 
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.float-btn {
+    padding: 12px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.persona-btn {
+    background-color: #81cc4b; /* Amarillo/Dorado para Persona */
+    color: var(--fondo-oscuro);
+}
+
+.empresa-btn {
+    background-color: #1e2e38; /* Azul corporativo para Empresa */
+    color: var(--texto-claro);
+}
+
+.go-back-link-left {
+    color: #cccccc;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    align-self: flex-start; /* Alineado a la izquierda */
+    margin-left: 10px;
+}

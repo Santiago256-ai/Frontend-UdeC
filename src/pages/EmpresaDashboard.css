@@ -1,0 +1,469 @@
+/* Variables de Color */
+:root {
+    --color-primary: #0056b3; /* Azul para acciones principales */
+    --color-secondary: #f0f4f8; /* Fondo claro */
+    --color-text-dark: #333;
+    --color-text-light: #555;
+    --color-success: #28a745;
+    --color-danger: #dc3545;
+    --color-warning: #ffc107;
+    --color-info: #17a2b8;
+}
+
+/* --- Layout General --- */
+.dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--color-secondary);
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+/* --- Header y Botón de Cerrar Sesión --- */
+.dashboard-header {
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.logo-placeholder {
+    font-size: 2.5em;
+}
+
+.welcome-info {
+    flex-grow: 1;
+    margin-left: 20px;
+}
+
+.welcome-info h2 {
+    font-size: 1.5em;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.welcome-info h3 {
+    font-size: 1em;
+    color: var(--color-text-light);
+    font-weight: normal;
+    margin: 5px 0 0;
+}
+
+.logout-button {
+    background-color: var(--color-danger);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}
+
+.divider {
+    border: 0;
+    height: 1px;
+    background-color: #ddd;
+    margin: 10px 0 20px;
+}
+
+/* --- Navegación por Pestañas --- */
+.dashboard-tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 20px;
+}
+
+.dashboard-tabs button {
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-light);
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.dashboard-tabs button:hover {
+    color: var(--color-primary);
+}
+
+.dashboard-tabs button.active {
+    color: var(--color-primary);
+    border-bottom: 3px solid var(--color-primary);
+}
+
+/* --- Contenido Principal --- */
+.dashboard-content {
+    flex-grow: 1;
+}
+
+.dashboard-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.dashboard-card h3 {
+    font-size: 1.5em;
+    color: var(--color-text-dark);
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+/* --- Formulario de Publicación --- */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--color-text-dark);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.2);
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.required-star {
+    color: var(--color-danger);
+    font-weight: normal;
+}
+
+.primary-button {
+    grid-column: 1 / -1;
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.primary-button:hover {
+    background-color: #004494;
+}
+
+/* --- Gestión de Vacantes --- */
+.vacantes-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.vacante-item {
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fafafa;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.vacante-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: #ddd;
+}
+
+.vacante-item.selected {
+    border: 2px solid var(--color-primary);
+    background-color: #e6f0ff;
+}
+
+.vacante-item h4 {
+    font-size: 1.2em;
+    color: var(--color-primary);
+    margin: 0 0 5px;
+}
+
+.vacante-meta {
+    font-size: 0.9em;
+    color: var(--color-text-light);
+    margin-bottom: 15px;
+}
+
+.vacante-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.secondary-button {
+    background-color: #f0f0f0;
+    color: var(--color-text-dark);
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+
+.secondary-button:hover {
+    background-color: #e0e0e0;
+    border-color: #b3b3b3;
+}
+
+.delete-button {
+    background-color: #f8d7da;
+    color: var(--color-danger);
+    padding: 8px 12px;
+    border: 1px solid var(--color-danger);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+
+.delete-button:hover {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+/* --- Postulaciones Detalladas --- */
+.postulaciones-detail {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    /* CORRECCIÓN: Asegurar el color oscuro para el texto principal */
+    color: var(--color-text-dark);
+}
+
+.filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-controls label {
+    font-weight: bold;
+    color: var(--color-text-dark); /* CORRECCIÓN: Color oscuro para el label */
+}
+
+.filter-controls select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    /* CORRECCIÓN: Color oscuro para el texto del select */
+    color: var(--color-text-dark); 
+    background-color: white; 
+}
+
+.postulaciones-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.postulacion-item {
+    background-color: #fdfdfd;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-left: 5px solid var(--color-primary);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.candidate-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1 1 300px;
+}
+
+.candidate-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--color-text-dark);
+}
+
+.candidate-contact {
+    font-size: 0.9em;
+    color: var(--color-text-light);
+}
+
+.action-links {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.cv-link {
+    text-decoration: none;
+    color: var(--color-info);
+    padding: 8px 12px;
+    border: 1px solid var(--color-info);
+    border-radius: 6px;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+
+.cv-link:hover {
+    background-color: var(--color-info);
+    color: white;
+}
+
+/* --- Tags de Estado --- */
+.status-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+.status-pendiente {
+    background-color: var(--color-warning);
+    color: #856404;
+}
+
+.status-revisado {
+    background-color: #e8e8e8;
+    color: #444;
+}
+
+.status-aceptada {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.status-rechazada {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+/* --- Botones de Acción de Postulaciones --- */
+.action-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.accept-button {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.accept-button:not(:disabled):hover {
+    background-color: #1e7e34;
+}
+
+.reject-button {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.reject-button:not(:disabled):hover {
+    background-color: #bd2130;
+}
+
+/* --- Estados de Carga y Vacío --- */
+.loading-message, .empty-state {
+    text-align: center;
+    padding: 50px;
+    color: var(--color-text-light);
+    font-size: 1.2em;
+}
+
+/* --- Responsividad --- */
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .welcome-info {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .logout-button {
+        align-self: flex-end;
+        margin-top: 10px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .vacante-item, .postulacion-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .vacante-actions, .action-links {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
