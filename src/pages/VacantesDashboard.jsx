@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-// URL de tu API
-const API_URL = 'http://localhost:4000/api';
+import API from '../services/api'; // ⚡ Instancia de Axios con tu URL de Railway
 
 export default function VacantesDashboard() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Persistencia del usuario
     const [usuario, setUsuario] = useState(() => {
         const storedUser = localStorage.getItem('usuario');
         const initialUser = location.state?.usuario || (storedUser ? JSON.parse(storedUser) : null);
-        if (initialUser) localStorage.setItem('usuario', JSON.stringify(initialUser));
+        
+        if (initialUser) {
+            localStorage.setItem('usuario', JSON.stringify(initialUser));
+        }
         return initialUser;
     });
 
@@ -21,65 +20,54 @@ export default function VacantesDashboard() {
     const [selectedVacante, setSelectedVacante] = useState(null);
     const [pdfFile, setPdfFile] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [posting, setPosting] = useState(false);
     const [error, setError] = useState(null);
 
-    // Redirección si la sesión no es válida
     useEffect(() => {
-        if (!usuario || (usuario.rol !== 'estudiante' && usuario.rol !== 'persona')) {
+        if (!usuario) {
+            if (!loading) { 
+                localStorage.removeItem('usuario');
+                navigate('/'); 
+            }
+        } else if (usuario.rol !== 'estudiante' && usuario.rol !== 'persona') {
             localStorage.removeItem('usuario');
-            navigate('/');
+            navigate('/'); 
         } else {
             setLoading(false);
         }
-    }, [usuario, navigate]);
+    }, [usuario, navigate, loading]);
 
-    // Cargar vacantes desde el backend
+    // ⚡ Cargar vacantes con Axios
     useEffect(() => {
-        if (!usuario) return;
+        if (!usuario) {
+            setLoading(false);
+            return;
+        }
 
         const fetchVacantes = async () => {
             try {
-                const res = await axios.get(`${API_URL}/vacantes`);
-                setVacantes(res.data);
+                const { data } = await API.get('/vacantes'); // ✅ Usa tu URL de Railway
+                setVacantes(data);
                 setError(null);
             } catch (err) {
-                console.error("Error al cargar vacantes:", err);
-                setError("Error al cargar las vacantes. Asegúrate de que tu backend esté corriendo.");
+                console.error('Error al cargar vacantes:', err);
+                setError('Error al cargar las vacantes. Revisa tu backend.');
             }
         };
 
         fetchVacantes();
     }, [usuario]);
 
-    // Manejar selección de vacante
-    const handleSelectVacante = (vacante) => {
-        setSelectedVacante(vacante);
-    };
+    const handleSelectVacante = (vacante) => setSelectedVacante(vacante);
+    const handleFileChange = (e) => setPdfFile(e.target.files[0]);
 
-    // Manejar subida de CV
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.type !== 'application/pdf') {
-            alert("Solo se permite subir archivos PDF.");
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) { // 5MB
-            alert("El CV no puede superar los 5 MB.");
-            return;
-        }
-        setPdfFile(file);
-    };
-
-    // Enviar postulación
     const handlePostular = async () => {
         if (!selectedVacante || !pdfFile) {
-            alert("Selecciona una vacante y un archivo PDF."); 
+            alert('Selecciona una vacante y un archivo PDF.');
             return;
         }
+
         if (!usuario) {
-            alert("Error de autenticación. Por favor, inicia sesión.");
+            alert('Error de autenticación. Por favor, inicia sesión.');
             navigate('/');
             return;
         }
@@ -91,26 +79,25 @@ export default function VacantesDashboard() {
         formData.append('telefono', usuario.telefono || 'N/A');
 
         try {
-            setPosting(true);
-            const res = await axios.post(`${API_URL}/postulaciones/upload`, formData, {
+            const { data } = await API.post('/postulaciones/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("✅ Postulación enviada con éxito!");
+
+            console.log('Postulación enviada con éxito:', data);
+            alert('Postulación enviada con éxito!');
             setSelectedVacante(null);
             setPdfFile(null);
         } catch (err) {
-            console.error("Error en la postulación:", err);
-            const msg = err.response?.data?.error || err.message || "Error desconocido";
-            alert(`❌ Ocurrió un error al enviar tu postulación: ${msg}`);
-        } finally {
-            setPosting(false);
+            console.error('Error en la postulación:', err);
+            const message = err.response?.data?.error || 'Error desconocido.';
+            alert(`Ocurrió un error al enviar tu postulación: ${message}`);
         }
     };
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen bg-gray-100 text-gray-700">Cargando dashboard...</div>;
     }
-    
+
     if (error) {
         return <div className="flex justify-center items-center h-screen bg-red-100 text-red-700">Error: {error}</div>;
     }
@@ -125,7 +112,6 @@ export default function VacantesDashboard() {
                 </h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Vacantes */}
                     <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-2xl">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">Vacantes Disponibles ({vacantes.length})</h2>
                         <div className="space-y-4">
@@ -158,7 +144,6 @@ export default function VacantesDashboard() {
                         </div>
                     </div>
 
-                    {/* Postulación */}
                     <div className="lg:col-span-1 sticky top-4 h-fit bg-white p-6 rounded-xl shadow-2xl border-t-4 border-emerald-500">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">Postular a Vacante</h2>
                         {selectedVacante ? (
@@ -171,6 +156,7 @@ export default function VacantesDashboard() {
                                         Empresa: {selectedVacante.empresa?.nombre || 'N/A'}
                                     </p>
                                 </div>
+
                                 <label className="block text-sm font-medium text-gray-700">
                                     Subir CV (PDF)
                                 </label>
@@ -185,19 +171,21 @@ export default function VacantesDashboard() {
                                         file:bg-indigo-50 file:text-indigo-700
                                         hover:file:bg-indigo-100"
                                 />
+
                                 <button 
                                     onClick={handlePostular} 
                                     className={`w-full py-3 px-4 rounded-full font-bold transition duration-150 ease-in-out shadow-lg 
-                                        ${pdfFile && selectedVacante && !posting
+                                        ${pdfFile && selectedVacante 
                                             ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
                                             : 'bg-gray-300 text-gray-600 cursor-not-allowed'
                                         }`}
-                                    disabled={!pdfFile || !selectedVacante || posting}
+                                    disabled={!pdfFile || !selectedVacante}
                                 >
-                                    {posting ? "Enviando..." : "Enviar Postulación"}
+                                    Enviar Postulación
                                 </button>
+
                                 <p className="text-xs text-gray-500 text-center pt-2">
-                                    Asegúrate de que tu CV esté en formato PDF y no supere 5 MB.
+                                    Asegúrate de que tu CV esté en formato PDF.
                                 </p>
                             </div>
                         ) : (
