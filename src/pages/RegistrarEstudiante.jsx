@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './RegistrarEstudiante.css';
-import API from '../services/api'; // Asegúrate de ajustar la ruta si es necesario
+import API from '../services/api'; // Ajusta la ruta si es necesario
 
 export default function RegistrarEstudiante() {
   const [formData, setFormData] = useState({
@@ -72,8 +72,8 @@ export default function RegistrarEstudiante() {
       };
 
       try {
-        // Llamada al backend usando Axios
-        const response = await API.post("/api/estudiantes/registro", dataToSend);
+        // ✅ Llamada al backend usando Axios, sin doble /api
+        const response = await API.post("/estudiantes/registro", dataToSend);
 
         console.log('Registro exitoso:', response.data);
         alert('¡Registro de estudiante exitoso!');
