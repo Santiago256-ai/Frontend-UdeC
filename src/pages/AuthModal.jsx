@@ -1,89 +1,27 @@
-import { useState, useCallback } from 'react'; // Usamos useCallback para optimizar
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AuthModal.css';
 import Logo360Pro from "../assets/Logo360Pro.png";
-import API from '../services/api'; 
+import API from '../services/api'; // Usar Axios con la URL de producción
 
 export default function AuthModal({ isVisible, onClose }) {
     const [isRegistering, setIsRegistering] = useState(false);
     const [showFloatOptions, setShowFloatOptions] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const [identificador, setIdentificador] = useState(''); 
+    const [identificador, setIdentificador] = useState(''); // Correo o Usuario
     const [contraseña, setContraseña] = useState('');
     const [loginError, setLoginError] = useState(null); 
-    const [isLoading, setIsLoading] = useState(false); // 💡 NUEVO: Estado para bloqueo/UX
 
     const navigate = useNavigate();
 
     if (!isVisible) return null;
 
-    const togglePanel = useCallback(() => {
+    const togglePanel = () => {
         setIsRegistering(prev => !prev);
         setShowFloatOptions(false);
-    }, []);
-
-    const togglePasswordVisibility = useCallback(() => setShowPassword(prev => !prev), []);
-
-    // 💡 FUNCIÓN CENTRALIZADA PARA LA REDIRECCIÓN
-    const redirectToDashboard = (usuario) => {
-        const userRole = usuario.rol?.toLowerCase(); // Aseguramos minúsculas
-        onClose(); // Cerrar el modal antes de redirigir
-
-        if (userRole === 'estudiante' || userRole === 'persona') {
-            navigate('/vacantes-dashboard', { state: { usuario } });
-        } else if (userRole === 'empresa' || userRole === 'compania') {
-            navigate('/empresa-dashboard', { state: { usuario } });
-        } else {
-            console.error("Tipo de usuario no reconocido:", usuario);
-            setLoginError('Login exitoso, pero el rol del usuario es desconocido.');
-        }
     };
 
-
-    // --- LOGIN con Axios ---
-    const attemptLogin = async (endpoint) => {
-        try {
-            const response = await API.post(endpoint, { identificador, contraseña });
-            // Devuelve el objeto usuario, sea en 'usuario' o directamente en data
-            return response.data.usuario || response.data; 
-        } catch (error) {
-            console.warn(`Intento fallido en ${endpoint}:`, error.response?.data || error.message);
-            return null;
-        }
-    };
-
-    const handleLoginSubmit = async (e) => {
-        e.preventDefault();
-        setLoginError(null);
-        
-        if (!identificador || !contraseña) {
-            setLoginError('Debes ingresar tu correo/usuario y contraseña.');
-            return;
-        }
-
-        setIsLoading(true); // 💡 BLOQUEAR UI
-        
-        let usuario = null;
-
-        // 1. Intentar como Estudiante/Persona
-        usuario = await attemptLogin('/estudiantes/login');
-
-        // 2. Si falla, intentar como Empresa/Compañía
-        if (!usuario) {
-            usuario = await attemptLogin('/empresas/login');
-        }
-        
-        setIsLoading(false); // 💡 DESBLOQUEAR UI
-
-        if (usuario) {
-            redirectToDashboard(usuario);
-        } else {
-            setLoginError('Credenciales incorrectas. El correo/usuario o la contraseña no coinciden.');
-        }
-    };
-
-    // --- Funciones de Registro y Navegación ---
     const handleRegisterStart = () => setShowFloatOptions(true);
 
     const handlePersonaClick = () => {
@@ -96,16 +34,59 @@ export default function AuthModal({ isVisible, onClose }) {
         onClose();
     };
 
+    const togglePasswordVisibility = () => setShowPassword(prev => !prev);
+
     const handleForgotPasswordClick = (e) => {
         e.preventDefault();
         navigate('/forgot-password');
         onClose();
     };
 
+    // --- LOGIN con Axios ---
+    const attemptLogin = async (endpoint) => {
+        setLoginError(null);
+        try {
+            const response = await API.post(endpoint, { identificador, contraseña });
+            return response.data.usuario || response.data; // Devuelve usuario
+        } catch (error) {
+            console.warn(`Intento fallido en ${endpoint}:`, error.response?.data || error.message);
+            return null;
+        }
+    };
+
+    const handleLoginSubmit = async (e) => {
+        e.preventDefault();
+        setLoginError(null);
+
+        if (!identificador || !contraseña) {
+            setLoginError('Debes ingresar tu correo/usuario y contraseña.');
+            return;
+        }
+
+        let usuario = await attemptLogin('/estudiantes/login');
+
+        if (!usuario) usuario = await attemptLogin('/empresas/login');
+
+        if (usuario) {
+            const userRole = usuario.rol;
+            if (userRole === 'estudiante' || userRole === 'persona') {
+                navigate('/vacantes-dashboard', { state: { usuario } });
+            } else if (userRole === 'empresa' || userRole === 'compania') {
+                navigate('/empresa-dashboard', { state: { usuario } });
+            } else {
+                console.error("Tipo de usuario no reconocido:", usuario);
+                setLoginError('Login exitoso, pero el rol del usuario es desconocido.');
+                return;
+            }
+            onClose();
+        } else {
+            setLoginError('Credenciales incorrectas. El correo/usuario o la contraseña no coinciden.');
+        }
+    };
 
     // --- JSX / Renderizado ---
+    const containerClass = `auth-modal-overlay ${isRegistering ? 'panel-activo' : ''}`;
 
-    // Contenido del Panel (Registro / Inicio de Sesión)
     const panelContent = isRegistering ? (
         <>
             <div className="logo-container-panel"> 
@@ -151,7 +132,6 @@ export default function AuthModal({ isVisible, onClose }) {
         </>
     );
 
-    // Formulario de Registro (Estático por ahora, solo para UI)
     const RegisterForm = (
         <form className="formulario-container registrarse-container" onSubmit={(e) => e.preventDefault()}>
             <h2>Crear Cuenta</h2>
@@ -163,7 +143,6 @@ export default function AuthModal({ isVisible, onClose }) {
         </form>
     );
 
-    // Formulario de Inicio de Sesión (Login real)
     const LoginForm = (
         <form className="formulario-container iniciar-sesion-container" onSubmit={handleLoginSubmit}>
             <h2 className="login-title-desktop">Iniciar sesión</h2>
@@ -190,22 +169,13 @@ export default function AuthModal({ isVisible, onClose }) {
                 </button> 
             </div>
 
-            {loginError && <p style={{ color: 'red', marginTop: '10px', textAlign: 'center', fontSize: '0.9em' }}>{loginError}</p>}
+            {loginError && <p style={{ color: 'red', marginTop: '10px', textAlign: 'center' }}>{loginError}</p>}
 
             <a href="#" className="forgot-password" onClick={handleForgotPasswordClick}>¿Has olvidado tu contraseña?</a>
 
-            <button 
-                type="submit" 
-                className="form-submit-btn large-blue-btn" 
-                disabled={isLoading} // 💡 BLOQUEO DEL BOTÓN
-            >
-                {isLoading ? 'Cargando...' : 'Iniciar sesión'}
-            </button>
+            <button type="submit" className="form-submit-btn large-blue-btn">Iniciar sesión</button>
         </form>
     );
-
-    const containerClass = `auth-modal-overlay ${isRegistering ? 'panel-activo' : ''}`;
-
 
     return (
         <div className={containerClass} onClick={onClose}>
