@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './RegistrarEstudiante.css';
+import API from '../services/api'; // Asegúrate de ajustar la ruta si es necesario
 
 export default function RegistrarEstudiante() {
   const [formData, setFormData] = useState({
@@ -13,7 +14,7 @@ export default function RegistrarEstudiante() {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false); // ⬅️ Nuevo: Estado para manejar la carga
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,8 +22,7 @@ export default function RegistrarEstudiante() {
       ...prev,
       [name]: value
     }));
-    
-    // Limpiar error del campo cuando el usuario empiece a escribir
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -54,16 +54,14 @@ export default function RegistrarEstudiante() {
     return newErrors;
   };
 
-  // ⬅️ MODIFICACIÓN PRINCIPAL: Función asíncrona para la petición POST
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
-    
+
     if (Object.keys(newErrors).length === 0) {
       setErrors({});
-      setLoading(true); // Inicia el estado de carga
+      setLoading(true);
 
-      // Datos a enviar (excluye confirmarContraseña)
       const dataToSend = { 
         nombres: formData.nombres,
         apellidos: formData.apellidos,
@@ -71,52 +69,38 @@ export default function RegistrarEstudiante() {
         usuario: formData.usuario,
         contraseña: formData.contraseña,
         rol: formData.rol
-      }; 
-
-      // ⬅️ URL del backend. Coincide con tu configuración en server.js
-      const URL_BACKEND = 'http://localhost:4000/api/estudiantes/registro'; 
+      };
 
       try {
-        const response = await fetch(URL_BACKEND, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(dataToSend),
+        // Llamada al backend usando Axios
+        const response = await API.post("/api/estudiantes/registro", dataToSend);
+
+        console.log('Registro exitoso:', response.data);
+        alert('¡Registro de estudiante exitoso!');
+
+        // Limpiar formulario
+        setFormData({
+          nombres: '',
+          apellidos: '',
+          rol: 'estudiante',
+          correo: '',
+          usuario: '',
+          contraseña: '',
+          confirmarContraseña: ''
         });
 
-        // 1. Petición exitosa (código 200-299)
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Registro exitoso:', result);
-          alert('¡Registro de estudiante exitoso!');
-          
-          // Limpiar formulario después del registro
-          setFormData({
-            nombres: '',
-            apellidos: '',
-            rol: 'estudiante',
-            correo: '',
-            usuario: '',
-            contraseña: '',
-            confirmarContraseña: ''
-          });
-
-        } else {
-          // 2. Errores del servidor (ej: 409 Conflict por correo/usuario duplicado)
-          const errorData = await response.json();
-          console.error('Error de backend:', errorData);
-          alert(`Fallo el registro: ${errorData.error || 'Error desconocido del servidor'}`);
-        }
-
       } catch (error) {
-        // 3. Errores de red/conexión (ej: el servidor no está encendido)
-        console.error('Error de red/conexión:', error);
-        alert('Error de conexión. Asegúrate de que el servidor esté corriendo en ' + URL_BACKEND);
+        console.error('Error de backend o conexión:', error);
+
+        if (error.response && error.response.data) {
+          alert(`Fallo el registro: ${error.response.data.error || 'Error desconocido del servidor'}`);
+        } else {
+          alert('Error de conexión. Revisa tu backend.');
+        }
       } finally {
-        setLoading(false); // Finaliza el estado de carga
+        setLoading(false);
       }
-      
+
     } else {
       setErrors(newErrors);
     }
@@ -133,9 +117,7 @@ export default function RegistrarEstudiante() {
         <form onSubmit={handleSubmit} className="register-form">
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="nombres" className="form-label">
-                Nombres *
-              </label>
+              <label htmlFor="nombres" className="form-label">Nombres *</label>
               <input
                 type="text"
                 id="nombres"
@@ -144,15 +126,13 @@ export default function RegistrarEstudiante() {
                 onChange={handleChange}
                 className={`form-input ${errors.nombres ? 'error' : ''}`}
                 placeholder="Ingrese sus nombres"
-                disabled={loading} // ⬅️ Deshabilita durante la carga
+                disabled={loading}
               />
               {errors.nombres && <span className="error-message">{errors.nombres}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="apellidos" className="form-label">
-                Apellidos *
-              </label>
+              <label htmlFor="apellidos" className="form-label">Apellidos *</label>
               <input
                 type="text"
                 id="apellidos"
@@ -168,9 +148,7 @@ export default function RegistrarEstudiante() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="rol" className="form-label">
-              Rol
-            </label>
+            <label htmlFor="rol" className="form-label">Rol</label>
             <select
               id="rol"
               name="rol"
@@ -186,9 +164,7 @@ export default function RegistrarEstudiante() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="correo" className="form-label">
-              Correo Electrónico *
-            </label>
+            <label htmlFor="correo" className="form-label">Correo Electrónico *</label>
             <input
               type="email"
               id="correo"
@@ -203,9 +179,7 @@ export default function RegistrarEstudiante() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="usuario" className="form-label">
-              Usuario *
-            </label>
+            <label htmlFor="usuario" className="form-label">Usuario *</label>
             <input
               type="text"
               id="usuario"
@@ -221,9 +195,7 @@ export default function RegistrarEstudiante() {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="contraseña" className="form-label">
-                Contraseña *
-              </label>
+              <label htmlFor="contraseña" className="form-label">Contraseña *</label>
               <input
                 type="password"
                 id="contraseña"
@@ -238,9 +210,7 @@ export default function RegistrarEstudiante() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmarContraseña" className="form-label">
-                Confirmar Contraseña *
-              </label>
+              <label htmlFor="confirmarContraseña" className="form-label">Confirmar Contraseña *</label>
               <input
                 type="password"
                 id="confirmarContraseña"
@@ -258,7 +228,6 @@ export default function RegistrarEstudiante() {
           <button type="submit" className="submit-button" disabled={loading}>
             {loading ? 'Registrando...' : 'Crear Cuenta'} 
           </button>
-
         </form>
 
         <div className="register-footer">
