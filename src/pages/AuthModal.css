@@ -15,7 +15,20 @@
 }
 
 
+/* -------------------- ANIMACIÓN DE TRANSICIÓN DE PANELES -------------------- */
 
+/* 1. Mueve el panel izquierdo (verde) 50% a la derecha. */
+/* Esto lo posiciona exactamente donde estaba el panel derecho (formularios). */
+.auth-modal-overlay.panel-activo .panel-izquierdo {
+    transform: translateX(100%); /* Mueve el panel 100% de su propio ancho (50% del contenedor) */
+}
+
+/* 2. Opcional, pero recomendado: Mueve el panel derecho de formularios */
+/* Aunque solo renderizamos un formulario a la vez, mover su contenedor 
+/* da una sensación de que todo el módulo de formularios se movió. */
+.auth-modal-overlay.panel-activo .panel-derecho {
+    transform: translateX(-100%); /* Mueve el panel 100% de su propio ancho (50% del contenedor) */
+}
 
 
 

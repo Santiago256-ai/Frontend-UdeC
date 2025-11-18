@@ -291,24 +291,18 @@ export default function AuthModal({ isVisible, onClose }) {
             ) : (
 
                 <>
-
-                    <h1 className="auth-title">¡Hola!</h1>
-
-                    <p className="auth-paragraph">¿Aún no tienes cuenta? Regístrate gratis en pocos minutos y encuentra oportunidades o talentos.</p>
-
-                    <button className="auth-button fantasma" onClick={togglePanel}>
-
-                        Registrarse
-
-                    </button>
-
-                    <a href="#" className="go-back-link-left" onClick={(e) => {e.preventDefault(); handleRoleSelectionBack();}}>
-
-                        ← Elegir Rol
-
-                    </a>
-
-                </>
+                    <h1 className="auth-title">¡Hola!</h1>
+                    <p className="auth-paragraph">¿Aún no tienes cuenta? Regístrate gratis en pocos minutos y encuentra oportunidades o talentos.</p>
+                    <button 
+                        className="auth-button fantasma" 
+                        onClick={selectedRole === ROLES.EMPRESA ? handleEmpresaClick : handlePersonaClick} // 👈 ¡APLICA LA REDIRECCIÓN AHORA!
+                    >
+                        Registrarse
+                    </button>
+                    <a href="#" className="go-back-link-left" onClick={(e) => {e.preventDefault(); handleRoleSelectionBack();}}>
+                        ← Elegir Rol
+                    </a>
+                </>
 
             )}
 
@@ -490,35 +484,19 @@ export default function AuthModal({ isVisible, onClose }) {
 
     // Renderizado del Panel Derecho
 
-    const renderRightPanelContent = () => {
-
-        if (currentStep === STEPS.SELECT_ROLE) {
-
-            return RoleSelectionForm;
-
-        }
-
-       
-
-        // Si estamos en STEPS.AUTH_FORMS
-
-        if (isRegistering) {
-
-             // Ya que el flujo es 'Registrarse' -> Redirigir, usamos este form modificado.
-
-            return RegisterForm;
-
-        } else {
-
-            return LoginForm;
-
-        }
-
-    };
+// CÓDIGO CORREGIDO (Solo renderiza LoginForm)
+    // Renderizado del Panel Derecho
+    const renderRightPanelContent = () => {
+        if (currentStep === STEPS.SELECT_ROLE) {
+            return RoleSelectionForm;
+        }
+        
+        // En el paso AUTH_FORMS, solo se muestra el LoginForm para iniciar sesión.
+        return LoginForm; // 👈 Siempre devuelve el LoginForm en el Step 2
+    };
 
 
-
-    const containerClass = `auth-modal-overlay ${currentStep === STEPS.AUTH_FORMS && isRegistering ? 'panel-activo' : ''}`;
+    const containerClass = `auth-modal-overlay ${currentStep === STEPS.AUTH_FORMS ? 'panel-activo' : ''}`;
 
 
 
