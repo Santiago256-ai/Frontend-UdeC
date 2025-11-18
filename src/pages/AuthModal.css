@@ -30,7 +30,65 @@
     transform: translateX(-100%); /* Mueve el panel 100% de su propio ancho (50% del contenedor) */
 }
 
+/* Estilo base para los botones de login social */
+.social-login-btn {
+    width: 100%;
+    max-width: 350px;
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    border: 1px solid #ccc; /* Borde más visible */
+    background-color: white; /* Color de fondo por defecto (para ambos, si no tienen clase específica) */
+}
 
+/* Icono dentro del botón social */
+.auth-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+/* Estilos específicos para Google */
+.google-btn {
+    color: #444; /* Texto más oscuro */
+}
+.google-btn:hover {
+    background-color: #f0f0f0;
+}
+
+/* Estilos específicos para Microsoft */
+.microsoft-btn {
+    background-color: #2f2f2f; /* Fondo oscuro */
+    color: white;
+    border-color: #2f2f2f;
+}
+.microsoft-btn:hover {
+    background-color: #1f1f1f;
+}
+
+/* Separador "O inicia sesión con correo y contraseña" */
+.social-separator-top {
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+    border-bottom: 1px solid #444; /* Línea separadora */
+    line-height: 0.1em;
+    margin: 20px 0; /* Espacio arriba y abajo */
+    color: #888;
+}
+
+.social-separator-top span {
+    /* Usa el mismo color de fondo del panel de formularios para que la línea se "corte" */
+    background: #1b2836; 
+    padding: 0 10px;
+}
 
 
 /* Nuevo Contenedor de Selección de Rol */
