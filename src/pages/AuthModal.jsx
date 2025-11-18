@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AuthModal.css';
 import Logo360Pro from "../assets/Logo360Pro.png";
-import API from '../services/api'; // Usar Axios con la URL de producción
+// import API from '../services/api'; // Si API no se usa directamente en este componente, se puede comentar o eliminar.
 
-// 🚨 IMPORTACIÓN DE LOS NUEVOS COMPONENTES
+// 🚨 IMPORTACIÓN DE LOS COMPONENTES DE FORMULARIO
 import LoginForm from './LoginForm.jsx';
 import RegisterForm from './RegisterForm.jsx';
 
@@ -32,13 +32,8 @@ export default function AuthModal({
     const [selectedRole, setSelectedRole] = useState(null); 
     const [isRegistering, setIsRegistering] = useState(false);
     
-    // Estos estados ya no se usan en el nuevo flujo de componentes, pero los dejo si los necesitas en otra parte
-    const [showFloatOptions, setShowFloatOptions] = useState(false); 
-    const [showPassword, setShowPassword] = useState(false);
-    const [identificador, setIdentificador] = useState(''); 
-    const [contraseña, setContraseña] = useState('');
-    const [loginError, setLoginError] = useState(null); 
-
+    // Eliminamos estados no utilizados para una mayor limpieza
+    
     const navigate = useNavigate();
 
     // Resetear estados al abrir/cerrar (opcional, pero buena práctica)
@@ -68,7 +63,8 @@ export default function AuthModal({
         setIsRegistering(false); // Siempre empezamos en Login
     };
 
-    // Alterna entre Login y Registro (se usa en el panel izquierdo y dentro de los formularios)
+    // Alterna entre Login y Registro (usado en el panel izquierdo)
+    // Nota: Los formularios también deben tener un mecanismo para llamar a setIsRegistering(true/false)
     const togglePanel = () => {
         setIsRegistering(prev => !prev);
     };
@@ -83,14 +79,7 @@ export default function AuthModal({
         navigate('/register/company');
         onClose();
     };
-
-    // --- LÓGICA DE LOGIN (Se deja solo si planeas usarla, pero idealmente se mueve a LoginForm.js) ---
-    // (Mantengo tu lógica de handleLoginSubmit aquí por si la necesitas para re-conectar)
-    // Sin embargo, esta lógica DEBE ser movida a LoginForm.jsx para un diseño limpio.
     
-    /* const attemptLogin = async (endpoint) => { ... }; 
-    const handleLoginSubmit = async (e) => { ... }; */
-
     // --- JSX / Renderizado ---
 
     // 📌 1. Contenido del Panel (Izquierda)
@@ -109,7 +98,10 @@ export default function AuthModal({
                 <>
                     <h1 className="auth-title">¡Bienvenido!</h1>
                     <p className="auth-paragraph">Impulsa tu carrera o negocio. Inicia sesión para llevar tu desarrollo al siguiente nivel.</p>
-                    <button className="auth-button fantasma" onClick={togglePanel}>
+                    <button 
+                        className="auth-button fantasma" 
+                        onClick={() => setIsRegistering(false)} // Vuelve a la vista de Login dentro del modal
+                    >
                         Iniciar Sesión
                     </button>
                     <a href="#" className="go-back-link-left" onClick={(e) => {e.preventDefault(); handleRoleSelectionBack();}}>
@@ -123,7 +115,7 @@ export default function AuthModal({
                     <p className="auth-paragraph">¿Aún no tienes cuenta? Regístrate gratis en pocos minutos y encuentra oportunidades o talentos.</p>
                     <button 
                         className="auth-button fantasma" 
-                        // El botón de Registrarse aquí redirige al flujo de registro de la landing
+                        // Redirigir al flujo de registro de la landing (ya que es más complejo que un modal)
                         onClick={selectedRole === ROLES.EMPRESA ? handleEmpresaClick : handlePersonaClick} 
                     >
                         Registrarse
@@ -173,7 +165,7 @@ export default function AuthModal({
         
         // Si estamos en STEPS.AUTH_FORMS
         if (isRegistering) {
-            // 🚨 RENDERIZA EL COMPONENTE DE REGISTRO
+            // RENDERIZA EL COMPONENTE DE REGISTRO
             return (
                 <RegisterForm 
                     selectedRole={selectedRole} 
@@ -188,8 +180,8 @@ export default function AuthModal({
                 <LoginForm 
                     selectedRole={selectedRole}
                     setIsRegistering={setIsRegistering} // Pasa la función para ir a Registro
-                    handleGoogleLogin={handleGoogleLogin} // Pasa la prop de Google
-                    handleMicrosoftLogin={handleMicrosoftLogin} // Pasa la prop de Microsoft
+                    handleGoogleLogin={handleGoogleLogin} // 👈 PROPAGACIÓN CLAVE
+                    handleMicrosoftLogin={handleMicrosoftLogin} // 👈 PROPAGACIÓN CLAVE
                 />
             );
         }

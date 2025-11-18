@@ -1,18 +1,34 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// La URL base de tu Backend en Railway
+const RAILWAY_BASE_URL = 'https://backend-udec-production.up.railway.app/api'; 
 
 export default function RegisterForm({ 
     selectedRole, 
-    setIsRegistering // Prop para volver al modo Login
+    setIsRegistering, // Prop para volver al modo Login
+    handlePersonaClick, // Propagado desde AuthModal para redirección
+    handleEmpresaClick // Propagado desde AuthModal para redirección
 }) {
     
-    // Estado para los datos del nuevo usuario
+    // 🚨 Usamos useNavigate para la redirección después del registro
+    const navigate = useNavigate();
+
+    // --- ESTADOS ---
     const [registerData, setRegisterData] = useState({
         name: '',
         email: '',
         password: '',
     });
     
-    // Función para manejar los cambios en los inputs
+    // Estado para manejar errores de registro de la API
+    const [registerError, setRegisterError] = useState(null);
+    
+    // Estado para la carga
+    const [isLoading, setIsLoading] = useState(false);
+    
+    // --- MANEJADORES ---
+    
     const handleRegisterChange = (e) => {
         const { name, value } = e.target;
         setRegisterData(prev => ({
@@ -21,21 +37,70 @@ export default function RegisterForm({
         }));
     };
     
-    // Función para manejar el envío del formulario de Registro
-    const handleRegisterSubmit = (e) => {
+    // FUNCIÓN PRINCIPAL DE ENVÍO CON LÓGICA DE API
+    const handleRegisterSubmit = async (e) => {
         e.preventDefault();
+        setRegisterError(null); // Limpiar errores
+        setIsLoading(true); // Activar carga
+
+        const isEgresado = selectedRole === 'egresado';
         
-        console.log("Registrando nuevo usuario:", registerData, "con rol:", selectedRole);
+        // Determina el Endpoint de Registro
+        // 🚨 NOTA: Verifica con tu Backend si el endpoint es /register o /auth/register
+        // Asumiremos /auth/register por consistencia con el Login.
+        const endpoint = isEgresado
+            ? `${RAILWAY_BASE_URL}/auth/egresado/register` 
+            : `${RAILWAY_BASE_URL}/auth/empresa/register`;
         
-        // 🚨 Aquí iría tu lógica de registro con el Backend 
-        // (API.post('/auth/register', { ...registerData, rol: selectedRole }))
-        
-        alert(`Registro de prueba como ${selectedRole} exitoso para: ${registerData.email}`);
-        
-        // Opcional: Después del registro exitoso, podrías iniciar sesión o redirigir
-        
-        // Simplemente volvemos al modo de Login después de la simulación
-        setIsRegistering(false);
+        // Los datos que envía el frontend al backend
+        const payload = {
+            ...registerData,
+            role: selectedRole // Asegúrate de que tu backend espera el rol
+        };
+            
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (jsonError) {
+                    throw new Error(`Error de servidor inesperado (${response.status}).`);
+                }
+                throw new Error(errorData.message || 'Error al crear la cuenta. Inténtalo de nuevo.');
+            }
+
+            // Si el registro es exitoso (status 201 o 200)
+            const data = await response.json(); 
+            
+            console.log("¡Registro exitoso! Respuesta:", data);
+            
+            // 🚨 OPCIÓN 1 (Recomendada): Redirigir a una página de confirmación/primeros pasos.
+            // O, si el registro es *fuera* del modal:
+            if (isEgresado) {
+                 handlePersonaClick(); // Redirige a /register/student
+            } else {
+                 handleEmpresaClick(); // Redirige a /register/company
+            }
+            
+            // Opcional: Mostrar mensaje de éxito y cambiar a Login
+            // alert("¡Registro exitoso! Por favor, inicia sesión."); 
+            // setIsRegistering(false); 
+            
+        } catch (error) {
+            // Manejo del error
+            console.error('Error durante el registro:', error.message);
+            setRegisterError(error.message); // Mostrar el error en la UI
+        } finally {
+            setIsLoading(false); // Desactivar el indicador de carga
+        }
     };
     
     // Función para cambiar al modo de Login
@@ -43,10 +108,15 @@ export default function RegisterForm({
         setIsRegistering(false);
     };
 
+    // --- RENDERIZADO JSX ---
+    
+    // Determinar el título y el rol para el texto
+    const roleTitle = selectedRole === 'egresado' ? 'Egresado/Persona' : 'Empresa';
+
     return (
         <div className="formulario-container registrarse-container" style={{ zIndex: 3, opacity: 1 }}>
             <h2 className="login-title-desktop">
-                🚀 Únete como {selectedRole === 'student' ? '**Egresado/Persona**' : '**Empresa**'}
+                🚀 Únete como **{roleTitle}**
             </h2>
             
             <p style={{ color: '#ccc', marginBottom: '20px', textAlign: 'center' }}>
@@ -55,15 +125,33 @@ export default function RegisterForm({
             
             <form onSubmit={handleRegisterSubmit} style={{ width: '100%' }}>
                 
-                {/* Campo de Nombre Completo (Opcional, pero común en registros) */}
+                {/* Muestra el mensaje de error si existe */}
+                {registerError && (
+                    <div 
+                        className="error-message" 
+                        style={{ 
+                            backgroundColor: '#fee2e2', 
+                            color: '#ef4444', 
+                            padding: '10px', 
+                            borderRadius: '8px', 
+                            marginBottom: '15px',
+                            textAlign: 'center'
+                        }}
+                    >
+                        {registerError}
+                    </div>
+                )}
+                
+                {/* Campo de Nombre Completo */}
                 <input
                     className="modern-input"
                     type="text"
-                    placeholder="Nombre Completo"
+                    placeholder={selectedRole === 'egresado' ? 'Nombre Completo' : 'Nombre de la Empresa'}
                     name="name"
                     value={registerData.name}
                     onChange={handleRegisterChange}
                     required
+                    disabled={isLoading}
                 />
                 
                 {/* Campo de Email */}
@@ -75,6 +163,7 @@ export default function RegisterForm({
                     value={registerData.email}
                     onChange={handleRegisterChange}
                     required
+                    disabled={isLoading}
                 />
                 
                 {/* Campo de Contraseña */}
@@ -88,6 +177,7 @@ export default function RegisterForm({
                         onChange={handleRegisterChange}
                         required
                         minLength="6"
+                        disabled={isLoading}
                     />
                 </div>
 
@@ -95,8 +185,12 @@ export default function RegisterForm({
                     Al hacer clic en «Registrarse», aceptas las <a href="#" className="terms-link">Condiciones de uso</a> y la <a href="#" className="terms-link">Política de privacidad</a>.
                 </p>
 
-                <button type="submit" className="large-blue-btn">
-                    Registrarse
+                <button 
+                    type="submit" 
+                    className="large-blue-btn"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Registrando...' : 'Registrarse'}
                 </button>
             </form>
             
