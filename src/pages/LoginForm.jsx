@@ -35,17 +35,18 @@ const handleLoginSubmit = async (e) => {
     const isEgresado = selectedRole === 'egresado';
     
     // 1. URL Base de tu Backend en Railway
-    const RAILWAY_BASE_URL = 'https://backend-udec-production.up.railway.app/api/auth'; 
+    const RAILWAY_BASE_URL = 'https://backend-udec-production.up.railway.app/api'; 
     
-    // 2. Determina el Endpoint (Ruta completa de la API)
+    // 2. Determina el Endpoint (Ruta completa de la API con /auth/)
+    // 🚨 CAMBIO CLAVE AQUÍ: Se añade /auth/ para completar la ruta esperada.
     const endpoint = isEgresado
-        ? `${RAILWAY_BASE_URL}/egresado/login` // URL para Egresado
-        : `${RAILWAY_BASE_URL}/empresa/login`;  // URL para Empresa
+        ? `${RAILWAY_BASE_URL}/auth/egresado/login` // URL final: .../api/auth/egresado/login
+        : `${RAILWAY_BASE_URL}/auth/empresa/login`;  // URL final: .../api/auth/empresa/login
         
     // 3. Determina la ruta de redirección
     const redirectPath = isEgresado
-        ? '/vacantesdashboard' // Redirige a VacantesDashboard si es Egresado
-        : '/empresadashboard';  // Redirige a EmpresaDashboard si es Empresa
+        ? '/vacantesdashboard' 
+        : '/empresadashboard'; 
 
     try {
         const response = await fetch(endpoint, {
@@ -54,31 +55,42 @@ const handleLoginSubmit = async (e) => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                identificador: loginData.identificador, // Usuario o Email
+                identificador: loginData.identificador, 
                 password: loginData.password,
             }),
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            // Éxito: Guarda el token de sesión (si existe)
-            console.log("¡Inicio de sesión exitoso! Redirigiendo a:", redirectPath);
-            
-            if (data.token) {
-                localStorage.setItem('authToken', data.token);
+        // 🚨 Es crucial verificar si la respuesta NO fue OK antes de intentar leer JSON
+        if (!response.ok) {
+            // Si la respuesta no es 200, pero no es un error de red,
+            // intentamos leer el error JSON o lanzamos un error genérico
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (jsonError) {
+                // Captura el error de JSON (como el SyntaxError original)
+                throw new Error(`Error de conexión o respuesta inesperada (${response.status}): ${response.statusText}.`);
             }
-            
-            // REDIRECCIONAR USANDO LA RUTA CONDICIONAL
-            navigate(redirectPath); 
-            
-        } else {
-            // Error: Muestra el mensaje de error del servidor
-            alert(`Error al iniciar sesión: ${data.message || 'Credenciales inválidas o error desconocido.'}`);
+            throw new Error(errorData.message || 'Credenciales inválidas o error desconocido.');
         }
+
+        // Si la respuesta fue OK (response.ok es true)
+        const data = await response.json(); 
+
+        // Éxito: Guarda el token de sesión
+        console.log("¡Inicio de sesión exitoso! Redirigiendo a:", redirectPath);
+        
+        if (data.token) {
+            localStorage.setItem('authToken', data.token);
+        }
+        
+        // REDIRECCIONAR 
+        navigate(redirectPath); 
+            
     } catch (error) {
-        console.error('Error de conexión:', error);
-        alert('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
+        // Manejo mejorado del error que se captura del bloque try (ya sea de red o del servidor)
+        console.error('Error durante el inicio de sesión:', error.message);
+        alert(`Error al iniciar sesión: ${error.message}`);
     }
 };
     
