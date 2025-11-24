@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // 👈 Se añadió para navegación
 import './RegistrarEstudiante.css';
 import API from '../services/api'; // Ajusta la ruta si es necesario
 
 export default function RegistrarEstudiante() {
+  const navigate = useNavigate(); // Inicializar useNavigate
+
   const [formData, setFormData] = useState({
     nombres: '',
     apellidos: '',
@@ -31,22 +34,47 @@ export default function RegistrarEstudiante() {
     }
   };
 
+  // 1. Redirecciona a la ruta de Landing.jsx
+  const handleGoBack = () => {
+    navigate('/'); // Asume que Landing.jsx es la ruta '/'
+  };
+
+  // 2. Redirecciona a la ruta de AuthModal
+  const handleLoginRedirect = (e) => {
+    e.preventDefault();
+    // Se asume que AuthModal es la página de Login
+    navigate('/'); // O la ruta que uses para AuthModal/Login
+  };
+
+  // Función de validación de contraseña fuerte
+  const validatePasswordStrength = (password) => {
+    // 3. Expresión regular: 8+ caracteres, 1+ minúscula, 1+ mayúscula, 1+ número, 1+ caracter especial
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+~`|}{[\]:;"'<,>.?/])[A-Za-z\d!@#$%^&*()_+~`|}{[\]:;"'<,>.?/]{8,}$/;
+    
+    return passwordRegex.test(password);
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.nombres.trim()) newErrors.nombres = 'Los nombres son requeridos';
     if (!formData.apellidos.trim()) newErrors.apellidos = 'Los apellidos son requeridos';
+    
     if (!formData.correo.trim()) {
       newErrors.correo = 'El correo es requerido';
     } else if (!/\S+@\S+\.\S+/.test(formData.correo)) {
       newErrors.correo = 'El correo no es válido';
     }
+    
     if (!formData.usuario.trim()) newErrors.usuario = 'El usuario es requerido';
+    
+    // 3. Nueva validación de contraseña fuerte
     if (!formData.contraseña) {
       newErrors.contraseña = 'La contraseña es requerida';
-    } else if (formData.contraseña.length < 6) {
-      newErrors.contraseña = 'La contraseña debe tener al menos 6 caracteres';
+    } else if (!validatePasswordStrength(formData.contraseña)) {
+      newErrors.contraseña = 'Mín. 8 caracteres: mayúscula, minúscula, número y un caracter especial';
     }
+
     if (formData.contraseña !== formData.confirmarContraseña) {
       newErrors.confirmarContraseña = 'Las contraseñas no coinciden';
     }
@@ -68,26 +96,19 @@ export default function RegistrarEstudiante() {
         correo: formData.correo,
         usuario: formData.usuario,
         contraseña: formData.contraseña,
-        rol: formData.rol
+        // 4. El rol se envía (incluido 'egresado')
+        rol: formData.rol 
       };
 
       try {
-        // ✅ Llamada al backend usando Axios, sin doble /api
+        // ✅ Volviendo a la ruta que sabes que funciona en tu backend
         const response = await API.post("/estudiantes/registro", dataToSend);
 
         console.log('Registro exitoso:', response.data);
-        alert('¡Registro de estudiante exitoso!');
+        alert('¡Registro exitoso!');
 
-        // Limpiar formulario
-        setFormData({
-          nombres: '',
-          apellidos: '',
-          rol: 'estudiante',
-          correo: '',
-          usuario: '',
-          contraseña: '',
-          confirmarContraseña: ''
-        });
+        // Redireccionar al login después de registro exitoso (como solicitaste)
+        navigate('/'); 
 
       } catch (error) {
         console.error('Error de backend o conexión:', error);
@@ -110,7 +131,7 @@ export default function RegistrarEstudiante() {
     <div className="register-container">
       <div className="register-card">
         <div className="register-header">
-          <h1 className="register-title">Registro de Estudiante</h1>
+          <h1 className="register-title">Registro de Usuario</h1>
           <p className="register-subtitle">Complete sus datos para crear su cuenta</p>
         </div>
 
@@ -158,7 +179,6 @@ export default function RegistrarEstudiante() {
               disabled={loading}
             >
               <option value="estudiante">Estudiante</option>
-              <option value="profesor">Profesor</option>
               <option value="egresado">Egresado</option>
             </select>
           </div>
@@ -203,7 +223,7 @@ export default function RegistrarEstudiante() {
                 value={formData.contraseña}
                 onChange={handleChange}
                 className={`form-input ${errors.contraseña ? 'error' : ''}`}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mín. 8 caracteres, letras, números, especial"
                 disabled={loading}
               />
               {errors.contraseña && <span className="error-message">{errors.contraseña}</span>}
@@ -228,10 +248,30 @@ export default function RegistrarEstudiante() {
           <button type="submit" className="submit-button" disabled={loading}>
             {loading ? 'Registrando...' : 'Crear Cuenta'} 
           </button>
+          
+          {/* Botón Regresar con estilo submit-button */}
+          <button 
+            type="button" 
+            onClick={handleGoBack} 
+            className="submit-button secondary-button" 
+            disabled={loading}
+          >
+            Regresar
+          </button>
         </form>
 
         <div className="register-footer">
-          <p>¿Ya tienes una cuenta? <a href="/login" className="login-link">Iniciar Sesión</a></p>
+          <p>
+            ¿Ya tienes una cuenta? 
+            {/* Enlace para redireccionar al AuthModal */}
+            <a 
+              href="/" 
+              onClick={handleLoginRedirect} 
+              className="login-link"
+            >
+              Iniciar Sesión
+            </a>
+          </p>
         </div>
       </div>
     </div>

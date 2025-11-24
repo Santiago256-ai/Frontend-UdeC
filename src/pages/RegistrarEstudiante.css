@@ -114,6 +114,36 @@
   transform: translateY(0);
 }
 
+/* --- Estilos para el botón Regresar (.secondary-button) --- */
+.secondary-button {
+    background: linear-gradient(135deg, #00ff22 0%, #02501d 100%); 
+    
+    /* 📌 Propiedades clave para el TAMAÑO y FORMA (Tomadas de .submit-button) */
+    padding: 14px 20px;       /* 👈 Igualar el relleno: 14px arriba/abajo, 20px a los lados */
+    border-radius: 8px;       /* 👈 Igualar el redondeo de las esquinas */
+    
+    /* 📌 Propiedades clave para el TEXTO (Tomadas de .submit-button) */
+    color: white !important;  /* Para asegurar el texto blanco */
+    font-size: 16px;          /* Igualar el tamaño de la fuente */
+    font-weight: 600;         /* Igualar el grosor de la fuente */
+    
+    /* Otras propiedades necesarias */
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: block; /* Para que ocupe el ancho completo */
+    width: 100%;
+    
+    margin-top: 5px; 
+}
+
+.secondary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(100, 100, 100, 0.3);
+}
+
+
 .register-footer {
   text-align: center;
   margin-top: 25px;
