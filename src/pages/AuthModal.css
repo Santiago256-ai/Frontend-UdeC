@@ -47,7 +47,16 @@
     border: 1px solid #ccc; /* Borde más visible */
     background-color: white; /* Color de fondo por defecto (para ambos, si no tienen clase específica) */
 }
-
+/* Añade esto a tu archivo CSS */
+.authorization-text.justify-text {
+    /* Justifica el texto para una apariencia más formal */
+    text-align: justify; 
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
 /* Icono dentro del botón social */
 .auth-icon {
     width: 20px;
@@ -1087,4 +1096,332 @@
 
     margin-left: 10px;
 
+}
+
+/* Necesitas añadir estos estilos a tu archivo CSS */
+.custom-select-container {
+    position: relative;
+}
+
+.custom-select-header {
+    /* Aquí puedes reutilizar los estilos de .form-select */
+    cursor: pointer;
+    border: 1px solid #ccc; /* o el color de tu borde */
+    padding: 10px;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.custom-select-dropdown {
+    position: absolute;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-top: none;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10; /* Asegura que esté sobre otros elementos */
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 5px 0;
+}
+
+.dropdown-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.dropdown-option:hover {
+    background-color: #f0f0f0;
+}
+
+.dropdown-option input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+
+/* --- Estilos para la Política de Autorización (Paso 5) --- */
+
+.policy-block {
+    max-height: 250px; 
+    overflow-y: auto;  
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+/* ⚡ CORRECCIÓN 1: Justificar el texto dentro del bloque de políticas */
+.policy-block p, 
+.policy-block li,
+.policy-block ol,
+.policy-block div.policy-content {
+    text-align: justify; 
+}
+
+/* Aplicar color de texto oscuro para que sea legible */
+.policy-block p, 
+.policy-block li,
+.policy-block strong {
+    color: #333333 !important; 
+}
+
+.policy-block strong {
+    color: #1a1a1a !important; 
+}
+
+.policy-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #00796b; 
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    text-align: left; /* Títulos no deben justificarse */
+}
+
+/* --- Estilos para Checkboxes Organizados (Al lado) --- */
+
+.form-group.checkbox-group {
+    /* Mantenemos Flexbox para que el check y el texto estén al lado */
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background-color: #ffffff;
+}
+
+/* ⚡ CORRECCIÓN 3: Aplicar Negrita a los textos de las 4 opciones de autorización */
+.form-group.checkbox-group label {
+    font-weight: bold; /* Texto de la opción en negrita */
+    color: #333;
+    cursor: pointer;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Ajuste específico para el checkbox */
+.form-group.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    flex-shrink: 0; 
+    margin-top: 2px;
+}
+
+/* Estilo para el texto de error/obligatorio (Si ya está en negrita, se mantiene el color de error) */
+.form-group.checkbox-group label.error-text {
+    color: #d9534f; /* Rojo para el texto de advertencia */
+    /* font-weight: bold; ya está en el estilo general */
+}
+
+/* --- Estilos para quitar Negrita del Desplegable (Se mantienen) --- */
+
+.custom-select-dropdown .dropdown-option label {
+    font-weight: normal; 
+}
+
+.custom-select-dropdown input[type="checkbox"] + label {
+    font-weight: normal;
+}
+
+/* --------------------------------------------------- */
+/* --- Estilos para el Resumen (Paso 6) --- */
+/* --------------------------------------------------- */
+
+.summary-container {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f7f7f7;
+    margin-bottom: 20px;
+}
+
+.summary-section {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.summary-section-title {
+    font-size: 1.15em;
+    color: #00796b; /* Color verde oscuro */
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.summary-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 2 columnas en pantallas grandes */
+    gap: 10px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dotted #cccccc;
+}
+
+.summary-key {
+    font-weight: 600; /* Seminegrita para el nombre del campo */
+    color: #333;
+    margin-right: 10px;
+}
+
+.summary-value {
+    text-align: right;
+    color: #555;
+    word-break: break-word; /* Rompe palabras largas si es necesario */
+}
+
+.summary-separator {
+    margin: 25px 0;
+    border: 0;
+    border-top: 1px solid #ccc;
+}
+
+/* Estilo para el checkbox final para que no sea tan grande como los de política */
+.final-confirmation-check {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+}
+
+/* En tu archivo CSS */
+.hint-text {
+  /*
+  Elige un color que contraste bien con el fondo,
+  como el negro, un gris oscuro o, si es un error, un rojo.
+  */
+  color: #000000; /* Negro puro */
+  /* color: #333333; /* Gris oscuro para un aspecto más suave */
+  /* color: #FF0000; /* Rojo, si quieres indicar un requisito no cumplido */
+}
+
+/* En tu archivo CSS */
+.step-subtitle {
+  /* Establece el color de la fuente para que contraste con el fondo. */
+  color: #333333; /* Un gris oscuro, ideal para subtítulos */
+  /* O puedes usar negro puro: */
+  /* color: #000000; */
+}
+
+/* En tu archivo CSS */
+.alert-box {
+  /* ... otros estilos para el fondo, borde, padding, etc. */
+  
+  /* Establece un color de fuente que contraste fuertemente. */
+  color: #000000; /* Negro puro */
+  /* O un gris oscuro si el fondo de la caja no es blanco. */
+  /* color: #333333; */ 
+  
+  /* Puedes añadir negrita para énfasis: */
+  /* font-weight: bold; */
+}
+
+/* Estilos para el contenedor principal del resumen */
+.resumen-container {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  background-color: #f9f9f9;
+}
+
+---
+
+/* Estilos para el contenedor principal del resumen */
+.resumen-container {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  background-color: #f9f9f9;
+}
+
+/* Estilos para cada sección de resumen (Credenciales, Ubicación, etc.) */
+.resumen-seccion {
+  margin-bottom: 15px;
+}
+
+/* 1. CORRECCIÓN PARA TÍTULOS DE SECCIÓN (h3) */
+/* Ej: "1. Credenciales de Acceso" / "2. Ubicación" */
+.resumen-seccion h3 {
+  /* Asegura que el título sea visible (usa el color verde de tu tema) */
+  color: #28a745; 
+  border-bottom: 2px solid #28a745;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+/* 2. CORRECCIÓN PARA LAS LÍNEAS DE DETALLE (p) */
+/* Afecta el VALOR del dato (ej. "DollarCity" o "Bogotá") */
+.resumen-seccion p {
+  margin: 5px 0;
+  font-size: 14px;
+  /* CORRECCIÓN VITAL: Color oscuro para el valor del dato */
+  color: #333333; 
+}
+
+/* 3. CORRECCIÓN PARA LAS ETIQUETAS DENTRO DEL PÁRRAFO (strong) */
+/* Afecta la ETIQUETA (ej. "Nombre de la Empresa:") */
+.resumen-seccion p strong {
+  /* Asegura que la etiqueta del campo sea negro puro */
+  color: #000000; 
+  font-weight: bold;
+}
+
+/* Estilo del Contenedor de Navegación */
+.navigation-buttons {
+    /* Esto es CLAVE para que los botones se alineen horizontalmente */
+    display: flex;
+    /* Esto mueve el botón "Regresar" a la izquierda y el "Siguiente" a la derecha */
+    justify-content: space-between; 
+    /* Margen superior para separarlo del contenido del paso */
+    margin-top: 30px; 
+    /* Asegúrate de que ocupe todo el ancho para que 'space-between' funcione */
+    width: 100%; 
+}
+
+/* Estilo del Botón de Regresar */
+.btn-back {
+    /* Para darle el estilo y el color que se ve en tu imagen (gris/azul pálido) */
+    background-color: #6c757d; /* Gris para el botón de regresar */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+}
+
+/* El botón de Siguiente */
+.btn-next {
+    background-color: #4CAF50; /* Verde */
+    
+    /* 👈 AÑADE ESTA LÍNEA PARA LETRAS BLANCAS */
+    color: white; 
+    
+    /* ... otros estilos similares ... */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
