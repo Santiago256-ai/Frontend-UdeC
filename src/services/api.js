@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://backend-udec-production.up.railway.app/api",
+  baseURL: "https://backend-ude-c.vercel.app/api",
 });
 
 // Interceptor para agregar token automáticamente
