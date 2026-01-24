@@ -11,24 +11,23 @@ export default function Mensajeria() {
     const [nuevoMensaje, setNuevoMensaje] = useState("");
     const scrollRef = useRef();
 
-    // 🚀 NUEVA FUNCIÓN: MARCAR COMO LEÍDOS
-    // Se ejecuta apenas entramos al chat para limpiar el contador del Navbar
+    // 🚀 MARCAR COMO LEÍDOS
     useEffect(() => {
         const marcarLeidos = async () => {
             if (!usuario?.id || !empresaId) return;
             try {
-                // Usamos el endpoint PUT que creamos en el backend
                 await API.put(`/mensajeria/leer/${usuario.id}/${empresaId}`);
             } catch (err) {
                 console.error("Error al marcar mensajes como leídos", err);
             }
         };
         marcarLeidos();
-    }, [empresaId, usuario?.id]); // Se dispara al cambiar de chat o entrar
+    }, [empresaId, usuario?.id]);
 
     // 1. FUNCIÓN PARA CARGAR MENSAJES
+    // La envolvemos en un callback o la definimos dentro para que sea estable
     const cargarMensajes = async () => {
-        if (!usuario || !empresaId) return;
+        if (!usuario?.id || !empresaId) return;
         try {
             const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}`);
             setMensajes(data);
@@ -37,12 +36,18 @@ export default function Mensajeria() {
         }
     };
 
-    // 2. EFECTO PARA TIEMPO REAL
+    // 2. EFECTO PARA TIEMPO REAL (CORREGIDO)
     useEffect(() => {
-        cargarMensajes();
-        const interval = setInterval(cargarMensajes, 3000); 
+        cargarMensajes(); // Carga inicial
+
+        const interval = setInterval(() => {
+            cargarMensajes();
+        }, 3000); 
+
+        // ⚡ IMPORTANTE: Limpiar el intervalo cuando el componente se desmonte
+        // o cuando cambie el empresaId
         return () => clearInterval(interval);
-    }, [empresaId]);
+    }, [empresaId, usuario?.id]); 
 
     // 3. AUTO-SCROLL
     useEffect(() => {
@@ -64,7 +69,7 @@ export default function Mensajeria() {
             
             await API.post('/mensajeria/enviar', payload);
             setNuevoMensaje("");
-            cargarMensajes(); 
+            cargarMensajes(); // Recargar inmediatamente tras enviar
         } catch (err) {
             console.error("Error detallado:", err.response?.data);
             alert("No se pudo enviar el mensaje");
@@ -75,11 +80,12 @@ export default function Mensajeria() {
         <div className="flex flex-col h-screen bg-gray-100">
             {/* Header del Chat */}
             <div className="p-4 bg-indigo-600 text-white flex items-center shadow-lg">
-                <button onClick={() => navigate('/vacantes-dashboard')} className="mr-4 hover:bg-indigo-700 p-1 rounded">
+                <button onClick={() => navigate('/vacantes-dashboard')} className="mr-4 hover:bg-indigo-700 p-1 rounded transition-colors">
                     <ArrowLeft />
                 </button>
                 <div className="w-10 h-10 bg-indigo-400 rounded-full flex items-center justify-center mr-3 text-white font-bold">
-                    E
+                    {/* Placeholder dinámico para la inicial */}
+                    {empresaId ? 'E' : '?'}
                 </div>
                 <div>
                     <h2 className="font-bold text-lg">Chat con Empresa</h2>
@@ -124,14 +130,14 @@ export default function Mensajeria() {
                     type="text"
                     value={nuevoMensaje}
                     onChange={(e) => setNuevoMensaje(e.target.value)}
-                    placeholder="Escribe tu duda sobre la vacante..."
-                    className="flex-1 border border-gray-300 rounded-full px-5 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
+                    placeholder="Escribe tu duda..."
+                    className="flex-1 border border-gray-300 rounded-full px-5 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 transition-all"
                 />
                 <button 
                     type="submit" 
                     disabled={!nuevoMensaje.trim()}
                     className={`p-3 rounded-full transition-all shadow-md ${
-                        nuevoMensaje.trim() ? 'bg-indigo-600 text-white hover:scale-110' : 'bg-gray-200 text-gray-400'
+                        nuevoMensaje.trim() ? 'bg-indigo-600 text-white hover:scale-110 active:scale-95' : 'bg-gray-200 text-gray-400'
                     }`}
                 >
                     <Send className="w-6 h-6" />
