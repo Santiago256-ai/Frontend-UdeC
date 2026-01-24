@@ -1,21 +1,35 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, User, ArrowLeft } from 'lucide-react';
 import API from '../services/api'; 
-import { useNavigate, useParams } from 'react-router-dom'; // 👈 Añade useParams
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function Mensajeria() {
     const navigate = useNavigate();
-    const { empresaId } = useParams(); // 👈 Captura el ID de la URL (/mensajeria/45)
+    const { empresaId } = useParams(); 
     const [usuario] = useState(JSON.parse(localStorage.getItem('usuario')));
     const [mensajes, setMensajes] = useState([]);
     const [nuevoMensaje, setNuevoMensaje] = useState("");
     const scrollRef = useRef();
 
+    // 🚀 NUEVA FUNCIÓN: MARCAR COMO LEÍDOS
+    // Se ejecuta apenas entramos al chat para limpiar el contador del Navbar
+    useEffect(() => {
+        const marcarLeidos = async () => {
+            if (!usuario?.id || !empresaId) return;
+            try {
+                // Usamos el endpoint PUT que creamos en el backend
+                await API.put(`/mensajeria/leer/${usuario.id}/${empresaId}`);
+            } catch (err) {
+                console.error("Error al marcar mensajes como leídos", err);
+            }
+        };
+        marcarLeidos();
+    }, [empresaId, usuario?.id]); // Se dispara al cambiar de chat o entrar
+
     // 1. FUNCIÓN PARA CARGAR MENSAJES
     const cargarMensajes = async () => {
         if (!usuario || !empresaId) return;
         try {
-            // Usamos los IDs reales en la URL del backend
             const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}`);
             setMensajes(data);
         } catch (err) {
@@ -28,38 +42,34 @@ export default function Mensajeria() {
         cargarMensajes();
         const interval = setInterval(cargarMensajes, 3000); 
         return () => clearInterval(interval);
-    }, [empresaId]); // 👈 Se reinicia si cambias de chat
+    }, [empresaId]);
 
     // 3. AUTO-SCROLL
     useEffect(() => {
         scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [mensajes]);
 
-   // 4. ENVIAR MENSAJE
-const handleEnviar = async (e) => {
-    e.preventDefault();
-    if (!nuevoMensaje.trim()) return;
+    // 4. ENVIAR MENSAJE
+    const handleEnviar = async (e) => {
+        e.preventDefault();
+        if (!nuevoMensaje.trim()) return;
 
-    try {
-        const payload = {
-            contenido: nuevoMensaje,
-            senderType: 'USUARIO',
-            senderId: usuario.id,
-            // CORRECCIÓN AQUÍ: El receiverId DEBE ser el ID de la empresa (empresaId)
-            // No pongas usuario.id aquí, o el mensaje se quedará en tu cuenta.
-            receiverId: parseInt(empresaId) 
-        };
-        
-        console.log("Enviando mensaje a la empresa:", empresaId); // Para debuggear
-        
-        await API.post('/mensajeria/enviar', payload);
-        setNuevoMensaje("");
-        cargarMensajes(); 
-    } catch (err) {
-        console.error("Error detallado:", err.response?.data);
-        alert("No se pudo enviar el mensaje");
-    }
-};
+        try {
+            const payload = {
+                contenido: nuevoMensaje,
+                senderType: 'USUARIO',
+                senderId: usuario.id,
+                receiverId: parseInt(empresaId) 
+            };
+            
+            await API.post('/mensajeria/enviar', payload);
+            setNuevoMensaje("");
+            cargarMensajes(); 
+        } catch (err) {
+            console.error("Error detallado:", err.response?.data);
+            alert("No se pudo enviar el mensaje");
+        }
+    };
 
     return (
         <div className="flex flex-col h-screen bg-gray-100">
@@ -69,11 +79,10 @@ const handleEnviar = async (e) => {
                     <ArrowLeft />
                 </button>
                 <div className="w-10 h-10 bg-indigo-400 rounded-full flex items-center justify-center mr-3 text-white font-bold">
-                    {/* Podrías poner la inicial de la empresa aquí */}
                     E
                 </div>
                 <div>
-                    <h2 className="font-bold text-lg">Chat de Soporte / Empresa</h2>
+                    <h2 className="font-bold text-lg">Chat con Empresa</h2>
                     <div className="flex items-center gap-1">
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                         <span className="text-xs text-indigo-100">Activo ahora</span>
