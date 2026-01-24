@@ -35,30 +35,31 @@ export default function Mensajeria() {
         scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [mensajes]);
 
-    // 4. ENVIAR MENSAJE
-    const handleEnviar = async (e) => {
-        e.preventDefault();
-        if (!nuevoMensaje.trim()) return;
+   // 4. ENVIAR MENSAJE
+const handleEnviar = async (e) => {
+    e.preventDefault();
+    if (!nuevoMensaje.trim()) return;
 
-        try {
-            const payload = {
-                contenido: nuevoMensaje,
-                senderType: 'USUARIO',
-                senderId: usuario.id,
-                // IMPORTANTE: En tu lógica de Prisma, el receptor de la notificación
-                // suele ser el usuario, pero aquí el mensaje va hacia la empresa.
-                // Ajustamos el receiverId para que el backend sepa quién es el destino.
-                receiverId: usuario.id, 
-                empresaDestinoId: parseInt(empresaId) // Dato extra para el backend
-            };
-            
-            await API.post('/mensajeria/enviar', payload);
-            setNuevoMensaje("");
-            cargarMensajes(); 
-        } catch (err) {
-            alert("No se pudo enviar el mensaje");
-        }
-    };
+    try {
+        const payload = {
+            contenido: nuevoMensaje,
+            senderType: 'USUARIO',
+            senderId: usuario.id,
+            // CORRECCIÓN AQUÍ: El receiverId DEBE ser el ID de la empresa (empresaId)
+            // No pongas usuario.id aquí, o el mensaje se quedará en tu cuenta.
+            receiverId: parseInt(empresaId) 
+        };
+        
+        console.log("Enviando mensaje a la empresa:", empresaId); // Para debuggear
+        
+        await API.post('/mensajeria/enviar', payload);
+        setNuevoMensaje("");
+        cargarMensajes(); 
+    } catch (err) {
+        console.error("Error detallado:", err.response?.data);
+        alert("No se pudo enviar el mensaje");
+    }
+};
 
     return (
         <div className="flex flex-col h-screen bg-gray-100">
