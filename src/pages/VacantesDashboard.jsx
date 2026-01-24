@@ -58,13 +58,21 @@ const Navbar = ({ usuario, onLogout, unreadNotificationsCount, unreadMessagesCou
                     </button>
 
                     {/* Icono de Mensajes (Solo uno, bien posicionado) */}
-                    <button 
-                        onClick={() => navigate('/mensajeria')} 
-                        className="p-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-indigo-600 relative transition duration-150"
-                    >
-                        <MessageSquare className="w-6 h-6" />
-                        {renderBadge(unreadMessagesCount, 'bg-blue-500')}
-                    </button>
+                   <button 
+    onClick={() => {
+        // Validación de seguridad para evitar el Error 500
+        const idEmpresa = selectedVacante.empresaId || selectedVacante.empresa?.id;
+        if (idEmpresa) {
+            navigate(`/mensajeria/${idEmpresa}`);
+        } else {
+            alert("Error: No se encontró el ID de la empresa para esta vacante.");
+        }
+    }}
+    className="w-full py-3 px-4 bg-indigo-100 text-indigo-700 rounded-full font-bold hover:bg-indigo-200 transition duration-150 flex items-center justify-center gap-2 shadow-sm border border-indigo-200"
+>
+    <MessageSquare className="w-5 h-5" />
+    Contactar Empresa
+</button>
 
                     {/* Menú de Perfil */}
                     <div className="relative">
