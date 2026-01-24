@@ -57,7 +57,9 @@ const Navbar = ({ usuario, onLogout, unreadNotificationsCount, unreadMessagesCou
                     </button>
 
                     {/* Icono de Mensajes */}
-                    <button className="p-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-indigo-600 relative transition duration-150">
+                    <button 
+                    onClick={() => navigate('/mensajeria')} // ⬅️ AÑADE ESTO
+                    className="p-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-indigo-600 relative transition duration-150">
                         <MessageSquare className="w-6 h-6" />
                         {renderBadge(unreadMessagesCount, 'bg-blue-500')}
                     </button>
@@ -169,25 +171,28 @@ export default function VacantesDashboard() {
     }, [usuario]);
     
     // ⚡ LÓGICA PARA CARGAR LOS CONTADORES (REEMPLAZAR CON LLAMADA REAL A LA API)
-    useEffect(() => {
-        if (!usuario) return;
+useEffect(() => {
+    if (!usuario) return;
 
-        const fetchCounters = () => {
-             // ⚠️ REEMPLAZAR ESTOS NÚMEROS CON LLAMADA REAL A TU API
-             const totalUnreadNotifications = 5; 
-             const totalUnreadMessages = 12;
+    const fetchCounters = async () => {
+        try {
+            // Llamada al nuevo endpoint en Vercel
+            const { data } = await API.get(`/mensajeria/contadores/${usuario.id}`);
+            
+            setUnreadMessagesCount(data.unreadMessages);
+            setUnreadNotificationsCount(data.unreadNotifications);
+        } catch (err) {
+            console.error('Error al obtener contadores:', err);
+        }
+    };
 
-             setUnreadNotificationsCount(totalUnreadNotifications);
-             setUnreadMessagesCount(totalUnreadMessages);
-        };
-        
-        fetchCounters(); 
-        
-        // Opcional: Establecer un intervalo para recargar los contadores cada cierto tiempo (ej. 30 segundos)
-        // const intervalId = setInterval(fetchCounters, 30000);
-        // return () => clearInterval(intervalId);
-        
-    }, [usuario]);
+    fetchCounters(); 
+    
+    // Polling: Preguntar cada 10 segundos para actualizar el Navbar
+    const intervalId = setInterval(fetchCounters, 10000);
+    return () => clearInterval(intervalId);
+    
+}, [usuario]);
     
     // Función para cerrar sesión
     const handleLogout = () => {
@@ -335,6 +340,14 @@ export default function VacantesDashboard() {
                                 >
                                     Enviar Postulación
                                 </button>
+                                {/* ⚡ AQUÍ VA EL NUEVO BOTÓN DE CONTACTO ⚡ */}
+            <button 
+                onClick={() => navigate(`/mensajeria/${selectedVacante.empresaId}`)}
+                className="w-full py-3 px-4 bg-indigo-100 text-indigo-700 rounded-full font-bold hover:bg-indigo-200 transition duration-150 ease-in-out flex items-center justify-center gap-2 shadow-sm border border-indigo-200"
+            >
+                <MessageSquare className="w-5 h-5" />
+                Contactar Empresa
+            </button>
 
                                 <p className="text-xs text-gray-500 text-center pt-2">
                                     Asegúrate de que tu CV esté en formato PDF.

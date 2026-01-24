@@ -2,120 +2,13 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; 
 import API from "../services/api"; // ⚡ Usar la URL configurada de Railway
 import "./EmpresaDashboard.css"; // Asegúrate de que este CSS exista
+import ChatSidebar from "../components/ChatSidebar"; // O la ruta donde lo guardaste
 
 // =========================================================
 // ⚡ COMPONENTE CHAT LATERAL (Sidebar) con Lógica de Envío
 // =========================================================
 
-const ChatSidebar = ({ empresaId, postulante, onClose }) => {
-    // 1. Estado para el input del mensaje
-    const [currentMessage, setCurrentMessage] = useState('');
-    const [isSending, setIsSending] = useState(false);
-    
-    // Extraer solo el primer nombre para un saludo más corto
-    const nombrePostulante = postulante.usuario?.nombres?.split(' ')[0] || 'Candidato';
-    const postulanteId = postulante.usuario?.id;
-    
-    const handleSendMessage = async () => {
-        if (!currentMessage.trim() || isSending) return;
 
-        setIsSending(true);
-        
-        // Datos que se enviarán a tu API de Railway
-        const messageData = {
-            senderId: empresaId,       // ID de la empresa (Tú)
-            receiverId: postulanteId,  // ID del estudiante/egresado
-            content: currentMessage.trim(),
-        };
-
-        try {
-            // 🚀 LLAMADA A LA API PARA ENVIAR EL MENSAJE
-            // Debes implementar un endpoint en Railway que gestione esto:
-            // 1. Guardar el mensaje. 
-            // 2. Crear una notificación para el receiverId.
-            await API.post(`/mensajes/empresa`, messageData);
-
-            alert(`Mensaje enviado a ${nombrePostulante}. Recuerda: el backend DEBE registrarlo y crear la notificación.`);
-            setCurrentMessage(''); // Limpiar el input
-
-        } catch (error) {
-            console.error('Error al enviar mensaje:', error.response?.data || error);
-            alert(`Fallo al enviar el mensaje: ${error.response?.data?.error || 'Error de conexión.'}`);
-        } finally {
-            setIsSending(false);
-        }
-    };
-
-    if (!postulante) return null;
-
-    return (
-        <div 
-            style={{
-                position: 'fixed',
-                top: 0,
-                right: 0,
-                width: '350px',
-                height: '100%',
-                backgroundColor: 'white',
-                boxShadow: '-4px 0 10px rgba(0,0,0,0.2)',
-                zIndex: 1000,
-                display: 'flex',
-                flexDirection: 'column',
-                transition: 'transform 0.3s ease-in-out',
-            }}
-        >
-            {/* Header del Chat */}
-            <div style={{ padding: '15px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#e0f7ff' }}>
-                <h4 style={{ margin: 0, color: '#333', fontSize: '1.1em', fontWeight: 'bold' }}>💬 Chat con {nombrePostulante}</h4>
-                <button 
-                    onClick={onClose} 
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.8em', color: '#555', lineHeight: 1 }}
-                >
-                    &times;
-                </button>
-            </div>
-
-            {/* Historial de Mensajes (Placeholder) */}
-            <div style={{ flexGrow: 1, padding: '15px', overflowY: 'auto', backgroundColor: '#f9f9f9' }}>
-                <p style={{ color: '#888', textAlign: 'center', marginTop: '50px', fontSize: '0.9em' }}>
-                    *Aquí se cargaría el historial de chat con la API.
-                </p>
-                {/* Simulación de un mensaje reciente de la Empresa */}
-                {currentMessage.trim() && (
-                    <div style={{ textAlign: 'right', marginBottom: '10px' }}>
-                        <span style={{ backgroundColor: '#007bff', color: 'white', padding: '8px 12px', borderRadius: '15px 15px 0 15px', maxWidth: '80%', display: 'inline-block', fontSize: '0.9em' }}>
-                            {currentMessage}
-                        </span>
-                        <span style={{ display: 'block', fontSize: '0.7em', color: '#aaa', marginTop: '2px' }}>{new Date().toLocaleTimeString()} (Preview)</span>
-                    </div>
-                )}
-            </div>
-
-            {/* Input para Enviar Mensaje */}
-            <div style={{ padding: '15px', borderTop: '1px solid #eee', display: 'flex', gap: '10px' }}>
-                <input 
-                    type="text" 
-                    placeholder="Escribe un mensaje..." 
-                    value={currentMessage}
-                    onChange={(e) => setCurrentMessage(e.target.value)}
-                    onKeyPress={(e) => {
-                        if (e.key === 'Enter') handleSendMessage();
-                    }}
-                    style={{ flexGrow: 1, padding: '10px', borderRadius: '5px', border: '1px solid #ccc', fontSize: '0.9em' }}
-                    disabled={isSending}
-                />
-                <button 
-                    className="secondary-button" 
-                    onClick={handleSendMessage}
-                    style={{ padding: '10px 15px', backgroundColor: '#28a745', color: 'white', border: '1px solid #28a745' }}
-                    disabled={!currentMessage.trim() || isSending}
-                >
-                    {isSending ? 'Enviando...' : 'Enviar'}
-                </button>
-            </div>
-        </div>
-    );
-};
 
 // =========================================================
 // COMPONENTE PRINCIPAL: EmpresaDashboard

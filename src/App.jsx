@@ -10,6 +10,7 @@ import Vacantes from "./pages/Vacantes";
 import VacantesDashboard from './pages/VacantesDashboard';
 // 💡 Asegúrate de que el path sea correcto (ej: si está en ./pages/)
 import EmpresaDashboard from './pages/EmpresaDashboard'; 
+import Mensajeria from './pages/Mensajeria';
 
 import "./App.css";
 
@@ -34,6 +35,7 @@ function App() {
         <Route path="/empresa" element={<Empresa />} />
         <Route path="/vacantes" element={<Vacantes />} />
         <Route path="/vacantes-dashboard" element={<VacantesDashboard />} />
+<Route path="/mensajeria/:empresaId" element={<Mensajeria />} />
       </Routes>
     </Router>
   );
