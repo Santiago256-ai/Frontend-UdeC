@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import API from '../services/api'; // ⚡ Instancia de Axios con tu URL de Railway
 // Importamos los iconos
 import { Bell, MessageSquare, Settings, LogOut, ChevronDown } from 'lucide-react';
+import NotificationBadge from '../components/NotificationBadge'; // Ajusta la ruta
 
 // =========================================================
 // ⚡ FUNCIONES AUXILIARES DENTRO DEL ARCHIVO (por requisito)
@@ -34,14 +35,14 @@ const renderBadge = (count, colorClass) => {
 // ⚡ COMPONENTE NAVBAR DENTRO DEL ARCHIVO (por requisito)
 // =========================================================
 
-const Navbar = ({ usuario, onLogout, unreadNotificationsCount, unreadMessagesCount }) => {
+const Navbar = ({ usuario, onLogout, unreadNotificationsCount, unreadMessagesCount, navigate }) => {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
     return (
         <header className="sticky top-0 z-50 bg-white shadow-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
                 
-                {/* Logo o Nombre de la App */}
+                {/* Logo */}
                 <div className="text-xl font-bold text-indigo-600">
                     <span className="hidden sm:inline">Portal de Empleo</span>
                     <span className="sm:hidden">PE</span>
@@ -56,15 +57,16 @@ const Navbar = ({ usuario, onLogout, unreadNotificationsCount, unreadMessagesCou
                         {renderBadge(unreadNotificationsCount, 'bg-red-500')}
                     </button>
 
-                    {/* Icono de Mensajes */}
+                    {/* Icono de Mensajes (Solo uno, bien posicionado) */}
                     <button 
-                    onClick={() => navigate('/mensajeria')} // ⬅️ AÑADE ESTO
-                    className="p-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-indigo-600 relative transition duration-150">
+                        onClick={() => navigate('/mensajeria')} 
+                        className="p-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-indigo-600 relative transition duration-150"
+                    >
                         <MessageSquare className="w-6 h-6" />
                         {renderBadge(unreadMessagesCount, 'bg-blue-500')}
                     </button>
 
-                    {/* Menú de Perfil con Foto */}
+                    {/* Menú de Perfil */}
                     <div className="relative">
                         <button
                             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -76,20 +78,11 @@ const Navbar = ({ usuario, onLogout, unreadNotificationsCount, unreadMessagesCou
                             <ChevronDown className="w-4 h-4 text-gray-500" />
                         </button>
 
-                        {/* Menú Desplegable */}
                         {isProfileMenuOpen && (
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 border border-gray-100 z-10">
                                 <div className="px-4 py-2 text-sm text-gray-700 truncate border-b border-gray-100">
-                                    ¡Hola, **{usuario.nombres}**!
+                                    ¡Hola, <b>{usuario.nombres}</b>!
                                 </div>
-                                <a
-                                    href="#"
-                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition duration-150"
-                                    onClick={() => { setIsProfileMenuOpen(false); alert('Ir a Configuración de Perfil'); }}
-                                >
-                                    <Settings className="w-4 h-4 mr-2" />
-                                    Configuración
-                                </a>
                                 <button
                                     onClick={() => { onLogout(); setIsProfileMenuOpen(false); }}
                                     className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-150"
@@ -189,7 +182,7 @@ useEffect(() => {
     fetchCounters(); 
     
     // Polling: Preguntar cada 10 segundos para actualizar el Navbar
-    const intervalId = setInterval(fetchCounters, 10000);
+    const intervalId = setInterval(fetchCounters, 5000);
     return () => clearInterval(intervalId);
     
 }, [usuario]);
@@ -253,11 +246,12 @@ useEffect(() => {
         <div className="min-h-screen bg-gray-100 font-sans">
             {/* ⚡ Navbar Integrada */}
             <Navbar 
-                usuario={usuario} 
-                onLogout={handleLogout} 
-                unreadNotificationsCount={unreadNotificationsCount}
-                unreadMessagesCount={unreadMessagesCount}
-            />
+    usuario={usuario} 
+    onLogout={handleLogout} 
+    unreadNotificationsCount={unreadNotificationsCount}
+    unreadMessagesCount={unreadMessagesCount}
+    navigate={navigate} // ⬅️ IMPORTANTE: Pasa la función de navegación aquí
+/>
 
             <div className="max-w-7xl mx-auto p-4 sm:p-8">
                 

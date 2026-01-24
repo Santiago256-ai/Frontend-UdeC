@@ -11,9 +11,10 @@ const ChatSidebar = ({ empresaId, postulante, onClose }) => {
     const nombrePostulante = postulante?.usuario?.nombres || 'Candidato';
 
     // 1. Cargar historial al montar el componente
+    // 1. Cargar historial y refrescar cada 3 segundos
     useEffect(() => {
         const fetchHistory = async () => {
-            if (!postulanteId) return;
+            if (!postulanteId || !empresaId) return;
             try {
                 const res = await API.get(`/mensajeria/historial/${postulanteId}/${empresaId}`);
                 setMessages(res.data);
@@ -21,7 +22,14 @@ const ChatSidebar = ({ empresaId, postulante, onClose }) => {
                 console.error("Error al cargar historial:", err);
             }
         };
-        fetchHistory();
+
+        fetchHistory(); // Carga inicial
+
+        // Configurar el intervalo para el tiempo real (Polling)
+        const interval = setInterval(fetchHistory, 3000);
+
+        // Limpiar el intervalo cuando el componente se desmonte o cambie el chat
+        return () => clearInterval(interval);
     }, [postulanteId, empresaId]);
 
     // 2. Auto-scroll al final cuando llegan mensajes
@@ -114,12 +122,48 @@ const styles = {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
     },
     closeBtn: { background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' },
-    chatBody: { flex: 1, padding: '15px', overflowY: 'auto', backgroundColor: '#f4f7f6', display: 'flex', flexDirection: 'column' },
+    
+    // IMPORTANTE: El display flex y column aquí permiten que alignSelf funcione
+    chatBody: { 
+        flex: 1, padding: '15px', overflowY: 'auto', 
+        backgroundColor: '#f4f7f6', display: 'flex', flexDirection: 'column' 
+    },
+    
     emptyText: { textAlign: 'center', color: '#888', marginTop: '20px', fontSize: '14px' },
-    msgEmpresa: { alignSelf: 'flex-end', marginBottom: '12px', textAlign: 'right', maxWidth: '85%' },
-    msgUsuario: { alignSelf: 'flex-start', marginBottom: '12px', textAlign: 'left', maxWidth: '85%' },
-    bubbleEmpresa: { backgroundColor: '#28a745', color: 'white', padding: '10px', borderRadius: '15px 15px 0 15px', fontSize: '14px' },
-    bubbleUsuario: { backgroundColor: '#fff', color: '#333', padding: '10px', borderRadius: '15px 15px 15px 0', fontSize: '14px', border: '1px solid #ddd' },
+
+    // MENSAJES DE LA EMPRESA (DERECHA)
+    msgEmpresa: { 
+        alignSelf: 'flex-end',  // Empuja a la derecha
+        marginBottom: '15px', 
+        textAlign: 'right', 
+        maxWidth: '85%' 
+    },
+    bubbleEmpresa: { 
+        backgroundColor: '#28a745', 
+        color: 'white', 
+        padding: '10px 14px', 
+        borderRadius: '15px 15px 0 15px', 
+        fontSize: '14px',
+        boxShadow: '0 2px 5px rgba(40, 167, 69, 0.2)'
+    },
+
+    // MENSAJES DEL USUARIO/POSTULANTE (IZQUIERDA)
+    msgUsuario: { 
+        alignSelf: 'flex-start', // Empuja a la izquierda
+        marginBottom: '15px', 
+        textAlign: 'left', 
+        maxWidth: '85%' 
+    },
+    bubbleUsuario: { 
+        backgroundColor: '#fff', 
+        color: '#333', 
+        padding: '10px 14px', 
+        borderRadius: '15px 15px 15px 0', 
+        fontSize: '14px', 
+        border: '1px solid #ddd',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+    },
+
     time: { fontSize: '10px', color: '#999', marginTop: '4px', display: 'block' },
     footer: { padding: '15px', borderTop: '1px solid #eee', display: 'flex', gap: '8px' },
     input: { flex: 1, padding: '10px', borderRadius: '20px', border: '1px solid #ddd', outline: 'none' },
