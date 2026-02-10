@@ -403,6 +403,7 @@ return (
             <ChatSidebar 
                 empresaId={empresa?.id} // ⚡ Corregido con Optional Chaining
                 postulante={chatPostulante} 
+                vacanteId={vacanteActual?.id} // ⚡ Asegúrate de que este ID llegue aquí
                 onClose={() => setIsChatOpen(false)}
             />
         )}
