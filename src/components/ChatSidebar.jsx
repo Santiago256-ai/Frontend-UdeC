@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import API from "../services/api"; 
 
-const ChatSidebar = ({ empresaId, postulante, onClose }) => {
+const ChatSidebar = ({ empresaId, postulante, vacanteId,onClose }) => {
     const [messages, setMessages] = useState([]);
     const [currentMessage, setCurrentMessage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -14,9 +14,9 @@ const ChatSidebar = ({ empresaId, postulante, onClose }) => {
     // 1. Cargar historial y refrescar cada 3 segundos
     useEffect(() => {
         const fetchHistory = async () => {
-            if (!postulanteId || !empresaId) return;
+            if (!postulanteId || !empresaId || !vacanteId) return;
             try {
-                const res = await API.get(`/mensajeria/historial/${postulanteId}/${empresaId}`);
+                const res = await API.get(`/mensajeria/historial/${postulanteId}/${empresaId}/${vacanteId}`);
                 setMessages(res.data);
             } catch (err) {
                 console.error("Error al cargar historial:", err);
@@ -30,7 +30,7 @@ const ChatSidebar = ({ empresaId, postulante, onClose }) => {
 
         // Limpiar el intervalo cuando el componente se desmonte o cambie el chat
         return () => clearInterval(interval);
-    }, [postulanteId, empresaId]);
+    }, [postulanteId, empresaId, vacanteId]);
 
     // 2. Auto-scroll al final cuando llegan mensajes
     useEffect(() => {
@@ -48,6 +48,7 @@ const ChatSidebar = ({ empresaId, postulante, onClose }) => {
             senderId: empresaId,
             senderType: 'EMPRESA',
             receiverId: postulanteId,
+            vacanteId: parseInt(vacanteId), // ⚡ ENVIAMOS EL ID DE LA VACANTE
             contenido: currentMessage.trim()
         };
 
