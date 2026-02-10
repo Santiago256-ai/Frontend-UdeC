@@ -4,6 +4,7 @@ import API from '../services/api'; // ⚡ Instancia de Axios con tu URL de Railw
 // Importamos los iconos
 import { Bell, MessageSquare, Settings, LogOut, ChevronDown } from 'lucide-react';
 import NotificationBadge from '../components/NotificationBadge'; // Ajusta la ruta
+import Mensajeria from '../components/Chat-Vacantes';
 
 // =========================================================
 // ⚡ FUNCIONES AUXILIARES DENTRO DEL ARCHIVO (por requisito)
@@ -116,6 +117,7 @@ export default function VacantesDashboard() {
     const [pdfFile, setPdfFile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [chatAbierto, setChatAbierto] = useState(false);
     
     // ⚡ NUEVOS ESTADOS PARA LOS CONTADORES
     const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
@@ -327,15 +329,15 @@ useEffect(() => {
                                     disabled={!pdfFile || !selectedVacante}
                                 >
                                     Enviar Postulación
+   </button>
+
+                                {/* ⚡ BOTÓN DE CONTACTO ⚡ */}
+                                <button 
+                                    onClick={() => setChatAbierto(true)}
+                                    className="w-full py-3 rounded-full font-bold text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50 transition shadow-md"
+                                >
+                                    Contactar Empresa
                                 </button>
-                                {/* ⚡ AQUÍ VA EL NUEVO BOTÓN DE CONTACTO ⚡ */}
-            <button 
-                onClick={() => navigate(`/mensajeria/${selectedVacante.empresaId}`)}
-                className="w-full py-3 px-4 bg-indigo-100 text-indigo-700 rounded-full font-bold hover:bg-indigo-200 transition duration-150 ease-in-out flex items-center justify-center gap-2 shadow-sm border border-indigo-200"
-            >
-                <MessageSquare className="w-5 h-5" />
-                Contactar Empresa
-            </button>
 
                                 <p className="text-xs text-gray-500 text-center pt-2">
                                     Asegúrate de que tu CV esté en formato PDF.
@@ -348,6 +350,16 @@ useEffect(() => {
                         )}
                     </div>
                 </div>
+
+                {/* ⚡ RENDER DEL CHAT FLOTANTE ⚡ */}
+                {/* En VacantesDashboard.jsx */}
+{chatAbierto && selectedVacante && (
+    <Mensajeria 
+        empresaId={selectedVacante.empresaId} 
+        vacanteId={selectedVacante.id} // ⚡ NUEVA PROP: ID de la vacante
+        onClose={() => setChatAbierto(false)} 
+    />
+)}
             </div>
         </div>
     );

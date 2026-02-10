@@ -180,12 +180,20 @@ export default function EmpresaDashboard() {
     const vacanteActual = vacantes.find(v => v.id === vacanteSeleccionadaId);
 
     // Ajustamos el estilo principal para desplazar el contenido cuando el chat está abierto
-    const mainContentStyle = isChatOpen 
-        ? { marginRight: '350px', transition: 'margin-right 0.3s ease-in-out' }
-        : { marginRight: '0', transition: 'margin-right 0.3s ease-in-out' };
+// Usamos transform para desplazar, no para encoger
+const mainContentStyle = {
+    flex: 1,
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    // Quitamos los márgenes y anchos fijos de aquí para que mande el CSS
+};
 
-    return (
-        <div className="dashboard-layout" style={mainContentStyle}>
+return (
+    <div className="dashboard-layout">
+        {/* 1. CONTENEDOR PRINCIPAL */}
+        <div className="dashboard-container" style={mainContentStyle}>
+            
             <header className="dashboard-header">
                 <span className="logo-placeholder">💼</span>
                 <div className="welcome-info">
@@ -208,7 +216,7 @@ export default function EmpresaDashboard() {
                         setVacanteSeleccionadaId(null); 
                         setPostulaciones([]); 
                         setFiltroEstado("TODOS");
-                        setIsChatOpen(false); // Cierra el chat al cambiar de pestaña
+                        setIsChatOpen(false);
                         setChatPostulante(null);
                     }}
                 >
@@ -218,7 +226,7 @@ export default function EmpresaDashboard() {
                     className={activeTab === "creacion" ? "active" : ""} 
                     onClick={() => {
                         setActiveTab("creacion");
-                        setIsChatOpen(false); // Cierra el chat al cambiar de pestaña
+                        setIsChatOpen(false);
                         setChatPostulante(null);
                     }}
                 >
@@ -363,7 +371,6 @@ export default function EmpresaDashboard() {
                                                 <div className="action-links">
                                                     <a href={p.cv_url || '#'} target="_blank" rel="noopener noreferrer" className="cv-link">📥 Ver CV</a>
                                                     
-                                                    {/* ⚡ BOTÓN DE CHAT */}
                                                     <button 
                                                         className="action-button" 
                                                         onClick={() => handleOpenChat(p)}
@@ -389,16 +396,16 @@ export default function EmpresaDashboard() {
                     </section>
                 )}
             </main>
+        </div> {/* CIERRE dashboard-container */}
             
-            {/* ⚡ INTEGRACIÓN DEL CHAT LATERAL */}
-            {isChatOpen && (
-                <ChatSidebar 
-                    empresaId={empresa.id} // ID de la empresa para saber quién envía
-                    postulante={chatPostulante} 
-                    onClose={() => setIsChatOpen(false)}
-                />
-            )}
-
-        </div>
-    );
+        {/* 2. CHAT LATERAL */}
+        {isChatOpen && (
+            <ChatSidebar 
+                empresaId={empresa?.id} // ⚡ Corregido con Optional Chaining
+                postulante={chatPostulante} 
+                onClose={() => setIsChatOpen(false)}
+            />
+        )}
+    </div> // CIERRE dashboard-layout
+  );
 }

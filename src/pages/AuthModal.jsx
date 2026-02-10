@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AuthModal.css';
-
+import RecuperarPassword from './RecuperarPassword';
 import Logo360Pro from "../assets/Logo360Pro.png";
 import API from '../services/api'; // Usar Axios con la URL de producción
 
@@ -30,7 +30,7 @@ export default function AuthModal({ isVisible, onClose }) {
     // 📌 VARIABLES DE ESTADO
     const [currentStep, setCurrentStep] = useState(STEPS.SELECT_ROLE);
     const [selectedRole, setSelectedRole] = useState(null); // Nuevo estado para guardar el rol
-
+const [vistaOlvidado, setVistaOlvidado] = useState(false);
     const [isRegistering, setIsRegistering] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -158,6 +158,7 @@ export default function AuthModal({ isVisible, onClose }) {
         setCurrentStep(STEPS.SELECT_ROLE);
         setSelectedRole(null);
         setIsRegistering(false); 
+setVistaOlvidado(false);
     }
     
     const startAuthFlow = (role) => {
@@ -185,10 +186,9 @@ export default function AuthModal({ isVisible, onClose }) {
     const togglePasswordVisibility = () => setShowPassword(prev => !prev);
 
     const handleForgotPasswordClick = (e) => {
-        e.preventDefault();
-        navigate('/forgot-password');
-        onClose();
-    };
+        e.preventDefault();
+        setVistaOlvidado(true); // Cambia a la "pestaña" de recuperación
+    };
 
     // --- LÓGICA DE LOGIN por Correo y Contraseña (Mantenida, ya valida ambos roles) ---
     const attemptLogin = async (endpoint) => {
@@ -377,15 +377,25 @@ export default function AuthModal({ isVisible, onClose }) {
     );
 
 
-    // Renderizado del Panel Derecho
-    const renderRightPanelContent = () => {
-        if (currentStep === STEPS.SELECT_ROLE) {
-            return RoleSelectionForm;
-        }
-        
-        // En el paso AUTH_FORMS, siempre devuelve el LoginForm
-        return LoginForm; 
-    };
+  // Renderizado del Panel Derecho
+const renderRightPanelContent = () => {
+    if (currentStep === STEPS.SELECT_ROLE) {
+        return RoleSelectionForm;
+    }
+
+    if (vistaOlvidado) {
+        // ✅ Las props van dentro de la etiqueta <RecuperarPassword ... />
+        return (
+            <RecuperarPassword 
+                volverAlLogin={() => setVistaOlvidado(false)} 
+                emailPrellenado={identificador} 
+            />
+        );
+    }
+
+    // En el paso AUTH_FORMS, devuelve el LoginForm
+    return LoginForm; 
+};
 
     const containerClass = `auth-modal-overlay ${currentStep === STEPS.AUTH_FORMS ? 'panel-activo' : ''}`;
 

@@ -73,30 +73,44 @@
 }
 
 /* Estilos específicos para Microsoft */
+/* Busca la clase de este botón o aplícala así */
 .microsoft-btn {
-    background-color: #2f2f2f; /* Fondo oscuro */
-    color: white;
-    border-color: #2f2f2f;
-}
-.microsoft-btn:hover {
-    background-color: #1f1f1f;
+    background-color: #FFFFFF !important; /* Blanco puro */
+    color: #424242 !important;            /* Gris oscuro profesional para el texto */
+    border: 1px solid #8C8C8C;            /* Borde sutil */
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
 }
 
-/* Separador "O inicia sesión con correo y contraseña" */
+.microsoft-btn:hover {
+    background-color: #F2F2F2 !important; /* Un gris casi blanco al pasar el mouse */
+}
+
+/* Separador actualizado con más color */
 .social-separator-top {
     width: 100%;
     max-width: 350px;
     text-align: center;
-    border-bottom: 1px solid #444; /* Línea separadora */
+    /* Cambiamos el color de la línea a uno más sutil y azulado */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
     line-height: 0.1em;
-    margin: 20px 0; /* Espacio arriba y abajo */
-    color: #888;
-}
+    margin: 25px 0; /* Un poco más de espacio */
+    
+    /* Usamos el azul de tus links para que tenga "color" */
+    color: #ffffff; 
+    font-size: 0.85rem;
+    font-weight: 500;
+}   
 
 .social-separator-top span {
-    /* Usa el mismo color de fondo del panel de formularios para que la línea se "corte" */
-    background: #1b2836; 
-    padding: 0 10px;
+    /* IMPORTANTE: Asegúrate de que este fondo sea EXACTAMENTE 
+       el mismo que el de tu panel izquierdo */
+    background: #1e2e38; 
+    padding: 0 15px;
 }
 
 
@@ -134,46 +148,49 @@
 
 /* Modificamos los botones de rol para que se vean bien en el panel oscuro */
 
+/* Modificamos los botones de rol para que se vean bien en el panel oscuro */
 .role-selection-container .float-btn {
-
-    border: none; /* Quitamos el borde fantasma */
-
+    border: 2px solid transparent; /* Reservamos espacio para el borde */
     font-size: 1.1rem;
-
     padding: 15px 20px;
-
-    transition: background-color 0.2s, transform 0.1s;
-
+    width: 100%; /* Asegura que ambos tengan el mismo ancho */
+    max-width: 300px; /* Tamaño ideal para botones de rol */
+    margin-bottom: 15px;
+    transition: all 0.3s ease; /* Transición suave para todos los cambios */
+    cursor: pointer;
+    border-radius: 8px;
 }
 
-
-
+/* 1. BOTÓN EGRESADO (Persona) */
 .role-selection-container .persona-btn {
-
-    background-color: #6bb859; /* Un color verde que contraste */
-
-    color: var(--texto-claro);
-
+    background-color: #6bb859; /* Verde original */
+    color: #FFFFFF;
+    border: 2px solid #6bb859;
 }
 
+.role-selection-container .persona-btn:hover {
+    background-color: #FFFFFF !important; /* Fondo blanco al pasar el cursor */
+    color: #6bb859 !important;            /* Texto verde */
+    border: 2px solid #6bb859;            /* Mantiene el borde verde */
+}
 
-
+/* 2. BOTÓN EMPRESA */
 .role-selection-container .empresa-btn {
-
-    background-color: #2D545E; /* Tu color oscuro de botón */
-
-    color: var(--texto-claro);
-
+    background-color: #2D545E; /* Azul/Gris oscuro original */
+    color: #FFFFFF;
+    border: 2px solid #2D545E;
 }
 
+.role-selection-container .empresa-btn:hover {
+    background-color: #FFFFFF !important; /* Fondo blanco al pasar el cursor */
+    color: #2D545E !important;            /* Texto oscuro */
+    border: 2px solid #2D545E;            /* Mantiene el borde oscuro */
+}
 
-
+/* Efectos generales al pasar el cursor */
 .role-selection-container .float-btn:hover {
-
-    transform: translateY(-2px);
-
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-
+    transform: translateY(-3px); /* Un pequeño salto hacia arriba */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* Sombra más profunda */
 }
 
 
@@ -349,27 +366,15 @@
 
 
 .content-wrapper {
-
     display: flex;
-
     flex-direction: column;
-
-    /* 📌 Alinear al inicio para dejar espacio al logo. Antes era 'center' */
-
-    justify-content: flex-start;
-
+    /* CAMBIA ESTO de 'flex-start' a 'center' */
+    justify-content: center; 
     align-items: center;
-
     text-align: center;
-
     height: 100%;
-
-    /* Aumentar padding vertical si el logo ocupa mucho espacio */
-
     padding: 20px 40px;
-
 }
-
 
 
 .auth-title {
@@ -394,36 +399,32 @@
 
 
 
+/* Botón de cerrar corregido */
 .close-btn {
-
     position: absolute;
-
     top: 15px;
-
     right: 15px;
-
-    background: transparent;
-
-    border: none;
-
-    color: var(--texto-claro);
-
+    background: rgba(255, 255, 255, 0.1); /* Un fondo muy sutil para que parezca un botón */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Borde blanco suave */
+    color: #FFFFFF; /* La X ahora es blanca pura */
     font-size: 1.2rem;
-
+    font-weight: bold;
     cursor: pointer;
-
-    opacity: 0.7;
-
-    transition: opacity 0.2s;
-
+    width: 35px; /* Le damos forma cuadrada */
+    height: 35px;
+    border-radius: 8px; /* Bordes redondeados como tus otros botones */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease; /* Transición suave */
+    z-index: 10;
 }
 
-
-
 .close-btn:hover {
-
-    opacity: 1;
-
+    background-color: #FFFFFF !important; /* Fondo blanco al pasar el cursor */
+    color: #7cb342 !important;            /* La X cambia al verde de tu panel */
+    transform: rotate(90deg);             /* Efecto de giro elegante */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -510,40 +511,31 @@
 
 /* -------------------- BOTONES ESTÁNDAR -------------------- */
 
+/* Busca esta clase o añádela para personalizar el botón de REGISTRARSE */
 .auth-button {
-
-    /* Botón 'fantasma' en el panel verde */
-
-    border-radius: 20px;
-
-    border: 1px solid var(--texto-claro);
-
-    background-color: transparent;
-
-    color: var(--texto-claro);
-
-    font-size: 12px;
-
+    /* Color de fondo: Blanco para que resalte sobre el verde */
+    background-color: #FFFFFF !important; 
+    
+    /* Color del texto: El verde de tu panel para que contraste */
+    color: #6bb859 !important; 
+    margin-top: 60px !important;
+    /* Estilos de forma */
+    border-radius: 25px;
+    border: 2px solid #FFFFFF;
+    font-size: 14px;
     font-weight: bold;
-
     padding: 12px 45px;
-
     letter-spacing: 1px;
-
     text-transform: uppercase;
-
     cursor: pointer;
-
-    transition: background-color 0.2s, color 0.2s;
-
+    transition: all 0.3s ease;
 }
 
-
-
+/* Efecto al pasar el ratón (Hover) */
 .auth-button:hover {
-
-    background-color: rgba(255, 255, 255, 0.1);
-
+    background-color: transparent !important; /* Se vuelve transparente */
+    color: #FFFFFF !important;               /* El texto cambia a blanco */
+    transform: scale(1.05);                  /* Crece un poquito */
 }
 
 
@@ -624,7 +616,7 @@
 
     height: 100%;
 
-    text-align: left; /* Alineación del texto a la izquierda para el nuevo diseño */
+    text-align: center; /* Alineación del texto a la izquierda para el nuevo diseño */
 
 }
 
@@ -640,7 +632,9 @@
 
     color: var(--texto-claro);
 
-    text-align: left;
+    text-align: center;
+
+    width: 100%;
 
 }
 
@@ -826,7 +820,7 @@
 
     background-color: rgba(255, 255, 255, 0.1); /* Fondo más transparente/claro para simular el look */
 
-    color: white;
+    color: #000000;
 
     font-size: 1rem;
 
@@ -834,7 +828,7 @@
 
 .modern-input::placeholder {
 
-    color: #cccccc;
+    color: #bbbbbb;
 
 }
 
@@ -915,6 +909,7 @@
 }
 
 .forgot-password:hover {
+    color: #FFFFFF !important;
 
     text-decoration: underline;
 
@@ -959,35 +954,26 @@
 
 
 /* 8. BOTÓN DE SUBMIT GRANDE */
-
 .large-blue-btn {
-
     width: 100%;
-
     padding: 15px;
-
     font-size: 1.1rem;
-
     font-weight: bold;
-
-    border-radius: 25px;
-
-    background-color: #8ea072;
-
-    color: rgb(255, 255, 255);
-
-    border: none;
-
+    border-radius: 8px;
+    background-color: var(--panel-verde); /* Tu verde actual */
+    color: rgb(255, 255, 255); /* Letras blancas */
+    border: 2px solid var(--panel-verde); /* Añadimos borde verde desde el inicio */
     cursor: pointer;
-
     margin-top: 10px;
-
+    transition: all 0.3s ease; /* Suaviza el cambio de colores */
 }
 
 .large-blue-btn:hover {
-
-    background-color: #4f7832;
-
+    background-color: #ffffff !important; /* Fondo blanco al pasar el cursor */
+    color: var(--panel-verde) !important;  /* Letras verdes al pasar el cursor */
+    border: 2px solid var(--panel-verde);  /* Mantiene el borde verde para que no se pierda */
+    transform: translateY(-2px);           /* Sube un poquito más para dar sensación de clic */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Sombra suave para que resalte sobre el oscuro */
 }
 
 
@@ -995,17 +981,14 @@
 /* -------------------- ESTILOS DE OPCIONES FLOTANTES (Panel Verde) -------------------- */
 
 .register-action-area {
-
     width: 100%;
-
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
-    margin-top: 30px;
-
+    
+    /* ESTO EMPUJA TODO HACIA ABAJO */
+    margin-top: auto; 
+    margin-bottom: 50px; /* Para que no pegue al borde inferior */
 }
 
 
@@ -1081,21 +1064,20 @@
 
 
 .go-back-link-left {
-
-    color: #cccccc;
-
-    font-size: 0.8rem;
-
-    margin-top: 10px;
-
+    color: #FFFFFF !important; /* Blanco puro para que resalte sobre el verde */
+    font-weight: 600;
+    font-size: 0.9rem;
     text-decoration: none;
+    display: block;            /* Para poder centrarlo mejor */
+    text-align: center;
+    margin-top: 25px !important;          /* Espacio respecto al botón de arriba */
+    opacity: 0.85;             /* Un poco sutil por defecto */
+    transition: opacity 0.2s;
+}
 
-    cursor: pointer;
-
-    align-self: flex-start; /* Alineado a la izquierda */
-
-    margin-left: 10px;
-
+.go-back-link-left:hover {
+    opacity: 1;                /* Se ilumina al 100% al pasar el mouse */
+    text-decoration: underline; /* Aparece el subrayado */
 }
 
 /* Necesitas añadir estos estilos a tu archivo CSS */
