@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, X, MessageSquare } from 'lucide-react';
 import API from '../services/api'; 
+import './Estilo-Chat-Vacantes.css'; // Asegúrate de que el nombre coincida
 
 export default function Mensajeria({ empresaId, vacanteId, onClose }) {
     const [usuario] = useState(() => JSON.parse(localStorage.getItem('usuario')));
@@ -8,7 +9,7 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
     const [nuevoMensaje, setNuevoMensaje] = useState("");
     const scrollRef = useRef();
 
-    // 1. MARCAR COMO LEÍDOS (Lógica de tu primer componente)
+    // 1. MARCAR COMO LEÍDOS
     useEffect(() => {
         const marcarLeidos = async () => {
             if (!usuario?.id || !empresaId) return;
@@ -21,11 +22,10 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
         marcarLeidos();
     }, [empresaId, usuario?.id]);
 
-    // 2. FUNCIÓN PARA CARGAR MENSAJES (Integrando vacanteId)
+    // 2. FUNCIÓN PARA CARGAR MENSAJES
     const cargarMensajes = async () => {
         if (!usuario?.id || !empresaId || !vacanteId) return;
         try {
-            // Usamos la ruta completa con vacanteId como en tu segunda lógica
             const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}/${vacanteId}`);
             setMensajes(data || []);
         } catch (err) {
@@ -35,12 +35,8 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
 
     // 3. EFECTO PARA TIEMPO REAL
     useEffect(() => {
-        cargarMensajes(); // Carga inicial
-
-        const interval = setInterval(() => {
-            cargarMensajes();
-        }, 3000); 
-
+        cargarMensajes();
+        const interval = setInterval(() => cargarMensajes(), 3000); 
         return () => clearInterval(interval);
     }, [empresaId, vacanteId, usuario?.id]); 
 
@@ -54,11 +50,9 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
         e.preventDefault();
         if (!nuevoMensaje.trim()) return;
 
-        const texto = nuevoMensaje.trim();
-
         try {
             const payload = {
-                contenido: texto,
+                contenido: nuevoMensaje.trim(),
                 senderType: 'USUARIO',
                 senderId: usuario.id,
                 receiverId: parseInt(empresaId),
@@ -66,52 +60,48 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
             };
             
             await API.post('/mensajeria/enviar', payload);
-            setNuevoMensaje(""); // Limpiar solo si el envío es exitoso
-            cargarMensajes(); // Recargar inmediatamente
+            setNuevoMensaje(""); 
+            cargarMensajes(); 
         } catch (err) {
-            console.error("Error al enviar:", err.response?.data || err.message);
+            console.error("Error al enviar:", err);
             alert("No se pudo enviar el mensaje");
         }
     };
 
     return (
-        <div className="fixed right-5 bottom-5 w-[380px] h-[500px] bg-white shadow-2xl rounded-t-2xl flex flex-col border border-gray-200 z-[9999]">
-            {/* Header del Modal */}
-            <div className="p-4 bg-indigo-600 text-white rounded-t-2xl flex justify-between items-center shadow-md">
-                <div className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5" />
+        <div className="chat-window">
+            {/* Header */}
+            <header className="chat-header">
+                <div className="chat-header-info">
+                    <MessageSquare size={20} />
                     <div>
-                        <h2 className="font-bold text-sm">Chat de la Vacante</h2>
-                        <div className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                            <span className="text-[10px] text-indigo-100">Activo ahora</span>
+                        <h2 className="chat-title">Chat de la Vacante</h2>
+                        <div className="status-indicator">
+                            <span className="online-dot"></span>
+                            <span>Activo ahora</span>
                         </div>
                     </div>
                 </div>
-                <button onClick={onClose} className="hover:bg-indigo-700 p-1 rounded-full transition-colors">
-                    <X className="w-5 h-5" />
+                <button onClick={onClose} className="close-button">
+                    <X size={20} />
                 </button>
-            </div>
+            </header>
 
-            {/* Cuerpo del Chat (Estilo WhatsApp) */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#e5ddd5]">
+            {/* Cuerpo del Chat */}
+            <div className="chat-body">
                 {mensajes.length === 0 ? (
-                    <div className="text-center text-gray-500 mt-10 bg-white/50 p-3 rounded-lg text-xs">
+                    <div className="empty-chat">
                         Inicia una conversación con la empresa.
                     </div>
                 ) : (
                     mensajes.map((m) => (
                         <div 
                             key={m.id} 
-                            className={`flex ${m.senderType === 'USUARIO' ? 'justify-end' : 'justify-start'}`}
+                            className={`message-wrapper ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}
                         >
-                            <div className={`max-w-[85%] p-3 rounded-xl shadow-sm ${
-                                m.senderType === 'USUARIO' 
-                                ? 'bg-indigo-600 text-white rounded-tr-none' 
-                                : 'bg-white text-gray-800 rounded-tl-none'
-                            }`}>
-                                <p className="text-sm leading-relaxed">{m.contenido}</p>
-                                <span className={`text-[10px] block text-right mt-1 opacity-70`}>
+                            <div className={`message-bubble ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}>
+                                <p>{m.contenido}</p>
+                                <span className="message-time">
                                     {m.fechaEnvio ? new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                                 </span>
                             </div>
@@ -121,23 +111,21 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
                 <div ref={scrollRef} />
             </div>
 
-            {/* Input de Texto */}
-            <form onSubmit={handleEnviar} className="p-3 bg-white border-t flex items-center gap-2">
+            {/* Footer / Input */}
+            <form onSubmit={handleEnviar} className="chat-footer">
                 <input 
                     type="text"
                     value={nuevoMensaje}
                     onChange={(e) => setNuevoMensaje(e.target.value)}
                     placeholder="Escribe tu duda..."
-                    className="flex-1 bg-gray-100 border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 text-black outline-none"
+                    className="chat-input"
                 />
                 <button 
                     type="submit" 
                     disabled={!nuevoMensaje.trim()}
-                    className={`p-2 rounded-full transition-all ${
-                        nuevoMensaje.trim() ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-400'
-                    }`}
+                    className="send-button"
                 >
-                    <Send className="w-4 h-4" />
+                    <Send size={16} />
                 </button>
             </form>
         </div>
