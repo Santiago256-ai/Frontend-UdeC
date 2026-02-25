@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, X, MessageSquare } from 'lucide-react';
+import { Send, X, MessageSquare, Lock } from 'lucide-react'; // Añadimos Lock para el icono de bloqueo
 import API from '../services/api'; 
-import './Estilo-Chat-Vacantes.css'; // Asegúrate de que el nombre coincida
+import './Estilo-Chat-Vacantes.css';
 
 export default function Mensajeria({ empresaId, vacanteId, onClose }) {
     const [usuario] = useState(() => JSON.parse(localStorage.getItem('usuario')));
     const [mensajes, setMensajes] = useState([]);
     const [nuevoMensaje, setNuevoMensaje] = useState("");
+    // NUEVO: Estado para saber si la empresa bloqueó el chat
+    const [isChatActivo, setIsChatActivo] = useState(true); 
     const scrollRef = useRef();
 
-    // 1. MARCAR COMO LEÍDOS
+    // 1. MARCAR COMO LEÍDOS (Igual)
     useEffect(() => {
         const marcarLeidos = async () => {
             if (!usuario?.id || !empresaId) return;
@@ -22,33 +24,39 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
         marcarLeidos();
     }, [empresaId, usuario?.id]);
 
-    // 2. FUNCIÓN PARA CARGAR MENSAJES
+    // 2. CARGAR MENSAJES Y ESTADO
     const cargarMensajes = async () => {
         if (!usuario?.id || !empresaId || !vacanteId) return;
         try {
             const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}/${vacanteId}`);
-            setMensajes(data || []);
+            
+            // Suponiendo que tu backend responde con un objeto { mensajes: [], chatActivo: true }
+            // Si el backend solo manda el array, deberías crear un endpoint para el status
+            setMensajes(data.mensajes || []);
+setIsChatActivo(data.chatActivo); 
+            
+            if (data.chatActivo !== undefined) {
+                setIsChatActivo(data.chatActivo);
+            }
         } catch (err) {
             console.error("Error al cargar historial:", err);
         }
     };
 
-    // 3. EFECTO PARA TIEMPO REAL
     useEffect(() => {
         cargarMensajes();
         const interval = setInterval(() => cargarMensajes(), 3000); 
         return () => clearInterval(interval);
     }, [empresaId, vacanteId, usuario?.id]); 
 
-    // 4. AUTO-SCROLL
     useEffect(() => {
         scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [mensajes]);
 
-    // 5. ENVIAR MENSAJE
     const handleEnviar = async (e) => {
         e.preventDefault();
-        if (!nuevoMensaje.trim()) return;
+        // Bloqueo preventivo en la función
+        if (!nuevoMensaje.trim() || !isChatActivo) return;
 
         try {
             const payload = {
@@ -70,15 +78,14 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
 
     return (
         <div className="chat-window">
-            {/* Header */}
             <header className="chat-header">
                 <div className="chat-header-info">
                     <MessageSquare size={20} />
                     <div>
                         <h2 className="chat-title">Chat de la Vacante</h2>
                         <div className="status-indicator">
-                            <span className="online-dot"></span>
-                            <span>Activo ahora</span>
+                            <span className={isChatActivo ? "online-dot" : "offline-dot"}></span>
+                            <span>{isChatActivo ? "Activo ahora" : "Chat finalizado"}</span>
                         </div>
                     </div>
                 </div>
@@ -87,18 +94,20 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
                 </button>
             </header>
 
-            {/* Cuerpo del Chat */}
             <div className="chat-body">
-                {mensajes.length === 0 ? (
-                    <div className="empty-chat">
-                        Inicia una conversación con la empresa.
+                {/* MENSAJE DE ADVERTENCIA CUANDO ESTÁ DESACTIVADO */}
+                {!isChatActivo && (
+                    <div className="chat-disabled-alert">
+                        <Lock size={16} />
+                        <p>Conversación desactivada por parte de la empresa. No podrás enviar ni recibir mensajes.</p>
                     </div>
+                )}
+
+                {mensajes.length === 0 ? (
+                    <div className="empty-chat">Inicia una conversación con la empresa.</div>
                 ) : (
                     mensajes.map((m) => (
-                        <div 
-                            key={m.id} 
-                            className={`message-wrapper ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}
-                        >
+                        <div key={m.id} className={`message-wrapper ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}>
                             <div className={`message-bubble ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}>
                                 <p>{m.contenido}</p>
                                 <span className="message-time">
@@ -111,18 +120,19 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
                 <div ref={scrollRef} />
             </div>
 
-            {/* Footer / Input */}
-            <form onSubmit={handleEnviar} className="chat-footer">
+            {/* FOOTER BLOQUEADO SI NO ESTÁ ACTIVO */}
+            <form onSubmit={handleEnviar} className={`chat-footer ${!isChatActivo ? 'footer-disabled' : ''}`}>
                 <input 
                     type="text"
                     value={nuevoMensaje}
                     onChange={(e) => setNuevoMensaje(e.target.value)}
-                    placeholder="Escribe tu duda..."
+                    placeholder={isChatActivo ? "Escribe tu duda..." : "Chat deshabilitado"}
                     className="chat-input"
+                    disabled={!isChatActivo} // Deshabilita el input
                 />
                 <button 
                     type="submit" 
-                    disabled={!nuevoMensaje.trim()}
+                    disabled={!nuevoMensaje.trim() || !isChatActivo} // Deshabilita el botón
                     className="send-button"
                 >
                     <Send size={16} />
