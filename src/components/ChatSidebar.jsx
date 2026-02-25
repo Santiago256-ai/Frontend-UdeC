@@ -1,29 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import API from "../services/api"; 
 
+// 1. AGREGAR EXPORT DEFAULT AQUÍ
 const ChatSidebar = ({ empresaId, postulante, vacanteId, onClose }) => {
     const [messages, setMessages] = useState([]);
     const [currentMessage, setCurrentMessage] = useState('');
     const [loading, setLoading] = useState(false);
-    // NUEVO: Estado para controlar si el chat está habilitado
     const [isChatEnabled, setIsChatEnabled] = useState(true); 
     const scrollRef = useRef(null);
 
     const postulanteId = postulante?.usuario?.id;
     const nombrePostulante = postulante?.usuario?.nombres || 'Candidato';
 
-    // 1. Cargar historial y estado del chat
+    // 2. CARGAR DATOS (Corregido res.data)
     useEffect(() => {
         const fetchData = async () => {
             if (!postulanteId || !empresaId || !vacanteId) return;
             try {
-                // Asumiendo que tu API devuelve el estado del chat junto al historial o en otro endpoint
                 const res = await API.get(`/mensajeria/historial/${postulanteId}/${empresaId}/${vacanteId}`);
-                setMessages(res.data.mensajes);
-setIsChatEnabled(res.data.chatActivo);
                 
-                // Si el backend envía el estado de la postulación, actualizamos aquí:
-                // setIsChatEnabled(res.data.chatActivo); 
+                // Extraemos los datos correctamente del objeto que definimos en el backend
+                if (res.data) {
+                    setMessages(res.data.mensajes || []);
+                    setIsChatEnabled(res.data.chatActivo);
+                }
             } catch (err) {
                 console.error("Error al cargar datos:", err);
             }
@@ -34,18 +34,19 @@ setIsChatEnabled(res.data.chatActivo);
         return () => clearInterval(interval);
     }, [postulanteId, empresaId, vacanteId]);
 
-    // 2. Función para activar/desactivar chat (Hacia el Backend)
+    // 3. TOGGLE STATUS (Corregido endpoint y nombres de campos)
     const toggleChatStatus = async () => {
         const nuevoEstado = !isChatEnabled;
         try {
-            // Ajusta esta ruta según tu API. Ejemplo: /postulaciones/toggle-chat
-            await API.patch(`/postulaciones/status-chat`, {
-                postulanteId,
-                vacanteId,
+            // Ajustado a la ruta que creamos en el backend: /mensajeria/status-chat
+            await API.patch(`/mensajeria/status-chat`, {
+                usuarioId: postulanteId, // El backend espera usuarioId
+                vacanteId: parseInt(vacanteId),
                 activo: nuevoEstado
             });
             setIsChatEnabled(nuevoEstado);
         } catch (err) {
+            console.error(err);
             alert("No se pudo cambiar el estado del chat");
         }
     };
@@ -54,17 +55,16 @@ setIsChatEnabled(res.data.chatActivo);
         if (!currentMessage.trim() || loading || !isChatEnabled) return;
 
         setLoading(true);
-        const payload = {
-            senderId: empresaId,
-            senderType: 'EMPRESA',
-            receiverId: postulanteId,
-            vacanteId: parseInt(vacanteId),
-            contenido: currentMessage.trim()
-        };
-
         try {
+            const payload = {
+                senderId: empresaId,
+                senderType: 'EMPRESA',
+                receiverId: postulanteId,
+                vacanteId: parseInt(vacanteId),
+                contenido: currentMessage.trim()
+            };
             const res = await API.post('/mensajeria/enviar', payload);
-            setMessages([...messages, res.data]);
+            setMessages(prev => [...prev, res.data]);
             setCurrentMessage('');
         } catch (err) {
             alert("Error al enviar el mensaje");
@@ -73,19 +73,23 @@ setIsChatEnabled(res.data.chatActivo);
         }
     };
 
+    // Auto-scroll al recibir mensajes
+    useEffect(() => {
+        scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
+    }, [messages]);
+
     return (
         <div className="chat-sidebar-container" style={styles.sidebar}>
-            {/* Header con Switch */}
             <div style={{...styles.header, backgroundColor: isChatEnabled ? '#28a745' : '#6c757d'}}>
                 <div>
-                    <h4 style={{ margin: 0 }}>💬 {nombrePostulante}</h4>
+                    <h4 style={{ margin: 0, color: 'white' }}>💬 {nombrePostulante}</h4>
                     <label style={styles.switchLabel}>
                         <input 
                             type="checkbox" 
                             checked={isChatEnabled} 
                             onChange={toggleChatStatus} 
                         />
-                        <span style={{marginLeft: '5px', fontSize: '12px'}}>
+                        <span style={{marginLeft: '5px', fontSize: '12px', color: 'white'}}>
                             {isChatEnabled ? 'Chat Activo' : 'Chat Desactivado'}
                         </span>
                     </label>
@@ -93,17 +97,22 @@ setIsChatEnabled(res.data.chatActivo);
                 <button onClick={onClose} style={styles.closeBtn}>&times;</button>
             </div>
 
-            {/* Cuerpo del Chat */}
             <div ref={scrollRef} style={styles.chatBody}>
                 {!isChatEnabled && (
                     <div style={styles.disabledBanner}>
                         Has desactivado el chat para este postulante.
                     </div>
                 )}
-                {/* ... (mapeo de mensajes igual al tuyo) */}
+                
+                {messages.map((m) => (
+                    <div key={m.id} style={m.senderType === 'EMPRESA' ? styles.myMsg : styles.theirMsg}>
+                        <div style={m.senderType === 'EMPRESA' ? styles.myBubble : styles.theirBubble}>
+                            {m.contenido}
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            {/* Input Footer - Bloqueado si el chat está desactivado */}
             <div style={{...styles.footer, backgroundColor: isChatEnabled ? '#fff' : '#f8f9fa'}}>
                 <input 
                     type="text"
@@ -130,15 +139,11 @@ setIsChatEnabled(res.data.chatActivo);
     );
 };
 
-// Nuevos Estilos a agregar
-const additionalStyles = {
-    switchLabel: {
-        display: 'flex',
-        alignItems: 'center',
-        marginTop: '5px',
-        cursor: 'pointer',
-        fontSize: '12px'
-    },
+// IMPORTANTE: EXPORT DEFAULT
+export default ChatSidebar;
+
+const styles = {
+    // Asegúrate de tener definidos aquí todos tus estilos (sidebar, header, chatBody, etc.)
     disabledBanner: {
         backgroundColor: '#fff3cd',
         color: '#856404',
@@ -148,8 +153,12 @@ const additionalStyles = {
         borderRadius: '8px',
         marginBottom: '15px',
         border: '1px solid #ffeeba'
-    }
+    },
+    switchLabel: {
+        display: 'flex',
+        alignItems: 'center',
+        marginTop: '5px',
+        cursor: 'pointer'
+    },
+    // ... agrega el resto de tus estilos existentes aquí
 };
-
-// Mezclar con tus estilos existentes
-const styles = { ...existingStyles, ...additionalStyles };
