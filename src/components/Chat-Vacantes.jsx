@@ -25,23 +25,22 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
     }, [empresaId, usuario?.id]);
 
     // 2. CARGAR MENSAJES Y ESTADO
-    const cargarMensajes = async () => {
-        if (!usuario?.id || !empresaId || !vacanteId) return;
-        try {
-            const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}/${vacanteId}`);
-            
-            // Suponiendo que tu backend responde con un objeto { mensajes: [], chatActivo: true }
-            // Si el backend solo manda el array, deberías crear un endpoint para el status
-            setMensajes(data.mensajes || []);
-setIsChatActivo(data.chatActivo); 
-            
-            if (data.chatActivo !== undefined) {
-                setIsChatActivo(data.chatActivo);
-            }
-        } catch (err) {
-            console.error("Error al cargar historial:", err);
-        }
-    };
+    const cargarMensajes = async () => {
+        if (!usuario?.id || !empresaId || !vacanteId) return;
+        try {
+            const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}/${vacanteId}`);
+            
+            // CORRECCIÓN AQUÍ:
+            // Usamos 'data' que es lo que extrajimos del await
+            setMensajes(data.mensajes || []); 
+            
+            if (data.chatActivo !== undefined) {
+                setIsChatActivo(data.chatActivo);
+            }
+        } catch (err) {
+            console.error("Error al cargar historial:", err);
+        }
+    };
 
     useEffect(() => {
         cargarMensajes();
