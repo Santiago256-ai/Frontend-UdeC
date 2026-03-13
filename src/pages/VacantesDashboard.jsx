@@ -1,365 +1,326 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import API from '../services/api'; // ⚡ Instancia de Axios con tu URL de Railway
-// Importamos los iconos
-import { Bell, MessageSquare, Settings, LogOut, ChevronDown } from 'lucide-react';
-import NotificationBadge from '../components/NotificationBadge'; // Ajusta la ruta
+import API from '../services/api'; 
+import { 
+    LogOut, 
+    MessageSquare, 
+    Briefcase, 
+    Building2, 
+    PlusCircle, 
+    Search, 
+    Calendar, 
+    Users
+} from 'lucide-react';
 import Mensajeria from '../components/Chat-Vacantes';
-
-// =========================================================
-// ⚡ FUNCIONES AUXILIARES DENTRO DEL ARCHIVO (por requisito)
-// =========================================================
-
-// Función para obtener las iniciales del usuario para el avatar
-const getInitials = (nombres) => {
-    if (!nombres) return 'U';
-    const parts = nombres.split(' ');
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return parts[0][0].toUpperCase();
-};
-
-// Función para renderizar el Badge (Contador) de notificaciones/mensajes
-const renderBadge = (count, colorClass) => {
-    if (count <= 0) return null; // No renderizar si el contador es 0 o menos
-
-    return (
-        <span 
-            className={`absolute top-0 right-0 h-5 min-w-5 px-1 ${colorClass} text-white text-xs font-bold rounded-full flex items-center justify-center transform translate-x-1/4 -translate-y-1/4`}
-        >
-            {/* Muestra 99+ si es mayor a 99 */}
-            {count > 99 ? '99+' : count} 
-        </span>
-    );
-};
-
-// =========================================================
-// ⚡ COMPONENTE NAVBAR DENTRO DEL ARCHIVO (por requisito)
-// =========================================================
-
-const Navbar = ({ usuario, onLogout, unreadNotificationsCount, unreadMessagesCount, navigate }) => {
-    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-
-    return (
-        <header className="sticky top-0 z-50 bg-white shadow-md">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-                
-                {/* Logo */}
-                <div className="text-xl font-bold text-indigo-600">
-                    <span className="hidden sm:inline">Portal de Empleo</span>
-                    <span className="sm:hidden">PE</span>
-                </div>
-
-                {/* Secciones de Iconos */}
-                <div className="flex items-center space-x-6">
-                    
-                    {/* Icono de Notificaciones (Campanita) */}
-                    <button className="p-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-indigo-600 relative transition duration-150">
-                        <Bell className="w-6 h-6" />
-                        {renderBadge(unreadNotificationsCount, 'bg-red-500')}
-                    </button>
-
-                    {/* Icono de Mensajes (Solo uno, bien posicionado) */}
-                    <NotificationBadge />
-
-                    {/* Menú de Perfil */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                            className="flex items-center space-x-1 focus:outline-none p-1 rounded-full hover:bg-gray-100 transition duration-150"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-sm ring-2 ring-indigo-300">
-                                {getInitials(usuario.nombres)}
-                            </div>
-                            <ChevronDown className="w-4 h-4 text-gray-500" />
-                        </button>
-
-                        {isProfileMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 border border-gray-100 z-10">
-                                <div className="px-4 py-2 text-sm text-gray-700 truncate border-b border-gray-100">
-                                    ¡Hola, <b>{usuario.nombres}</b>!
-                                </div>
-                                <button
-                                    onClick={() => { onLogout(); setIsProfileMenuOpen(false); }}
-                                    className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-150"
-                                >
-                                    <LogOut className="w-4 h-4 mr-2" />
-                                    Cerrar Sesión
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </header>
-    );
-};
-
-// =========================================================
-// COMPONENTE PRINCIPAL: VacantesDashboard
-// =========================================================
+import CrearCV from '../pages/CrearCV'; 
+import './VacantesDashboard.css'; 
+import ConfirmacionLogout from '../components/ConfirmacionLogout';
 
 export default function VacantesDashboard() {
     const location = useLocation();
     const navigate = useNavigate();
 
+    // 1. ESTADOS
     const [usuario, setUsuario] = useState(() => {
         const storedUser = localStorage.getItem('usuario');
-        const initialUser = location.state?.usuario || (storedUser ? JSON.parse(storedUser) : null);
-        
-        if (initialUser) {
-            localStorage.setItem('usuario', JSON.stringify(initialUser));
-        }
-        return initialUser;
+        return location.state?.usuario || (storedUser ? JSON.parse(storedUser) : null);
     });
 
     const [vacantes, setVacantes] = useState([]);
+    const [chatsRecientes, setChatsRecientes] = useState([]); 
     const [selectedVacante, setSelectedVacante] = useState(null);
-    const [pdfFile, setPdfFile] = useState(null);
+    const [chatActivo, setChatActivo] = useState(null); 
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [chatAbierto, setChatAbierto] = useState(false);
-    
-    // ⚡ NUEVOS ESTADOS PARA LOS CONTADORES
-    const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
-    const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [vistaActiva, setVistaActiva] = useState('vacantes'); 
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-    // Lógica de Autenticación/Redirección
+    // 2. EFECTOS Y DATA FETCHING
     useEffect(() => {
-        if (!usuario) {
-            if (!loading) { 
-                localStorage.removeItem('usuario');
-                navigate('/'); 
-            }
-        } else if (usuario.rol !== 'estudiante' && usuario.rol !== 'egresado') {
-            localStorage.removeItem('usuario');
-            navigate('/'); 
+        if (!usuario || !usuario.id) {
+            navigate('/login');
         } else {
+            fetchVacantes();
+        }
+    }, [usuario, navigate]);
+
+    const fetchVacantes = async () => {
+        try {
+            const res = await API.get('/vacantes');
+            setVacantes(res.data);
+        } catch (err) {
+            console.error("Error al cargar vacantes", err);
+        } finally {
             setLoading(false);
         }
-    }, [usuario, navigate, loading]);
+    };
 
-    // Lógica para cargar vacantes con Axios
+    const fetchChats = useCallback(async () => {
+        if (!usuario?.id) return;
+        try {
+            const resChats = await API.get(`/mensajeria/mis-conversaciones/${usuario.id}`);
+            setChatsRecientes(resChats.data);
+        } catch (e) {
+            console.error("Error al cargar chats", e);
+        }
+    }, [usuario?.id]); 
+
     useEffect(() => {
-        if (!usuario) {
-            setLoading(false);
-            return;
+        let intervalo;
+        if (vistaActiva === 'mensajes' && usuario?.id) {
+            fetchChats();
+            intervalo = setInterval(() => fetchChats(), 8000); 
         }
+        return () => clearInterval(intervalo);
+    }, [vistaActiva, usuario, fetchChats]);
 
-        const fetchVacantes = async () => {
-            try {
-                const { data } = await API.get('/vacantes'); 
-                setVacantes(data);
-                setError(null);
-            } catch (err) {
-                console.error('Error al cargar vacantes:', err);
-                setError('Error al cargar las vacantes. Revisa tu backend.');
-            }
-        };
-
-        fetchVacantes();
-    }, [usuario]);
-    
-    // ⚡ LÓGICA PARA CARGAR LOS CONTADORES (REEMPLAZAR CON LLAMADA REAL A LA API)
-useEffect(() => {
-    if (!usuario) return;
-
-    const fetchCounters = async () => {
-        try {
-            // Llamada al nuevo endpoint en Vercel
-            const { data } = await API.get(`/mensajeria/contadores/${usuario.id}`);
-            
-            setUnreadMessagesCount(data.unreadMessages);
-            setUnreadNotificationsCount(data.unreadNotifications);
-        } catch (err) {
-            console.error('Error al obtener contadores:', err);
-        }
-    };
-
-    fetchCounters(); 
-    
-    // Polling: Preguntar cada 10 segundos para actualizar el Navbar
-    const intervalId = setInterval(fetchCounters, 5000);
-    return () => clearInterval(intervalId);
-    
-}, [usuario]);
-    
-    // Función para cerrar sesión
+    // 3. HANDLERS
     const handleLogout = () => {
-        localStorage.removeItem('usuario');
-        navigate('/', { replace: true }); 
+        localStorage.clear();
+        navigate('/', { replace: true });
     };
 
-    // Funciones de manejo de postulación
-    const handleSelectVacante = (vacante) => setSelectedVacante(vacante);
-    const handleFileChange = (e) => setPdfFile(e.target.files[0]);
+   const abrirChatDesdeVacante = (vacante) => {
+    setChatActivo({
+        vacanteId: vacante.id, // ✅ Cambiado de 'id' a 'vacanteId'
+        empresaId: vacante.empresaId || vacante.empresa?.id,
+        titulo: vacante.titulo,
+        nombreEmpresa: vacante.empresa?.nombre || 'Empresa'
+    });
+    setVistaActiva('mensajes');                
+};
 
-    const handlePostular = async () => {
-        if (!selectedVacante || !pdfFile) {
-            alert('Selecciona una vacante y un archivo PDF.');
-            return;
-        }
+    const formatDate = (dateString) => {
+        if (!dateString) return "Indefinida";
+        return new Date(dateString).toLocaleDateString('es-ES', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+    };
 
-        if (!usuario) {
-            alert('Error de autenticación. Por favor, inicia sesión.');
-            navigate('/');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('cv', pdfFile);
-        formData.append('vacanteId', selectedVacante.id);
-        formData.append('usuarioId', usuario.id);
-        formData.append('telefono', usuario.telefono || 'N/A');
-
-        try {
-            const { data } = await API.post('/postulaciones/upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+    // 4. LÓGICA DE FILTRADO
+    const getFilteredData = () => {
+        const term = searchTerm.toLowerCase();
+        if (vistaActiva === 'vacantes') {
+            return vacantes.filter(v => {
+                const cumpleBusqueda = v.titulo.toLowerCase().includes(term) ||
+                                     v.empresa?.nombre.toLowerCase().includes(term);
+                const estaAbierta = v.estado === "ABIERTA";
+                const fechaVencida = v.fechaCierre && new Date(v.fechaCierre) < new Date();
+                const cupoLleno = v.limitePostulantes && (v._count?.postulaciones >= v.limitePostulantes);
+                return cumpleBusqueda && estaAbierta && !fechaVencida && !cupoLleno;
             });
-
-            console.log('Postulación enviada con éxito:', data);
-            alert('Postulación enviada con éxito!');
-            setSelectedVacante(null);
-            setPdfFile(null);
-        } catch (err) {
-            console.error('Error en la postulación:', err);
-            const message = err.response?.data?.error || 'Error desconocido.';
-            alert(`Ocurrió un error al enviar tu postulación: ${message}`);
         }
+        return Array.isArray(chatsRecientes) ? chatsRecientes.filter(c => 
+            (c.nombreEmpresa || "").toLowerCase().includes(term) ||
+            (c.tituloVacante || "").toLowerCase().includes(term)
+        ) : [];
     };
-    
-    // Renderizado de carga y error
-    if (loading) {
-        return <div className="flex justify-center items-center h-screen bg-gray-100 text-gray-700">Cargando dashboard...</div>;
-    }
 
-    if (error) {
-        return <div className="flex justify-center items-center h-screen bg-red-100 text-red-700">Error: {error}</div>;
-    }
+    const dataFiltrada = getFilteredData();
 
-    if (!usuario) return null;
+    if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
 
     return (
-        <div className="min-h-screen bg-gray-100 font-sans">
-            {/* ⚡ Navbar Integrada */}
-            <Navbar 
-    usuario={usuario} 
-    onLogout={handleLogout} 
-    unreadNotificationsCount={unreadNotificationsCount}
-    unreadMessagesCount={unreadMessagesCount}
-    navigate={navigate} // ⬅️ IMPORTANTE: Pasa la función de navegación aquí
-/>
-
-            <div className="max-w-7xl mx-auto p-4 sm:p-8">
-                
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-indigo-700 mb-6 border-b-4 border-indigo-300 pb-2">
-                    Panel de Vacantes
-                </h1>
-                
-                {/* Contenido Principal */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Sección de Vacantes */}
-                    <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-2xl">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Vacantes Disponibles ({vacantes.length})</h2>
-                        <div className="space-y-4">
-                            {vacantes.length === 0 ? (
-                                <p className="text-gray-500 italic">No hay vacantes disponibles en este momento.</p>
-                            ) : (
-                                vacantes.map((v) => (
-                                    <div 
-                                        key={v.id} 
-                                        onClick={() => handleSelectVacante(v)} 
-                                        className={`p-5 border-l-4 rounded-lg shadow-md cursor-pointer transition duration-300 ease-in-out 
-                                            ${selectedVacante?.id === v.id 
-                                                ? 'bg-indigo-50 border-indigo-600 ring-2 ring-indigo-500' 
-                                                : 'bg-white hover:bg-gray-50 border-gray-200'
-                                            }`}
-                                    >
-                                        <h3 className="text-xl font-semibold text-gray-900 mb-1">{v.titulo}</h3>
-                                        <p className="text-sm font-medium text-indigo-600 mb-2">
-                                            Empresa: <span className="font-bold">{v.empresa?.nombre || 'N/A'}</span>
-                                        </p>
-                                        <p className="text-gray-600 text-sm line-clamp-2">{v.descripcion}</p>
-                                        {selectedVacante?.id === v.id && (
-                                            <span className="mt-2 inline-block text-xs font-semibold text-indigo-700">
-                                                SELECCIONADA
-                                            </span>
-                                        )}
-                                    </div>
-                                ))
-                            )}
+        <div className="dashboard-layout">
+            <div className="unified-wrapper">
+                {/* BARRA LATERAL */}
+                <nav className="sidebar">
+                    <div className="sidebar-top">
+                        <div className="logo-text">UdeC <span className="text-olive">Jobs</span></div>
+                        <div className="sidebar-menu">
+                            <button 
+                                className={`menu-item ${vistaActiva === 'vacantes' || vistaActiva === 'crear-cv' ? 'active' : ''}`} 
+                                onClick={() => setVistaActiva('vacantes')}
+                            >
+                                <Briefcase size={20}/> <span>Vacantes</span>
+                            </button>
+                            <button 
+                                className={`menu-item ${vistaActiva === 'mensajes' ? 'active' : ''}`} 
+                                onClick={() => setVistaActiva('mensajes')}
+                            >
+                                <MessageSquare size={20}/> <span>Mensajes</span>
+                            </button>
                         </div>
                     </div>
+                    <button onClick={() => setShowLogoutConfirm(true)} className="logout-btn">
+                        <LogOut size={18} /> <span>Cerrar Sesión</span>
+                    </button>
+                </nav>
 
-                    {/* Sección de Postulación */}
-                    <div className="lg:col-span-1 sticky top-20 h-fit bg-white p-6 rounded-xl shadow-2xl border-t-4 border-emerald-500">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Postular a Vacante</h2>
-                        {selectedVacante ? (
-                            <div className="space-y-5">
-                                <div className="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-md">
-                                    <p className="text-base font-semibold text-emerald-700">
-                                        Vacante: {selectedVacante.titulo}
-                                    </p>
-                                    <p className="text-sm text-emerald-600">
-                                        Empresa: {selectedVacante.empresa?.nombre || 'N/A'}
-                                    </p>
+                <div className="glass-container">
+                    {/* ENCABEZADO */}
+                    <header className="main-header">
+                        {vistaActiva !== 'crear-cv' ? (
+                            <div className="search-bar">
+                                <Search size={18} color="#1a202c" />
+                                <input 
+                                    type="text" 
+                                    placeholder={vistaActiva === 'mensajes' ? "Buscar en mensajes..." : "Buscar puesto o empresa..."}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        ) : <div className="header-spacer"></div>}
+
+                        <div className="header-actions">
+                            {vistaActiva !== 'crear-cv' && (
+                                <div className="user-profile">
+                                    <span className="user-name">{usuario?.nombre || 'Egresado'}</span>
+                                    <div className="avatar">{usuario?.nombre?.charAt(0) || 'E'}</div>
+                                </div>
+                            )}
+                        </div>
+                    </header>
+
+      <div className="content-inner">
+    {/* CASO 1: VISTA DE MENSAJES */}
+    {vistaActiva === 'mensajes' && (
+        <div className="teams-layout">
+            <div className="chats-list-sidebar">
+                <h3 className="section-title">Chats</h3>
+                <div className="chat-scroll">
+                    {dataFiltrada.length > 0 ? dataFiltrada.map((chat, idx) => (
+                        <div 
+                            key={`chat-${idx}`} // ✅ Usamos idx (definido en el map) para evitar el ReferenceError
+                            className={`chat-item-cola ${chatActivo?.vacanteId === chat.vacanteId && chatActivo?.empresaId === chat.empresaId ? 'active' : ''}`} 
+                            onClick={() => setChatActivo({ 
+                                vacanteId: chat.vacanteId, // ✅ Enviamos vacanteId (no id) para que Mensajeria.jsx lo reciba bien
+                                empresaId: chat.empresaId, 
+                                titulo: chat.tituloVacante, 
+                                nombreEmpresa: chat.nombreEmpresa 
+                            })}
+                        >
+                            <div className="avatar-cola">{chat.nombreEmpresa?.charAt(0)}</div>
+                            <div className="info-cola">
+                                <strong>{chat.nombreEmpresa}</strong>
+                                <p className="last-msg">{chat.ultimoMensaje || "Sin mensajes"}</p>
+                                <span className="vacante-tag">{chat.tituloVacante}</span>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="no-chats-msg">No hay conversaciones.</div>
+                    )}
+                </div>
+            </div>
+
+            <div className="chat-main-window">
+                {chatActivo ? (
+                    <Mensajeria 
+                        usuario={usuario} 
+                        empresaId={chatActivo.empresaId} 
+                        vacanteId={chatActivo.vacanteId} // ✅ Pasamos la prop exacta que espera el componente
+                        onClose={() => setChatActivo(null)} 
+                    />
+                ) : (
+                    <div className="empty-state">
+                        <MessageSquare size={64} color="#e2e8f0" />
+                        <h3>Bandeja de Entrada</h3>
+                        <p>Selecciona un chat para ver la conversación.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    )}
+
+                        {/* CASO 2: VISTA DE CREAR CV */}
+                        {vistaActiva === 'crear-cv' && (
+                            <div className="full-width-cv-view">
+                                <div className="cv-scroll-container">
+                                    <div className="cv-content-wrapper">
+                                        <CrearCV isInline={true} setVistaActiva={setVistaActiva} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* CASO 3: VISTA DE VACANTES */}
+                        {vistaActiva === 'vacantes' && (
+                            <div className="grid-container">
+                                <div className="vacantes-scroll-area">
+                                    <div className="content-title-area">
+                                        <h1>Oportunidades Laborales</h1>
+                                        <p className="subtitle">Explora vacantes en tiempo real</p>
+                                    </div>
+                                    {dataFiltrada.map((v) => (
+                                        <div 
+                                            key={`vacante-${v.id}`} 
+                                            onClick={() => setSelectedVacante(v)} 
+                                            className={`vacante-card ${selectedVacante?.id === v.id ? 'active' : ''}`}
+                                        >
+                                            <div className="card-icon"><Building2 size={24}/></div>
+                                            <div className="card-info">
+                                                <h4>{v.titulo}</h4>
+                                                <p className="company-name">{v.empresa?.nombre || 'Empresa Verificada'}</p>
+                                                {v.limitePostulantes && (
+                                                    <span className="badge-cupos">
+                                                        {(v.limitePostulantes - (v._count?.postulaciones || 0))} cupos restantes
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
 
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Subir CV (PDF)
-                                </label>
-                                <input 
-                                    type="file" 
-                                    accept="application/pdf" 
-                                    onChange={handleFileChange}
-                                    className="block w-full text-sm text-gray-500
-                                        file:mr-4 file:py-2 file:px-4
-                                        file:rounded-full file:border-0
-                                        file:text-sm file:font-semibold
-                                        file:bg-indigo-50 file:text-indigo-700
-                                        hover:file:bg-indigo-100"
-                                />
+                                <aside className="vacante-detail-view">
+                                    {selectedVacante ? (
+                                        <div className="detail-container">
+                                            <h2 className="detail-title">{selectedVacante.titulo}</h2>
+                                            <div className="vacancy-meta-info">
+                                                <div className="meta-item"><Calendar size={16} /><span>Publicada: {formatDate(selectedVacante.fechaCreacion)}</span></div>
+                                                <div className="meta-item deadline"><Calendar size={16} /><span>Cierre: {formatDate(selectedVacante.fechaCierre)}</span></div>
+                                                {selectedVacante.limitePostulantes && (
+                                                    <div className="meta-item"><Users size={16} /><span>Cupo: {selectedVacante._count?.postulaciones} / {selectedVacante.limitePostulantes}</span></div>
+                                                )}
+                                            </div>
+                                            <div className="detail-section">
+                                                <h5>Descripción del puesto</h5>
+                                                <p className="detail-text">{selectedVacante.descripcion}</p>
+                                            </div>
+                                            <div className="action-box">
+    {/* Botón para ir a editar el perfil digital */}
+    <button onClick={() => setVistaActiva('crear-cv')} className="btn-outline">
+        <PlusCircle size={18} /> MI PERFIL DIGITAL
+    </button>
 
-                                <button 
-                                    onClick={handlePostular} 
-                                    className={`w-full py-3 px-4 rounded-full font-bold transition duration-150 ease-in-out shadow-lg 
-                                        ${pdfFile && selectedVacante 
-                                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                                            : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                                        }`}
-                                    disabled={!pdfFile || !selectedVacante}
-                                >
-                                    Enviar Postulación
-   </button>
+    {/* NUEVO: Botón de Postulación Directa */}
+    <button 
+        onClick={async () => {
+            try {
+                const res = await API.post(`/estudiantes/${selectedVacante.id}/postular`);
+                alert(res.data.message);
+                // Opcional: refrescar vacantes para ver el contador de cupos actualizado
+                fetchVacantes(); 
+            } catch (err) {
+                alert(err.response?.data?.error || "Error al postularse");
+            }
+        }} 
+        className="btn-primary"
+    >
+        <Briefcase size={18} /> POSTULARME AHORA
+    </button>
 
-                                {/* ⚡ BOTÓN DE CONTACTO ⚡ */}
-                                <button 
-                                    onClick={() => setChatAbierto(true)}
-                                    className="w-full py-3 rounded-full font-bold text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50 transition shadow-md"
-                                >
-                                    Contactar Empresa
-                                </button>
-
-                                <p className="text-xs text-gray-500 text-center pt-2">
-                                    Asegúrate de que tu CV esté en formato PDF.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-md">
-                                <p className="text-yellow-900">Por favor, selecciona una vacante de la lista para ver el formulario de postulación.</p>
+    <button onClick={() => abrirChatDesdeVacante(selectedVacante)} className="btn-outline">
+        <MessageSquare size={18} /> Preguntar por el puesto
+    </button>
+</div>
+                                        </div>
+                                    ) : (
+                                        <div className="empty-state">
+                                            <Briefcase size={48} color="#cbd5e1" />
+                                            <p>Selecciona una vacante para ver los detalles</p>
+                                        </div>
+                                    )}
+                                </aside>
                             </div>
                         )}
                     </div>
                 </div>
-
-                {/* ⚡ RENDER DEL CHAT FLOTANTE ⚡ */}
-                {/* En VacantesDashboard.jsx */}
-{chatAbierto && selectedVacante && (
-    <Mensajeria 
-        empresaId={selectedVacante.empresaId} 
-        vacanteId={selectedVacante.id} // ⚡ NUEVA PROP: ID de la vacante
-        onClose={() => setChatAbierto(false)} 
-    />
-)}
+            
+                <ConfirmacionLogout 
+                    isOpen={showLogoutConfirm} 
+                    onConfirm={handleLogout} 
+                    onCancel={() => setShowLogoutConfirm(false)} 
+                />
             </div>
         </div>
     );

@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; 
-import API from "../services/api"; // ⚡ Usar la URL configurada de Railway
-import "./EmpresaDashboard.css"; // Asegúrate de que este CSS exista
-import ChatSidebar from "../components/ChatSidebar"; // O la ruta donde lo guardaste
-
-// =========================================================
-// ⚡ COMPONENTE CHAT LATERAL (Sidebar) con Lógica de Envío
-// =========================================================
-
-
-
-// =========================================================
-// COMPONENTE PRINCIPAL: EmpresaDashboard
-// =========================================================
+import API from "../services/api"; 
+import { 
+    LogOut, MessageSquare, Briefcase, PlusCircle, 
+    Building2, Calendar, Users, Edit3, Trash2, Eye, MapPin, 
+    FileText, CheckCircle, XCircle, Clock, ArrowLeft, BarChart3
+} from 'lucide-react';
+import "./EmpresaDashboard.css"; 
+import ChatSidebar from "../components/ChatSidebar"; 
+import VerCV from "../components/verCV";
+// Importación del módulo de métricas (ajustada a tu estructura de carpetas)
+import EmpresaMetricas from './EmpresaDashboard/EmpresaMetricas';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function EmpresaDashboard() {
     const location = useLocation();
@@ -35,21 +35,40 @@ export default function EmpresaDashboard() {
     const [vacanteSeleccionadaId, setVacanteSeleccionadaId] = useState(null); 
     const [filtroEstado, setFiltroEstado] = useState("TODOS"); 
     const [loading, setLoading] = useState(true);
-    
-    // ⚡ ESTADOS PARA EL CHAT ⚡
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const [chatPostulante, setChatPostulante] = useState(null); // Postulante con el que chateamos
+    const [chatPostulante, setChatPostulante] = useState(null); 
+    const [perfilSeleccionado, setPerfilSeleccionado] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     
+    // Estado para rastrear el conteo previo de postulaciones (Polling)
+    const [prevTotalPostulaciones, setPrevTotalPostulaciones] = useState(0);
+
+    // Estado para edición
+    const [editandoVacante, setEditandoVacante] = useState(null);
+
     const [nuevaVacante, setNuevaVacante] = useState({
-      titulo: "",
-      descripcion: "",
-      ubicacion: "",
-      tipo: "",
-      modalidad: "",
-      salario: "",
+      titulo: "", descripcion: "", ubicacion: "", tipo: "",
+      modalidad: "", salario: "", fechaCierre: "", limitePostulantes: "",
     });
 
-    // 🔹 Redirección si la sesión no es válida
+    // Al inicio de tu componente EmpresaDashboard
+useEffect(() => {
+    const handleFirstInteraction = () => {
+        // Ejecutamos un sonido silencioso de 0.1 segundos para habilitar el canal de audio
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        if (context.state === 'suspended') {
+            context.resume();
+        }
+        console.log("🔊 Audio desbloqueado para esta sesión");
+        // Quitamos el evento para que no se ejecute cada vez que hagas clic
+        window.removeEventListener('click', handleFirstInteraction);
+    };
+
+    window.addEventListener('click', handleFirstInteraction);
+    return () => window.removeEventListener('click', handleFirstInteraction);
+}, []);
+
+    // --- Efectos y Redirección ---
     useEffect(() => {
         if (!empresa) {
             localStorage.removeItem('usuario');
@@ -59,354 +78,375 @@ export default function EmpresaDashboard() {
         }
     }, [empresa, navigate]);
 
-    // --- Funciones de Data ---
-    const cargarVacantes = useCallback(() => {
-      if (empresa?.id) {
+    // Función base para cargar vacantes
+// 1. Modifica cargarVacantes para que solo establezca el estado inicial una vez
+const cargarVacantes = useCallback(() => {
+    if (empresa?.id) {
         API.get(`/vacantes/empresa/${empresa.id}`)
-          .then((res) => setVacantes(res.data))
-          .catch((err) => console.error("Error al cargar vacantes:", err));
-      }
-    }, [empresa]); 
+            .then((res) => {
+                setVacantes(res.data);
+                const total = res.data.reduce((acc, v) => acc + (v._count?.postulaciones || 0), 0);
+                
+                // IMPORTANTE: Solo inicializamos si es 0 para que checkNewPostulaciones 
+                // pueda detectar el incremento después.
+                setPrevTotalPostulaciones(prev => prev === 0 ? total : prev);
+            })
+            .catch((err) => console.error("Error al cargar vacantes:", err));
+    }
+}, [empresa?.id]);
+
+// 2. Modifica checkNewPostulaciones para que sea más sensible
+const checkNewPostulaciones = useCallback(async () => {
+    if (!empresa?.id || vacantes.length === 0) return;
+    
+    try {
+        // En lugar de confiar en el conteo del dashboard, 
+        // consultamos los detalles de cada vacante activa
+        const promesas = vacantes.map(v => API.get(`/postulaciones/vacante/${v.id}`));
+        const resultados = await Promise.all(promesas);
+        
+        // Sumamos el total de items que vienen en cada respuesta
+        const totalActual = resultados.reduce((acc, res) => acc + (res.data?.length || 0), 0);
+
+        console.log(`🔍 VERIFICACIÓN REAL: Anterior: ${prevTotalPostulaciones} | Actual: ${totalActual}`);
+
+        if (prevTotalPostulaciones > 0 && totalActual > prevTotalPostulaciones) {
+    toast.info("🚀 ¡Nueva postulación recibida!");
+    
+    // Crear el objeto de audio
+    const audio = new Audio('/sounds/notification.mp3');
+    
+    // Forzar la carga y luego reproducir
+    audio.load(); 
+    audio.play()
+        .then(() => console.log("🔊 Sonido emitido con éxito"))
+        .catch(e => {
+            console.warn("🔔 Notificación visual enviada, pero el audio requiere un clic previo en la página.");
+        });
+
+    cargarVacantes();
+}
+        
+        setPrevTotalPostulaciones(totalActual);
+    } catch (error) {
+        console.error("Error en el escaneo de postulaciones:", error);
+    }
+}, [empresa?.id, vacantes, prevTotalPostulaciones, cargarVacantes]);
+
+    // Intervalo de Polling cada 30 segundos
+useEffect(() => {
+    const interval = setInterval(() => {
+        checkNewPostulaciones();
+    }, 5000); // 5 segundos para pruebas
+    return () => clearInterval(interval);
+}, [checkNewPostulaciones]);
 
     useEffect(() => {
       if (empresa) cargarVacantes();
     }, [empresa, cargarVacantes]); 
 
-    // 🌟 Manejar envío de nueva vacante
+    // --- Handlers ---
     const handleSubmit = async (e) => {
         e.preventDefault(); 
-        if (!empresa?.id) {
-            alert("Error: ID de empresa no encontrado. Reinicia la sesión.");
-            return;
-        }
-
         try {
-            const vacanteData = { ...nuevaVacante, empresaId: empresa.id };
-            const res = await API.post(`/vacantes`, vacanteData);
-
-            alert(`Vacante "${res.data.titulo}" publicada con éxito.`);
-            setNuevaVacante({ titulo: "", descripcion: "", ubicacion: "", tipo: "", modalidad: "", salario: "" });
+            const vacanteData = { 
+                ...nuevaVacante, 
+                empresaId: empresa.id,
+                limitePostulantes: nuevaVacante.limitePostulantes ? parseInt(nuevaVacante.limitePostulantes) : null 
+            };
+            await API.post(`/vacantes`, vacanteData);
+            toast.success("Vacante publicada con éxito.");
+            setNuevaVacante({ titulo: "", descripcion: "", ubicacion: "", tipo: "", modalidad: "", salario: "", fechaCierre: "", limitePostulantes: "" });
             cargarVacantes();
             setActiveTab("gestion");
-
-        } catch (err) {
-            console.error("Error al publicar la vacante:", err.response?.data?.error || err);
-            alert(`Error al publicar la vacante: ${err.response?.data?.error || "Error de conexión o validación."}`);
-        }
+        } catch (err) { toast.error("Error al publicar la vacante"); }
     };
 
-    // 🌟 Manejar eliminación de vacante
+    const handlePrepararEdicion = (vacante) => {
+        setEditandoVacante({
+            ...vacante,
+            fechaCierre: vacante.fechaCierre ? vacante.fechaCierre.split('T')[0] : ""
+        });
+        setActiveTab("edicion");
+    };
+
+    const handleActualizarVacante = async (e) => {
+        e.preventDefault();
+        try {
+            await API.put(`/vacantes/${editandoVacante.id}`, editandoVacante);
+            toast.success("Vacante actualizada correctamente");
+            setEditandoVacante(null);
+            setActiveTab("gestion");
+            cargarVacantes();
+        } catch (err) { toast.error("Error al actualizar la vacante"); }
+    };
+
     const handleEliminarVacante = async (vacanteId, titulo) => {
         if (!window.confirm(`¿Eliminar la vacante: "${titulo}"?`)) return;
-
         try {
             await API.delete(`/vacantes/${vacanteId}`);
-            alert(`Vacante "${titulo}" eliminada con éxito.`);
+            toast.success("Vacante eliminada");
             cargarVacantes();
-            if (vacanteSeleccionadaId === vacanteId) {
-                setVacanteSeleccionadaId(null);
-                setPostulaciones([]);
-            }
-
-        } catch (err) {
-            console.error("Error al eliminar la vacante:", err);
-            alert(`Fallo al eliminar la vacante: ${err.response?.data?.error || "Error desconocido."}`);
-        }
+            if (vacanteSeleccionadaId === vacanteId) setVacanteSeleccionadaId(null);
+        } catch (err) { toast.error("Fallo al eliminar."); }
     };
     
-    // Cargar postulaciones de una vacante
     const handleVerPostulaciones = async (vacanteId) => {
         setVacanteSeleccionadaId(vacanteId);
         setFiltroEstado("TODOS");
-        // Asegúrate de cerrar el chat al cambiar de vacante
         setIsChatOpen(false); 
-        setChatPostulante(null);
-        
         try {
             const res = await API.get(`/postulaciones/vacante/${vacanteId}`);
             setPostulaciones(res.data);
         } catch (err) {
-            console.error(err);
             setPostulaciones([]);
-            alert("Error al cargar postulaciones o no hay ninguna.");
+            toast.warning("No hay postulaciones aún.");
         }
     };
 
-    // Actualizar estado de postulaciones
     const handleUpdateEstado = async (postulacionId, nuevoEstado) => {
-        const tituloVacante = vacantes.find(v => v.id === vacanteSeleccionadaId)?.titulo || 'esta vacante';
-        const postulacion = postulaciones.find(p => p.id === postulacionId);
-        const nombreCandidato = `${postulacion?.usuario?.nombres} ${postulacion?.usuario?.apellidos}`.trim() || 'el candidato';
-        
-        if (!window.confirm(`Cambiar estado de ${nombreCandidato} para "${tituloVacante}" a: ${nuevoEstado}?`)) return;
-        
         try {
             await API.patch(`/postulaciones/${postulacionId}/estado`, { estado: nuevoEstado.toUpperCase() });
             setPostulaciones(prev => prev.map(p => p.id === postulacionId ? { ...p, estado: nuevoEstado.toUpperCase() } : p));
-            alert(`Estado actualizado a: ${nuevoEstado.toUpperCase()}`);
-        } catch (err) {
-            console.error("Error al actualizar estado:", err);
-            alert(`Fallo al actualizar el estado: ${err.response?.data?.error || "Error desconocido."}`);
+            toast.success(`Estado actualizado a ${nuevoEstado}`);
+        } catch (err) { toast.error("Error al actualizar estado."); }
+    };
+
+    const getStatusIcon = (estado) => {
+        switch (estado?.toUpperCase()) {
+            case 'ACEPTADA': return <CheckCircle size={16} color="#10b981" />;
+            case 'RECHAZADA': return <XCircle size={16} color="#ef4444" />;
+            case 'REVISADO': return <Clock size={16} color="#f59e0b" />;
+            default: return <Clock size={16} color="#64748b" />;
         }
     };
-    
-    // 🌟 Función para abrir el chat
-    const handleOpenChat = (postulacion) => {
-        setChatPostulante(postulacion);
-        setIsChatOpen(true);
-    };
 
-    // Filtrar postulaciones
-    const postulacionesFiltradas = postulaciones.filter(p => {
-        const estado = p.estado?.toUpperCase() || "PENDIENTE"; 
-        return filtroEstado === "TODOS" || estado === filtroEstado;
-    });
-
-    const getStatusTag = (estado) => {
-        const status = estado?.toUpperCase() || 'PENDIENTE';
-        let specificClass = '';
-        switch (status) {
-            case 'ACEPTADA': specificClass = 'status-aceptada'; break;
-            case 'RECHAZADA': specificClass = 'status-rechazada'; break;
-            case 'REVISADO': specificClass = 'status-revisado'; break;
-            default: specificClass = 'status-pendiente'; break;
-        }
-        return <span className={`status-tag ${specificClass}`}>{status}</span>;
-    };
-
-    if (loading) return <div className="dashboard-layout"><h1>Cargando panel de empresa...</h1></div>;
-    if (!empresa) return null;
+    if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
 
     const vacanteActual = vacantes.find(v => v.id === vacanteSeleccionadaId);
 
-    // Ajustamos el estilo principal para desplazar el contenido cuando el chat está abierto
-// Usamos transform para desplazar, no para encoger
-const mainContentStyle = {
-    flex: 1,
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    // Quitamos los márgenes y anchos fijos de aquí para que mande el CSS
-};
-
-return (
-    <div className="dashboard-layout">
-        {/* 1. CONTENEDOR PRINCIPAL */}
-        <div className="dashboard-container" style={mainContentStyle}>
-            
-            <header className="dashboard-header">
-                <span className="logo-placeholder">💼</span>
-                <div className="welcome-info">
-                    <h2>Panel de Control Empresarial</h2>
-                    <h3>Bienvenida, {empresa?.nombre || empresa?.razonSocial || "Empresa"}</h3>
-                    <button className="logout-button" onClick={() => {
-                        localStorage.removeItem('usuario');
-                        navigate('/');
-                    }}>Cerrar Sesión</button>
+    return (
+        <div className="empresa-dashboard-layout">
+            <nav className="empresa-sidebar">
+                <div className="sidebar-brand">
+                    <Building2 size={24} /> <span>UdeC <small>Empresas</small></span>
                 </div>
-            </header>
-
-            <hr className="divider" />
-
-            <nav className="dashboard-tabs">
-                <button 
-                    className={activeTab === "gestion" ? "active" : ""} 
-                    onClick={() => {
-                        setActiveTab("gestion"); 
-                        setVacanteSeleccionadaId(null); 
-                        setPostulaciones([]); 
-                        setFiltroEstado("TODOS");
-                        setIsChatOpen(false);
-                        setChatPostulante(null);
-                    }}
-                >
-                    📝 Gestión de Vacantes ({vacantes.length})
-                </button>
-                <button 
-                    className={activeTab === "creacion" ? "active" : ""} 
-                    onClick={() => {
-                        setActiveTab("creacion");
-                        setIsChatOpen(false);
-                        setChatPostulante(null);
-                    }}
-                >
-                    ✨ Publicar Nueva Vacante
+                <div className="sidebar-links">
+                    <button className={activeTab === "gestion" ? "active" : ""} onClick={() => { setActiveTab("gestion"); setVacanteSeleccionadaId(null); }}>
+                        <Briefcase size={20} /> Gestión de Vacantes
+                    </button>
+                    <button className={activeTab === "creacion" ? "active" : ""} onClick={() => setActiveTab("creacion")}>
+                        <PlusCircle size={20} /> Publicar Vacante
+                    </button>
+                    <button className={activeTab === "metricas" ? "active" : ""} onClick={() => setActiveTab("metricas")}>
+                        <BarChart3 size={20} /> Métricas y Reportes
+                    </button>
+                </div>
+                <button className="logout-btn" onClick={() => { localStorage.clear(); navigate('/'); }}>
+                    <LogOut size={18} /> Cerrar Sesión
                 </button>
             </nav>
 
-            <main className="dashboard-content">
-                {activeTab === "creacion" && (
-                    <section className="dashboard-card form-card">
-                        <h3>Formulario de Publicación</h3>
-                        <form onSubmit={handleSubmit} className="form-grid">
-                            <div className="form-group">
-                                <label>Título de la Vacante *</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej: Desarrollador Full-Stack"
-                                    value={nuevaVacante.titulo}
-                                    onChange={(e) => setNuevaVacante({ ...nuevaVacante, titulo: e.target.value })}
-                                    required
-                                />
-                            </div>
+            <main className="empresa-main-content">
+                <header className="main-header">
+                    <div className="header-title">
+                        <h2>
+                            {activeTab === 'creacion' && 'Nueva Oferta Laboral'}
+                            {activeTab === 'gestion' && 'Panel de Gestión'}
+                            {activeTab === 'edicion' && 'Editar Vacante'}
+                            {activeTab === 'metricas' && 'Métricas y Reportes Empresariales'}
+                        </h2>
+                        <p>{empresa?.nombre || "Bienvenido al portal empresarial"}</p>
+                    </div>
+                    <div className="header-user">
+                        <div className="avatar">{empresa?.nombre?.charAt(0)}</div>
+                    </div>
+                </header>
 
-                            <div className="form-group full-width">
-                                <label>Descripción del Puesto *</label>
-                                <textarea
-                                    placeholder="Detalla las responsabilidades, requisitos y beneficios..."
-                                    value={nuevaVacante.descripcion}
-                                    onChange={(e) => setNuevaVacante({ ...nuevaVacante, descripcion: e.target.value })}
-                                    rows="4"
-                                    required
-                                />
-                            </div>
+                <div className="content-scrollable">
+                    {/* VISTA: MÉTRICAS */}
+                    {activeTab === "metricas" && (
+                        <EmpresaMetricas empresaId={empresa?.id} />
+                    )}
 
-                            <div className="form-group">
-                                <label>Ubicación *</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ciudad, País"
-                                    value={nuevaVacante.ubicacion}
-                                    onChange={(e) => setNuevaVacante({ ...nuevaVacante, ubicacion: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className="form-group">
-                                <label>Tipo de Contrato *</label>
-                                <select
-                                    value={nuevaVacante.tipo}
-                                    onChange={(e) => setNuevaVacante({ ...nuevaVacante, tipo: e.target.value })}
-                                    required
-                                >
-                                    <option value="">Selecciona el tipo</option>
-                                    <option value="Tiempo completo">Tiempo completo</option>
-                                    <option value="Medio tiempo">Medio tiempo</option>
-                                    <option value="Prácticas">Prácticas</option>
-                                </select>
-                            </div>
-                            
-                            <div className="form-group">
-                                <label>Modalidad *</label>
-                                <select
-                                    value={nuevaVacante.modalidad}
-                                    onChange={(e) => setNuevaVacante({ ...nuevaVacante, modalidad: e.target.value })}
-                                    required
-                                >
-                                    <option value="">Selecciona la modalidad</option>
-                                    <option value="Presencial">Presencial</option>
-                                    <option value="Remoto">Remoto</option>
-                                    <option value="Hibrido">Híbrido</option>
-                                </select>
-                            </div>
-                            
-                            <div className="form-group">
-                                <label>Salario (Opcional)</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej: $1200 USD/mes"
-                                    value={nuevaVacante.salario}
-                                    onChange={(e) => setNuevaVacante({ ...nuevaVacante, salario: e.target.value })}
-                                />
-                            </div>
-
-                            <button type="submit" className="primary-button full-width">
-                                Publicar Vacante Ahora
-                            </button>
-                        </form>
-                    </section>
-                )}
-
-                {activeTab === "gestion" && (
-                    <section className="dashboard-card management-view">
-                        <h3>Listado de Vacantes Activas</h3>
-                        {vacantes.length === 0 ? (
-                            <p className="empty-state">Aún no has publicado ninguna vacante. ¡Comienza en la pestaña "Publicar Nueva Vacante"!</p>
-                        ) : (
-                            <div className="vacantes-list-grid">
-                                {vacantes.map((v) => (
-                                    <div key={v.id} className={`vacante-item ${vacanteSeleccionadaId === v.id ? 'selected' : ''}`}>
-                                        <h4>{v.titulo}</h4>
-                                        <p className="vacante-meta">
-                                            📍 {v.ubicacion} | 💻 {v.modalidad} | 💰 {v.salario || 'A Convenir'}
-                                        </p>
-                                        <div className="vacante-actions">
-                                            <button className="secondary-button" onClick={() => handleVerPostulaciones(v.id)}>Ver Postulaciones</button>
-                                            <button className="delete-button" onClick={() => handleEliminarVacante(v.id, v.titulo)}>Eliminar</button>
-                                        </div>
+                    {/* VISTA: CREACIÓN */}
+                    {activeTab === "creacion" && (
+                        <div className="form-card-container animate-fade-in">
+                            <form onSubmit={handleSubmit} className="professional-form">
+                                <div className="form-grid-layout">
+                                    <div className="field-group full">
+                                        <label>Título de la Vacante *</label>
+                                        <input type="text" required value={nuevaVacante.titulo} onChange={(e) => setNuevaVacante({ ...nuevaVacante, titulo: e.target.value })} placeholder="Ej: Desarrollador Fullstack" />
                                     </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {vacanteSeleccionadaId && (
-                            <div className="postulaciones-detail">
-                                <h4>Candidatos para: {vacanteActual?.titulo || 'Vacante'}</h4>
-                                
-                                <div className="filter-controls">
-                                    <label htmlFor="estado-filter">Filtrar por Estado:</label>
-                                    <select id="estado-filter" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
-                                        <option value="TODOS">Todos ({postulaciones.length})</option>
-                                        <option value="PENDIENTE">Pendiente</option>
-                                        <option value="REVISADO">Revisado</option>
-                                        <option value="ACEPTADA">Aceptada</option> 
-                                        <option value="RECHAZADA">Rechazada</option>
-                                    </select>
+                                    <div className="field-group full">
+                                        <label>Descripción del Puesto *</label>
+                                        <textarea required rows="4" value={nuevaVacante.descripcion} onChange={(e) => setNuevaVacante({ ...nuevaVacante, descripcion: e.target.value })} placeholder="Requisitos, responsabilidades..." />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Ubicación *</label>
+                                        <input type="text" required value={nuevaVacante.ubicacion} onChange={(e) => setNuevaVacante({ ...nuevaVacante, ubicacion: e.target.value })} placeholder="Ciudad o Remoto" />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Tipo de Contrato</label>
+                                        <select value={nuevaVacante.tipo} onChange={(e) => setNuevaVacante({ ...nuevaVacante, tipo: e.target.value })}>
+                                            <option value="">Selecciona</option>
+                                            <option value="Tiempo completo">Tiempo completo</option>
+                                            <option value="Medio tiempo">Medio tiempo</option>
+                                            <option value="Prácticas">Prácticas</option>
+                                        </select>
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Modalidad</label>
+                                        <select value={nuevaVacante.modalidad} onChange={(e) => setNuevaVacante({ ...nuevaVacante, modalidad: e.target.value })}>
+                                            <option value="">Selecciona</option>
+                                            <option value="Presencial">Presencial</option>
+                                            <option value="Remoto">Remoto</option>
+                                            <option value="Hibrido">Híbrido</option>
+                                        </select>
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Salario (Opcional)</label>
+                                        <input type="text" value={nuevaVacante.salario} onChange={(e) => setNuevaVacante({ ...nuevaVacante, salario: e.target.value })} />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Fecha Límite</label>
+                                        <input type="date" value={nuevaVacante.fechaCierre} onChange={(e) => setNuevaVacante({ ...nuevaVacante, fechaCierre: e.target.value })} />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Límite Candidatos</label>
+                                        <input type="number" value={nuevaVacante.limitePostulantes} onChange={(e) => setNuevaVacante({ ...nuevaVacante, limitePostulantes: e.target.value })} />
+                                    </div>
                                 </div>
+                                <button type="submit" className="btn-publish">Publicar Vacante Ahora</button>
+                            </form>
+                        </div>
+                    )}
 
-                                {postulaciones.length > 0 ? (
-                                    postulacionesFiltradas.length > 0 ? (
-                                        <ul className="postulaciones-list">
-                                            {postulacionesFiltradas.map((p) => (
-                                            <li key={p.id} className="postulacion-item">
-                                                <div className="candidate-info">
-                                                    <span className="candidate-name">
-                                                        {`${p.usuario?.nombres} ${p.usuario?.apellidos}`.trim() || 'Estudiante Sin Nombre'}
-                                                    </span>
-                                                    {getStatusTag(p.estado)}
-                                                    <span className="candidate-contact">📧 {p.usuario?.correo || 'Sin correo'}</span>
-                                                    <span className="candidate-contact">📞 {p.telefono || 'Sin teléfono'}</span>
-                                                </div>
+                    {/* VISTA: EDICIÓN */}
+                    {activeTab === "edicion" && editandoVacante && (
+                        <div className="form-card-container animate-fade-in">
+                            <button className="btn-back" onClick={() => setActiveTab("gestion")}>
+                                <ArrowLeft size={16} /> Volver al listado
+                            </button>
+                            <form onSubmit={handleActualizarVacante} className="professional-form">
+                                <div className="form-grid-layout">
+                                    <div className="field-group full">
+                                        <label>Título de la Vacante</label>
+                                        <input type="text" required value={editandoVacante.titulo} onChange={(e) => setEditandoVacante({ ...editandoVacante, titulo: e.target.value })} />
+                                    </div>
+                                    <div className="field-group full">
+                                        <label>Descripción del Puesto</label>
+                                        <textarea required rows="4" value={editandoVacante.descripcion} onChange={(e) => setEditandoVacante({ ...editandoVacante, descripcion: e.target.value })} />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Ubicación</label>
+                                        <input type="text" required value={editandoVacante.ubicacion} onChange={(e) => setEditandoVacante({ ...editandoVacante, ubicacion: e.target.value })} />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Tipo de Contrato</label>
+                                        <select value={editandoVacante.tipo} onChange={(e) => setEditandoVacante({ ...editandoVacante, tipo: e.target.value })}>
+                                            <option value="Tiempo completo">Tiempo completo</option>
+                                            <option value="Medio tiempo">Medio tiempo</option>
+                                            <option value="Prácticas">Prácticas</option>
+                                        </select>
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Modalidad</label>
+                                        <select value={editandoVacante.modalidad} onChange={(e) => setEditandoVacante({ ...editandoVacante, modalidad: e.target.value })}>
+                                            <option value="Presencial">Presencial</option>
+                                            <option value="Remoto">Remoto</option>
+                                            <option value="Hibrido">Híbrido</option>
+                                        </select>
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Salario</label>
+                                        <input type="text" value={editandoVacante.salario} onChange={(e) => setEditandoVacante({ ...editandoVacante, salario: e.target.value })} />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Fecha Límite</label>
+                                        <input type="date" value={editandoVacante.fechaCierre} onChange={(e) => setEditandoVacante({ ...editandoVacante, fechaCierre: e.target.value })} />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Límite Candidatos</label>
+                                        <input type="number" value={editandoVacante.limitePostulantes} onChange={(e) => setEditandoVacante({ ...editandoVacante, limitePostulantes: e.target.value })} />
+                                    </div>
+                                </div>
+                                <button type="submit" className="btn-update">Guardar Cambios</button>
+                            </form>
+                        </div>
+                    )}
 
-                                                <div className="action-links">
-                                                    <a href={p.cv_url || '#'} target="_blank" rel="noopener noreferrer" className="cv-link">📥 Ver CV</a>
-                                                    
-                                                    <button 
-                                                        className="action-button" 
-                                                        onClick={() => handleOpenChat(p)}
-                                                        style={{ backgroundColor: '#28a745', borderColor: '#28a745', color: 'white', fontWeight: 'bold' }}
-                                                    >
-                                                        💬 Enviar Mensaje
-                                                    </button>
-
-                                                    <button className="action-button accept-button" onClick={() => handleUpdateEstado(p.id, 'ACEPTADA')} disabled={p.estado?.toUpperCase() === 'ACEPTADA'}>✅ Aceptar</button>
-                                                    <button className="action-button reject-button" onClick={() => handleUpdateEstado(p.id, 'RECHAZADA')} disabled={p.estado?.toUpperCase() === 'RECHAZADA'}>❌ Rechazar</button>
-                                                </div>
-                                            </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p className="empty-state">No hay postulaciones con el estado "{filtroEstado}".</p>
-                                    )
+                    {/* VISTA: GESTIÓN */}
+                    {activeTab === "gestion" && (
+                        <div className="management-container">
+                            <div className="vacantes-grid">
+                                {vacantes.length === 0 ? (
+                                    <p className="empty-state">No hay vacantes publicadas.</p>
                                 ) : (
-                                    <p className="empty-state">Aún no hay postulaciones para esta vacante.</p>
+                                    vacantes.map((v) => (
+                                        <div key={v.id} className={`v-card ${vacanteSeleccionadaId === v.id ? 'v-active' : ''}`}>
+                                            <div className="v-header">
+                                                <div className="v-title-group">
+                                                    <h4>{v.titulo}</h4>
+                                                    <span className="v-tag">{v.modalidad}</span>
+                                                </div>
+                                            </div>
+                                            <div className="v-body">
+                                                <div className="info-item"><MapPin size={14}/> {v.ubicacion}</div>
+                                                <div className="info-item"><Users size={14}/> {v._count?.postulaciones || 0} postulantes</div>
+                                            </div>
+                                            <div className="v-footer-actions">
+                                                <button className="btn-action-icon edit" onClick={() => handlePrepararEdicion(v)} title="Editar"><Edit3 size={18} /></button>
+                                                <button className="btn-main-center" onClick={() => handleVerPostulaciones(v.id)} title="Ver Postulaciones"><Eye size={20} /> <span>Ver Postulaciones</span></button>
+                                                <button className="btn-action-icon delete" onClick={() => handleEliminarVacante(v.id, v.titulo)} title="Eliminar"><Trash2 size={18} /></button>
+                                            </div>
+                                        </div>
+                                    ))
                                 )}
                             </div>
-                        )}
-                    </section>
-                )}
+
+                            {vacanteSeleccionadaId && (
+                                <div className="postulantes-section animate-fade-in">
+                                    <div className="section-header">
+                                        <h3>Candidatos: {vacanteActual?.titulo}</h3>
+                                        <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+                                            <option value="TODOS">Todos</option>
+                                            <option value="PENDIENTE">Pendientes</option>
+                                            <option value="ACEPTADA">Aceptadas</option>
+                                            <option value="RECHAZADA">Rechazadas</option>
+                                        </select>
+                                    </div>
+                                    <div className="candidatos-list">
+                                        {postulaciones.filter(p => filtroEstado === "TODOS" || p.estado === filtroEstado).map((p) => (
+                                            <div key={p.id} className="candidato-row">
+                                                <div className="c-info">
+                                                    <span className="c-name" onClick={() => { setPerfilSeleccionado(p.usuario); setIsModalOpen(true); }}>
+                                                        {p.usuario?.nombres} {p.usuario?.apellidos}
+                                                    </span>
+                                                    <div className="c-status">
+                                                        {getStatusIcon(p.estado)} {p.estado}
+                                                    </div>
+                                                </div>
+                                                <div className="c-actions">
+                                                    <button className="c-btn-cv" onClick={() => { setPerfilSeleccionado(p.usuario); setIsModalOpen(true); }} title="Ver CV"><FileText size={16}/> CV</button>
+                                                    <button className="c-btn-chat" onClick={() => { setChatPostulante(p); setIsChatOpen(true); }} title="Abrir Chat"><MessageSquare size={16}/></button>
+                                                    <button className="c-btn-ok" onClick={() => handleUpdateEstado(p.id, 'ACEPTADA')} title="Aceptar">✅</button>
+                                                    <button className="c-btn-no" onClick={() => handleUpdateEstado(p.id, 'RECHAZADA')} title="Rechazar">❌</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </main>
-        </div> {/* CIERRE dashboard-container */}
-            
-        {/* 2. CHAT LATERAL */}
-        {isChatOpen && (
-            <ChatSidebar 
-                empresaId={empresa?.id} // ⚡ Corregido con Optional Chaining
-                postulante={chatPostulante} 
-                vacanteId={vacanteActual?.id} // ⚡ Asegúrate de que este ID llegue aquí
-                onClose={() => setIsChatOpen(false)}
-            />
-        )}
-    </div> // CIERRE dashboard-layout
-  );
+
+            {/* Modales y Notificaciones */}
+            {isModalOpen && perfilSeleccionado && <VerCV perfil={perfilSeleccionado} onClose={() => setIsModalOpen(false)} />}
+            {isChatOpen && <ChatSidebar empresaId={empresa?.id} postulante={chatPostulante} vacanteId={vacanteActual?.id} onClose={() => setIsChatOpen(false)} />}
+            <ToastContainer position="bottom-right" theme="colored" />
+        </div>
+    );
 }

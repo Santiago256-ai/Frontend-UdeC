@@ -1,0 +1,255 @@
+/* --- 1. Estructura Base (Opción 3: Pantalla Completa) --- */
+.cv-container {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #ffffff; /* Fondo blanco uniforme */
+    display: block; 
+    padding: 0; 
+    box-sizing: border-box;
+}
+
+.cv-card { 
+    background: #ffffff !important;
+    border-radius: 0; /* Sin redondeado para pegar a los bordes */
+    box-shadow: none !important; /* Sin sombra lateral */
+    width: 100%;
+    max-width: 100%; 
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* --- 2. Header (Línea recta de borde a borde) --- */
+.cv-card-header {
+    background: #00482B;
+    padding: 20px 5%; /* Espaciado lateral relativo */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    position: relative; /* <--- AÑADE ESTA LÍNEA */
+}
+
+.cv-card-header h1 { 
+    font-size: 1.4rem; 
+    margin: 0; 
+    font-weight: 600; 
+    color: #ffffff !important;
+
+    /* --- Corrección para centrado total --- */
+    position: absolute;
+    left: 50%;
+    top: 50%; /* Lo baja al centro vertical */
+    transform: translate(-50%, -50%); /* Lo mueve exacto al centro en ambos ejes */
+    white-space: nowrap; /* Evita que el texto se rompa en dos líneas */
+}
+
+/* --- 3. Botones del Header --- */
+.btn-back-header {
+    background: rgba(255, 255, 255, 0.1); /* Fondo semi-transparente */
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px;
+    width: 40px;  /* Tamaño fijo para que sea un círculo perfecto */
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transición más fluida */
+}
+
+/* Efecto Hover para la Flecha */
+.btn-back-header:hover {
+    background: rgba(255, 255, 255, 0.25); /* Se aclara el fondo */
+    transform: translateX(-5px); /* Pequeño salto a la izquierda (indica retroceso) */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Efecto al hacer clic */
+.btn-back-header:active {
+    transform: scale(0.9) translateX(-2px);
+}
+
+.btn-submit {
+    background: #79C000;
+    color: white;
+    border: none;
+    /* Ajustamos el padding y dimensiones para que sea un círculo/cuadrado */
+    width: 45px; 
+    height: 45px;
+    padding: 0; 
+    
+    border-radius: 8px; /* O usa 50% si lo quieres totalmente circular */
+    font-size: 1.2rem; /* Tamaño del icono */
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    
+    /* Evita que el contenedor lo aplaste si hay poco espacio */
+    flex-shrink: 0; 
+}
+
+.btn-submit:hover {
+    background: #8ade00;
+    box-shadow: 0 4px 12px rgba(121, 192, 0, 0.2);
+}
+
+/* Efecto al pasar el mouse */
+.btn-submit:hover {
+    background: #8ade00; /* Un verde más claro/brillante */
+    transform: scale(1.1); /* Crece un 10% para dar sensación de clic */
+    box-shadow: 0 4px 15px rgba(121, 192, 0, 0.4); /* Sombra suave de color verde */
+}
+
+/* Efecto cuando se presiona (opcional pero recomendado) */
+.btn-submit:active {
+    transform: scale(0.95); /* Se encoge un poco al hacer clic */
+}
+
+
+/* --- 4. Formulario (Contenido centrado para lectura cómoda) --- */
+.cv-form { 
+    padding: 60px 5%; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 3.5rem; /* Más espacio entre secciones */
+    max-width: 1100px; /* Limita el ancho del texto para que sea fácil de leer */
+    margin: 0 auto; 
+}
+
+.section-title { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 12px;
+    margin-bottom: 30px;
+    color: #1e293b;
+}
+
+.section-title h3 { 
+    font-size: 1.1rem; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    margin: 0;
+    font-weight: 800;
+}
+
+/* --- 5. Grid y Distribución --- */
+.grid-row { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 60px; /* Espacio generoso para que los inputs no se peguen */
+}
+
+/* --- 6. Bloques Dinámicos --- */
+.dynamic-block { 
+    background: #f8fafc; 
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid #edf2f7;
+    border-left: 5px solid #00482B;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.dynamic-block:hover {
+    background: #f1f5f9;
+}
+
+/* --- 7. Inputs Estilo Minimalista (Línea Inferior) --- */
+.input-group {
+    display: flex;
+    flex-direction: column-reverse; 
+    margin-bottom: 25px; 
+}
+
+.input-group input, 
+.input-group textarea {
+    background: transparent !important;
+    border: none;
+    border-bottom: 1px solid #cbd5e0;
+    border-radius: 0;
+    padding: 14px 0 10px 0; /* Más aire sobre el texto escrito */
+    font-size: 1rem;
+    color: #334155;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.input-group input:focus, 
+.input-group textarea:focus {
+    outline: none;
+    border-bottom: 2px solid #00482B;
+}
+
+/* --- 8. Labels con Espaciado Corregido --- */
+.input-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 12px; /* SEPARACIÓN CRÍTICA: Despega el texto de la línea */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-group input:focus + label,
+.input-group textarea:focus + label {
+    color: #00482B;
+}
+
+/* --- 9. Botones de Acción Internos --- */
+.btn-add {
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    color: #475569;
+    padding: 14px;
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    margin-top: 10px;
+    transition: all 0.2s;
+}
+
+.btn-add:hover {
+    background: #f0fdf4;
+    border: 1px solid #00482B;
+    color: #00482B;
+}
+
+.btn-remove {
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-remove:hover {
+    background: #fff5f5;
+    color: #e53e3e;
+    border-color: #feb2b2;
+}
+
+/* --- 10. Responsivo --- */
+@media (max-width: 768px) { 
+    .grid-row { grid-template-columns: 1fr; gap: 25px; } 
+    .cv-form { padding: 40px 20px; }
+    .cv-card-header { padding: 20px; }
+}

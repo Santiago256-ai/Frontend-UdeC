@@ -1,34 +1,28 @@
 /* Estilo-Chat-Vacantes.css */
 
 /* Contenedor Principal */
+/* Contenedor Principal - AHORA INTEGRADO */
 .chat-window {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    width: 380px;
-    height: 500px;
+    /* QUITAMOS: position: fixed, right, bottom, width, height, z-index */
+    width: 100%;             /* Ocupa todo el ancho del panel derecho */
+    height: 100%;            /* Ocupa todo el alto disponible */
     background-color: #ffffff;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
     display: flex;
     flex-direction: column;
-    border: 1px solid #e5e7eb;
-    z-index: 9999;
     overflow: hidden;
+    border: none;            /* Quitamos borde si el contenedor padre ya tiene */
 }
 
 /* Header - 🌿 Verde según tu estilo */
 .chat-header {
-    padding: 15px;
-    background-color: #28a745; 
+    padding: 15px 20px;
+    background-color: #007B3E; 
     color: #ffffff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Quitamos border-radius si los tenía el contenedor padre */
 }
-
 .chat-header-info {
     display: flex;
     align-items: center;
@@ -53,13 +47,13 @@
 
 /* Cuerpo del Chat */
 .chat-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
+    flex: 1;                /* Esto hace que crezca y empuje al footer hacia abajo */
+    overflow-y: auto;       /* Habilita el scroll interno */
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    background-color: #f4f7f6; /* Color de fondo del objeto styles */
+    gap: 12px;
+    background-color: #f8fafc; /* Un gris muy claro para diferenciar del fondo blanco */
 }
 
 /* Burbujas de Mensajes */
@@ -68,7 +62,9 @@
     width: 100%;
 }
 
-.message-wrapper.sent { justify-content: flex-end; }
+.message-wrapper.sent {
+    justify-content: flex-end;
+}
 .message-wrapper.received { justify-content: flex-start; }
 
 .message-bubble {
@@ -77,14 +73,17 @@
     font-size: 14px;
     line-height: 1.5;
     position: relative;
+    text-align: left !important;
 }
 
 /* MENSAJES ENVIADOS (DERECHA) */
 .message-bubble.sent {
-    background-color: #28a745;
+    background-color: #007B3E;
     color: #ffffff;
-    border-radius: 15px 15px 0 15px;
-    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.2);
+    border-radius: 12px 12px 0 12px; /* Estilo moderno */
+    max-width: 75%;
+    padding: 10px 14px;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.15);
 }
 
 /* MENSAJES RECIBIDOS (IZQUIERDA) - ⚡ Corregido para ver letras oscuras */
@@ -105,6 +104,7 @@
     font-size: 14px !important;
     margin: 0 !important;
     line-height: 1.4 !important;
+    text-align: left !important;
 }
 
 /* 3. Estilo de la hora para mensajes RECIBIDOS */
@@ -125,11 +125,21 @@
     display: block !important;
 }
 .message-time {
-    display: block;
-    text-align: right;
-    font-size: 10px;
-    margin-top: 4px;
-    opacity: 0.7;
+    display: block !important;
+    text-align: right !important; /* <--- ESTO LA MUEVE A LA DERECHA */
+    font-size: 10px !important;
+    margin-top: 4px !important;
+    width: 100% !important;      /* Asegura que ocupe todo el ancho para poder alinearse */
+    opacity: 0.8;
+}
+
+.message-wrapper.sent .message-bubble.sent p {
+    text-align: left !important;   /* Alinea el texto a la izquierda */
+    color: #ffffff !important;     /* Mantiene el texto blanco */
+    font-weight: normal !important; /* Sin negrita */
+    margin: 0 !important;          /* Quita espacios extra que agrandan la burbuja */
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 /* Footer / Input */
@@ -199,26 +209,44 @@
     100% { transform: scale(0.95); opacity: 0.7; }
 }
 
-/* Alerta de chat desactivado */
+/* El contenedor se mantiene igual para no agrandarse */
 .chat-disabled-alert {
+    position: sticky;        /* Lo mantiene fijo mientras haces scroll */
+    top: 0;                  /* Lo pega a la parte superior del chat-body */
+    z-index: 10;            
     background-color: #fff4f4;
     border: 1px solid #feb2b2;
-    color: #c53030;
     padding: 12px;
     margin: 10px;
     border-radius: 8px;
     display: flex;
     align-items: center;
+    justify-content: center; /* Centra el contenido horizontalmente */
     gap: 10px;
-    font-size: 0.85rem;
-    text-align: center;
+}
+
+/* ESTO CAMBIA SOLO EL TEXTO: Negro sutil, sin negrita y tamaño controlado */
+.chat-disabled-alert p {
+    color: #333333 !important; /* Un negro sutil (gris muy oscuro) */
+    font-weight: normal !important; /* Quita la negrita */
+    font-size: 0.8rem;
+    margin: 0 !important; /* Evita que el letrero se agrade por márgenes internos */
+    line-height: 1.2;
+}
+
+/* MANTIENE TU CANDADITO ROJO */
+.chat-disabled-alert svg {
+    color: #c53030 !important; 
+    flex-shrink: 0; /* Evita que el icono se aplaste */
+    width: 14px;
+    height: 14px;
 }
 
 /* Punto de estado inactivo */
 .offline-dot {
     height: 8px;
     width: 8px;
-    background-color: #a0aec0;
+    background-color: #c53030;
     border-radius: 50%;
     display: inline-block;
     margin-right: 5px;

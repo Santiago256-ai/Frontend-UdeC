@@ -55,26 +55,33 @@ export default function Mensajeria() {
     }, [mensajes]);
 
     // 4. ENVIAR MENSAJE
-    const handleEnviar = async (e) => {
-        e.preventDefault();
-        if (!nuevoMensaje.trim()) return;
+   const handleEnviar = async (e) => {
+    e.preventDefault();
+    
+    // Validación de seguridad: Si no hay ID de empresa, no intentamos enviar
+    if (!nuevoMensaje.trim() || !isChatActivo || !empresaId) {
+        console.error("Faltan datos para enviar:", { empresaId, vacanteId });
+        alert("Error: No se identificó a la empresa de esta vacante.");
+        return;
+    }
 
-        try {
-            const payload = {
-                contenido: nuevoMensaje,
-                senderType: 'USUARIO',
-                senderId: usuario.id,
-                receiverId: parseInt(empresaId) 
-            };
-            
-            await API.post('/mensajeria/enviar', payload);
-            setNuevoMensaje("");
-            cargarMensajes(); // Recargar inmediatamente tras enviar
-        } catch (err) {
-            console.error("Error detallado:", err.response?.data);
-            alert("No se pudo enviar el mensaje");
-        }
-    };
+    try {
+        const payload = {
+            contenido: nuevoMensaje.trim(),
+            senderType: 'USUARIO',
+            senderId: usuario.id,
+            receiverId: parseInt(empresaId), // Aseguramos que sea número
+            vacanteId: parseInt(vacanteId)
+        };
+        
+        await API.post('/mensajeria/enviar', payload);
+        setNuevoMensaje(""); 
+        cargarMensajes(); 
+    } catch (err) {
+        console.error("Error al enviar (500):", err.response?.data || err.message);
+        alert("El servidor no pudo procesar el mensaje. Verifica que la empresa exista.");
+    }
+};
 
     return (
         <div className="flex flex-col h-screen bg-gray-100">

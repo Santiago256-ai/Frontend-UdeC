@@ -1,0 +1,128 @@
+:root {
+  /* Paleta Oficial Universidad de Cundinamarca */
+  --udec-green: #00843d;      /* Verde institucional */
+  --udec-gold: #c5a059;       /* Dorado/Ocre institucional */
+  --udec-light-gray: #f8f9fa;
+  --udec-dark: #1a1a1a;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.cv-modal-container {
+  background: white;
+  width: 100%;
+  max-width: 850px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px; right: 20px;
+  background: none; border: none;
+  font-size: 2.5rem; color: white;
+  cursor: pointer; z-index: 10;
+  transition: transform 0.2s;
+}
+
+.close-btn:hover { transform: scale(1.1); }
+
+/* Header con Colores UdeC */
+.cv-header {
+  background: var(--udec-green); /* Fondo Verde UdeC */
+  color: white;
+  padding: 50px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
+  border-bottom: 5px solid var(--udec-gold); /* Detalle Dorado */
+}
+
+.cv-header-text h2 { 
+  margin: 0; 
+  font-size: 1.8rem; 
+  text-transform: uppercase; 
+  letter-spacing: 1px;
+}
+
+.cv-subtitle { 
+  font-size: 1.1rem; 
+  opacity: 0.95; 
+  margin: 8px 0 0; 
+  font-weight: 300;
+}
+
+/* Avatar con iniciales */
+.cv-photo-circle {
+  width: 110px; height: 110px;
+  background: white;
+  border-radius: 50%;
+  border: 4px solid var(--udec-gold); /* Borde Dorado */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--udec-green);
+  font-weight: bold; 
+  font-size: 1.8rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Layout del cuerpo */
+.cv-body-layout { display: flex; min-height: 550px; }
+
+.cv-sidebar {
+  width: 32%;
+  background: var(--udec-light-gray);
+  padding: 45px 30px;
+  border-right: 1px solid #eee;
+}
+
+.cv-main-content {
+  width: 68%;
+  padding: 45px 50px;
+}
+
+/* Títulos de sección con acento Verde/Dorado */
+.cv-sidebar h4, .cv-main-content h4 {
+  font-size: 0.9rem;
+  color: var(--udec-green);
+  border-bottom: 2px solid var(--udec-gold);
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.cv-section { margin-bottom: 35px; font-size: 0.9rem; color: #444; }
+.cv-section p { margin: 8px 0; line-height: 1.4; }
+
+.cv-item { margin-bottom: 25px; }
+.cv-item h5 { margin: 0; font-size: 1.05rem; color: var(--udec-dark); }
+.cv-item-meta { font-size: 0.85rem; color: #3d5a6c; font-weight: 600; margin-top: 4px; }
+
+/* Etiquetas de Habilidades UdeC */
+.cv-tag {
+  display: inline-block;
+  background: white;
+  color: var(--udec-green);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  margin: 4px;
+  border: 1px solid var(--udec-green);
+  font-weight: 500;
+}

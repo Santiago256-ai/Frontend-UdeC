@@ -244,45 +244,29 @@
 /* -------------------- CONTENEDOR PRINCIPAL (Altura Ajustada) -------------------- */
 
 .auth-contenedor-principal {
-
-    background-color: var(--fondo-oscuro);
-
-    border-radius: 10px;
-
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4), 0 10px 10px rgba(0, 0, 0, 0.3);
-
-    position: relative;
-
+    display: flex;
+    width: 900px; /* Prueba con 900px o 950px */
+    min-height: 550px;
+    background-color: #242f38;
+    border-radius: 20px;
     overflow: hidden;
-
-    width: 768px;
-
-    max-width: 90%;
-
-    /* Altura aumentada para el formulario de Login moderno */
-
-    height: 680px;
-
-    max-height: 95vh;
-
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 
 
 /* -------------------- PANELES BASE -------------------- */
 
+/* Asegúrate de que los paneles internos tengan el tamaño correcto */
 .panel-contenedor {
-
-    position: absolute;
-
-    top: 0;
-
-    width: 50%; /* Cada panel ocupa la mitad del ancho */
-
-    height: 100%;
-
-    transition: transform 0.6s ease-in-out;
-
+    flex: 1; /* Esto obliga a que cada panel ocupe exactamente la mitad */
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 

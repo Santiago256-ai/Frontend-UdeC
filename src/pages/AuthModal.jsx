@@ -26,7 +26,7 @@ const ROLES = {
     EMPRESA: 'empresa',
 };
 
-export default function AuthModal({ isVisible, onClose }) {
+export default function AuthModal({ show, onClose }) {
     // 📌 VARIABLES DE ESTADO
     const [currentStep, setCurrentStep] = useState(STEPS.SELECT_ROLE);
     const [selectedRole, setSelectedRole] = useState(null); // Nuevo estado para guardar el rol
@@ -40,7 +40,7 @@ const [vistaOlvidado, setVistaOlvidado] = useState(false);
 
     const navigate = useNavigate();
 
-    if (!isVisible) return null;
+    if (!show) return null;
 
     // ------------------------------------------------------------------
     // 🔑 FUNCIONES CENTRALES DE AUTENTICACIÓN Y REDIRECCIÓN

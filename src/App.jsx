@@ -11,6 +11,7 @@ import VacantesDashboard from './pages/VacantesDashboard';
 // 💡 Asegúrate de que el path sea correcto (ej: si está en ./pages/)
 import EmpresaDashboard from './pages/EmpresaDashboard'; 
 import Mensajeria from './pages/Mensajeria';
+import CrearCV from './pages/CrearCV';
 
 import "./App.css";
 
@@ -29,6 +30,8 @@ function App() {
         {/* Rutas internas (solo accesibles después de login) */}
         <Route path="/home" element={<Home />} />
         <Route path="/estudiante" element={<Estudiante />} />
+{/* ✅ NUEVA RUTA PARA LA HOJA DE VIDA */}
+        <Route path="/crear-cv" element={<CrearCV />} />
         {/* ✅ RUTA AÑADIDA: Coincide con la redirección de AuthModal.jsx */}
         <Route path="/empresa-dashboard" element={<EmpresaDashboard />} /> 
         {/* ------------------------------------------------------------- */}

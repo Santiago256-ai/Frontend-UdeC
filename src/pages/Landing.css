@@ -1,690 +1,555 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-/*
-|--------------------------------------------------------------------------
-| CONFIGURACIÓN DE COLORES HSL Y TAILWIND
-|--------------------------------------------------------------------------
-| Se mantienen las variables HSL de shadcn/ui para el soporte de Dark Mode.
-| La variable 'primary' será utilizada para el verde corporativo oscuro.
-| La variable 'secondary' será utilizada para fondos de bloques.
-*/
-@layer base {
-    :root {
-        /* Color de fondo: Blanco, para modo claro */
-        --background: 0 0% 100%;
-        /* Color de frente (texto): Oscuro, para modo claro */
-        --foreground: 222.2 84% 4.9%;
-        --card: 0 0% 100%; /* Fondo de tarjetas/modales, blanco */
-        --card-foreground: 222.2 84% 4.9%; /* Texto de tarjetas */
-
-
-        /* Color Verde Corporativo Oscuro (Primary) - Similar al verde de LinkedIn */
-        --primary: 150 40% 25%; /* Nuevo tono de verde corporativo para el modo claro */
-        --primary-foreground: 210 40% 98%; /* Texto blanco sobre verde */
-
-        /* Color de Fondo de Componentes (Secondary) - Un tono de verde/gris claro para bloques */
-        --secondary: 150 20% 90%; 
-        --secondary-foreground: 222.2 47.4% 11.2%; /* Texto oscuro sobre el fondo secundario */
-
-        /* Color de Acento - Azul vibrante para botones (como el azul de LinkedIn) */
-        --accent: 210 90% 50%; /* Azul de acción */
-        --accent-foreground: 210 40% 98%; /* Texto blanco sobre azul */
-
-        --border: 214.3 31.8% 91.4%;
-        --ring: 222.2 84% 4.9%;
-    }
-
-    .dark {
-        /* Color de fondo: Oscuro, para modo oscuro */
-        --background: 222.2 84% 4.9%;
-        /* Color de frente (texto): Claro, para modo oscuro */
-        --foreground: 210 40% 98%; 
-        --card: 222.2 84% 4.9%; /* Fondo de tarjetas/modales, oscuro */
-        --card-foreground: 210 40% 98%; /* Texto de tarjetas */
-
-        /* Color Verde Corporativo Oscuro (Primary) - Más claro en Dark Mode */
-        --primary: 150 40% 75%; 
-        --primary-foreground: 222.2 47.4% 11.2%; /* Texto oscuro sobre verde */
-
-        /* Color de Fondo de Componentes (Secondary) - Gris oscuro para bloques */
-        --secondary: 217.2 32.6% 17.5%;
-        --secondary-foreground: 210 40% 98%; /* Texto claro sobre el fondo secundario */
-
-        /* Color de Acento - Azul vibrante para botones */
-        --accent: 210 90% 50%;
-        --accent-foreground: 210 40% 98%;
-        
-        --border: 217.2 32.6% 17.5%;
-        --ring: 212.7 26.8% 83.9%;
-    }
-}
-
-/*
-|--------------------------------------------------------------------------
-| ANIMACIÓN DE FONDO GLOBAL Y CLASES BASE
-|--------------------------------------------------------------------------
-*/
-@layer base {
-    * {
-        @apply border-border;
-    }
-    
-    body {
-        /* Color de texto base */
-        @apply text-foreground; 
-
-        /* 🟢 APLICACIÓN CLAVE: Fondo animado con tonos VERDES PROFESIONALES */
-        background: linear-gradient(-45deg, #007B3E, #79C000, #007B3E, #79C000); 
-        background-size: 400% 400%;
-        /* Animación más lenta para un toque elegante */
-        animation: gradientAnimation 20s ease infinite; 
-        font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-    }
-}
-
-@keyframes gradientAnimation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/*
-|--------------------------------------------------------------------------
-| ESTILOS DE LANDING PAGE
-|--------------------------------------------------------------------------
-*/
-
-/* === Contenedor Principal === */
-.landing-container {
-    /* Asegura que el contenido flote sobre el fondo del body */
-    @apply bg-background/50; 
-}
-
-/*
-|--------------------------------------------------------------------------
-| ESTRUCTURA PRINCIPAL (HEADER)
-|--------------------------------------------------------------------------
-*/
-.landing-header {
-    /* Esto es CLAVE para que no se mueva y para que el z-index funcione */
-    position: sticky; 
-    top: 0;
-    width: 100%;
-    
-    /* 🔑 CLAVE: Asegura que el header esté encima de todo el contenido */
-    z-index: 1000; 
-    
-    /* 🎨 CLAVE: Asegura que el header tenga un fondo sólido */
-    @apply bg-background; 
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 5%;
-    border-bottom: 1px solid hsl(var(--border));
-}
-
-.landing-logo {
-    font-size: 1.8rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-}
-
-.landing-logo-express {
-    @apply text-primary;
-    margin-right: 2px;
-}
-
-.landing-logo-360 {
-    @apply text-foreground;
-}
-
-.landing-logo-pro {
-    font-size: 0.9rem;
-    font-weight: 700;
-    @apply text-accent;
-    align-self: flex-start;
-    margin-top: -8px;
-}
-
-/* === Menú de Navegación === */
-.landing-menu {
-    display: none; /* Ocultar por defecto en móvil */
-    gap: 1.5rem;
-}
-
-.landing-menu a {
-    font-size: 1rem;
-    font-weight: 500;
-    @apply text-foreground/70 hover:text-accent transition-colors duration-200;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| AUTENTICACIÓN Y DROP-DOWN
-|--------------------------------------------------------------------------
-*/
-.landing-auth-buttons {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.landing-login-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    border: 1px solid hsl(var(--foreground)/20%);
-    @apply bg-transparent text-foreground/80 hover:bg-secondary transition-colors duration-200;
-}
-
-.landing-register-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    border: none;
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200;
-}
-
-.landing-register-dropdown {
-    position: relative;
-    /* Opcional: un z-index más alto para asegurar el apilamiento */
-    z-index: 1010; 
-}
-
-.landing-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 5px); /* Espacio debajo del botón */
-    right: 0;
-    min-width: 200px;
-    padding: 0.5rem 0;
-    
-    /* Fondo del dropdown */
-    @apply bg-card border border-border rounded-lg shadow-xl;
-    
-    /* Asegurar que el menú desplegable esté visible encima de todo */
-    z-index: 999; 
-
-    /* Estilos de transición */
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: all 0.2s ease-out;
-}
-
-.landing-dropdown-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.landing-dropdown-item {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    font-weight: 500;
-    @apply text-foreground hover:bg-secondary transition-colors duration-150;
-}
-
-/* === Estilos de la Sección Principal (MAIN) === */
-.landing-main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 3rem 5%;
-    display: grid;
-    grid-template-columns: minmax(300px, 1fr) 1.2fr;
-    gap: 4rem;
-    align-items: flex-start;
-}
-
-.landing-card {
-    /* Estilo de la tarjeta de bienvenida y auth */
-    @apply bg-card p-8 rounded-xl shadow-2xl;
-    border: 1px solid hsl(var(--border));
-}
-
-.landing-welcome {
-    font-size: 2.2rem;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 2rem;
-    @apply text-primary;
-}
-
-/* === Botones de Autenticación === */
-.landing-options {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.landing-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.5rem;
-    border-radius: 5px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.auth-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 0.75rem;
-}
-
-.landing-auth-google {
-    @apply bg-transparent text-foreground border border-border hover:bg-secondary;
-}
-
-.landing-auth-microsoft {
-    @apply bg-transparent text-foreground border border-border hover:bg-secondary;
-}
-
-.landing-continue-btn {
-    width: 100%;
-    padding: 0.75rem 1.5rem;
-    border-radius: 5px;
-    font-size: 1rem;
-    font-weight: 600;
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-colors duration-200;
-    margin-top: 1rem;
-}
-
-.landing-legal {
-    font-size: 0.8rem;
-    @apply text-primary;
-    margin-top: 1rem;
-    text-align: center;
-}
-
-.landing-legal a {
-    @apply text-primary/80 hover:underline;
-}
-
-.landing-separator {
-    text-align: center;
-    position: relative;
-    margin: 1.5rem 0;
-    font-size: 0.9rem;
-    @apply text-muted-foreground;
-}
-
-.landing-separator::before,
-.landing-separator::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    @apply bg-border;
-}
-
-.landing-separator::before {
-    left: 0;
-}
-
-.landing-separator::after {
-    right: 0;
-}
-
-.landing-auth-email {
-    @apply bg-transparent text-foreground border border-border hover:bg-secondary;
-}
-
-.landing-signup-link {
-    text-align: center;
-    margin-top: 1.5rem;
-    @apply text-foreground;
-}
-
-.landing-signup-link a {
-    font-weight: 600;
-    @apply text-accent hover:underline;
-}
-
-/* === Imagen Principal === */
-.landing-image img {
-    width: 100%;
-    height: auto;
-    border-radius: 1rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-/*
-|--------------------------------------------------------------------------
-| SECCIÓN ADICIONAL INFERIOR
-|--------------------------------------------------------------------------
-*/
-.landing-extra-section {
-    max-width: 1200px;
-    margin: 3rem auto;
-    padding: 0 5%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 3rem;
-}
-
-.landing-info-block {
-    @apply bg-card p-6 rounded-xl shadow-lg;
-    border: 1px solid hsl(var(--border));
-}
-
-.landing-info-text h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    @apply text-primary;
-}
-
-.landing-info-text p {
-    font-size: 0.95rem;
-    @apply text-foreground/80;
-    margin-bottom: 1.5rem;
-}
-
-.landing-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.landing-tag {
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/70 transition-colors duration-150;
-    white-space: nowrap;
-}
-
-.landing-tag.show-all {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90;
-}
-
-.landing-job-promo {
-    @apply bg-primary p-6 rounded-xl text-primary-foreground shadow-lg;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.landing-job-promo h3 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-}
-
-.landing-publish-btn {
-    padding: 0.6rem 1.2rem;
-    border-radius: 20px;
-    font-weight: 600;
-    align-self: flex-start;
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-colors duration-200;
-}
-
-/*
-|--------------------------------------------------------------------------
-| CARRUSEL
-|--------------------------------------------------------------------------
-*/
-.landing-carousel {
-    max-width: 1200px;
-    margin: 4rem auto 6rem;
-    padding: 0 5%;
-    position: relative;
-    overflow: hidden; /* Muy importante para que no se vea el contenido desbordado */
-    @apply bg-card p-8 rounded-xl shadow-2xl;
-    border: 1px solid hsl(var(--border));
-}
-
-.carousel-wrapper {
-    display: flex;
-    transition: transform 0.5s ease-in-out;
-    /* Ajuste para asegurar que solo se vea un item a la vez */
-    width: 100%; /* El wrapper ocupa todo el ancho del carrusel */
-}
-
-.carousel-item {
-    flex-shrink: 0;
-    width: 100%; /* Cada item ocupa el 100% del wrapper */
-    /* Aseguramos que no haya espacio extra */
-    box-sizing: border-box; 
-}
-
-.carousel-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    align-items: center;
-}
-
-.carousel-text h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    @apply text-primary;
-}
-
-.carousel-text p {
-    font-size: 1rem;
-    @apply text-foreground/80;
-}
-
-.carousel-image {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 350px; 
-    overflow: hidden; 
-}
-
-.carousel-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; 
-    border-radius: 1rem; 
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.carousel-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 50px; 
-    height: 50px; 
-    border-radius: 50%;
-    font-size: 1.8rem; 
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 10;
-    /* CAMBIO CLAVE: Eliminar el borde y aumentar aún más la transparencia */
-    @apply bg-primary/20 text-primary-foreground/60 border-0 hover:bg-primary/40 transition-all duration-300; /* border-0 para eliminar el borde */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1; 
-}
-
-.carousel-btn.prev {
-    left: 20px;
-}
-
-.carousel-btn.next {
-    right: 20px;
-}
-
-.carousel-indicators {
-    text-align: center;
-    margin-top: 1.5rem;
-}
-
-.carousel-indicators span {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin: 0 0.5rem;
-    cursor: pointer;
-    @apply bg-border transition-colors duration-300;
-}
-
-.carousel-indicators span.active {
-    @apply bg-accent;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| FOOTER
-|--------------------------------------------------------------------------
-*/
-.landing-footer {
-    padding: 3rem 5%;
-    @apply bg-primary text-primary-foreground;
-}
-
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid hsl(var(--primary-foreground)/30%);
-}
-
-.footer-section h4 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.footer-section p {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    @apply text-primary-foreground/90;
-}
-
-.footer-section ul {
-    list-style: none;
+/* ============================================================
+   1. RESET TOTAL (ELIMINA FRANJAS VERDES Y MÁRGENES DE VITE)
+   ============================================================ */
+:root, body, html, #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden; /* Evita scroll horizontal */
+    background-color: white; /* Cambia el verde por blanco si queda algún hueco */
+}
+
+/* Contenedor principal para forzar ancho de ventana */
+.landing-global-wrapper {
+    width: 100vw;
+    margin: 0;
     padding: 0;
 }
 
-.footer-section ul li a {
-    display: block;
-    margin-bottom: 0.5rem;
+/* ============================================================
+   2. NAVBAR (ANCHO COMPLETO)
+   ============================================================ */
+.custom-nav {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(5px);
+    width: 100vw;
+    height: 85px;
+    border-bottom: 1px solid #eee;
+}
+
+/* ============================================================
+   3. SECCIÓN HERO (PERRO CON GAFAS - PANTALLA COMPLETA)
+   ============================================================ */
+/* ============================================================
+   ANIMACIÓN SIN ESPACIOS EN BLANCO
+   ============================================================ */
+@keyframes megaFondo {
+    0%, 100% { background-image: url('/img1.jpg'); } /* Inicio y fin iguales */
+    25%      { background-image: url('/img2.jpg'); }
+    50%      { background-image: url('/img3.jpg'); }
+    75%      { background-image: url('/img4.jpg'); }
+}
+
+.hero-section {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    margin: 0;
+    
+    /* IMAGEN DE BASE: Evita que se vea blanco al cargar la página */
+    background-image: url('/img4.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Duración de 12s para que cambie cada 4s aprox */
+    animation: megaFondo 12s infinite ease-in-out; 
+}
+
+.hero-content-wrapper {
+    display: flex;
+    justify-content: space-between; /* Envía uno a cada lado */
+    align-items: center;
+    width: 100%;
+    padding: 0 8%; /* Espacio para que no peguen al borde del monitor */
+}
+
+/* CAJA DEL LOGO (IZQUIERDA) */
+.hero-logo-container {
+    width: 35%; /* Ajusta según el tamaño de tu logo */
+}
+
+.glass-card-logo {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+/* CAJA DEL TEXTO (DERECHA) */
+.hero-text-container {
+    width: 45%; /* Ancho de la caja de texto */
+}
+
+.glass-card-text {
+    background: rgba(255, 255, 255, 0.4); /* Transparencia sutil */
+    backdrop-filter: blur(15px);
+    padding: 40px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* ESTILOS INTERNOS DEL TEXTO */
+.titulo-serif-hero {
+    font-family: 'Georgia', serif;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.linea-decorativa {
+    width: 80px;
+    height: 3px;
+    background-color: #42adab;
+    margin: 0 auto 20px;
+    border: none;
+    opacity: 1;
+}
+
+.texto-descripcion {
+    font-size: 1.2rem;
+    color: #444;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.texto-frase {
+    font-style: italic;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.btn-donar-hero {
+    background-color: #c5d68d; /* Color verde suave de tu diseño */
+    color: #333;
+    border: none;
+    padding: 12px 40px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-donar-hero:hover {
+    background-color: #b3c57a;
+    transform: scale(1.05);
+}
+
+/* ============================================================
+   4. SECCIÓN MISIÓN Y VISIÓN (CUADROS A LOS LADOS)
+   ============================================================ */
+.mision-vision-fav {
+    width: 100vw;
+    height: 85vh; /* Altura para que se vea bien la imagen */
+    background-image: url('/img7.jpg'); /* Tu imagen favorita del perro */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Efecto elegante al bajar */
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.mision-vision-content {
+    display: flex;
+    justify-content: space-between; /* Empuja los cuadros a los extremos */
+    width: 100%;
+    padding: 0 6%; /* Espacio para que no toquen el borde del monitor */
+}
+
+/* Cuadros semitransparentes (Glassmorphism) */
+.glass-box {
+    background: rgba(255, 255, 255, 0.75); /* Transparencia para ver al perro detrás */
+    backdrop-filter: blur(8px);
+    padding: 40px;
+    width: 42%; /* Tamaño de cada cuadro */
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    text-align: justify;
+    transition: transform 0.3s ease;
+}
+
+.glass-box:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* ============================================================
+   5. OBJETIVOS (SISTEMA DE TARJETAS)
+   ============================================================ */
+.objetivos-section {
+    padding: 80px 5%;
+    background-color: #ffffff;
+    text-align: center;
+}
+
+.titulo-serif-objetivos {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 50px;
+    text-transform: uppercase;
+}
+
+.objetivos-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap; /* Para que sea responsivo en celulares */
+}
+
+.obj-card-custom {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 20px;
+    transition: transform 0.3s ease;
+}
+
+.obj-card-custom:hover {
+    transform: translateY(-10px);
+}
+
+.obj-img-wrapper {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.obj-img-real {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Esto evita que la imagen se estire feo */
+}
+
+.obj-titulo {
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.obj-descripcion {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-align: justify; 
+    
+    /* Opcional: Un poco de margen a los lados para que el 
+       justificado no toque los bordes de la tarjeta */
+    padding: 0 10px;
+}
+
+/* ============================================================
+   6. ELEMENTOS FLOTANTES (REDES Y CHAT)
+   ============================================================ */
+.social-sidebar {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px 8px;
+    border-radius: 25px 0 0 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 9999;
+}
+
+.social-sidebar img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.social-sidebar img:hover {
+    transform: scale(1.3) rotate(10deg);
+}
+
+.chatbot-container {
+    position: fixed;
+    bottom: 25px;
+    right: 85px;
+    z-index: 9999;
+}
+
+.chat-pill {
+    background: #42adab;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(66, 173, 171, 0.4);
+}
+
+/* ============================================================
+   7. TIPOGRAFÍAS Y OTROS
+   ============================================================ */
+.titulo-serif {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-weight: bold;
+    color: #222;
+    text-align: center;
+}
+
+hr {
+    border: 0;
+    border-top: 2px solid #42adab;
+    width: 50px;
+    margin: 10px auto 20px;
+}
+
+/* Estilos de burbujas de chat */
+.msg-bubble.user { background: #d1ecf1; align-self: flex-end; padding: 8px; border-radius: 10px; }
+.msg-bubble.bot { background: #f8f9fa; align-self: flex-start; padding: 8px; border-radius: 10px; }
+
+/* Ajustes para el Navbar */
+.auth-header-links {
+    display: flex;
+    align-items: center;
+}
+
+.auth-item {
+    color: #666 !important; /* Gris oscuro */
+    font-weight: 600 !important;
     font-size: 0.9rem;
-    @apply text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-150;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    padding: 0 5px !important;
 }
 
-.footer-socials a {
-    font-size: 1.5rem;
-    margin-right: 1rem;
-    @apply text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-150;
+.auth-item:hover {
+    color: #42adab !important; /* El verde de tu fundación */
 }
 
-.footer-bottom {
+/* Asegurar que el navbar no sea transparente si no quieres */
+.navbar {
+    height: 80px;
+    z-index: 1000;
+}
+
+.auth-item-custom {
+    color: #666 !important;
+    font-weight: bold !important;
+    font-size: 0.9rem !important;
+    text-decoration: none !important;
+    white-space: nowrap; /* Evita que el texto se rompa en dos líneas */
+    transition: 0.3s;
+}
+
+.auth-item-custom:hover {
+    color: #42adab !important; /* El verde de tu fundación */
+}
+
+/* Ajuste preventivo para el body debido al navbar fixed */
+body {
+    padding-top: 80px; 
+}
+
+/* RESET PARA EL NAVBAR */
+.navbar-custom-main {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 85px;
+    background-color: #0b301e;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-content-container {
+    width: 100%;
+    max-width: 1400px; /* Ajusta esto según el ancho de tu monitor */
+    margin: 0 auto;
+    padding: 0 40px; /* Espacio a los lados para que no peguen al borde */
+    display: flex;
+    justify-content: space-between; /* LOGO IZQUIERDA - BOTONES DERECHA */
+    align-items: center;
+}
+
+.navbar-logo-img {
+    height: 65px;
+    width: auto;
+}
+
+.navbar-auth-group {
+    display: flex;
+    gap: 15px;
+}
+
+.auth-item-link {
+    text-decoration: none !important;
+    color: #ffffff !important; /* Texto blanco */
+    font-weight: 600 !important;
+    font-size: 0.95rem;
+    transition: 0.3s;
+    opacity: 0.9;
+}
+
+.auth-item-link:hover {
+    color: #42adab !important; /* El verde agua de tu logo para el hover */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+/* El separador entre links */
+.separator-nav {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================================
+   ESTILOS DEL PIE DE PÁGINA (RESERVADO)
+   ============================================================ */
+.footer-universidad {
+    background-color: #f8f9fa; /* Un gris muy claro para diferenciar del blanco */
+    padding: 40px 0;
+    border-top: 1px solid #eee;
+    text-align: center;
+    width: 100vw;
+    /* ESTO ES LO QUE CENTRA TODO */
+    display: flex;
+    flex-direction: column; /* Pone un texto debajo del otro */
+    align-items: center;    /* Centra horizontalmente */
+    justify-content: center; /* Centra verticalmente si hay altura */
+    text-align: center;
+    margin-top: 50px;
+}
+
+.footer-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding-top: 1rem;
-    text-align: center;
+    padding: 0 20px;
+}
+
+.copyright-text {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.universidad-text {
+    color: #42adab; /* El verde de tu logo */
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.footer-links a {
+    text-decoration: none;
+    color: #666;
     font-size: 0.85rem;
-    @apply text-primary-foreground/70;
+    transition: 0.3s;
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| RESPONSIVENESS
-|--------------------------------------------------------------------------
-*/
-@media (min-width: 768px) {
-    .landing-menu {
-        display: flex; /* Mostrar el menú en pantallas medianas/grandes */
-    }
+.footer-links a:hover {
+    color: #333;
 }
 
-@media (max-width: 1024px) {
-    .landing-main {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-    }
-    
-    .landing-image {
-        order: -1; /* Mover la imagen arriba en la columna única */
-        padding-bottom: 1rem;
-    }
-    
-    .landing-extra-section {
-        grid-template-columns: 1fr;
-    }
-
-    .carousel-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-
-    .carousel-image {
-        order: -1;
-    }
-
-    .footer-container {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-    
-    .footer-socials {
-        justify-content: center;
-        display: flex;
-    }
+.separator {
+    color: #ddd;
 }
 
-@media (max-width: 600px) {
-    .landing-header {
-        padding: 0.75rem 4%;
-    }
+/* BOTÓN CON ESTILO VERDE LIMA */
+.nav-auth-button {
+    background-color: #c5d38a !important; /* El verde lima de tu imagen */
+    color: #1a4d36 !important; /* Texto verde oscuro para contraste */
+    padding: 10px 22px !important;
+    border-radius: 12px !important; /* Bordes suaves como el de "Inicia Ahora" */
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+}
 
-    .landing-logo {
-        font-size: 1.5rem;
-    }
+/* EFECTO AL PASAR EL CURSOR (HOVER) */
+.nav-auth-button:hover {
+    background-color: #556b2f !important; /* CAMBIO A VERDE OLIVA (OliveDrab) */
+    color: #c5d38a !important;           /* LAS LETRAS PASAN AL VERDE LIMA ORIGINAL */
+    border: 2px solid #c5d38a;           /* Opcional: un borde para resaltar el botón */
+    transform: scale(1.05);              /* Pequeño crecimiento para dinamismo */
+    cursor: pointer;
+}
 
-    .landing-auth-buttons {
-        gap: 0.5rem;
-    }
+/* Contenedor para separarlos un poco */
+.navbar-auth-group {
+    display: flex;
+    gap: 15px; /* Espacio entre botones */
+    align-items: center;
+}
 
-    .landing-login-btn,
-    .landing-register-btn {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.9rem;
-    }
+/* CONTENEDOR DEL DROPDOWN */
+.dropdown-custom {
+    position: relative;
+    display: inline-block;
+}
 
-    .landing-main {
-        padding: 2rem 4%;
-    }
+/* CONTENIDO QUE SE DESPLIEGA */
+.dropdown-content-custom {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    background-color: #0b301e; /* Verde oscuro del navbar para que combine */
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 1000;
+    margin-top: 5px;
+    overflow: hidden;
+    border: 1px solid #c5d38a; /* Borde verde lima delgado */
+}
 
-    .landing-welcome {
-        font-size: 1.8rem;
-    }
+/* MOSTRAR AL PASAR EL MOUSE */
+.dropdown-custom:hover .dropdown-content-custom {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
 
-    .landing-extra-section {
-        padding: 0 4%;
-    }
-    
-    .carousel-btn {
-        width: 40px; 
-        height: 40px;
-        font-size: 1.5rem;
-    }
+/* BOTONES INTERNOS (EGRESADO / EMPRESA) */
+.dropdown-item-custom {
+    color: white !important;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: 0.3s;
+    text-align: center;
+}
+
+/* EFECTO HOVER EN LAS OPCIONES: Verde Oliva con letras verdes */
+.dropdown-item-custom:hover {
+    background-color: #556b2f !important; /* Verde Oliva */
+    color: #c5d38a !important;           /* Letras Verde Lima */
+}
+
+/* ANIMACIÓN DE ENTRADA */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }

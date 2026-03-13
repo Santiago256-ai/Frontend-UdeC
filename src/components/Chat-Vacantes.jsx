@@ -1,77 +1,92 @@
-import { useState, useEffect, useRef } from 'react';
-import { Send, X, MessageSquare, Lock } from 'lucide-react'; // Añadimos Lock para el icono de bloqueo
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Send, X, MessageSquare, Lock } from 'lucide-react'; 
 import API from '../services/api'; 
 import './Estilo-Chat-Vacantes.css';
 
-export default function Mensajeria({ empresaId, vacanteId, onClose }) {
-    const [usuario] = useState(() => JSON.parse(localStorage.getItem('usuario')));
+export default function Mensajeria({ empresaId, vacanteId, onClose, usuario }) {
+    
     const [mensajes, setMensajes] = useState([]);
     const [nuevoMensaje, setNuevoMensaje] = useState("");
-    // NUEVO: Estado para saber si la empresa bloqueó el chat
     const [isChatActivo, setIsChatActivo] = useState(true); 
-    const scrollRef = useRef();
+    
+    // 1. Referencia al contenedor de mensajes (chat-body)
+    const chatBodyRef = useRef(null);
 
-    // 1. MARCAR COMO LEÍDOS (Igual)
-    useEffect(() => {
-        const marcarLeidos = async () => {
-            if (!usuario?.id || !empresaId) return;
-            try {
-                await API.put(`/mensajeria/leer/${usuario.id}/${empresaId}`);
-            } catch (err) {
-                console.error("Error al marcar mensajes como leídos", err);
+    // --- CORRECCIÓN 1: Memoizar cargarMensajes ---
+    const cargarMensajes = useCallback(async (isInitialLoad = false) => {
+        if (!usuario?.id || !empresaId || !vacanteId) return;
+        
+        try {
+            const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}/${vacanteId}`);
+            
+            const nuevosMensajes = data.mensajes || [];
+
+            // Solo actualizar si hay mensajes nuevos para evitar re-renderizados innecesarios
+            setMensajes(prev => {
+                if (JSON.stringify(prev) === JSON.stringify(nuevosMensajes)) {
+                    return prev;
+                }
+                return nuevosMensajes;
+            });
+
+            if (data.chatActivo !== undefined) {
+                setIsChatActivo(data.chatActivo);
             }
-        };
-        marcarLeidos();
-    }, [empresaId, usuario?.id]);
+        } catch (err) {
+            // console.error("Error al cargar historial:", err);
+        }
+    }, [usuario, empresaId, vacanteId]);
 
-    // 2. CARGAR MENSAJES Y ESTADO
-    const cargarMensajes = async () => {
-        if (!usuario?.id || !empresaId || !vacanteId) return;
-        try {
-            const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}/${vacanteId}`);
-            
-            // CORRECCIÓN AQUÍ:
-            // Usamos 'data' que es lo que extrajimos del await
-            setMensajes(data.mensajes || []); 
-            
-            if (data.chatActivo !== undefined) {
-                setIsChatActivo(data.chatActivo);
-            }
-        } catch (err) {
-            console.error("Error al cargar historial:", err);
-        }
-    };
-
+    // 2. EFECTOS: Cargar historial
     useEffect(() => {
-        cargarMensajes();
+        cargarMensajes(true);
         const interval = setInterval(() => cargarMensajes(), 3000); 
         return () => clearInterval(interval);
-    }, [empresaId, vacanteId, usuario?.id]); 
+    }, [cargarMensajes]); 
 
+    // Marcar mensajes como leídos
     useEffect(() => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (!usuario?.id || !empresaId) return;
+        API.put(`/mensajeria/leer/${usuario.id}/${empresaId}`).catch(() => {});
+    }, [empresaId, usuario?.id]);
+
+    // --- CORRECCIÓN 2: Lógica de Scroll Inteligente ---
+    useEffect(() => {
+        const container = chatBodyRef.current;
+        if (!container) return;
+
+        // Comprobar si el usuario está cerca del fondo
+        const isUserAtBottom = 
+            container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+
+        // Si el usuario estaba abajo, o si estamos cargando los mensajes por primera vez
+        // (y no hay mensajes previos), entonces hacemos scroll al fondo.
+        if (isUserAtBottom || mensajes.length === 0) {
+            container.scrollTop = container.scrollHeight;
+        }
+        // Si no estaba abajo, no hacemos nada, así el usuario puede leer tranquilos.
+        
     }, [mensajes]);
 
+    // 3. ENVIAR MENSAJE
     const handleEnviar = async (e) => {
         e.preventDefault();
-        // Bloqueo preventivo en la función
+        
+        if (!usuario || !usuario.id) return;
         if (!nuevoMensaje.trim() || !isChatActivo) return;
 
         try {
-            const payload = {
-                contenido: nuevoMensaje.trim(),
-                senderType: 'USUARIO',
+            await API.post('/mensajeria/enviar', {                
                 senderId: usuario.id,
-                receiverId: parseInt(empresaId),
-                vacanteId: parseInt(vacanteId)
-            };
-            
-            await API.post('/mensajeria/enviar', payload);
-            setNuevoMensaje(""); 
-            cargarMensajes(); 
-        } catch (err) {
-            console.error("Error al enviar:", err);
-            alert("No se pudo enviar el mensaje");
+                receiverId: empresaId,
+                contenido: nuevoMensaje,
+                senderType: 'USUARIO',
+                vacanteId: vacanteId
+            });
+            setNuevoMensaje("");
+            cargarMensajes(); // Actualizar inmediatamente
+        } catch (error) {
+            // console.error("Error al enviar:", error);
         }
     };
 
@@ -79,36 +94,43 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
         <div className="chat-window">
             <header className="chat-header">
                 <div className="chat-header-info">
-                    <MessageSquare size={20} />
-                    <div>
-                        <h2 className="chat-title">Chat de la Vacante</h2>
+                    <MessageSquare size={20} className="text-olive" />
+                    <div className="header-text-group">
+                        <h2 className="chat-title">Conversación</h2>
                         <div className="status-indicator">
                             <span className={isChatActivo ? "online-dot" : "offline-dot"}></span>
-                            <span>{isChatActivo ? "Activo ahora" : "Chat finalizado"}</span>
+                            <span className="status-text">{isChatActivo ? "Chat Abierto" : "Finalizado"}</span>
                         </div>
                     </div>
                 </div>
-                <button onClick={onClose} className="close-button">
-                    <X size={20} />
-                </button>
+                {onClose && (
+                    <button onClick={onClose} className="close-button">
+                        <X size={20} />
+                    </button>
+                )}
             </header>
 
-            <div className="chat-body">
-                {/* MENSAJE DE ADVERTENCIA CUANDO ESTÁ DESACTIVADO */}
+            {/* --- CORRECCIÓN 3: Asignar la referencia aquí --- */}
+            <div className="chat-body" ref={chatBodyRef}>
                 {!isChatActivo && (
                     <div className="chat-disabled-alert">
                         <Lock size={16} />
-                        <p>Conversación desactivada por parte de la empresa. No podrás enviar ni recibir mensajes.</p>
+                        <p>Esta conversación ha sido cerrada.</p>
                     </div>
                 )}
 
                 {mensajes.length === 0 ? (
-                    <div className="empty-chat">Inicia una conversación con la empresa.</div>
+                    <div className="empty-chat-placeholder">
+                        <p>Aún no hay mensajes. ¡Inicia la conversación!</p>
+                    </div>
                 ) : (
                     mensajes.map((m) => (
-                        <div key={m.id} className={`message-wrapper ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}>
+                        <div 
+                            key={m.id} 
+                            className={`message-wrapper ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}
+                        >
                             <div className={`message-bubble ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}>
-                                <p>{m.contenido}</p>
+                                <p className="message-content">{m.contenido}</p>
                                 <span className="message-time">
                                     {m.fechaEnvio ? new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                                 </span>
@@ -116,25 +138,24 @@ export default function Mensajeria({ empresaId, vacanteId, onClose }) {
                         </div>
                     ))
                 )}
-                <div ref={scrollRef} />
+                {/* --- SE ELIMINÓ EL DIV REF TEMPORAL --- */}
             </div>
 
-            {/* FOOTER BLOQUEADO SI NO ESTÁ ACTIVO */}
             <form onSubmit={handleEnviar} className={`chat-footer ${!isChatActivo ? 'footer-disabled' : ''}`}>
                 <input 
                     type="text"
                     value={nuevoMensaje}
                     onChange={(e) => setNuevoMensaje(e.target.value)}
-                    placeholder={isChatActivo ? "Escribe tu duda..." : "Chat deshabilitado"}
+                    placeholder={isChatActivo ? "Escribe un mensaje..." : "Chat deshabilitado"}
                     className="chat-input"
-                    disabled={!isChatActivo} // Deshabilita el input
+                    disabled={!isChatActivo}
                 />
                 <button 
                     type="submit" 
-                    disabled={!nuevoMensaje.trim() || !isChatActivo} // Deshabilita el botón
-                    className="send-button"
+                    disabled={!nuevoMensaje.trim() || !isChatActivo || !usuario?.id} 
+                    className={`send-button ${!isChatActivo ? 'btn-disabled' : ''}`}
                 >
-                    <Send size={16} />
+                    <Send size={18} />
                 </button>
             </form>
         </div>

@@ -13,32 +13,40 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  return (
-    <nav className="bg-blue-600 text-white shadow-md">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold tracking-wide">
+return (
+    <nav className="w-full bg-[#0077cc] text-white shadow-lg sticky top-0 z-50">
+      {/* max-w-full para que no se vea cortado en Vercel */}
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <Link to="/" className="text-2xl font-extrabold tracking-tighter hover:opacity-90 transition-opacity">
           UdeC JobPortal
         </Link>
 
-        <div className="flex items-center gap-6">
-          <Link to="/" className="hover:text-gray-200">Inicio</Link>
-          <Link to="/vacantes" className="hover:text-gray-200">Vacantes</Link>
+        <div className="flex items-center gap-8 font-medium">
+          <Link to="/" className="hover:text-blue-200 transition-colors">Inicio</Link>
+          <Link to="/vacantes-dashboard" className="hover:text-blue-200 transition-colors">Vacantes</Link>
 
           {!token ? (
-            <>
-              <Link to="/login" className="hover:text-gray-200">Login</Link>
-              <Link to="/register" className="hover:text-gray-200">Registro</Link>
-            </>
+            <div className="flex gap-4">
+              <Link to="/login" className="hover:text-blue-200">Login</Link>
+              <Link to="/register/student" className="bg-white text-[#0077cc] px-4 py-2 rounded-lg font-bold hover:bg-gray-100 transition-all">
+                Registro
+              </Link>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center gap-4">
               {user?.rol === "estudiante" && (
-                <Link to="/estudiante" className="hover:text-gray-200">Mi Perfil</Link>
+                <Link to="/estudiante" className="bg-blue-500/30 px-3 py-1 rounded-md hover:bg-blue-500/50">Mi Perfil</Link>
               )}
               {user?.rol === "empresa" && (
-                <Link to="/empresa" className="hover:text-gray-200">Panel Empresa</Link>
+                <Link to="/empresa-dashboard" className="bg-blue-500/30 px-3 py-1 rounded-md hover:bg-blue-500/50">Panel Empresa</Link>
               )}
-              <button onClick={logout} className="bg-white text-blue-600 px-3 py-1 rounded">Cerrar sesión</button>
-            </>
+              <button 
+                onClick={logout} 
+                className="ml-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-transform active:scale-95 shadow-md"
+              >
+                Cerrar sesión
+              </button>
+            </div>
           )}
         </div>
       </div>
