@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Mail, Phone, MapPin } from 'lucide-react';
-import './VerCV.css';
+import './verCV.css';
 
 const VerCV = ({ perfil, onClose }) => {
     // 1. Extraemos el objeto CV del perfil del usuario
