@@ -1,555 +1,530 @@
-/* ============================================================
-   1. RESET TOTAL (ELIMINA FRANJAS VERDES Y MÁRGENES DE VITE)
-   ============================================================ */
-:root, body, html, #root {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden; /* Evita scroll horizontal */
-    background-color: white; /* Cambia el verde por blanco si queda algún hueco */
+:root {
+  --udec-verde: #004d2c;
+  --udec-dorado: #a28945;
+  --blanco: #ffffff;
+  --texto: #333333;
 }
 
-/* Contenedor principal para forzar ancho de ventana */
-.landing-global-wrapper {
-    width: 100vw;
-    margin: 0;
-    padding: 0;
+/* --- NAVBAR --- */
+/* --- NAVBAR --- */
+.navbar-udec {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 8%;
+  /* CAMBIO: Fondo verde institucional igual al footer */
+  background-color: var(--udec-verde); 
+  /* Eliminamos el borde superior verde porque ya todo el bloque es verde */
+  border-top: none; 
+  border-bottom: 3px solid var(--udec-dorado);
 }
 
-/* ============================================================
-   2. NAVBAR (ANCHO COMPLETO)
-   ============================================================ */
-.custom-nav {
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(5px);
-    width: 100vw;
-    height: 85px;
-    border-bottom: 1px solid #eee;
+.secondary-logo-img {
+  height: 60px; /* Mantén tu altura actual */
+  width: auto;
+  object-fit: contain;
+  padding: 5px;
+
+  /* --- AGREGA ESTA LÍNEA PARA VOLVERLO BLANCO --- */
+  filter: brightness(0) invert(1); 
 }
 
-/* ============================================================
-   3. SECCIÓN HERO (PERRO CON GAFAS - PANTALLA COMPLETA)
-   ============================================================ */
-/* ============================================================
-   ANIMACIÓN SIN ESPACIOS EN BLANCO
-   ============================================================ */
-@keyframes megaFondo {
-    0%, 100% { background-image: url('/img1.jpg'); } /* Inicio y fin iguales */
-    25%      { background-image: url('/img2.jpg'); }
-    50%      { background-image: url('/img3.jpg'); }
-    75%      { background-image: url('/img4.jpg'); }
+.navbar-logo img {
+  height: 60px;
 }
 
-.hero-section {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
-    margin: 0;
-    
-    /* IMAGEN DE BASE: Evita que se vea blanco al cargar la página */
-    background-image: url('/img4.jpg'); 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    
-    /* Duración de 12s para que cambie cada 4s aprox */
-    animation: megaFondo 12s infinite ease-in-out; 
+.navbar-nav ul {
+  display: flex;
+  list-style: none;
+  gap: 20px;
 }
 
-.hero-content-wrapper {
-    display: flex;
-    justify-content: space-between; /* Envía uno a cada lado */
-    align-items: center;
+.navbar-nav a {
+  text-decoration: none;
+  color: var(--texto);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.navbar-nav li.active a {
+  color: var(--udec-dorado);
+  border-bottom: 2px solid var(--udec-dorado);
+  padding-bottom: 5px;
+}
+
+/* --- HERO --- */
+.hero-udec {
+  position: relative;
+  height: 400px; /* Ajusta la altura según tu diseño */
+  display: flex;
+  overflow: hidden;
+}
+
+.hero-half {
+  flex: 1;
+  position: relative;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Asegura que la imagen cubra todo el espacio sin deformarse */
+}
+
+/* EL OVERLAY VERDE CON EL DEGRADADO EXACTO */
+.hero-green-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; /* Cubre solo el lado izquierdo (foto graduados) */
+  height: 100%;
+  
+  /* El degradado empieza verde y termina transparente a la mitad */
+  background: linear-gradient(
+    to right, 
+    rgba(0, 51, 26, 0.9) 0%,   /* Verde intenso institucional */
+    rgba(0, 51, 26, 0.6) 100%,  /* Empieza a desvanecerse */
+    rgba(0, 51, 26, 0) 120%     /* Totalmente transparente a la mitad exacta */
+  );
+  
+  z-index: 1;
+}
+
+/* TEXTO SUPERPUESTO */
+.hero-text-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 8%;
+  z-index: 2; /* Texto por encima del verde */
+}
+
+.text-container h1 {
+  color: var(--blanco);
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text-container p {
+  color: var(--blanco);
+  font-size: 1rem;
+  margin-top: 15px;
+  border-top: 2px solid var(--udec-dorado);
+  padding-top: 10px;
+  display: inline-block;
+}
+/* --- ACCIONES (LOGIN Y REGISTRO) --- */
+.actions-section-white {
+  padding: 50px 0; /* Padding arriba/abajo, quitamos el horizontal anterior de 8% */
+  flex: 1; /* Mantenemos esto para el Sticky Footer */
+}
+
+.actions-section-grid {
+  display: grid;
+  /* Mantenemos tus proporciones de columnas originales */
+  grid-template-columns: 1.2fr 1fr; 
+  gap: 100px; /* Mantenemos el espacio entre ellas */
+  
+  /* NUEVO: Limitamos el ancho para que no se pegue a los bordes */
+  max-width: 1100px; /* Ajusta este valor si lo quieres más ancho o estrecho */
+  margin: 0 auto; /* Centra horizontalmente todo el bloque */
+  padding: 0 40px; /* Un poco de "aire" en los lados para cuando la pantalla empiece a achicarse */
+}
+
+.action-column h2, .highlights-block h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 25px;
+  position: relative;
+  border-bottom: none; /* Quitamos el borde anterior */
+}
+
+.action-column h2::after, .highlights-block h3::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100px; /* Largo de la línea dorada */
+  height: 2px;
+  background-color: var(--udec-dorado);
+}
+
+/* Formulario */
+.udec-input-field {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: var(--gris-suave);
+}
+
+/* --- ESTILOS DEL CAMPO DE CONTRASEÑA --- */
+/* --- CONTENEDOR PRINCIPAL DEL CAMPO DE CONTRASEÑA --- */
+.password-input-wrapper {
+  position: relative; /* Mantenemos esto para el icono absoluto */
+  width: 100%;
+  
+  /* --- CAMBIOS CLAVE PARA EL CENTRADO --- */
+  display: flex; /* Convierte el contenedor en Flexbox */
+  align-items: center; /* Centra verticalmente todos sus hijos */
+  margin-bottom: 15px;
+}
+
+.password-field {
+  padding: 12px 50px 12px 12px; /* Padding: Top, Right (espacio para icono), Bottom, Left */
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: var(--gris-suave);
+  
+  /* --- CAMBIOS CLAVE --- */
+  margin: 0; /* QUITAMOS cualquier margen que pueda estar descentrando */
+  box-sizing: border-box; /* Asegura que el padding no altere la altura total */
+}
+
+/* --- ESTILOS DEL BOTÓN DE OJO (SIN SALTO) --- */
+
+.password-toggle-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  
+  /* NUEVO: Contenedor flex para superponer iconos */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* NUEVO: Definimos un tamaño fijo para el botón para que no "baile" */
+  width: 24px; 
+  height: 24px;
+  
+  color: #888;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #333;
+}
+
+.password-toggle-btn:active {
+  transform: translateY(-50%) scale(0.9);
+}
+
+/* Estilo base para AMBOS iconos */
+.password-icon {
+  stroke-width: 1.5;
+  
+  /* NUEVO: Posicionamiento absoluto dentro del botón para superponerlos */
+  position: absolute; 
+  
+  /* NUEVO: Transición suave de opacidad (esto quita el salto visual) */
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* --- CLASES DE VISIBILIDAD (CONTROLADAS POR JS) --- */
+
+.password-icon.visible {
+  opacity: 1; /* Totalmente visible */
+  transform: scale(1); /* Tamaño normal */
+  pointer-events: auto; /* Permite clics si fuera necesario */
+}
+
+.password-icon.hidden {
+  opacity: 0; /* Totalmente invisible */
+  transform: scale(0.8); /* Pequeño efecto de encogimiento al ocultarse */
+  pointer-events: none; /* Evita que interactúe cuando está oculto */
+}
+
+/* Opcional: El icono se pone verde cuando activas el ojo */
+.password-toggle-btn:focus .password-icon,
+.password-toggle-btn:active .password-icon {
+  color: var(--udec-verde);
+}
+
+.login-form-extras {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-password-link {
+  font-size: 0.85rem;
+  color: #666;
+  text-decoration: none;
+}
+
+/* Botones con estilo de la imagen */
+.udec-green-btn {
+  background: linear-gradient(to bottom, #104e32, #00301b);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px; /* Bordes muy redondeados */
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.udec-green-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
+}
+
+.register-buttons-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  /* CAMBIO AQUÍ: Esto obliga a los botones a usar el ancho disponible */
+  align-items: stretch; 
+  width: 100%;
+}
+
+.register-big-btn {
+  padding: 18px 40px;
+  /* CAMBIO AQUÍ: Usamos width 100% y un max-width para asegurar que estiren */
+  width: 100%; 
+  max-width: 450px; /* Prueba con 450px para que sean bien largos */
+  min-width: 300px; 
+  
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* --- HIGHLIGHTS (OFERTAS Y EMPRESAS) --- */
+.highlights-section-white {
+  padding: 0 8% 50px 8%;
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 100px;
+}
+
+.highlights-block h3 {
+  font-size: 1.4rem;
+  color: var(--texto-oscuro);
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--udec-dorado);
+  display: inline-block;
+}
+
+/* --- FOOTER --- */
+.footer-dark-green {
+  background-color: var(--udec-verde);
+  color: var(--blanco);
+  padding: 20px 8%; /* Aumentamos un poco el padding para que se vea más profesional */
+  
+  display: flex;
+  /* CAMBIO 1: Cambiamos space-between por center */
+  justify-content: center; 
+  align-items: center;
+  
+  /* CAMBIO 2: Añadimos espacio entre el logo y el texto */
+  gap: 60px; 
+  border-top: 3px solid var(--udec-dorado);
+  /* CAMBIO 3: Aseguramos que las líneas de texto se alineen al centro entre ellas */
+  text-align: left; 
+}
+
+.footer-logo-and-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.footer-logo-small {
+  height: 40px;
+}
+
+.footer-info-text p {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.footer-social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.social-icon {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+
+/* Responsivo */
+/* =========================================
+   MEDIA QUERIES (RESPONSIVO - MÓVILES)
+   ========================================= */
+
+/* Dispositivos medianos (tablets y laptops pequeñas) */
+@media (max-width: 1024px) {
+  .navbar-udec, 
+  .hero-text-overlay, 
+  .actions-section-white, 
+  .highlights-section-white, 
+  .footer-dark-green {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  .text-container h1 {
+    font-size: 1.8rem;
+  }
+}
+
+/* Dispositivos pequeños (Teléfonos Celulares) */
+@media (max-width: 768px) {
+  /* --- NAVBAR --- */
+  .navbar-udec {
+    padding: 10px 15px; /* Menos espacio en los lados */
+  }
+
+  /* Esto hará que el logo de la izquierda y el de la derecha se vean blancos */
+.navbar-logo img, 
+.secondary-logo-img {
+  height: 60px;
+  filter: brightness(0) invert(1); /* Convierte el logo a color blanco */
+}
+
+  /* --- HERO --- */
+  .hero-udec {
+    height: 300px; /* Reducimos la altura en móviles */
+    flex-direction: column; /* Apilamos las imágenes si fuera necesario */
+  }
+
+  /* En móviles muy pequeños, ocultamos la segunda imagen y extendemos el verde */
+  .hero-half.right-side {
+    display: none;
+  }
+  
+  .hero-half.left-side {
     width: 100%;
-    padding: 0 8%; /* Espacio para que no peguen al borde del monitor */
-}
+  }
 
-/* CAJA DEL LOGO (IZQUIERDA) */
-.hero-logo-container {
-    width: 35%; /* Ajusta según el tamaño de tu logo */
-}
+  .hero-green-overlay {
+    background: linear-gradient(
+      to bottom, 
+      rgba(0, 51, 26, 0.9) 0%, 
+      rgba(0, 51, 26, 0.8) 100% /* Hacemos el verde más uniforme */
+    );
+  }
 
-.glass-card-logo {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    border-radius: 15px;
-    display: flex;
-    justify-content: center;
-}
-
-/* CAJA DEL TEXTO (DERECHA) */
-.hero-text-container {
-    width: 45%; /* Ancho de la caja de texto */
-}
-
-.glass-card-text {
-    background: rgba(255, 255, 255, 0.4); /* Transparencia sutil */
-    backdrop-filter: blur(15px);
-    padding: 40px;
-    border-radius: 25px;
+  .hero-text-overlay {
+    padding-left: 15px;
+    padding-right: 15px;
+    justify-content: center; /* Centramos el texto */
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
+  }
 
-/* ESTILOS INTERNOS DEL TEXTO */
-.titulo-serif-hero {
-    font-family: 'Georgia', serif;
-    font-size: 3rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-}
+  .text-container h1 {
+    font-size: 1.5rem; /* Texto más pequeño */
+  }
 
-.linea-decorativa {
-    width: 80px;
-    height: 3px;
-    background-color: #42adab;
-    margin: 0 auto 20px;
-    border: none;
-    opacity: 1;
-}
+  .text-container p {
+    font-size: 0.9rem;
+    display: block; /* Ocupa todo el ancho */
+    border-top: none; /* Quitamos la línea dorada para simplificar */
+    padding-top: 0;
+  }
 
-.texto-descripcion {
-    font-size: 1.2rem;
-    color: #444;
-    line-height: 1.5;
-    margin-bottom: 20px;
-}
+  /* --- SECCIONES DE ACCIONES (LOGIN/REGISTRO) --- */
+  .actions-section-white {
+    padding: 30px 15px;
+  }
 
-.texto-frase {
-    font-style: italic;
-    font-weight: bold;
-    color: #555;
-    margin-bottom: 30px;
-}
-
-.btn-donar-hero {
-    background-color: #c5d68d; /* Color verde suave de tu diseño */
-    color: #333;
-    border: none;
-    padding: 12px 40px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-donar-hero:hover {
-    background-color: #b3c57a;
-    transform: scale(1.05);
-}
-
-/* ============================================================
-   4. SECCIÓN MISIÓN Y VISIÓN (CUADROS A LOS LADOS)
-   ============================================================ */
-.mision-vision-fav {
-    width: 100vw;
-    height: 85vh; /* Altura para que se vea bien la imagen */
-    background-image: url('/img7.jpg'); /* Tu imagen favorita del perro */
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed; /* Efecto elegante al bajar */
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.mision-vision-content {
-    display: flex;
-    justify-content: space-between; /* Empuja los cuadros a los extremos */
-    width: 100%;
-    padding: 0 6%; /* Espacio para que no toquen el borde del monitor */
-}
-
-/* Cuadros semitransparentes (Glassmorphism) */
-.glass-box {
-    background: rgba(255, 255, 255, 0.75); /* Transparencia para ver al perro detrás */
-    backdrop-filter: blur(8px);
-    padding: 40px;
-    width: 42%; /* Tamaño de cada cuadro */
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-    text-align: justify;
-    transition: transform 0.3s ease;
-}
-
-.glass-box:hover {
-    transform: translateY(-10px);
-    background: rgba(255, 255, 255, 0.9);
-}
-
-/* ============================================================
-   5. OBJETIVOS (SISTEMA DE TARJETAS)
-   ============================================================ */
-.objetivos-section {
-    padding: 80px 5%;
-    background-color: #ffffff;
-    text-align: center;
-}
-
-.titulo-serif-objetivos {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 50px;
-    text-transform: uppercase;
-}
-
-.objetivos-container {
-    display: flex;
-    justify-content: center;
+.actions-section-grid {
+    grid-template-columns: 1fr; /* Una sola columna */
     gap: 30px;
-    flex-wrap: wrap; /* Para que sea responsivo en celulares */
+    padding: 0 15px; /* Menos padding lateral en móviles */
+    max-width: 100%; /* Permitimos que ocupe todo el ancho en móviles */
+  }
+
+  .login-form-extras {
+    flex-direction: column-reverse; /* Botón arriba, enlace abajo */
+    gap: 15px;
+    align-items: center; /* Centramos el botón */
+  }
+
+ .btn-login-submit {
+  padding: 12px 60px !important; /* El !important asegura que sobreescriba cualquier otra regla */
+  min-width: 180px; 
+  border-radius: 25px;
 }
 
-.obj-card-custom {
-    flex: 1;
-    min-width: 300px;
-    max-width: 400px;
-    padding: 20px;
-    transition: transform 0.3s ease;
-}
+  /* NUEVO: Hacemos los botones de registro anchos completos SOLO en móviles */
+  .register-buttons-group {
+    align-items: center; /* Centramos el grupo */
+    gap: 15px;
+  }
+  
+  .register-big-btn {
+    width: 100%; /* Botones de registro ancho completo en móvil */
+    min-width: 0; /* Quitamos el min-width de escritorio */
+    align-self: center; /* Centramos */
+  }
 
-.obj-card-custom:hover {
-    transform: translateY(-10px);
-}
+  .forgot-password-link {
+    text-align: center;
+  }
 
-.obj-img-wrapper {
-    width: 100%;
-    height: 250px;
-    overflow: hidden;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-
-.obj-img-real {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Esto evita que la imagen se estire feo */
-}
-
-.obj-titulo {
-    font-weight: 800;
-    color: #2c3e50;
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-}
-
-.obj-descripcion {
-    color: #666;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    text-align: justify; 
+  /* --- FOOTER --- */
+  .footer-dark-green {
+    flex-direction: column; /* Apilamos todo verticalmente */
+    gap: 20px;
+    padding: 30px 15px;
     
-    /* Opcional: Un poco de margen a los lados para que el 
-       justificado no toque los bordes de la tarjeta */
-    padding: 0 10px;
-}
+  }
 
-/* ============================================================
-   6. ELEMENTOS FLOTANTES (REDES Y CHAT)
-   ============================================================ */
-.social-sidebar {
-    position: fixed;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.6);
-    padding: 15px 8px;
-    border-radius: 25px 0 0 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    z-index: 9999;
-}
+  .footer-logo-and-info {
+    flex-direction: column; /* Logo sobre texto */
+    gap: 10px;
+  }
 
-.social-sidebar img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    transition: 0.3s;
-}
+  .footer-info-text p {
+    font-size: 0.85rem; /* Texto un poco más grande para legibilidad */
+  }
 
-.social-sidebar img:hover {
-    transform: scale(1.3) rotate(10deg);
-}
-
-.chatbot-container {
-    position: fixed;
-    bottom: 25px;
-    right: 85px;
-    z-index: 9999;
-}
-
-.chat-pill {
-    background: #42adab;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 5px 15px rgba(66, 173, 171, 0.4);
-}
-
-/* ============================================================
-   7. TIPOGRAFÍAS Y OTROS
-   ============================================================ */
-.titulo-serif {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-weight: bold;
-    color: #222;
-    text-align: center;
-}
-
-hr {
-    border: 0;
-    border-top: 2px solid #42adab;
-    width: 50px;
-    margin: 10px auto 20px;
-}
-
-/* Estilos de burbujas de chat */
-.msg-bubble.user { background: #d1ecf1; align-self: flex-end; padding: 8px; border-radius: 10px; }
-.msg-bubble.bot { background: #f8f9fa; align-self: flex-start; padding: 8px; border-radius: 10px; }
-
-/* Ajustes para el Navbar */
-.auth-header-links {
-    display: flex;
-    align-items: center;
-}
-
-.auth-item {
-    color: #666 !important; /* Gris oscuro */
-    font-weight: 600 !important;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: color 0.3s ease;
-    padding: 0 5px !important;
-}
-
-.auth-item:hover {
-    color: #42adab !important; /* El verde de tu fundación */
-}
-
-/* Asegurar que el navbar no sea transparente si no quieres */
-.navbar {
-    height: 80px;
-    z-index: 1000;
-}
-
-.auth-item-custom {
-    color: #666 !important;
-    font-weight: bold !important;
-    font-size: 0.9rem !important;
-    text-decoration: none !important;
-    white-space: nowrap; /* Evita que el texto se rompa en dos líneas */
-    transition: 0.3s;
-}
-
-.auth-item-custom:hover {
-    color: #42adab !important; /* El verde de tu fundación */
-}
-
-/* Ajuste preventivo para el body debido al navbar fixed */
-body {
-    padding-top: 80px; 
-}
-
-/* RESET PARA EL NAVBAR */
-.navbar-custom-main {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 85px;
-    background-color: #0b301e;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-}
-
-.navbar-content-container {
-    width: 100%;
-    max-width: 1400px; /* Ajusta esto según el ancho de tu monitor */
-    margin: 0 auto;
-    padding: 0 40px; /* Espacio a los lados para que no peguen al borde */
-    display: flex;
-    justify-content: space-between; /* LOGO IZQUIERDA - BOTONES DERECHA */
-    align-items: center;
-}
-
-.navbar-logo-img {
-    height: 65px;
-    width: auto;
-}
-
-.navbar-auth-group {
-    display: flex;
-    gap: 15px;
-}
-
-.auth-item-link {
-    text-decoration: none !important;
-    color: #ffffff !important; /* Texto blanco */
-    font-weight: 600 !important;
-    font-size: 0.95rem;
-    transition: 0.3s;
-    opacity: 0.9;
-}
-
-.auth-item-link:hover {
-    color: #42adab !important; /* El verde agua de tu logo para el hover */
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-}
-
-/* El separador entre links */
-.separator-nav {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* ============================================================
-   ESTILOS DEL PIE DE PÁGINA (RESERVADO)
-   ============================================================ */
-.footer-universidad {
-    background-color: #f8f9fa; /* Un gris muy claro para diferenciar del blanco */
-    padding: 40px 0;
-    border-top: 1px solid #eee;
-    text-align: center;
-    width: 100vw;
-    /* ESTO ES LO QUE CENTRA TODO */
-    display: flex;
-    flex-direction: column; /* Pone un texto debajo del otro */
-    align-items: center;    /* Centra horizontalmente */
-    justify-content: center; /* Centra verticalmente si hay altura */
-    text-align: center;
-    margin-top: 50px;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.copyright-text {
-    color: #888;
-    font-size: 0.9rem;
-    margin-bottom: 5px;
-}
-
-.universidad-text {
-    color: #42adab; /* El verde de tu logo */
-    font-size: 1rem;
-    margin-bottom: 20px;
-}
-
-.footer-links {
-    display: flex;
+  .footer-social-icons {
     justify-content: center;
-    gap: 15px;
+    width: 100%;
+    margin-top: 10px;
+  }
 }
 
-.footer-links a {
-    text-decoration: none;
-    color: #666;
-    font-size: 0.85rem;
-    transition: 0.3s;
+/* Teléfonos muy pequeños */
+@media (max-width: 480px) {
+  .text-container h1 {
+    font-size: 1.3rem;
+  }
+  
+  .udec-green-btn {
+    padding: 10px 20px;
+  }
 }
 
-.footer-links a:hover {
-    color: #333;
-}
-
-.separator {
-    color: #ddd;
-}
-
-/* BOTÓN CON ESTILO VERDE LIMA */
-.nav-auth-button {
-    background-color: #c5d38a !important; /* El verde lima de tu imagen */
-    color: #1a4d36 !important; /* Texto verde oscuro para contraste */
-    padding: 10px 22px !important;
-    border-radius: 12px !important; /* Bordes suaves como el de "Inicia Ahora" */
-    font-weight: 700 !important;
-    text-decoration: none !important;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: inline-block;
-}
-
-/* EFECTO AL PASAR EL CURSOR (HOVER) */
-.nav-auth-button:hover {
-    background-color: #556b2f !important; /* CAMBIO A VERDE OLIVA (OliveDrab) */
-    color: #c5d38a !important;           /* LAS LETRAS PASAN AL VERDE LIMA ORIGINAL */
-    border: 2px solid #c5d38a;           /* Opcional: un borde para resaltar el botón */
-    transform: scale(1.05);              /* Pequeño crecimiento para dinamismo */
-    cursor: pointer;
-}
-
-/* Contenedor para separarlos un poco */
-.navbar-auth-group {
-    display: flex;
-    gap: 15px; /* Espacio entre botones */
-    align-items: center;
-}
-
-/* CONTENEDOR DEL DROPDOWN */
-.dropdown-custom {
-    position: relative;
-    display: inline-block;
-}
-
-/* CONTENIDO QUE SE DESPLIEGA */
-.dropdown-content-custom {
-    display: none; /* Oculto por defecto */
-    position: absolute;
-    background-color: #0b301e; /* Verde oscuro del navbar para que combine */
-    min-width: 160px;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-    border-radius: 8px;
-    z-index: 1000;
-    margin-top: 5px;
-    overflow: hidden;
-    border: 1px solid #c5d38a; /* Borde verde lima delgado */
-}
-
-/* MOSTRAR AL PASAR EL MOUSE */
-.dropdown-custom:hover .dropdown-content-custom {
-    display: block;
-    animation: fadeIn 0.3s ease;
-}
-
-/* BOTONES INTERNOS (EGRESADO / EMPRESA) */
-.dropdown-item-custom {
-    color: white !important;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: 0.3s;
-    text-align: center;
-}
-
-/* EFECTO HOVER EN LAS OPCIONES: Verde Oliva con letras verdes */
-.dropdown-item-custom:hover {
-    background-color: #556b2f !important; /* Verde Oliva */
-    color: #c5d38a !important;           /* Letras Verde Lima */
-}
-
-/* ANIMACIÓN DE ENTRADA */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* --- CONTENEDOR PRINCIPAL --- */
+.landing-udec-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ocupa el 100% de la altura de la ventana (viewport height) */
 }

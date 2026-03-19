@@ -55,7 +55,7 @@ if (res && res.data) {
 
     if (token) {
         localStorage.setItem("token", token); // Este es el JWT de Firebase
-        localStorage.setItem("user", JSON.stringify(usuario));
+        localStorage.setItem("usuario", JSON.stringify(usuario)); // <--- Corrección: Ahora dice "usuario"
     } else {
         // Si no llega token, el middleware rechazará las peticiones futuras
         console.error("No se recibió el token del servidor");

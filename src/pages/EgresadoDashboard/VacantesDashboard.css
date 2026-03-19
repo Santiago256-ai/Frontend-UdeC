@@ -1,0 +1,1207 @@
+/* VacantesDashboard.css - VERSIÓN FINAL ESTILO MAQUETA UDEC */
+
+/* 1. VARIABLES INSTITUCIONALES Y RESET */
+:root {
+  --udec-green: #006b3f;
+  --udec-green-dark: #004d2e;
+  --udec-orange: #f29400;
+  --white: #ffffff;
+  --text-main: #1a202c;
+  --text-muted: #718096;
+  --bg-main: #f0f2f5; /* Fondo gris claro de la imagen 1 */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 80px;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', sans-serif; /* Tipografía más moderna */
+}
+
+.dashboard-layout {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* 2. BARRA LATERAL (SIDEBAR) */
+.sidebar {
+    width: 260px; /* <--- ESTO ES VITAL */
+    min-width: 260px; 
+    height: 100vh;
+    background-color: var(--udec-green); /* Asegúrate que tenga el color */
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    left: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Animación suave */
+    z-index: 100;
+}
+
+.sidebar-top {
+    flex: 1; /* Ocupa todo el espacio disponible */
+    overflow-y: auto; /* Activa scroll interno si el menú es muy largo */
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-top::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar-top::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+}
+
+.sidebar.collapsed {
+    width: 80px !important;
+    min-width: 80px !important; /* Reseteamos el min-width para que permita encogerse */
+}
+
+.sidebar.collapsed span {
+    opacity: 0;
+    visibility: hidden;
+    display: none; /* Esto quita el espacio del texto */
+}
+
+/* Evita que el texto intente ajustarse en varias líneas mientras se cierra */
+.menu-item span, .btn-content span {
+    white-space: nowrap; 
+    overflow: hidden;
+}
+
+/* 5. Centrar iconos */
+.sidebar.collapsed .menu-item,
+.sidebar.collapsed .btn-content {
+    justify-content: center;
+    padding: 15px 0;
+}
+
+/* 6. Ajustar el logo */
+.sidebar.collapsed .udec-logo-placeholder {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+}
+
+/* Contenedor del logo en el Sidebar */
+.logo-section {
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Línea sutil de separación */
+    margin-bottom: 10px;
+}
+
+.platform-logo-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    min-height: 60px; /* Mantiene la altura constante para que el menú no salte */
+}
+
+/* Estilo para el logo grande */
+.logo-full-expanded {
+    height: 45px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Estilo para el icono cuando está colapsado */
+.logo-icon-collapsed {
+    height: 35px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Animación opcional para que aparezca suavemente */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Logo cuando el menú está expandido */
+.logo-large {
+    height: 50px; /* Ajusta según el diseño de tu logo */
+    width: auto;
+    object-fit: contain;
+    transition: all 0.3s ease;
+}
+
+/* Logo cuando el menú está contraído (más pequeño) */
+.logo-small {
+    height: 35px;
+    width: auto;
+    object-fit: contain;
+}
+
+.udec-logo-placeholder {
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+  border: 2px solid white;
+  padding: 4px 8px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center; /* Centra verticalmente icono y texto */
+  gap: 10px;           /* Un poco menos de espacio para que no se amontone */
+  padding: 12px 18px;  /* Reducimos el padding para que sea más estilizado */
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  width: 100%;
+  transition: all 0.3s ease;
+  text-align: left;    /* Asegura que el contenido se alinee a la izquierda */
+}
+
+.menu-item:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1); /* Un poco más de brillo en el hover */
+}
+
+.menu-item.active {
+  background-color: var(--udec-orange);
+  color: white;
+}
+
+/* 🛡️ ESTO ES CLAVE PARA LA ALINEACIÓN DEL ICONO */
+.menu-item svg {
+  flex-shrink: 0;      /* Evita que el icono se encoja si el texto es largo */
+  min-width: 20px;     /* Asegura que todos los iconos ocupen el mismo ancho visual */
+  display: flex;
+  justify-content: center;
+}
+
+.logout-item {
+  margin-top: 10px;    /* Separa un poco del botón de contraer */
+  color: #ff8a8a;      /* Un color sutilmente rojizo para advertir la acción */
+}
+
+/* 3. CONTENEDOR PRINCIPAL (GLASS EFFECT) */
+.glass-container {
+  flex-grow: 1;
+  margin: 0; /* Eliminamos margen para que se vea más integrado */
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-header {
+  height: 70px;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+}
+
+.portal-tag { 
+  font-size: 15px; 
+  font-weight: 700; 
+  color: var(--text-dark); 
+  text-transform: uppercase;
+}
+
+.search-box {
+  background: var(--white);
+  padding: 10px 20px;
+  border-radius: 25px; /* Más redondeado como en la imagen 1 */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 300px;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-box input { border: none; outline: none; font-size: 13px; width: 100%; color: var(--text-muted); }
+
+/* 4. ÁREA DE CONTENIDO (LISTA + DETALLE) */
+.vacantes-view-container {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 70px);
+  padding: 0 20px 20px 20px;
+  gap: 20px;
+}
+
+/* Panel Izquierdo: Lista de Vacantes */
+.vacantes-list-panel {
+  width: 40%;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.vacantes-list-panel h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+}
+
+.vacante-card-item {
+  background: var(--white);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: 0.3s;
+  border: 2px solid transparent;
+}
+
+.vacante-card-item:hover, .vacante-card-item.active {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--udec-green);
+}
+
+.vacante-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.btn-details-action {
+  background-color: var(--udec-green) !important;
+  color: white !important;
+  border: none;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 5. PANEL DERECHO: DETALLE (EL EFECTO FLOTANTE) */
+.vacante-detail-panel {
+  width: 60%;
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.detail-header-info h3 {
+  font-size: 26px;
+  color: var(--text-dark);
+  margin-bottom: 5px;
+}
+
+.detail-body-text {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4a5568;
+}
+
+/* 6. BOTONES DE ACCIÓN (VERDE Y NARANJA UDEC) */
+.actions-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.btn-apply-main {
+  background: var(--udec-green);
+  color: white;
+  padding: 16px;
+  border-radius: 10px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: 0.3s;
+}
+
+.btn-apply-main:hover {
+  background: var(--udec-green-dark);
+  box-shadow: 0 4px 12px rgba(0, 107, 63, 0.2);
+}
+
+.btn-cv-secondary {
+  background: var(--udec-orange);
+  color: white;
+  padding: 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* ÁREA DRAG AND DROP (Visto en imagen 1) */
+.drag-drop-area {
+  border: 2px dashed #cbd5e0;
+  background: #fdfdfd;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 7. SCROLLBAR PERSONALIZADO */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+
+/* Estenedor de las etiquetas en la tarjeta y en el detalle */
+.card-meta-tags, .detail-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Estilo base para los Badges */
+.badge-cupos, .badge-date, .meta-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+/* Badge de Cupos (Inspirado en el color naranja UDEC para resaltar urgencia) */
+.badge-cupos {
+  background-color: #fff9f0;
+  color: #bf6a02;
+  border-color: #fbd38d;
+}
+
+/* Badge cuando quedan pocos cupos (Crítico) */
+.badge-cupos.urgent {
+  background-color: #fff5f5;
+  color: #c53030;
+  border-color: #feb2b2;
+}
+
+/* Badge de Fechas (Gris azulado elegante) */
+.badge-date, .meta-tag-badge {
+  background-color: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+/* Iconos dentro de los badges */
+.badge-icon {
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* Ajuste para el detalle derecho */
+.detail-meta-row {
+  margin-bottom: 20px;
+}
+
+.meta-tag-badge b {
+  margin-right: 3px;
+  color: #1e293b;
+}
+
+/* Badge de Publicación (Verde UdeC suave) */
+.badge-published {
+    background-color: #e6f4ea !important; /* El !important asegura que se aplique */
+    color: #006b3f !important;
+    border: 1px solid #c2e0d1 !important;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+/* Badge de Cierre (Azul grisáceo para neutralidad o Rojo si falta poco) */
+.badge-deadline {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+/* Badge de Cupos (Naranja UdeC para resaltar disponibilidad/escasez) */
+/* 1. ESTADO NORMAL (4 o más cupos) - Naranja UdeC suave */
+.badge-slots {
+    background-color: #f1f5f9 !important; /* El gris de los otros badges */
+    color: #475569 !important;           /* El color de texto gris oscuro */
+    border: 1px solid #e2e8f0 !important;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+/* 2. ESTADO ADVERTENCIA (Exactamente 3 cupos) - Amarillo */
+.badge-slots.cupos-warning {
+    background-color: #fff4e5 !important; /* Naranja UdeC suave */
+    color: #f29400 !important;           /* Texto naranja fuerte */
+    border: 1px solid #ffead0 !important;
+}
+
+/* 3. ESTADO CRÍTICO (2 o menos cupos) - Rojo + Parpadeo */
+.badge-slots.cupos-critico {
+    background-color: #fef2f2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fecaca !important;
+    /* Usamos la animación que ya creamos para la fecha */
+    animation: simpleBlink 1.5s infinite; 
+}
+
+/* 4. ESTILO PARA LAS NEGRITAS (¡Últimos! / ¡Alerta!) */
+.badge-slots b {
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 9px;
+    margin-left: 5px;
+}
+
+.badge-deadline.urgent, .badge-cupos.urgent {
+    background-color: #fff5f5;
+    color: #e53e3e;
+    border: 1px solid #feb2b2;
+    animation: pulse-red 2s infinite;
+}
+
+/* Efecto hover sutil para todos los badges */
+.meta-tag-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+/* Badge de Cierre Urgente (Rojo suave) */
+.badge-deadline.urgent {
+    background-color: #fff5f5 !important;
+    color: #e53e3e !important;
+    border: 1px solid #feb2b2 !important;
+}
+
+/* Animación sutil de pulso para llamar la atención */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.2); }
+    70% { box-shadow: 0 0 0 5px rgba(229, 62, 62, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); }
+}
+
+
+/* --- FOOTER DEL SIDEBAR --- */
+.sidebar-footer {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background-color: var(--udec-green); /* Asegura que tape el scroll de arriba */
+    padding: 10px;
+    flex-shrink: 0; /* Evita que los botones se aplasten */
+}
+
+.collapse-btn-footer, .logout-btn-sidebar {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    width: 100%;
+    outline: none;
+}
+
+.btn-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Efectos Hover */
+.collapse-btn-footer:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.logout-btn-sidebar:hover {
+    background-color: #e53e3e; /* Rojo para salida */
+    color: white;
+}
+
+/* Manejo de rotación del icono */
+.icon-transition {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* AJUSTES CUANDO EL SIDEBAR ESTÁ COLAPSADO */
+.sidebar-collapsed .btn-content {
+    justify-content: center;
+    gap: 0;
+}
+
+.sidebar-collapsed .sidebar-footer {
+    padding: 15px 5px;
+}
+
+.sidebar-collapsed .collapse-btn-footer, 
+.sidebar-collapsed .logout-btn-sidebar {
+    padding: 12px 0;
+}
+
+/* --- AJUSTE PARA MÓVILES (Pantallas < 768px) --- */
+@media (max-width: 768px) {
+    .dashboard-layout {
+        flex-direction: column; /* El sidebar pasa a estar arriba o oculto */
+    }
+
+    .sidebar {
+        position: fixed;
+        width: 100% !important;
+        height: auto;
+        bottom: 0; /* Menú tipo barra inferior en móvil o lateral flotante */
+        z-index: 1000;
+        flex-direction: row; /* En móvil se ve mejor horizontal */
+    }
+    
+    /* Si prefieres el clásico menú lateral que sale de lado en móvil: */
+    .sidebar.collapsed {
+        left: -100%; /* Escondido en móvil por defecto */
+    }
+}
+
+/* --- AJUSTES DE OPTIMIZACIÓN PARA MENÚ CONTRAÍDO --- */
+
+/* 1. Reducir el padding y el logo cuando está colapsado */
+.sidebar.collapsed .logo-section {
+    padding: 20px 10px; /* Menos espacio superior */
+}
+
+/* 2. Reducir el espacio de los items del menú */
+.sidebar.collapsed .menu-item {
+    padding: 12px 0; /* Items más compactos */
+}
+
+/* 3. Ajustes específicos para el Footer (Contraer y Cerrar Sesión) */
+.sidebar.collapsed .sidebar-footer {
+    padding: 5px; /* Relleno mínimo */
+    gap: 4px;     /* Casi sin separación entre botones */
+}
+
+.sidebar.collapsed .collapse-btn-footer, 
+.sidebar.collapsed .logout-btn-sidebar {
+    padding: 8px 0; /* Altura de botón reducida */
+}
+
+/* 4. FORZAR ICONOS MÁS PEQUEÑOS (Solo en estado colapsado) */
+.sidebar.collapsed svg {
+    width: 16px !important;  /* Bajamos de 18px/20px a 16px */
+    height: 16px !important;
+}
+
+/* 5. Asegurar que no haya nada que empuje el contenido hacia abajo */
+.sidebar.collapsed .btn-content {
+    justify-content: center;
+    margin: 0;
+}
+
+/* Esto permite que los nombres floten hacia afuera */
+.sidebar.collapsed, 
+.sidebar.collapsed .sidebar-top {
+    overflow: visible !important;
+}
+
+/* --- CORRECCIÓN FINAL TOOLTIPS --- */
+
+/* --- TOOLTIPS SUTILES PARA MENÚ CONTRAÍDO --- */
+
+/* 1. Preparar el contenedor del item */
+.sidebar.collapsed .menu-item span,
+.sidebar.collapsed .collapse-btn-footer span,
+.sidebar.collapsed .logout-btn-sidebar span {
+  left: 85px;
+    position: relative;
+    overflow: visible; /* Permitir que la etiqueta flote hacia afuera */
+}
+
+/* 2. Convertir el span en una etiqueta flotante SUTIL */
+.sidebar.collapsed .menu-item:hover span,
+.sidebar.collapsed .collapse-btn-footer:hover span,
+.sidebar.collapsed .logout-btn-sidebar:hover span {
+  opacity: 1;
+    left: 95px; /* Aquí es donde se separa visualmente de la barra */
+    visibility: visible;
+    display: block !important; /* Volvemos a mostrarlo */
+    position: absolute;
+    left: 65px; /* Ligeramente más cerca del icono */
+    background-color: rgba(0, 107, 63, 0.95); /* Verde UdeC con ligera transparencia */
+    color: white;
+    padding: 4px 10px; /* Relleno mucho más compacto */
+    border-radius: 4px; /* Bordes menos redondeados para mayor seriedad */
+    font-size: 11px; /* Fuente más pequeña y sutil */
+    font-weight: 500; /* Peso de fuente medio, menos pesado */
+    white-space: nowrap;
+    opacity: 0; /* Invisible por defecto */
+    pointer-events: none; /* No interfiere con el clic en el icono */
+    transition: all 0.25s ease-out; /* Transición suave */
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.15); /* Sombra más suave y discreta */
+    border: 1px solid rgba(255,255,255,0.1); /* Borde casi invisible */
+    z-index: 999;
+}
+
+/* 3. Flechita pequeña y sutil */
+.sidebar.collapsed .menu-item span::before {
+    content: "";
+    position: absolute;
+    left: -4px; /* <--- Mantenlo entre -4px y -5px */
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-right: 4px solid rgba(0, 107, 63, 0.95);
+}
+
+/* 4. Mostrar al pasar el cursor (Hover) */
+.sidebar.collapsed .menu-item:hover span,
+.sidebar.collapsed .collapse-btn-footer:hover span,
+.sidebar.collapsed .logout-btn-sidebar:hover span {
+    opacity: 1;
+    left: 85px; /* <--- Aumenta esto para separar el cuadro de la barra */
+    visibility: visible;
+}
+
+/* 5. Ajuste especial sutil para el botón de Cerrar Sesión (Rojo suave) */
+.sidebar.collapsed .logout-btn-sidebar:hover span {
+    background-color: rgba(220, 38, 38, 0.95); /* Rojo más suave con transparencia */
+}
+.sidebar.collapsed .logout-btn-sidebar:hover span::before {
+    border-right-color: rgba(220, 38, 38, 0.95);
+}
+
+/* CONTENEDOR MAESTRO DEL HEADER */
+.main-header-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* FRANJA DE COLORES SUPERIOR */
+.header-top-bar {
+    height: 35px; /* Ajusta según prefieras */
+    display: flex;
+    width: 100%;
+}
+
+.bar-green {
+    flex: 2; /* Más ancha */
+    background-color: #006b3f;
+}
+
+.bar-orange {
+    flex: 1; /* Más angosta */
+    background-color: #f29400;
+}
+
+/* CONTENIDO BLANCO */
+.header-content {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    border-bottom: 1px solid #eee;
+}
+
+/* LADO IZQUIERDO: LOGO */
+/* Ajuste para el contenedor del logo (Dándole más espacio) */
+.udec-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px; /* Reducimos el padding lateral para ganar ancho */
+    margin-right: 20px; /* Espacio con el contenedor del usuario */
+}
+
+/* Estilo para la imagen del logo (Aumentando el tamaño) */
+.header-logo-img {
+    height: 60px; /* <--- AUMENTA ESTE VALOR. Estaba en 55px */
+    width: auto;  /* Mantiene la proporción original */
+    object-fit: contain; /* Asegura que la imagen no se corte */
+    display: block;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: #006b3f;
+    line-height: 1;
+}
+
+.brand-sub {
+    font-size: 9px;
+    font-weight: 600;
+    color: #666;
+    letter-spacing: 0.5px;
+}
+
+/* CENTRO: USUARIO */
+.user-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #eee;
+}
+
+.user-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-full-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+}
+
+.user-career {
+    font-size: 13px;
+    color: #777;
+}
+
+/* DERECHA: BUSCADOR */
+.search-wrapper {
+    background: #f1f3f6;
+    border-radius: 20px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 250px;
+}
+
+.search-wrapper input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 100%;
+}
+
+.settings-btn {
+    background: none;
+    border: none;
+    color: #888;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+/* Ajuste de los tres bloques del header */
+.header-left {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.header-center {
+    flex: 2; /* Le damos más espacio al buscador en el centro */
+    display: flex;
+    justify-content: center;
+}
+
+.header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end; /* Empuja el perfil totalmente a la derecha */
+    align-items: center;
+    /* Quitamos o reducimos el gap ya que no hay más iconos al lado */
+    gap: 0; 
+}
+
+/* Ajuste del buscador para que no sea excesivamente ancho en el centro */
+.search-wrapper {
+    background: #f1f3f6;
+    border-radius: 20px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 450px; /* Controlamos el ancho máximo en el centro */
+}
+
+/* Alineamos el texto del usuario a la derecha para que fluya hacia el avatar */
+.user-details {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    justify-content: center;
+    /* Añadimos un pequeño espacio entre los elementos hijos */
+    gap: 2px; 
+}
+
+.user-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Evita que el contenedor se haga más pequeño de lo necesario */
+    min-width: max-content; 
+    padding-right: 20px;
+}
+
+/* 1. Avatar con Iniciales (Modificado para la dinámica) */
+.user-avatar-initials {
+    width: 48px;
+    height: 48px;
+    background-color: #006b3f; /* Verde UdeC */
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    /* Cambiamos el borde blanco por uno transparente para que el naranja luzca mejor */
+    border: 2px solid transparent; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+    /* IMPORTANTE: Suaviza el cambio de color y tamaño */
+    transition: all 0.3s ease; 
+    cursor: pointer;
+}
+
+/* 2. Nombre del Estudiante (Modificado) */
+.user-full-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a202c;
+    /* Ajustamos la altura de línea para que no pegue con lo de abajo */
+    line-height: 1.4; 
+    margin-bottom: 2px; /* Espacio extra de seguridad */
+}
+
+.user-career {
+    font-size: 12px;
+    color: #718096;
+    /* Un interlineado más suelto para la carrera también ayuda */
+    line-height: 1.2;
+}
+
+/* 4. ESTA ES LA NUEVA REGLA (La magia del hover) */
+.user-profile-info:hover .user-avatar-initials {
+    border-color: #f29400; /* Borde Naranja UdeC */
+    transform: scale(1.08); /* Crece un poquito */
+    box-shadow: 0 0 12px rgba(242, 148, 0, 0.4); /* Resplandor naranja */
+}
+
+.user-profile-info:hover .user-full-name {
+    color: #006b3f; /* El nombre se ilumina en verde al pasar el mouse */
+}
+
+@media (max-width: 1280px) {
+    /* Reducimos un poco el buscador para darle aire al nombre */
+    .search-wrapper {
+        max-width: 300px;
+    }
+
+    /* Reducimos ligeramente la fuente del nombre */
+    .user-full-name {
+        font-size: 13.5px;
+    }
+    
+    .user-avatar-initials {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+}
+
+/* 1. Contenedor principal con margen superior para separarlo del header */
+.section-title-container {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Un poco más de espacio entre icono y texto */
+    margin-top: 35px; /* Aumentamos a 35px para que respire mejor respecto al header */
+    margin-bottom: 25px;
+    padding-left: 5px;
+}
+
+.title-icon {
+    color: #006b3f; /* Verde UdeC */
+    flex-shrink: 0;
+}
+
+/* 2. Ajuste del h2 para que contenga el badge correctamente */
+.section-title-container h2 {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Más espacio entre texto y número */
+    font-size: 1.45rem; /* Bajamos un poco el tamaño */
+    font-weight: 600; /* Negrita más sutil y profesional */
+    color: #1a202c;
+    letter-spacing: -0.2px; /* Espaciado más natural */
+    margin: 0;
+    text-transform: none; /* Si lo tienes en mayúsculas en el HTML, podrías probar tipo oración */
+}
+
+.vacantes-count-badge {
+    background-color: #f1f5f9; 
+    color: #006b3f; /* Cambiamos el color del número al verde UdeC para que resalte */
+    padding: 4px 10px; /* Más balanceado */
+    border-radius: 12px; /* Menos circular, más como una etiqueta moderna */
+    font-size: 0.85rem; 
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    min-width: 32px; /* Asegura que el número no se vea apretado */
+    text-align: center;
+}
+
+/* 4. Línea decorativa (Mantenla si te gusta, ayuda a llenar el espacio) */
+.section-title-container::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, #e2e8f0, transparent);
+    margin-left: 20px;
+}
+
+.section-title-container:hover .vacantes-count-badge {
+    background-color: #006b3f;
+    color: white;
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+}
+
+/* Fondo oscuro con desenfoque */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px); /* El toque profesional */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Caja del Modal */
+.logout-modal {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: modalSlideUp 0.3s ease-out;
+}
+
+.modal-icon {
+    background: #fef2f2;
+    color: #dc2626; /* Rojo de alerta */
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.logout-modal h3 {
+    font-size: 1.5rem;
+    color: #1a202c;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.logout-modal p {
+    color: #64748b;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+/* Botones del Modal */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f8fafc;
+}
+
+.btn-confirm {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #dc2626; /* Rojo */
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-confirm:hover {
+    background: #b91c1c;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Animación de parpadeo suave para el icono de alerta */
+.blink-icon {
+    animation: simpleBlink 1.5s infinite;
+}
+
+@keyframes simpleBlink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; } /* Baja la opacidad suavemente */
+    100% { opacity: 1; }
+}
+
+/* Opcional: Si quieres que el badge entero sea más llamativo cuando es urgente */
+.meta-tag-badge.badge-deadline.urgent {
+    background-color: #fef2f2; /* Un fondo rojo muy tenue */
+    border-color: #fecaca;
+}
+
+/* Estado Urgente para la Fecha de Cierre */
+.badge-deadline.fecha-urgente {
+    background-color: #fef2f2 !important; /* Rojo suave de fondo */
+    color: #b91c1c !important;           /* Texto rojo fuerte */
+    border: 1px solid #fecaca !important;
+    
+    /* Aplicamos el parpadeo a TODO el badge */
+    animation: simpleBlink 1.5s infinite;
+}
+
+/* El estilo del icono de alerta dentro de la fecha */
+.badge-deadline.fecha-urgente .blink-icon {
+    color: #dc2626;
+}
+
+.tooltip-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* El texto que aparecerá */
+.tooltip-text {
+    visibility: hidden;
+    width: 160px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 100;
+    bottom: 125%; /* Aparece arriba del icono */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 10px;
+    pointer-events: none;
+}
+
+/* Mostrar al pasar el mouse */
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Contenedor que envuelve al componente de chat */
+.full-view-chat-container {
+    width: 100%;
+    height: calc(100vh - 120px); /* Ajusta según el alto de tu header */
+    background: white;
+    border-radius: 12px;
+    overflow: hidden; /* Evita scroll doble */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Si tu componente Mensajeria usa Flexbox, asegúrate que herede el alto */
+.full-view-chat-container > div {
+    height: 100%;
+}

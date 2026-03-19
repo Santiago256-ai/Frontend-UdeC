@@ -1,175 +1,218 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import './Landing.css';
-import { Link } from "react-router-dom"; 
-import LoginDropdown from './LoginDropdown';
 
-const Landing = () => {
-  // Estados para el Chatbot
-  const [chatOpen, setChatOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
+// URLs de Imágenes:
+// Asegúrate de mover tus fotos a la carpeta /public/ con estos nombres
+const logoUrl = '/Logo.png'; // Logo con escudo circular
+const logoSecundarioUrl = '/UdeC2.png';
+const graduadosImgUrl = '/grad1.jpg'; // Imagen de la izquierda
+const negociosImgUrl = '/of3.jpg'; // Imagen de la derecha
 
-  // ESTADO PARA EL MODAL DE INICIO DE SESIÓN
-  const [showModal, setShowModal] = useState(false);
+function Landing() {
+  const navigate = useNavigate();
+  const [correo, setCorreo] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
-    setMessages([...messages, { text: inputValue, sender: 'user' }, { text: "¡Hola! Estamos para ayudarte.", sender: 'bot' }]);
-    setInputValue('');
-  };
+  // ESTA ES LA FUNCIÓN DONDE VA EL CÓDIGO
+  const handleLogin = async (e) => {
+  e.preventDefault();
 
-  // Funciones para abrir/cerrar modal
-  const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+  // 🟢 VALIDACIÓN DE ADMINISTRADOR ÚNICO (Hardcoded)
+  // Usamos el correo "admin@udec.edu.co" para que pase la validación de tipo email del navegador
+  if (correo === 'admin@udec.edu.co' && password === 'Password123!') {
+    const adminUser = {
+      nombres: 'Administrador',
+      apellidos: 'UdeC',
+      rol: 'admin',
+      correo: 'admin@udec.edu.co'
+    };
 
- return (
-    <div className="landing-global-wrapper">
-      
-      {/* NAVBAR TOTALMENTE CORREGIDO */}
-      <nav className="navbar-custom-main">
-        <div className="navbar-content-container">
-          
-          {/* LOGO A LA IZQUIERDA */}
-          <Link to="/" className="navbar-logo-link">
-            <img src="/Logo.png" alt="Logo Empres360 PRO" className="navbar-logo-img" />
-          </Link>
+    localStorage.setItem('token', 'token-falso-admin'); // Un token para sesión local
+    localStorage.setItem('usuario', JSON.stringify(adminUser));
+    
+    // Redirección directa al panel que ya creamos
+    navigate('/Admin'); 
+    return; // Detenemos la ejecución aquí para que no intente ir al backend
+  }
+  try {
+    // Usamos el dominio oficial que configuraste en Vercel
+    const response = await fetch('https://backend-ude-c.vercel.app/api/auth/login', { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correo, password }),
+    });
 
-          {/* ESTE ES EL CONTENEDOR CLAVE */}
-          <div className="navbar-auth-group" style={{ position: 'relative' }}>
-            
-            {/* MENÚ DESPLEGABLE REGISTRARSE */}
-            <div className="dropdown-custom">
-              <button className="nav-auth-button dropdown-toggle-custom">
-                Registrarse
-              </button>
-              
-              <div className="dropdown-content-custom">
-                <Link to="/register/student" className="dropdown-item-custom">Egresado</Link>
-                <Link to="/register/company" className="dropdown-item-custom">Empresa</Link>
-              </div>
-            </div>
+    const data = await response.json();
 
-            {/* BOTÓN INICIAR SESIÓN */}
-            <button 
-              onClick={handleOpenModal} 
-              className="nav-auth-button"
-              style={{ border: 'none', cursor: 'pointer' }}
-            >
-              Iniciar Sesión
-            </button>
+    if (response.ok) {
+        // 1. Guardamos el token (para las peticiones API)
+        localStorage.setItem('token', data.token);
+        
+        // 2. GUARDAMOS EL USUARIO (Esto es lo que te falta para que el Dashboard no te rebote)
+        // Convertimos el objeto a texto con JSON.stringify
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        
+        // 3. Ahora sí, redireccionamos
+        if (data.tipo === "egresado") {
+          navigate('/vacantes-dashboard');
+        } else if (data.tipo === "empresa") {
+          navigate('/empresa-dashboard');
+        }
+      } else {
+      alert(data.message || "Credenciales incorrectas");
+    }
+  } catch (error) {
+    alert("No se pudo conectar con el servidor.");
+  }
+};
 
-            {/* EL DROPDOWN AHORA ES HIJO DE navbar-auth-group */}
-            <LoginDropdown 
-                isVisible={showModal} 
-                onClose={() => setShowModal(false)} 
-            />
+  return (
+    <div className="landing-udec-main">
 
-          </div> {/* Cierre de navbar-auth-group */}
+      {/* --- NAVBAR SUPERIOR --- */}
+      <header className="navbar-udec">
+        <div className="navbar-logo">
+          <img src={logoUrl} alt="Portal de Empleo UDEC" />
         </div>
-      </nav>
-
-      {/* SECCIÓN HERO - TEXTO A LA IZQUIERDA */}
-      <header className="hero-section">
-        <div className="hero-content-wrapper">
-          <div className="hero-text-container">
-            <div className="glass-card-text">
-              <h1 className="titulo-serif-hero">Empres360 PRO</h1>
-              <hr className="linea-decorativa" />
-              <p className="texto-descripcion">
-                Somos una plataforma diseñada para vincular egresados altamente capacitados con empresas que buscan talento competitivo, actualizado y preparado para asumir nuevos retos.
-              </p>
-              <p className="texto-frase">
-                En Empres360 PRO creemos que el éxito profesional comienza con la conexión adecuada.
-              </p>
-              {/* Puedes usar el mismo verde oliva aquí si deseas */}
-              <button className="btn-donar-hero">Inicia Ahora</button>
-            </div>
-          </div>
-        </div>
+        <div className="navbar-secondary-logo">
+    <img src={logoSecundarioUrl} alt="Logo Institucional" className="secondary-logo-img" />
+  </div>
       </header>
 
-      {/* SECCIÓN MISIÓN Y VISIÓN */}
-      <section className="mision-vision-fav">
-        <div className="mision-vision-content">
-          <div className="glass-box left">
-            <h2 className="titulo-serif">MISIÓN</h2>
-            <hr />
-            <p>
-Hacer que encontrar trabajo o el talento ideal sea lo más fácil del mundo. Creamos un espacio donde los estudiantes pueden postularse a vacantes reales con un clic y las empresas pueden revisar perfiles y elegir a su próximo gran integrante sin complicaciones.            </p>
-          </div>
+      {/* --- SECCIÓN HERO --- */}
+      <section className="hero-udec">
+        {/* Lado Izquierdo (Graduados + Overlay Verde) */}
+        <div className="hero-half left-side">
+          <img src={graduadosImgUrl} alt="Graduados" className="hero-img" />
+          {/* Este div crea el efecto de desvanecimiento verde exacto */}
+          <div className="hero-green-overlay"></div>
+        </div>
 
-          <div className="glass-box right">
-            <h2 className="titulo-serif">VISIÓN</h2>
-            <hr />
-            <p>
-Queremos ser el lugar favorito de todos para conectar: donde cada estudiante encuentre su primera gran oportunidad y cada empresa encuentre al profesional que estaba buscando, ayudando a que nadie se quede sin crecer.            </p>
+        {/* Lado Derecho (Negocios Puros) */}
+        <div className="hero-half right-side">
+          <img src={negociosImgUrl} alt="Negocios" className="hero-img" />
+        </div>
+
+        {/* Texto Central Superpuesto */}
+        <div className="hero-text-overlay">
+          <div className="text-container">
+            <h1>TU FUTURO PROFESIONAL<br /> COMIENZA AQUÍ</h1>
+            <p>VINCULANDO LA EXCELENCIA ACADÉMICA<br /> CON EL SECTOR PRODUCTIVO</p>
           </div>
         </div>
       </section>
 
-      {/* SECCIÓN OBJETIVOS */}
-      <section className="objetivos-section">
-        <h2 className="titulo-serif-objetivos">OBJETIVOS</h2>
-        <div className="objetivos-container">
-          {[
-            { t: "CONECTAR TALENTO CON OPORTUNIDADES", d: "Ayudar a que cada estudiante encuentre la vacante ideal de forma rápida, permitiéndole postularse a las mejores ofertas con solo unos clics.", img: "/img5.jpg" },
-            { t: "SIMPLIFICAR LA BÚSQUEDA DE PERSONAL", d: "Brindar a las empresas una herramienta fácil de usar para publicar sus vacantes, revisar perfiles de candidatos y elegir al mejor talento para su equipo.", img: "/img6.jpg" },
-            { t: "CREAR PROCESOS DE SELECCIÓN TRANSPARENTE", d: "Ser el punto de encuentro donde empresas y postulantes se comunican de manera directa, haciendo que el proceso de contratación sea claro, ágil y efectivo para todos.", img: "/img1.jpg" }
-          ].map((obj, i) => (
-            <div className="obj-card-custom" key={i}>
-              <div className="obj-img-wrapper">
-                <img src={obj.img} alt={obj.t} className="obj-img-real" />
+
+      {/* --- SECCIÓN DE ACCIONES (Fondo Blanco - Iniciar Sesión y Registrarse) --- */}
+      <section className="actions-section-white">
+        <div className="actions-section-grid">
+          
+          {/* Columna de INICIAR SESIÓN */}
+          <div className="action-column login-col">
+            <h2>INICIAR SESIÓN</h2>
+            
+            <form className="login-form-udec" onSubmit={handleLogin}>
+              <input 
+  type="email" 
+  placeholder="Correo electrónico" 
+  className="udec-input-field" 
+  value={correo} // <--- Conectar
+  onChange={(e) => setCorreo(e.target.value)} // <--- Guardar cambio
+  required 
+/>
+              
+              {/* Contenedor para el campo de contraseña con el icono de ojo */}
+              {/* Contenedor para el campo de contraseña */}
+<div className="password-input-wrapper">
+  <input 
+    // --- CAMBIO DINÁMICO DE TIPO ---
+    type={showPassword ? "text" : "password"} 
+    placeholder="Contraseña" 
+    className="udec-input-field password-field" 
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required 
+  />
+  
+  {/* --- ICONO CON FUNCIONALIDAD --- */}
+  <button 
+  type="button" 
+  className="password-toggle-btn"
+  onClick={() => setShowPassword(!showPassword)}
+  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+>
+  {/* Siempre renderizamos ambos, controlamos visibilidad con CSS */}
+  <EyeOff 
+    size={20} 
+    className={`password-icon icon-off ${showPassword ? 'visible' : 'hidden'}`} 
+  />
+  <Eye 
+    size={20} 
+    className={`password-icon icon-on ${!showPassword ? 'visible' : 'hidden'}`} 
+  />
+</button>
+</div>
+              
+              <div className="login-form-extras">
+                <a href="#olvidaste" className="forgot-password-link">
+                  ¿Olvidaste tu contraseña?
+                </a>
+                <button type="submit" className="udec-green-btn btn-login-submit">
+                  INGRESAR
+                </button>
               </div>
-              <h4 className="obj-titulo">{obj.t}</h4>
-              <p className="obj-descripcion">{obj.d}</p>
-            </div>
-          ))}
+            </form>
+          </div>
+
+          {/* Columna de REGISTRARSE */}
+          {/* Columna de REGISTRARSE */}
+<div className="action-column register-col">
+  <h2>REGISTRARSE</h2>
+  
+  <div className="register-buttons-group">
+    <button 
+      className="udec-green-btn register-big-btn"
+      onClick={() => navigate('/register/student')} // Redirección a Estudiante
+    >
+      SOY EGRESADO
+    </button>
+    
+    <button 
+      className="udec-green-btn register-big-btn"
+      onClick={() => navigate('/register/company')} // Redirección a Empresa
+    >
+      SOY EMPRESA
+    </button>
+  </div>
+</div>
+          
         </div>
       </section>
 
-      {/* PIE DE PÁGINA - UNIVERSIDAD DE CUNDINAMARCA */}
-      <footer className="footer-universidad">
-        <div className="footer-content">
-          <div className="footer-info">
-            <p className="copyright-text">© 2026 Empres360 PRO. Todos los derechos reservados.</p>
-            <p className="universidad-text">
-              Proyecto Académico - <strong>Universidad de Cundinamarca</strong>
-            </p>
-          </div>
-          <div className="footer-links">
-            <a href="#terminos">Términos y Condiciones</a>
-            <span className="separator">|</span>
-            <a href="#privacidad">Política de Privacidad</a>
+      {/* --- FOOTER (Verde Oscuro) --- */}
+      <footer className="footer-dark-green">
+        <div className="footer-top-links">
+          {/* Espacio para los enlaces del footer */}
+        </div>
+        
+        <div className="footer-logo-and-info">
+          {/* Logo pequeño de la UDEC */}
+          <img src={logoUrl} alt="UDEC" className="footer-logo-small" />
+          
+          {/* Texto de información de la universidad */}
+          <div className="footer-info-text">
+            <p>© 2026 Todos los derechos reservados.</p>
+            <p>Desarrollado por Empres360 PRO.</p>
+            <p>Universidad de Cundinamarca.</p>
           </div>
         </div>
-      </footer>   
+      </footer>
 
-      {/* REDES SOCIALES FLOTANTES */}
-      <div className="social-sidebar">
-        <a href="https://www.facebook.com/ucundinamarcaoficial/"><img src="/face.png" alt="FB" /></a>
-        <a href="https://www.instagram.com/ucundinamarcaoficial/"><img src="/insta.png" alt="IG" /></a>
-        <a href="https://www.ucundinamarca.edu.co/"><img src="/escudo_udec.png" alt="WA" /></a>
-      </div>
-
-      {/* CHATBOT */}
-      <div className="chatbot-container">
-        <div className="chat-pill" onClick={() => setChatOpen(!chatOpen)}>
-          Hola 👋 ¿Necesitas ayuda?
-        </div>
-        {chatOpen && (
-          <div className="chat-box shadow">
-            <div className="chat-messages p-3">
-              {messages.map((m, i) => <div key={i} className={`mb-2 ${m.sender}`}>{m.text}</div>)}
-            </div>
-            <div className="p-2 border-top d-flex">
-              <input type="text" className="form-control me-2" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-              <button onClick={handleSendMessage} className="btn btn-info text-white">Ir</button>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
-};
+}
 
 export default Landing;

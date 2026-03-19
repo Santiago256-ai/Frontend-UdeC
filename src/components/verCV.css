@@ -1,128 +1,219 @@
-:root {
-  /* Paleta Oficial Universidad de Cundinamarca */
-  --udec-green: #00843d;      /* Verde institucional */
-  --udec-gold: #c5a059;       /* Dorado/Ocre institucional */
-  --udec-light-gray: #f8f9fa;
-  --udec-dark: #1a1a1a;
+/* VerCV.css - Réplica exacta del Dashboard Estudiante */
+
+.cv-modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  padding: 20px;
+.cv-preview-container {
+    background: white;
+    width: 850px;
+    height: 95vh;
+    display: flex;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    border-radius: 20px; /* Radio de los paneles de tu Dashboard */
+    overflow: hidden;
 }
 
-.cv-modal-container {
-  background: white;
-  width: 100%;
-  max-width: 850px;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  border-radius: 8px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+/* Botón cerrar con estilo de tus botones de acción */
+.cv-close-x {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #dc2626; /* Rojo de alerta de tu logout modal */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: 0.3s;
 }
 
-.close-btn {
-  position: absolute;
-  top: 15px; right: 20px;
-  background: none; border: none;
-  font-size: 2.5rem; color: white;
-  cursor: pointer; z-index: 10;
-  transition: transform 0.2s;
+.cv-close-x:hover { transform: rotate(90deg); background: #b91c1c; }
+
+/* SIDEBAR IZQUIERDO (Verde Oscuro UdeC) */
+.cv-aside-green {
+    width: 35%;
+    background-color: var(--udec-green-dark); /* Usando tu variable */
+    color: white;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
 }
 
-.close-btn:hover { transform: scale(1.1); }
-
-/* Header con Colores UdeC */
-.cv-header {
-  background: var(--udec-green); /* Fondo Verde UdeC */
-  color: white;
-  padding: 50px 60px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
-  border-bottom: 5px solid var(--udec-gold); /* Detalle Dorado */
+.cv-aside-logo {
+    text-align: center; /* Asegura el centrado como en tu guía */
+    margin-bottom: 40px; /* Espacio igual al de CrearCV */
 }
 
-.cv-header-text h2 { 
-  margin: 0; 
-  font-size: 1.8rem; 
-  text-transform: uppercase; 
-  letter-spacing: 1px;
+.cv-aside-logo img { 
+    /* --- TAMAÑO IGUAL A TU GUÍA --- */
+    max-width: 120px; 
+    height: auto;
+
+
+    /* Si quieres que el escudo sea todo blanco (como en la guía), usa: */
+    /* filter: brightness(0) invert(1); */
+    
+    display: block;
+    margin: 0 auto;
 }
 
-.cv-subtitle { 
-  font-size: 1.1rem; 
-  opacity: 0.95; 
-  margin: 8px 0 0; 
-  font-weight: 300;
+.cv-aside-logo {
+    text-align: center; /* Asegura el centrado como en tu guía */
+    margin-bottom: 40px; /* Espacio igual al de CrearCV */
 }
 
-/* Avatar con iniciales */
-.cv-photo-circle {
-  width: 110px; height: 110px;
-  background: white;
-  border-radius: 50%;
-  border: 4px solid var(--udec-gold); /* Borde Dorado */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: var(--udec-green);
-  font-weight: bold; 
-  font-size: 1.8rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+.cv-aside-section h3 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    color: white;
 }
 
-/* Layout del cuerpo */
-.cv-body-layout { display: flex; min-height: 550px; }
+.cv-skill-item { margin-bottom: 15px; }
+.cv-skill-item span { font-size: 11px; font-weight: 600; display: block; margin-bottom: 6px; }
 
-.cv-sidebar {
-  width: 32%;
-  background: var(--udec-light-gray);
-  padding: 45px 30px;
-  border-right: 1px solid #eee;
+.skill-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
 }
 
-.cv-main-content {
-  width: 68%;
-  padding: 45px 50px;
+.progress {
+    height: 100%;
+    background: #DAAA00; /* Usando tu naranja para resaltar progreso */
+    border-radius: 10px;
 }
 
-/* Títulos de sección con acento Verde/Dorado */
-.cv-sidebar h4, .cv-main-content h4 {
-  font-size: 0.9rem;
-  color: var(--udec-green);
-  border-bottom: 2px solid var(--udec-gold);
-  padding-bottom: 6px;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
+.cv-bullet-list { list-style: none; }
+.cv-bullet-list li {
+    font-size: 12px;
+    margin-bottom: 8px;
+    padding-left: 15px;
+    position: relative;
+}
+.cv-bullet-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--udec-orange);
 }
 
-.cv-section { margin-bottom: 35px; font-size: 0.9rem; color: #444; }
-.cv-section p { margin: 8px 0; line-height: 1.4; }
-
-.cv-item { margin-bottom: 25px; }
-.cv-item h5 { margin: 0; font-size: 1.05rem; color: var(--udec-dark); }
-.cv-item-meta { font-size: 0.85rem; color: #3d5a6c; font-weight: 600; margin-top: 4px; }
-
-/* Etiquetas de Habilidades UdeC */
-.cv-tag {
-  display: inline-block;
-  background: white;
-  color: var(--udec-green);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  margin: 4px;
-  border: 1px solid var(--udec-green);
-  font-weight: 500;
+/* CUERPO DERECHO (Blanco) */
+.cv-main-white {
+    width: 65%;
+    padding: 60px 45px;
+    overflow-y: auto;
+    background: white;
 }
+
+.cv-main-header h1 {
+    font-size: 28px;
+    color: var(--text-main);
+    line-height: 1.1;
+    margin-bottom: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.cv-contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    color: var(--text-muted);
+    font-size: 11px;
+    border-bottom: 2px solid var(--udec-green);
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.cv-contact-row span { display: flex; align-items: center; gap: 6px; }
+
+.cv-section-title {
+    font-size: 14px;
+    color: var(--udec-green);
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+/* Usando tu estilo de caja de detalle */
+.detail-body-text p {
+    font-size: 12px;
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+/* TIMELINE (Timeline Marker estilo UdeC) */
+.cv-timeline { position: relative; padding-left: 10px; }
+
+.timeline-item {
+    display: flex;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.timeline-date {
+    width: 85px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.timeline-marker {
+    width: 10px;
+    height: 10px;
+    background: var(--udec-green);
+    border-radius: 50%;
+    margin-right: 20px;
+    margin-top: 4px;
+    z-index: 2;
+}
+
+.timeline-item::after {
+    content: "";
+    position: absolute;
+    left: 99px; /* Centrado con el marker */
+    top: 15px;
+    width: 1px;
+    height: 100%;
+    background: #edf2f7;
+}
+
+.timeline-item:last-child::after { display: none; }
+
+.timeline-info h4 { font-size: 13px; color: var(--text-main); margin: 0; font-weight: 700; }
+.timeline-info p { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.cv-references-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.ref-item { font-size: 11px; color: #4a5568; }
+.ref-item strong { display: block; color: var(--text-main); font-size: 12px; }
+
+/* Scrollbar sutil como en tu Dashboard */
+.cv-main-white::-webkit-scrollbar { width: 4px; }
+.cv-main-white::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }

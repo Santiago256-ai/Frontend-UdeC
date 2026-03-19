@@ -1,246 +1,341 @@
 import React, { useState, useEffect } from 'react';
-import { User, BookOpen, Briefcase, Save, Trash2, ArrowLeft, Award, Languages, Phone, Mail, MapPin } from 'lucide-react';
+import { 
+    Save, Eye, ArrowLeft, Phone, Mail, MapPin, Plus, Trash2, 
+    Users, Briefcase, GraduationCap, User, BrainCircuit, Globe 
+} from 'lucide-react';
+import API from "../services/api";
 import './CrearCV.css';
-import API from '../services/api';
 
-const CrearCV = ({ setVistaActiva }) => {
-  // --- ESTADOS ---
-  const [educacion, setEducacion] = useState([{ id: Date.now(), titulo: '', institucion: '', periodo: '' }]);
-  const [experiencia, setExperiencia] = useState([{ id: Date.now(), cargo: '', empresa: '', periodo: '' }]);
-  const [idiomas, setIdiomas] = useState([{ id: Date.now(), idioma: '', nivel: '' }]);
-  const [referencias, setReferencias] = useState([{ id: Date.now(), nombre: '', cargo: '', celular: '' }]);
-  
-  const [personal, setPersonal] = useState({ telefono: '', email: '', direccion: '' });
-  const [descripcion, setDescripcion] = useState('');
-  const [habilidades, setHabilidades] = useState('');
+export default function CrearCV({ isInline, setVistaActiva }) {
+    const [isPreview, setIsPreview] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-  // --- CARGA DE DATOS ---
-  useEffect(() => {
-    const obtenerCVExistente = async () => {
-      try {
-        const response = await API.get('/estudiantes/mi-cv'); 
-        if (response.data) {
-          const data = response.data;
-          setPersonal({ 
-            telefono: data.telefono || '', 
-            email: data.email || '', 
-            direccion: data.direccion || '' 
-          });
-          setDescripcion(data.descripcion || '');
-          setHabilidades(data.habilidades || '');
-          if (data.educacion?.length > 0) setEducacion(data.educacion);
-          if (data.experiencia?.length > 0) setExperiencia(data.experiencia);
-          if (data.idiomas?.length > 0) setIdiomas(data.idiomas);
-          if (data.referencias?.length > 0) setReferencias(data.referencias);
+    // Obtener el usuario logueado del localStorage
+    const usuarioLogueado = JSON.parse(localStorage.getItem('usuario'));
+    
+    // Estado inicial unificado con Prisma
+    const [cvData, setCvData] = useState({
+        telefono: "",
+        email: usuarioLogueado?.correo || "",
+        direccion: "",
+        descripcion: "",
+        habilidades: "", // Se guarda como String separado por comas
+        educacion: [{ titulo: "", institucion: "", periodo: "" }],
+        experiencia: [{ cargo: "", empresa: "", periodo: "" }],
+        referencias: [{ nombre: "", cargo: "", telefono: "" }],
+        aptitudes: [{ aptitud: "" }],
+        idiomas: [{ idioma: "", nivel: "0" }]
+    });
+
+    // Cargar los datos del CV si ya existen al montar el componente
+    useEffect(() => {
+        const cargarDatos = async () => {
+            if (!usuarioLogueado?.id) return;
+            try {
+                const res = await API.get(`/cvs/${usuarioLogueado.id}`);
+                if (res.data) {
+                    setCvData(res.data);
+                }
+            } catch (error) {
+                console.log("No se encontró CV previo o hubo un error al cargar");
+            }
+        };
+        cargarDatos();
+    }, [usuarioLogueado?.id]);
+
+    // --- MANEJADORES DE ESTADO ---
+    const handleChangeBasico = (e) => {
+        const { name, value } = e.target;
+        setCvData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleArrayChange = (index, arrayName, field, value) => {
+        const newArray = [...cvData[arrayName]];
+        newArray[index] = { ...newArray[index], [field]: value };
+        setCvData(prev => ({ ...prev, [arrayName]: newArray }));
+    };
+
+    const addArrayItem = (arrayName, emptyItem) => {
+        setCvData(prev => ({ ...prev, [arrayName]: [...prev[arrayName], emptyItem] }));
+    };
+
+    const removeArrayItem = (index, arrayName) => {
+        const newArray = cvData[arrayName].filter((_, i) => i !== index);
+        setCvData(prev => ({ ...prev, [arrayName]: newArray }));
+    };
+
+    // --- LOGICA DE GUARDADO ---
+    const handleGuardar = async () => {
+        if (!usuarioLogueado?.id) {
+            alert("Error: Usuario no identificado.");
+            return;
         }
-      } catch (error) {
-        console.log("Iniciando formulario nuevo.");
-      }
-    };
-    obtenerCVExistente();
-  }, []);
 
-  // --- HANDLERS ---
-  const handleUpdate = (setFunc, list, id, field, value) => {
-    setFunc(list.map(item => item.id === id ? { ...item, [field]: value } : item));
-  };
-
-  const handlePersonalChange = (field, value) => {
-    const val = field === 'telefono' ? value.replace(/[^0-9]/g, '') : value;
-    setPersonal(prev => ({ ...prev, [field]: val }));
-  };
-
-  // Validaciones
-  const esEduValido = educacion.every(e => e.titulo && e.institucion);
-  const esExpValido = experiencia.every(e => e.cargo && e.empresa);
-  const esRefValido = referencias.every(r => r.nombre && r.celular);
-
-  // --- GUARDAR ---
-  const handleSave = async () => {
-    const payload = {
-      personal,
-      descripcion,
-      habilidades,
-      educacion: educacion.filter(e => e.titulo || e.institucion),
-      experiencia: experiencia.filter(exp => exp.cargo || exp.empresa),
-      idiomas: idiomas.filter(i => i.idioma),
-      referencias: referencias.filter(r => r.nombre || r.celular)
+        setIsLoading(true);
+        try {
+            await API.post(`/cvs/${usuarioLogueado.id}`, cvData);
+            alert("¡Hoja de vida guardada exitosamente!");
+        } catch (error) {
+            console.error("Error al guardar CV:", error);
+            alert("Hubo un error al guardar la hoja de vida.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    try {
-      const response = await API.post('/estudiantes/guardar-cv', payload);
-      if (response.status === 200 || response.status === 201) {
-        alert("¡Hoja de vida guardada con éxito!");
-        setVistaActiva('vacantes');
-      }
-    } catch (error) {
-      const mensajeError = error.response?.data?.detalle || "Error en el servidor";
-      alert(`Error: ${mensajeError}`);
-    }
-  };
-
-  return (
-    <div className="cv-container">
-      <div className="cv-card">
-        {/* Header Estilizado */}
-        <header className="cv-card-header">
-          <div className="header-left-group">
-            <button type="button" className="btn-back-header" onClick={() => setVistaActiva('vacantes')}>
-              <ArrowLeft size={20} />
-            </button>
-            <h1>Configuración de Perfil</h1>
-          </div>
-          <button type="button" className="btn-submit" onClick={handleSave}>
-            <Save size={18} /> 
-          </button>
-        </header>
-
-        <form className="cv-form" onSubmit={(e) => e.preventDefault()}>
-          
-          {/* 1. Información de Contacto */}
-          <section className="form-section">
-            <div className="section-title"><User size={20} /> <h3>Información de Contacto</h3></div>
-            <div className="grid-row">
-              <div className="input-group">
-                <input type="tel" value={personal.telefono} onChange={(e) => handlePersonalChange('telefono', e.target.value)} placeholder="Ej: 321 244 5678" />
-                <label><Phone size={12} /> Teléfono Móvil</label>
-              </div>
-              <div className="input-group">
-                <input type="email" value={personal.email} onChange={(e) => handlePersonalChange('email', e.target.value)} placeholder="correo@ejemplo.com" />
-                <label><Mail size={12} /> Correo Electrónico</label>
-              </div>
-            </div>
-            <div className="input-group" style={{marginTop: '10px'}}>
-              <input type="text" value={personal.direccion} onChange={(e) => handlePersonalChange('direccion', e.target.value)} placeholder="Ciudad, Departamento" />
-              <label><MapPin size={12} /> Dirección de Residencia</label>
-            </div>
-          </section>
-
-          {/* 2. Resumen Profesional */}
-          <section className="form-section">
-            <div className="section-title"><h3>Sobre mí</h3></div>
-            <div className="input-group">
-              <textarea 
-                value={descripcion} 
-                onChange={(e) => setDescripcion(e.target.value)} 
-                placeholder="Ingeniero de Sistemas con experiencia en..."
-                style={{height: '100px'}}
-              ></textarea>
-              <label>Perfil Profesional</label>
-            </div>
-          </section>
-
-          {/* 3. Aptitudes */}
-          <section className="form-section">
-            <div className="section-title"><Award size={20} /> <h3>Habilidades y Aptitudes</h3></div>
-            <div className="input-group">
-              <input 
-                type="text" 
-                value={habilidades} 
-                placeholder="React, SQL, Gestión de proyectos..." 
-                onChange={(e) => setHabilidades(e.target.value)} 
-              />
-              <label>Tus principales competencias</label>
-            </div>
-          </section>
-
-          {/* 4. Formación Académica */}
-          <section className="form-section">
-            <div className="section-title"><BookOpen size={20} /> <h3>Formación Académica</h3></div>
-            {educacion.map((edu) => (
-              <div key={edu.id} className="dynamic-block">
-                <div className="grid-row">
-                  <div className="input-group">
-                    <input type="text" value={edu.titulo} onChange={(e) => handleUpdate(setEducacion, educacion, edu.id, 'titulo', e.target.value)} />
-                    <label>Título Obtenido</label>
-                  </div>
-                  <div className="input-group">
-                    <input type="text" value={edu.institucion} onChange={(e) => handleUpdate(setEducacion, educacion, edu.id, 'institucion', e.target.value)} />
-                    <label>Institución</label>
-                  </div>
+    // --- VISTA DE PREVISUALIZACIÓN ---
+    if (isPreview) {
+        return (
+            <div className="crear-cv-container">
+                <div className="cv-actions-header">
+                    <button className="btn-secondary" onClick={() => setIsPreview(false)}>
+                        <ArrowLeft size={18} /> Volver a Editar
+                    </button>
+                    <button className="btn-primary" onClick={handleGuardar} disabled={isLoading}>
+                        <Save size={18} /> {isLoading ? 'Guardando...' : 'Guardar CV'}
+                    </button>
                 </div>
-                <div className="input-group">
-                  <input type="text" value={edu.periodo} placeholder="Ej: 2018 - 2022" onChange={(e) => handleUpdate(setEducacion, educacion, edu.id, 'periodo', e.target.value)} />
-                  <label>Periodo / Año de Graduación</label>
-                </div>
-                {educacion.length > 1 && (
-                  <button type="button" onClick={() => setEducacion(educacion.filter(i => i.id !== edu.id))} className="btn-remove">
-                    <Trash2 size={12} /> Eliminar formación
-                  </button>
-                )}
-              </div>
-            ))}
-            <button type="button" onClick={() => setEducacion([...educacion, { id: Date.now(), titulo: '', institucion: '', periodo: '' }])} className="btn-add">+ Añadir Educación</button>
-          </section>
 
-          {/* 5. Experiencia Profesional */}
-          <section className="form-section">
-            <div className="section-title"><Briefcase size={20} /> <h3>Experiencia Profesional</h3></div>
-            {experiencia.map((exp) => (
-              <div key={exp.id} className="dynamic-block">
-                <div className="grid-row">
-                  <div className="input-group">
-                    <input type="text" value={exp.cargo} onChange={(e) => handleUpdate(setExperiencia, experiencia, exp.id, 'cargo', e.target.value)} />
-                    <label>Cargo / Rol</label>
-                  </div>
-                  <div className="input-group">
-                    <input type="text" value={exp.empresa} onChange={(e) => handleUpdate(setExperiencia, experiencia, exp.id, 'empresa', e.target.value)} />
-                    <label>Empresa</label>
-                  </div>
-                </div>
-                <div className="input-group">
-                  <input type="text" value={exp.periodo} placeholder="Ej: Enero 2023 - Presente" onChange={(e) => handleUpdate(setExperiencia, experiencia, exp.id, 'periodo', e.target.value)} />
-                  <label>Periodo Laborado</label>
-                </div>
-                {experiencia.length > 1 && (
-                  <button type="button" onClick={() => setExperiencia(experiencia.filter(i => i.id !== exp.id))} className="btn-remove">
-                    <Trash2 size={12} /> Eliminar experiencia
-                  </button>
-                )}
-              </div>
-            ))}
-            <button type="button" onClick={() => setExperiencia([...experiencia, { id: Date.now(), cargo: '', empresa: '', periodo: '' }])} className="btn-add">+ Añadir Experiencia</button>
-          </section>
+                <div className="cv-document-wrapper">
+                    <div className="cv-document">
+                        {/* BARRA LATERAL IZQUIERDA (VERDE) */}
+                        <aside className="cv-sidebar-green">
+                            <div className="cv-logo-container">
+                                <img src="/escudo_udec.png" alt="Logo UdeC" className="udec-logo-cv" />
+                            </div>
+                            
+                            
 
-          {/* 6. Idiomas y Referencias */}
-          <div className="grid-row">
-            <section className="form-section">
-              <div className="section-title"><Languages size={20} /> <h3>Idiomas</h3></div>
-              {idiomas.map((idi) => (
-                <div key={idi.id} className="dynamic-block">
-                  <div className="input-group">
-                    <input type="text" value={idi.idioma} onChange={(e) => handleUpdate(setIdiomas, idiomas, idi.id, 'idioma', e.target.value)} />
-                    <label>Idioma</label>
-                  </div>
-                  <div className="input-group">
-                    <input type="text" value={idi.nivel} placeholder="Ej: B2" onChange={(e) => handleUpdate(setIdiomas, idiomas, idi.id, 'nivel', e.target.value)} />
-                    <label>Nivel</label>
-                  </div>
-                </div>
-              ))}
-            </section>
+                            {/* Habilidades */}
+                            <div className="cv-sidebar-section">
+                                <h3 className="cv-sidebar-title">HABILIDADES</h3>
+                                {cvData.habilidades.split(',').map((hab, index) => hab.trim() && (
+                                    <div className="cv-skill-item" key={index}>
+                                        <span>{hab.trim()}</span>
+                                        <div className="skill-bar-bg"><div className="skill-bar-fill" style={{width: `80%`}}></div></div>
+                                    </div>
+                                ))}
+                            </div>
 
-            <section className="form-section">
-              <div className="section-title"><User size={20} /> <h3>Referencias</h3></div>
-              {referencias.map((ref) => (
-                <div key={ref.id} className="dynamic-block">
-                  <div className="input-group">
-                    <input type="text" value={ref.nombre} onChange={(e) => handleUpdate(setReferencias, referencias, ref.id, 'nombre', e.target.value)} />
-                    <label>Nombre</label>
-                  </div>
-                  <div className="input-group">
-                    <input type="tel" value={ref.celular} onChange={(e) => handleUpdate(setReferencias, referencias, ref.id, 'celular', e.target.value.replace(/[^0-9]/g, ''))} />
-                    <label>Celular</label>
-                  </div>
-                </div>
-              ))}
-            </section>
-          </div>
+                            {/* Aptitudes */}
+                            <div className="cv-sidebar-section">
+                                <h3 className="cv-sidebar-title">APTITUDES</h3>
+                                <ul className="cv-sidebar-list">
+                                    {cvData.aptitudes.map((apt, index) => apt.aptitud && (
+                                        <li key={index}>{apt.aptitud}</li>
+                                    ))}
+                                </ul>
+                            </div>
 
-        </form>
-      </div>
+                            {/* Idiomas */}
+                            <div className="cv-sidebar-section">
+                                <h3 className="cv-sidebar-title">IDIOMAS</h3>
+                                {cvData.idiomas.map((idioma, index) => idioma.idioma && (
+                                    <div className="cv-skill-item" key={index}>
+                                        <span>{idioma.idioma}</span>
+                                        <div className="skill-bar-bg">
+                                            <div className="skill-bar-fill" style={{width: `${idioma.nivel}%`}}></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </aside>
+
+                        {/* CONTENIDO PRINCIPAL (Con Datos de Contacto arriba) */}
+                    <main className="cv-main-content">
+                        <header className="cv-header-modern">
+    <h1 className="cv-name-display">
+        {usuarioLogueado?.nombres} {usuarioLogueado?.apellidos}
+    </h1>
+    <div className="cv-contact-row">
+        <span><Phone size={14} /> {cvData.telefono || 'Sin teléfono'}</span>
+        <span><Mail size={14} /> {cvData.email || usuarioLogueado?.correo}</span>
+        <span><MapPin size={14} /> {cvData.direccion || 'Cundinamarca, Colombia'}</span>
     </div>
-  );
-};
+</header>
 
-export default CrearCV;
+                            <section className="cv-section">
+                                <h3 className="cv-section-title">PERFIL PROFESIONAL</h3>
+                                <p className="cv-text-block">{cvData.descripcion}</p>
+                            </section>
+
+                            <section className="cv-section">
+                                <h3 className="cv-section-title">EXPERIENCIA</h3>
+                                {cvData.experiencia.map((exp, index) => exp.cargo && (
+                                    <div className="cv-timeline-item" key={index}>
+                                        <div className="cv-timeline-dates">{exp.periodo}</div>
+                                        <div className="cv-timeline-details">
+                                            <h4>{exp.cargo}</h4>
+                                            <h5>{exp.empresa}</h5>
+                                        </div>
+                                    </div>
+                                ))}
+                            </section>
+
+                            <section className="cv-section">
+                                <h3 className="cv-section-title">FORMACIÓN</h3>
+                                {cvData.educacion.map((edu, index) => edu.titulo && (
+                                    <div className="cv-timeline-item" key={index}>
+                                        <div className="cv-timeline-dates">{edu.periodo}</div>
+                                        <div className="cv-timeline-details">
+                                            <h4>{edu.institucion}</h4>
+                                            <h5>{edu.titulo}</h5>
+                                        </div>
+                                    </div>
+                                ))}
+                            </section>
+
+                            <section className="cv-section">
+                                <h3 className="cv-section-title">REFERENCIAS</h3>
+                                <div className="cv-references-grid">
+                                    {cvData.referencias.map((ref, i) => ref.nombre && (
+                                        <div className="cv-reference-item" key={i}>
+                                            <strong>{ref.nombre}</strong>
+                                            <p>{ref.cargo}</p>
+                                            <p>Cel: {ref.telefono}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        </main>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // --- VISTA DE EDICIÓN (FORMULARIO) ---
+    return (
+        <div className="crear-cv-container edit-mode-container">
+            <header className="cv-actions-header">
+                <h2>Completar Hoja de Vida</h2>
+                <div className="action-buttons">
+                    <button className="btn-secondary" onClick={() => setIsPreview(true)}>
+                        <Eye size={18} /> Previsualizar
+                    </button>
+                    <button className="btn-primary" onClick={handleGuardar} disabled={isLoading}>
+                        <Save size={18} /> {isLoading ? 'Guardando...' : 'Guardar'}
+                    </button>
+                </div>
+            </header>
+
+            <div className="cv-form-grid">
+                {/* Datos Básicos */}
+                <div className="form-card">
+                    <h3><User size={20} /> Datos Básicos y Perfil</h3>
+                    <div className="input-group">
+                        <label>Teléfono Celular</label>
+                        <input type="text" name="telefono" value={cvData.telefono} onChange={handleChangeBasico} placeholder="Ej. 300 123 4567"/>
+                    </div>
+                    <div className="input-group">
+                        <label>Dirección de Residencia</label>
+                        <input type="text" name="direccion" value={cvData.direccion} onChange={handleChangeBasico} placeholder="Ciudad, Departamento"/>
+                    </div>
+                    <div className="input-group">
+                        <label>Perfil Profesional</label>
+                        <textarea name="descripcion" value={cvData.descripcion} onChange={handleChangeBasico} placeholder="Cuéntanos sobre ti..."></textarea>
+                    </div>
+                    <div className="input-group">
+                        <label>Habilidades (Separadas por comas)</label>
+                        <input type="text" name="habilidades" value={cvData.habilidades} onChange={handleChangeBasico} placeholder="React, Node.js, SQL..."/>
+                    </div>
+                </div>
+
+                {/* Experiencia */}
+                <div className="form-card">
+                    <h3><Briefcase size={20} /> Experiencia Laboral</h3>
+                    {cvData.experiencia.map((exp, index) => (
+                        <div key={index} className="dynamic-item-form">
+                            <div className="input-group"><label>Cargo</label><input type="text" value={exp.cargo} onChange={(e) => handleArrayChange(index, 'experiencia', 'cargo', e.target.value)} /></div>
+                            <div className="form-row">
+                                <div className="input-group"><label>Empresa</label><input type="text" value={exp.empresa} onChange={(e) => handleArrayChange(index, 'experiencia', 'empresa', e.target.value)} /></div>
+                                <div className="input-group"><label>Periodo</label><input type="text" value={exp.periodo} onChange={(e) => handleArrayChange(index, 'experiencia', 'periodo', e.target.value)} /></div>
+                            </div>
+                            <button className="btn-remove-text" onClick={() => removeArrayItem(index, 'experiencia')}><Trash2 size={14}/> Eliminar</button>
+                        </div>
+                    ))}
+                    <button className="btn-add-more" onClick={() => addArrayItem('experiencia', { cargo: "", empresa: "", periodo: "" })}><Plus size={16} /> Añadir experiencia</button>
+                </div>
+
+                {/* Educación */}
+                <div className="form-card">
+                    <h3><GraduationCap size={20} /> Formación Académica</h3>
+                    {cvData.educacion.map((edu, index) => (
+                        <div key={index} className="dynamic-item-form">
+                            <div className="input-group"><label>Título</label><input type="text" value={edu.titulo} onChange={(e) => handleArrayChange(index, 'educacion', 'titulo', e.target.value)} /></div>
+                            <div className="form-row">
+                                <div className="input-group"><label>Institución</label><input type="text" value={edu.institucion} onChange={(e) => handleArrayChange(index, 'educacion', 'institucion', e.target.value)} /></div>
+                                <div className="input-group"><label>Periodo</label><input type="text" value={edu.periodo} onChange={(e) => handleArrayChange(index, 'educacion', 'periodo', e.target.value)} /></div>
+                            </div>
+                            <button className="btn-remove-text" onClick={() => removeArrayItem(index, 'educacion')}><Trash2 size={14}/> Eliminar</button>
+                        </div>
+                    ))}
+                    <button className="btn-add-more" onClick={() => addArrayItem('educacion', { titulo: "", institucion: "", periodo: "" })}><Plus size={16} /> Añadir formación</button>
+                </div>
+
+                {/* Referencias */}
+                <div className="form-card">
+                    <h3><Users size={20} /> Referencias</h3>
+                    {cvData.referencias.map((ref, index) => (
+                        <div key={index} className="dynamic-item-form">
+                            <div className="input-group"><label>Nombre</label><input type="text" value={ref.nombre} onChange={(e) => handleArrayChange(index, 'referencias', 'nombre', e.target.value)} /></div>
+                            <div className="form-row">
+                                <div className="input-group"><label>Cargo</label><input type="text" value={ref.cargo} onChange={(e) => handleArrayChange(index, 'referencias', 'cargo', e.target.value)} /></div>
+                               <div className="input-group">
+    <label>Teléfono</label>
+    <input 
+        type="text" 
+        /* ESTE ES EL CAMBIO CLAVE: 
+           Lee 'telefono' (si acabas de escribirlo) 
+           o 'celular' (si viene de la base de datos) 
+        */
+        value={ref.telefono || ref.celular || ""} 
+        onChange={(e) => handleArrayChange(index, 'referencias', 'telefono', e.target.value)} 
+    />
+</div>
+                            </div>
+                            <button className="btn-remove-text" onClick={() => removeArrayItem(index, 'referencias')}><Trash2 size={14}/> Eliminar</button>
+                        </div>
+                    ))}
+                    <button className="btn-add-more" onClick={() => addArrayItem('referencias', { nombre: "", cargo: "", telefono: "" })}><Plus size={16} /> Añadir referencia</button>
+                </div>
+
+                {/* Aptitudes */}
+                <div className="form-card">
+                    <h3><BrainCircuit size={20} /> Aptitudes</h3>
+                    {cvData.aptitudes.map((apt, index) => (
+                        <div key={index} className="dynamic-item-form">
+                            <div className="input-group">
+                                <label>Aptitud</label>
+                                <input type="text" value={apt.aptitud} onChange={(e) => handleArrayChange(index, 'aptitudes', 'aptitud', e.target.value)} placeholder="Ej. Liderazgo" />
+                            </div>
+                            <button className="btn-remove-text" onClick={() => removeArrayItem(index, 'aptitudes')}><Trash2 size={14}/> Eliminar</button>
+                        </div>
+                    ))}
+                    <button className="btn-add-more" onClick={() => addArrayItem('aptitudes', { aptitud: "" })}><Plus size={16} /> Añadir aptitud</button>
+                </div>
+
+                {/* Idiomas */}
+                <div className="form-card">
+                    <h3><Globe size={20} /> Idiomas</h3>
+                    {cvData.idiomas.map((idioma, index) => (
+                        <div key={index} className="dynamic-item-form">
+                            <div className="form-row">
+                                <div className="input-group">
+                                    <label>Idioma</label>
+                                    <input type="text" value={idioma.idioma} onChange={(e) => handleArrayChange(index, 'idiomas', 'idioma', e.target.value)} placeholder="Ej. Inglés" />
+                                </div>
+                                <div className="input-group">
+                                    <label>Nivel (%)</label>
+                                    <input type="number" min="0" max="100" value={idioma.nivel} onChange={(e) => handleArrayChange(index, 'idiomas', 'nivel', e.target.value)} />
+                                </div>
+                            </div>
+                            <button className="btn-remove-text" onClick={() => removeArrayItem(index, 'idiomas')}><Trash2 size={14}/> Eliminar</button>
+                        </div>
+                    ))}
+                    <button className="btn-add-more" onClick={() => addArrayItem('idiomas', { idioma: "", nivel: "0" })}><Plus size={16} /> Añadir idioma</button>
+                </div>
+            </div>
+        </div>
+    );
+}

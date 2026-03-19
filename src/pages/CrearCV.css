@@ -1,255 +1,572 @@
-/* --- 1. Estructura Base (Opción 3: Pantalla Completa) --- */
-.cv-container {
+/* Contenedor General */ 
+.crear-cv-container {
+    height: calc(100vh - 120px); /* Ajusta según el alto de tu header */
+    overflow-y: overlay; /* Permite el scroll sin mover el contenido */
+    padding: 20px 40px;
+    background-color: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el formulario */
+}
+
+.cv-actions-header {
+    position: sticky;
+    top: -20px; /* Se pega arriba */
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     width: 100%;
-    min-height: 100vh;
-    background-color: #ffffff; /* Fondo blanco uniforme */
-    display: block; 
-    padding: 0; 
-    box-sizing: border-box;
-}
-
-.cv-card { 
-    background: #ffffff !important;
-    border-radius: 0; /* Sin redondeado para pegar a los bordes */
-    box-shadow: none !important; /* Sin sombra lateral */
-    width: 100%;
-    max-width: 100%; 
-    margin: 0;
-    min-height: 100vh;
-}
-
-/* --- 2. Header (Línea recta de borde a borde) --- */
-.cv-card-header {
-    background: #00482B;
-    padding: 20px 5%; /* Espaciado lateral relativo */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-    position: relative; /* <--- AÑADE ESTA LÍNEA */
-}
-
-.cv-card-header h1 { 
-    font-size: 1.4rem; 
-    margin: 0; 
-    font-weight: 600; 
-    color: #ffffff !important;
-
-    /* --- Corrección para centrado total --- */
-    position: absolute;
-    left: 50%;
-    top: 50%; /* Lo baja al centro vertical */
-    transform: translate(-50%, -50%); /* Lo mueve exacto al centro en ambos ejes */
-    white-space: nowrap; /* Evita que el texto se rompa en dos líneas */
-}
-
-/* --- 3. Botones del Header --- */
-.btn-back-header {
-    background: rgba(255, 255, 255, 0.1); /* Fondo semi-transparente */
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 8px;
-    width: 40px;  /* Tamaño fijo para que sea un círculo perfecto */
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transición más fluida */
-}
-
-/* Efecto Hover para la Flecha */
-.btn-back-header:hover {
-    background: rgba(255, 255, 255, 0.25); /* Se aclara el fondo */
-    transform: translateX(-5px); /* Pequeño salto a la izquierda (indica retroceso) */
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-}
-
-/* Efecto al hacer clic */
-.btn-back-header:active {
-    transform: scale(0.9) translateX(-2px);
-}
-
-.btn-submit {
-    background: #79C000;
-    color: white;
-    border: none;
-    /* Ajustamos el padding y dimensiones para que sea un círculo/cuadrado */
-    width: 45px; 
-    height: 45px;
-    padding: 0; 
-    
-    border-radius: 8px; /* O usa 50% si lo quieres totalmente circular */
-    font-size: 1.2rem; /* Tamaño del icono */
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    
-    /* Evita que el contenedor lo aplaste si hay poco espacio */
-    flex-shrink: 0; 
-}
-
-.btn-submit:hover {
-    background: #8ade00;
-    box-shadow: 0 4px 12px rgba(121, 192, 0, 0.2);
-}
-
-/* Efecto al pasar el mouse */
-.btn-submit:hover {
-    background: #8ade00; /* Un verde más claro/brillante */
-    transform: scale(1.1); /* Crece un 10% para dar sensación de clic */
-    box-shadow: 0 4px 15px rgba(121, 192, 0, 0.4); /* Sombra suave de color verde */
-}
-
-/* Efecto cuando se presiona (opcional pero recomendado) */
-.btn-submit:active {
-    transform: scale(0.95); /* Se encoge un poco al hacer clic */
-}
-
-
-/* --- 4. Formulario (Contenido centrado para lectura cómoda) --- */
-.cv-form { 
-    padding: 60px 5%; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 3.5rem; /* Más espacio entre secciones */
-    max-width: 1100px; /* Limita el ancho del texto para que sea fácil de leer */
-    margin: 0 auto; 
-}
-
-.section-title { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    border-bottom: 2px solid #edf2f7;
-    padding-bottom: 12px;
+    max-width: 1000px;
+    padding: 15px 25px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     margin-bottom: 30px;
-    color: #1e293b;
 }
 
-.section-title h3 { 
-    font-size: 1.1rem; 
-    text-transform: uppercase; 
-    letter-spacing: 1.5px; 
-    margin: 0;
-    font-weight: 800;
-}
-
-/* --- 5. Grid y Distribución --- */
-.grid-row { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 60px; /* Espacio generoso para que los inputs no se peguen */
-}
-
-/* --- 6. Bloques Dinámicos --- */
-.dynamic-block { 
-    background: #f8fafc; 
-    padding: 30px;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    border: 1px solid #edf2f7;
-    border-left: 5px solid #00482B;
-    position: relative;
-    transition: background 0.2s;
-}
-
-.dynamic-block:hover {
-    background: #f1f5f9;
-}
-
-/* --- 7. Inputs Estilo Minimalista (Línea Inferior) --- */
-.input-group {
+.action-buttons {
     display: flex;
-    flex-direction: column-reverse; 
-    margin-bottom: 25px; 
+    gap: 10px;
 }
 
-.input-group input, 
-.input-group textarea {
-    background: transparent !important;
-    border: none;
-    border-bottom: 1px solid #cbd5e0;
-    border-radius: 0;
-    padding: 14px 0 10px 0; /* Más aire sobre el texto escrito */
-    font-size: 1rem;
-    color: #334155;
-    transition: all 0.3s;
-    width: 100%;
-}
-
-.input-group input:focus, 
-.input-group textarea:focus {
-    outline: none;
-    border-bottom: 2px solid #00482B;
-}
-
-/* --- 8. Labels con Espaciado Corregido --- */
-.input-group label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 12px; /* SEPARACIÓN CRÍTICA: Despega el texto de la línea */
+.btn-primary, .btn-secondary {
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.input-group input:focus + label,
-.input-group textarea:focus + label {
-    color: #00482B;
-}
-
-/* --- 9. Botones de Acción Internos --- */
-.btn-add {
-    background: #ffffff;
-    border: 1px dashed #cbd5e1;
-    color: #475569;
-    padding: 14px;
-    width: 100%;
-    border-radius: 8px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
     cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #004731; /* Verde UdeC */
+    color: white;
+}
+.btn-primary:hover { background-color: #003324; }
+
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: #4a5568;
+}
+.btn-secondary:hover { background-color: #cbd5e0; }
+
+/* =========================================
+   DISEÑO DE LA PREVISUALIZACIÓN (EL PAPEL)
+   ========================================= */
+.cv-document-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.cv-document {
+    width: 210mm; /* Tamaño carta/A4 estándar */
+    min-height: 297mm;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: flex; /* Flex para dividir en dos columnas */
+    overflow: hidden;
+}
+
+/* Columna Izquierda (Verde) */
+.cv-sidebar-green {
+    width: 32%;
+    background-color: #004731; /* Verde oscuro institucional */
+    color: white;
+    padding: 30px 20px;
+    border-right: 8px solid #00b36b; /* Franja verde clara de adorno */
+}
+
+.cv-logo-container {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.cv-logo-container img {
+    max-width: 120px;
+   
+}
+
+.cv-sidebar-title {
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 5px;
+}
+
+.cv-sidebar-section {
+    margin-bottom: 35px;
+}
+
+.cv-contact-item {
+    margin-bottom: 12px;
+    font-size: 12px;
+}
+
+.cv-contact-item strong {
+    display: block;
+    color: #00b36b; /* Acento verde claro */
+    margin-bottom: 2px;
+}
+
+.cv-skill-item {
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+
+.skill-bar-bg {
+    width: 100%;
+    height: 6px;
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+.skill-bar-fill {
+    height: 100%;
+    background-color: #DAAA00;
+    border-radius: 3px;
+}
+
+/* Columna Derecha (Blanca) */
+.cv-main-content {
+    width: 68%;
+    padding: 40px;
+    color: #333;
+}
+
+.cv-header h1 {
+    font-size: 32px;
+    color: #1a202c;
+    margin: 0 0 5px 0;
+    text-transform: uppercase;
+}
+
+.cv-header h2 {
+    font-size: 18px;
+    color: #4a5568;
+    margin: 0 0 15px 0;
+    font-weight: normal;
+}
+
+.cv-quick-contact {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #004731;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.cv-section {
+    margin-bottom: 25px;
+}
+
+.cv-section-title {
+    font-size: 16px;
+    color: #004731;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.cv-text-block {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #4a5568;
+    text-align: justify;
+}
+
+.cv-timeline-item {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.cv-timeline-dates {
+    width: 25%;
+    font-size: 12px;
+    color: #004731;
+    font-weight: bold;
+    padding-right: 15px;
+}
+
+.cv-timeline-details {
+    width: 75%;
+    border-left: 2px solid #004731;
+    padding-left: 15px;
+    position: relative;
+}
+
+/* El puntito en la línea de tiempo */
+.cv-timeline-details::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #004731;
+    border-radius: 50%;
+}
+
+.cv-timeline-details h4 {
+    margin: 0 0 5px 0;
+    font-size: 15px;
+    color: #1a202c;
+}
+
+.cv-timeline-details h5 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    font-weight: normal;
+    color: #718096;
+}
+
+.cv-timeline-details p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+    color: #4a5568;
+}
+
+/* =========================================
+   MODO EDICIÓN - DISEÑO PROFESIONAL
+   ========================================= */
+.edit-mode-container {
+    background-color: #f4f7f6; /* Fondo un poco más sofisticado */
+    padding: 30px;
+}
+
+.cv-actions-header h2 {
+    font-size: 24px;
+    color: #1a202c;
     font-weight: 700;
+    margin: 0;
+}
+
+.cv-form-grid {
+    width: 100%;
+    max-width: 1000px; /* Evita que los inputs sean infinitos */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Estilo de las tarjetas contenedoras */
+.form-card {
+    background: #ffffff;
+    padding: 40px; /* Más aire interno */
+    border-radius: 16px;
+    border: 1px solid #e1e8ed;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.form-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+}
+
+.form-card h3 {
+    font-size: 18px;
+    color: #004731;
+    border-left: 4px solid #ff8000; /* Acento naranja UdeC */
+    padding-left: 15px;
+    margin-bottom: 25px;
+}
+
+/* Grupo de Inputs */
+.input-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 8px;
+    transition: color 0.2s ease;
+}
+
+/* Estilos profesionales para Inputs y Textareas */
+.input-group input, 
+.input-group textarea,
+.skills-inputs input {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #2d3748;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.input-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+}
+
+/* El toque "Premium": Interacción al hacer Focus */
+.input-group input:focus, 
+.input-group textarea:focus,
+.skills-inputs input:focus {
+    outline: none;
+    background-color: #ffffff;
+    border-color: #004731;
+    box-shadow: 0 0 0 3px rgba(0, 71, 49, 0.15); /* Halo verde suave */
+}
+
+.input-group input:focus + label, 
+.input-group textarea:focus + label {
+    color: #004731;
+}
+
+/* Placeholder sutil */
+::placeholder {
+    color: #a0aec0;
+    opacity: 1; 
+}
+
+/* Grilla interna para alinear campos (ej. Nombre y Apellido en una fila si quieres) */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+.form-row .input-group {
+    flex: 1;
+}
+
+/* Habilidades */
+.skills-inputs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.skills-inputs input[type="text"] { 
+    flex: 3; 
+}
+
+.skills-inputs input[type="number"] { 
+    flex: 1; 
+    text-align: center;
+}
+
+.btn-add {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px dashed #bbf7d0;
+    padding: 12px;
+    width: 100%;
     margin-top: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
     transition: all 0.2s;
 }
 
 .btn-add:hover {
-    background: #f0fdf4;
-    border: 1px solid #00482B;
-    color: #00482B;
+    background: #dcfce7;
+}
+
+.dynamic-item {
+    background: #fcfcfc;
+    border: 1px solid #edf2f7;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.dynamic-item:hover {
+    border-color: #004731; /* Verde UdeC */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .btn-remove {
-    background: transparent;
-    color: #94a3b8;
-    border: 1px solid #e2e8f0;
-    padding: 6px 14px;
+    background: #fff5f5;
+    color: #c53030;
+    border: none;
+    padding: 8px 12px;
     border-radius: 6px;
-    font-size: 0.75rem;
+    font-size: 12px;
     cursor: pointer;
-    margin-top: 20px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-add-more {
+    background: white;
+    color: #004731;
+    border: 2px dashed #004731;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* ... tus estilos existentes ... */
+
+/* Estilos para Aptitudes en la previsualización */
+.cv-sidebar-section:has(.cv-contact-item > span) {
+    margin-bottom: 25px;
+}
+
+.cv-contact-item span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: white;
+}
+
+/* Grilla de referencias en la previsualización (mejorada) */
+.cv-references-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 15px;
+}
+
+.cv-reference-item {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.cv-reference-item strong {
+    display: block;
+    color: #1a202c;
+    margin-bottom: 3px;
+}
+
+.cv-reference-item p {
+    margin: 0;
+    color: #4a5568;
+}
+
+/* Estilos para los botones de eliminación en el formulario (reutilizados) */
+.btn-remove-text {
+    background: transparent;
+    color: #e53e3e;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 0;
+    margin-top: 5px;
     transition: all 0.2s;
-    display: inline-flex;
+}
+
+.btn-remove-text:hover {
+    text-decoration: underline;
+}
+
+.dynamic-item-form {
+    border-bottom: 1px dashed #e2e8f0;
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+}
+
+.dynamic-item-form:last-of-type {
+    border-bottom: none;
+}
+
+.btn-add-more {
+    background: white;
+    color: #004731;
+    border: 2px dashed #004731;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s;
+}
+
+.btn-add-more:hover {
+    background: #f0fdf4;
+}
+
+.cv-header-modern {
+    border-bottom: 2px solid #004731; /* Línea verde divisoria */
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.cv-header-modern h1 {
+    font-size: 30px;
+    color: #1a202c;
+    text-transform: uppercase;
+    margin: 0 0 10px 0;
+    letter-spacing: 1px;
+}
+
+.cv-contact-row {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #4a5568;
+}
+
+.cv-contact-row span {
+    display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.btn-remove:hover {
-    background: #fff5f5;
-    color: #e53e3e;
-    border-color: #feb2b2;
+.cv-contact-row span svg {
+    color: #004731; /* Iconos en verde para combinar */
 }
 
-/* --- 10. Responsivo --- */
-@media (max-width: 768px) { 
-    .grid-row { grid-template-columns: 1fr; gap: 25px; } 
-    .cv-form { padding: 40px 20px; }
-    .cv-card-header { padding: 20px; }
+/* Ajuste para que la lista de la barra lateral se vea bien */
+.cv-sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cv-sidebar-list li {
+    font-size: 13px;
+    margin-bottom: 6px;
+    position: relative;
+    padding-left: 15px;
+}
+
+.cv-sidebar-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #00b36b;
+}
+
+.cv-name-display {
+    font-size: 38px;      /* Tamaño grande impacto */
+    color: #004731;      /* Verde UdeC */
+    font-weight: 800;    /* Muy negrita */
+    text-transform: uppercase;
+    margin: 0 0 10px 0;
+    line-height: 1.1;
 }

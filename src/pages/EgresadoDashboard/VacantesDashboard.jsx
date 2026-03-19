@@ -1,0 +1,536 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import API from '../../services/api'; 
+import logoUdec from '../../assets/UdeC2.png';
+import logoGrande from '../../assets/Logo2.png'; 
+import logoPequeño from '../../assets/Logo3.png';
+
+// Fusionamos todos los iconos en un solo bloque de lucide-react
+import { 
+    LogOut, 
+    MessageSquare, 
+    Briefcase, 
+    Building2, 
+    PlusCircle, 
+    Search, 
+    Calendar, 
+    Users,
+    ChevronRight,
+    Home,
+    Bell,
+    ClipboardList,
+    Clock,
+    MapPin, 
+    FileText, 
+    Globe, 
+    DollarSign,
+    AlertTriangle,
+    User // Añadí este que tenías en el primero pero no en el segundo
+} from 'lucide-react';
+
+import Mensajeria from '../../components/Chat-Vacantes'; 
+import CrearCV from '../CrearCV'; 
+import ConfirmacionLogout from '../../components/ConfirmacionLogout'; 
+import './VacantesDashboard.css'; 
+
+export default function VacantesDashboard() {
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // 1. ESTADOS
+    const [usuario, setUsuario] = useState(() => {
+    const storedUser = localStorage.getItem('usuario');
+    // Priorizamos el localStorage siempre para mantener consistencia al recargar
+    return storedUser ? JSON.parse(storedUser) : (location.state?.usuario || null);
+});
+
+    const [vacantes, setVacantes] = useState([]);
+    const [chatsRecientes, setChatsRecientes] = useState([]); 
+    const [selectedVacante, setSelectedVacante] = useState(null);
+    const [chatActivo, setChatActivo] = useState(null); 
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [vistaActiva, setVistaActiva] = useState('vacantes'); 
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    // Agrega esto junto a tus otros estados (como el de usuario o vacantes)
+const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+    // 2. EFECTOS
+    useEffect(() => {
+        if (!usuario || !usuario.id) {
+            navigate('/'); // Cámbialo a '/' para que si falla el login, vuelvan a la Landing profesional
+        } else {
+            fetchVacantes();
+        }
+    }, [usuario, navigate]);
+
+    const fetchVacantes = async () => {
+        try {
+            const res = await API.get('/vacantes');
+            setVacantes(res.data);
+            if (res.data.length > 0) setSelectedVacante(res.data[0]);
+        } catch (err) {
+            console.error("Error al cargar vacantes", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchChats = useCallback(async () => {
+        if (!usuario?.id) return;
+        try {
+            const resChats = await API.get(`/mensajeria/mis-conversaciones/${usuario.id}`);
+            setChatsRecientes(resChats.data);
+        } catch (e) {
+            console.error("Error al cargar chats", e);
+        }
+    }, [usuario?.id]); 
+
+    useEffect(() => {
+        let intervalo;
+        if (vistaActiva === 'mensajes' && usuario?.id) {
+            fetchChats();
+            intervalo = setInterval(() => fetchChats(), 8000); 
+        }
+        return () => clearInterval(intervalo);
+    }, [vistaActiva, usuario, fetchChats]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth <= 1024) setIsSidebarCollapsed(true);
+            else setIsSidebarCollapsed(false);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // 3. UTILIDADES Y HANDLERS
+    const formatDate = (dateString) => {
+        if (!dateString) return "Indefinida";
+        return new Date(dateString).toLocaleDateString('es-ES', {
+            year: 'numeric', month: 'short', day: 'numeric'
+        });
+    };
+
+    const esFechaCercana = (fechaCierre) => {
+        if (!fechaCierre) return false;
+        const hoy = new Date();
+        const cierre = new Date(fechaCierre);
+        const diferenciaDias = (cierre - hoy) / (1000 * 60 * 60 * 24);
+        return diferenciaDias >= 0 && diferenciaDias <= 3;
+    };
+
+    // Función para determinar el estilo y texto de los cupos
+const obtenerEstiloCupos = (cupos) => {
+    const n = parseInt(cupos);
+    if (isNaN(n)) return { clase: '', texto: '' }; // Manejo de error
+
+    if (n <= 2) {
+        return { clase: 'cupos-critico', texto: '¡Alerta!' }; // Rojo + Icono parpadeante
+    } else if (n === 3) {
+        return { clase: 'cupos-warning', texto: '¡Pocos!' }; // Amarillo/Naranja
+    }
+    // Para 4 o más, no hay texto extra ni color especial
+    return { clase: '', texto: '' }; 
+};
+
+    const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    setShowLogoutModal(false); 
+    navigate('/'); 
+};
+
+    const abrirChatDesdeVacante = (vacante) => {
+    setChatActivo({
+        vacanteId: vacante.id,
+        empresaId: vacante.empresaId || vacante.empresa?.id,
+        titulo: vacante.titulo,
+        nombreEmpresa: vacante.empresa?.nombre || 'Empresa'
+    });
+    setVistaActiva('mensajes');                
+};
+
+    const handlePostulacion = async () => {
+        if (!selectedVacante) return;
+        try {
+            const res = await API.post(`/estudiantes/${selectedVacante.id}/postular`);
+            alert(res.data.message);
+            fetchVacantes(); 
+        } catch (err) {
+            alert(err.response?.data?.error || "Error al postularse");
+        }
+    };
+
+    const getFilteredData = () => {
+        const term = searchTerm.toLowerCase();
+        if (vistaActiva === 'vacantes') {
+            return vacantes.filter(v => 
+                (v.titulo.toLowerCase().includes(term) || v.empresa?.nombre.toLowerCase().includes(term)) 
+                && v.estado === "ABIERTA"
+            );
+        }
+        return Array.isArray(chatsRecientes) ? chatsRecientes.filter(c => 
+            (c.nombreEmpresa || "").toLowerCase().includes(term) ||
+            (c.tituloVacante || "").toLowerCase().includes(term)
+        ) : [];
+    };
+
+    const dataFiltrada = getFilteredData();
+
+    if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
+
+    const obtenerIniciales = (nombres, apellidos) => {
+    if (!nombres) return "U";
+    // Toma la primera de nombres y la primera de apellidos
+    const inicialNombre = nombres.trim()[0] || "";
+    const inicialApellido = apellidos ? apellidos.trim()[0] : "";
+    return (inicialNombre + inicialApellido).toUpperCase();
+};
+
+    return (
+        <div className={`dashboard-layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+            
+            {/* SIDEBAR CORREGIDO (UN SOLO NAV) */}
+            <nav className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+                <div className="sidebar-top">
+                    <div className="logo-section">
+    <div className="platform-logo-container">
+        {isSidebarCollapsed ? (
+            /* Logo tipo icono para sidebar cerrado */
+            <img 
+                src={logoPequeño} 
+                alt="Icono" 
+                className="logo-icon-collapsed fade-in" 
+            />
+        ) : (
+            /* Logo completo para sidebar abierto */
+            <img 
+                src={logoGrande} 
+                alt="Empres 360 Pro" 
+                className="logo-full-expanded fade-in" 
+            />
+        )}
+    </div>
+</div>
+                    <div className="sidebar-menu">
+                        <button className={`menu-item ${vistaActiva === 'inicio' ? 'active' : ''}`} onClick={() => setVistaActiva('inicio')}>
+                            <Home size={18}/> <span>INICIO</span>
+                        </button>
+                        <button className={`menu-item ${vistaActiva === 'solicitudes' ? 'active' : ''}`} onClick={() => setVistaActiva('solicitudes')}>
+                            <ClipboardList size={18}/> <span>MIS SOLICITUDES</span>
+                        </button>
+                        <button className={`menu-item ${vistaActiva === 'vacantes' ? 'active' : ''}`} onClick={() => setVistaActiva('vacantes')}>
+                            <Briefcase size={18}/> <span>VACANTES DISPONIBLES</span>
+                        </button>
+                        <button className={`menu-item ${vistaActiva === 'crear-cv' ? 'active' : ''}`} onClick={() => setVistaActiva('crear-cv')}>
+                            <PlusCircle size={18}/> <span>MI HOJA DE VIDA</span>
+                        </button>
+                        <button className={`menu-item ${vistaActiva === 'notificaciones' ? 'active' : ''}`} onClick={() => setVistaActiva('notificaciones')}>
+                            <Bell size={18}/> <span>NOTIFICACIONES</span>
+                        </button>
+                        <button 
+    className={`menu-item ${vistaActiva === 'mensajes' ? 'active' : ''}`} 
+    onClick={() => {
+        setChatActivo(null); // <-- Limpiar para ver la lista de chats
+        setVistaActiva('mensajes');
+    }}
+>
+    <MessageSquare size={18}/> <span>MENSAJES / CHAT</span>
+</button>
+                    </div>
+                </div>
+
+                <div className="sidebar-footer">
+                    <button className="collapse-btn-footer" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
+    <div className="btn-content">
+        <ChevronRight size={20} className={`icon-transition ${isSidebarCollapsed ? "" : "rotate-180"}`} />
+        {/* Este span es el que se convertirá en tooltip al contraer */}
+        <span>{isSidebarCollapsed ? "ABRIR MENÚ" : "CONTRAER MENÚ"}</span>
+    </div>
+</button>
+<div className="menu-item logout-item" onClick={() => setShowLogoutModal(true)}>
+    <LogOut size={20} className="sidebar-icon" />
+    {!isSidebarCollapsed && <span className="menu-label">CERRAR SESIÓN</span>}
+</div>
+                </div>
+            </nav>
+
+            <div className="glass-container">
+                <header className="main-header-container">
+    {/* Franja superior de colores */}
+    <div className="header-top-bar">
+        <div className="bar-green"></div>
+        <div className="bar-orange"></div>
+    </div>
+
+    {/* Franja inferior blanca con contenido */}
+    <div className="header-content">
+    {/* LADO IZQUIERDO: LOGO (Se queda igual) */}
+    <div className="header-left">
+        <div className="udec-brand">
+            <img src={logoUdec} alt="Logo UdeC" className="header-logo-img" />
+        </div>
+    </div>
+
+    {/* CENTRO: BUSCADOR (Lo movimos aquí) */}
+    <div className="header-center">
+        <div className="search-wrapper">
+            <Search size={18} className="search-icon-inside" />
+            <input type="text" placeholder="Buscar" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        </div>
+    </div>
+
+    {/* LADO DERECHO: PERFIL Y SETTINGS (Lo movimos aquí) */}
+    <div className="header-right">
+        <div className="user-profile-info">
+    <div className="user-details">
+        {/* Juntamos nombres y apellidos que vienen de tu BD */}
+        <span className="user-full-name">
+            {usuario?.nombres} {usuario?.apellidos}
+        </span>
+        <span className="user-career">Egresado - Ingeniería de Sistemas</span>
+    </div>
+    
+    <div className="user-avatar-initials">
+        {usuario?.foto ? (
+            <img src={usuario.foto} alt="Avatar" />
+        ) : (
+            <span>{obtenerIniciales(usuario?.nombres, usuario?.apellidos)}</span>
+        )}
+    </div>
+</div>
+    </div>
+</div>
+</header>
+
+                <main className="content-inner">
+                    {vistaActiva === 'vacantes' && (
+                        <div className="vacantes-view-container">
+                            <section className="vacantes-list-panel">
+    <div className="section-title-container">
+    <Briefcase size={28} className="title-icon" />
+    <h2>
+        VACANTES DISPONIBLES 
+        <span className="vacantes-count-badge">{dataFiltrada.length}</span>
+    </h2>
+</div>
+                                <div className="scrollable-cards">
+                                    {dataFiltrada.map((v) => {
+                                        const cuposDisponibles = v.limitePostulantes ? (v.limitePostulantes - (v._count?.postulaciones || 0)) : null;
+                                        const esUrgente = esFechaCercana(v.fechaCierre);
+
+                                        return (
+                                            <div key={v.id} className={`vacante-card-item ${selectedVacante?.id === v.id ? 'active' : ''}`} onClick={() => setSelectedVacante(v)}>
+                                                <div className="card-main-info">
+                                                    <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom: '4px'}}>
+                                                        <div className="card-logo-placeholder"><Building2 size={16} /></div>
+                                                        <h4 style={{fontSize: '15px', fontWeight: '600', color: '#1a202c', margin: '0'}}>{v.titulo}</h4>
+                                                    </div>
+                                                    <p className="c-empresa" style={{fontSize: '13px', color: '#718096', margin: '0 0 10px 0'}}>
+                                                        {v.empresa?.nombre || 'Empresa Aliada'} • <span style={{color: '#4a5568'}}>{v.ubicacion}</span>
+                                                    </p>
+                                                    <div className="card-meta-tags" style={{display: 'flex', gap: '6px', flexWrap: 'wrap'}}>
+                                                        <span style={{display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#475569'}}>
+                                                            <DollarSign size={12} style={{marginRight: '4px'}} />
+                                                            {v.salario && !isNaN(parseFloat(v.salario)) ? `$${parseFloat(v.salario).toLocaleString('es-CO')}` : 'A convenir'}
+                                                        </span>
+                                                        {/* Dentro de scrollable-cards -> dataFiltrada.map */}
+{cuposDisponibles !== null && (
+    <span 
+        className={`badge-slots ${obtenerEstiloCupos(cuposDisponibles).clase}`} 
+        style={{display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600'}}
+    >
+        <Users size={12} style={{marginRight: '4px'}} /> 
+        {cuposDisponibles} cupos
+        {obtenerEstiloCupos(cuposDisponibles).texto && (
+            <b style={{marginLeft: '4px'}}>{obtenerEstiloCupos(cuposDisponibles).texto}</b>
+        )}
+    </span>
+)}
+                                                        <span 
+    className={`badge-deadline ${esFechaCercana(v.fechaCierre) ? 'fecha-urgente' : ''}`} 
+    style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '500' }}
+>
+    <Clock size={12} style={{ marginRight: '6px' }} /> 
+    
+    {/* 1. Texto de urgencia en negrita al inicio */}
+    {esFechaCercana(v.fechaCierre) ? (
+        <>
+            {/* 1. Primero la fecha con formato discreto */}
+            <span style={{ marginRight: '4px' }}>
+                ({formatDate(v.fechaCierre)})
+            </span>
+
+            {/* 2. Luego el aviso de urgencia en negrita */}
+            <b style={{ fontWeight: '700', textTransform: 'uppercase' }}>
+                ¡Pronto!
+            </b>
+        </>
+    ) : (
+        `Cierre: ${formatDate(v.fechaCierre)}`
+    )}
+
+    {/* 2. Icono de Alerta al FINAL (solo si es urgente) */}
+    {esFechaCercana(v.fechaCierre) && (
+        <AlertTriangle 
+            size={13} 
+            className="blink-icon" 
+            style={{ marginLeft: '6px', color: '#dc2626' }} 
+        />
+    )}
+</span>
+                                                    </div>
+                                                </div>
+                                                <button className="btn-details-action" style={{marginTop: '12px', padding: '6px 12px', fontSize: '12px'}}>Ver Detalles</button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+
+                            <aside className="vacante-detail-panel">
+                                {selectedVacante ? (
+                                    <div className="detail-content-wrapper fade-in" key={selectedVacante.id}>
+                                        <div className="detail-header-info">
+                                            <h3 style={{fontSize: '22px', color: '#1a202c', marginBottom: '15px'}}>{selectedVacante.titulo}</h3>
+                                            
+                                            <div className="detail-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '20px' }}>
+                                                <span className="meta-tag-badge badge-published">
+                                                    <MapPin size={14} style={{marginRight: '6px'}} /> <b>Ubicación:</b> {selectedVacante.ubicacion}
+                                                </span>
+                                                <span className="meta-tag-badge badge-published">
+                                                    <FileText size={14} style={{marginRight: '6px'}} /> <b>Contrato:</b> {selectedVacante.tipo}
+                                                </span>
+                                                <span className="meta-tag-badge badge-published">
+                                                    <Globe size={14} style={{marginRight: '6px'}} /> <b>Modalidad:</b> {selectedVacante.modalidad}
+                                                </span>
+                                                <span className="meta-tag-badge badge-slots">
+                                                    <DollarSign size={14} style={{marginRight: '6px'}} /> <b>Salario:</b> { (selectedVacante.salario && !isNaN(parseFloat(selectedVacante.salario))) ? `$${parseFloat(selectedVacante.salario).toLocaleString('es-CO')}` : 'A convenir' }
+                                                </span>
+                                                <span className="meta-tag-badge badge-published">
+                                                    <Calendar size={14} style={{marginRight: '6px'}} /> <b>Publicado:</b> {formatDate(selectedVacante.fechaCreacion)}
+                                                </span>
+                                                
+                                                {/* CUPOS EN DETALLE CON ALERTA */}
+{selectedVacante.limitePostulantes && (
+    <span className={`meta-tag-badge badge-slots ${obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).clase}`}>
+        <Users size={14} style={{ marginRight: '6px' }} />
+        
+        <b>Cupos:</b> {selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)}
+        
+        {obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).texto && (
+            <b style={{ marginLeft: '5px' }}>
+                {obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).texto}
+            </b>
+        )}
+
+        {/* El Triángulo de Alerta al final */}
+        {obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).texto && (
+            <AlertTriangle 
+                size={16} 
+                className={(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)) <= 2 ? "blink-icon" : ""} 
+                style={{ 
+                    marginLeft: '8px', 
+                    color: (selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)) <= 2 ? '#dc2626' : '#a16207' 
+                }} 
+                title={`¡Quedan ${selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)} cupos!`}
+            />
+        )}
+    </span>
+)}
+
+                                                <span className={`meta-tag-badge badge-deadline ${esFechaCercana(selectedVacante.fechaCierre) ? 'urgent' : ''}`}>
+    <Clock size={14} style={{ marginRight: '6px' }} />
+    <b>Cierre:</b>
+    <span style={{ marginLeft: '3px' }}>
+        {formatDate(selectedVacante.fechaCierre)}
+    </span>
+
+    {/* 🔥 REEMPLAZO: Cambiamos el texto por el icono con tooltip --- */}
+    {esFechaCercana(selectedVacante.fechaCierre) && (
+    <div className="tooltip-container">
+        <AlertTriangle 
+            size={16} 
+            className="blink-icon" 
+            style={{ marginLeft: '6px', color: '#dc2626', cursor: 'pointer' }} 
+        />
+        <span className="tooltip-text">¡Esta vacante cierra muy pronto!</span>
+    </div>
+)}
+</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="detail-body-text" style={{background: '#fcfcfc', border: '1px solid #f0f0f0', borderRadius: '12px', padding: '20px'}}>
+                                            <strong style={{display: 'block', marginBottom: '10px', color: '#2d3748', fontSize: '15px'}}>Descripción de la vacante:</strong>
+                                            <p style={{fontSize: '14px', lineHeight: '1.7', color: '#4a5568'}}>{selectedVacante.descripcion}</p>
+                                        </div>
+
+                                        <div className="actions-footer" style={{marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                                            <button className="btn-apply-main" onClick={handlePostulacion}>POSTULARME AHORA</button>
+                                            <button className="btn-cv-secondary" onClick={() => setVistaActiva('crear-cv')}>MI HOJA DE VIDA (PDF)</button>
+                                            <div className="drag-drop-area" style={{border: '2px dashed #e2e8f0', borderRadius: '12px', padding: '20px', textAlign: 'center', background: '#f9fafb'}}>
+                                                <span style={{fontSize: '13px', color: '#718096'}}>Subir archivos adicionales</span>
+                                                <small style={{display: 'block', color: '#a0aec0', marginTop: '4px'}}>Drag and drop</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="no-selection-state">
+                                        <Briefcase size={50} color="#cbd5e0" /><p>Selecciona una vacante para ver los detalles completos.</p>
+                                    </div>
+                                )}
+                            </aside>
+                        </div>
+                    )}
+
+                    {vistaActiva === 'crear-cv' && <div className="full-view"><CrearCV isInline={true} setVistaActiva={setVistaActiva} /></div>}
+                    {/* Cambia el div que envuelve a Mensajeria por este */}
+{vistaActiva === 'mensajes' && (
+    <div style={{ 
+        height: 'calc(100vh - 140px)', // Ajusta el '140px' según el alto de tu header azul
+        width: '100%',
+        padding: '20px', // Espaciado para que no toque los bordes de la pantalla
+        boxSizing: 'border-box'
+    }}>
+        <Mensajeria 
+            usuario={usuario} 
+            activeChat={chatActivo} 
+            onClose={() => setChatActivo(null)} 
+        />
+    </div>
+)}
+                </main>
+            </div>
+
+            <ConfirmacionLogout 
+                isOpen={showLogoutConfirm} 
+                onConfirm={handleLogout} 
+                onCancel={() => setShowLogoutConfirm(false)} 
+            />
+
+            {showLogoutModal && (
+    <div className="modal-overlay">
+        <div className="logout-modal">
+            <div className="modal-icon">
+                <LogOut size={40} />
+            </div>
+            <h3>¿Cerrar sesión?</h3>
+            <p>Se cerrará tu sesión actual y tendrás que volver a ingresar.</p>
+            <div className="modal-actions">
+                <button className="btn-cancel" onClick={() => setShowLogoutModal(false)}>
+                    Cancelar
+                </button>
+                <button className="btn-confirm" onClick={handleLogout}>
+                    Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </div>
+)}
+        </div>
+    );
+}

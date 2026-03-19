@@ -1,163 +1,171 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, X, MessageSquare, Lock } from 'lucide-react'; 
+import { Send, Building2, MessageSquare, ArrowLeft, Lock, MoreVertical } from 'lucide-react'; 
 import API from '../services/api'; 
 import './Estilo-Chat-Vacantes.css';
 
-export default function Mensajeria({ empresaId, vacanteId, onClose, usuario }) {
-    
+export default function Mensajeria({ activeChat, onClose, usuario }) {
+    const [conversaciones, setConversaciones] = useState([]);
+    const [seleccionado, setSeleccionado] = useState(activeChat || null);
     const [mensajes, setMensajes] = useState([]);
-    const [nuevoMensaje, setNuevoMensaje] = useState("");
-    const [isChatActivo, setIsChatActivo] = useState(true); 
-    
-    // 1. Referencia al contenedor de mensajes (chat-body)
+    const [nuevoMsg, setNuevoMsg] = useState("");
+    const [isChatActivo, setIsChatActivo] = useState(true);
     const chatBodyRef = useRef(null);
 
-    // --- CORRECCIÓN 1: Memoizar cargarMensajes ---
-    const cargarMensajes = useCallback(async (isInitialLoad = false) => {
-        if (!usuario?.id || !empresaId || !vacanteId) return;
-        
+    const fetchConversaciones = useCallback(async () => {
+        if (!usuario?.id) return;
         try {
-            const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${empresaId}/${vacanteId}`);
-            
-            const nuevosMensajes = data.mensajes || [];
+            const res = await API.get(`/mensajeria/mis-conversaciones/${usuario.id}`);
+            setConversaciones(res.data);
+            // Si no hay seleccionado pero hay conversaciones, seleccionamos la primera
+            if (!seleccionado && res.data.length > 0) setSeleccionado(res.data[0]);
+        } catch (err) { console.error(err); }
+    }, [usuario?.id, seleccionado]);
 
-            // Solo actualizar si hay mensajes nuevos para evitar re-renderizados innecesarios
-            setMensajes(prev => {
-                if (JSON.stringify(prev) === JSON.stringify(nuevosMensajes)) {
-                    return prev;
-                }
-                return nuevosMensajes;
-            });
+    const cargarMensajes = useCallback(async () => {
+        if (!usuario?.id || !seleccionado) return;
+        try {
+            const { data } = await API.get(`/mensajeria/historial/${usuario.id}/${seleccionado.empresaId}/${seleccionado.vacanteId}`);
+            setMensajes(data.mensajes || []);
+            setIsChatActivo(data.chatActivo !== undefined ? data.chatActivo : true);
+        } catch (err) { console.error(err); }
+    }, [usuario, seleccionado]);
 
-            if (data.chatActivo !== undefined) {
-                setIsChatActivo(data.chatActivo);
-            }
-        } catch (err) {
-            // console.error("Error al cargar historial:", err);
+    useEffect(() => { fetchConversaciones(); }, [fetchConversaciones]);
+
+    useEffect(() => {
+        if (seleccionado) {
+            cargarMensajes();
+            const interval = setInterval(() => cargarMensajes(), 4000);
+            return () => clearInterval(interval);
         }
-    }, [usuario, empresaId, vacanteId]);
+    }, [seleccionado, cargarMensajes]);
 
-    // 2. EFECTOS: Cargar historial
     useEffect(() => {
-        cargarMensajes(true);
-        const interval = setInterval(() => cargarMensajes(), 3000); 
-        return () => clearInterval(interval);
-    }, [cargarMensajes]); 
-
-    // Marcar mensajes como leídos
-    useEffect(() => {
-        if (!usuario?.id || !empresaId) return;
-        API.put(`/mensajeria/leer/${usuario.id}/${empresaId}`).catch(() => {});
-    }, [empresaId, usuario?.id]);
-
-    // --- CORRECCIÓN 2: Lógica de Scroll Inteligente ---
-    useEffect(() => {
-        const container = chatBodyRef.current;
-        if (!container) return;
-
-        // Comprobar si el usuario está cerca del fondo
-        const isUserAtBottom = 
-            container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
-
-        // Si el usuario estaba abajo, o si estamos cargando los mensajes por primera vez
-        // (y no hay mensajes previos), entonces hacemos scroll al fondo.
-        if (isUserAtBottom || mensajes.length === 0) {
-            container.scrollTop = container.scrollHeight;
+        if (chatBodyRef.current) {
+            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
         }
-        // Si no estaba abajo, no hacemos nada, así el usuario puede leer tranquilos.
-        
     }, [mensajes]);
 
-    // 3. ENVIAR MENSAJE
     const handleEnviar = async (e) => {
-        e.preventDefault();
-        
-        if (!usuario || !usuario.id) return;
-        if (!nuevoMensaje.trim() || !isChatActivo) return;
+    e.preventDefault();
+    if (!nuevoMsg.trim() || !isChatActivo || !seleccionado) return;
 
-        try {
-            await API.post('/mensajeria/enviar', {                
-                senderId: usuario.id,
-                receiverId: empresaId,
-                contenido: nuevoMensaje,
-                senderType: 'USUARIO',
-                vacanteId: vacanteId
-            });
-            setNuevoMensaje("");
-            cargarMensajes(); // Actualizar inmediatamente
-        } catch (error) {
-            // console.error("Error al enviar:", error);
-        }
-    };
+    // Log para depuración
+    console.log("Datos del chat seleccionado:", seleccionado);
+
+    try {
+        const payload = {
+            contenido: nuevoMsg.trim(),
+            senderType: 'USUARIO',
+            senderId: parseInt(usuario.id),
+            // IMPORTANTE: Asegúrate de que este ID sea el que espera el backend
+            receiverId: parseInt(seleccionado.empresaId), 
+            vacanteId: parseInt(seleccionado.vacanteId)
+        };
+
+        console.log("Enviando este payload:", payload);
+
+        const res = await API.post('/mensajeria/enviar', payload);
+        setMensajes(prev => [...prev, res.data]);
+        setNuevoMsg("");
+    } catch (err) {
+        // Esto nos dirá qué dice el servidor exactamente
+        console.error("Error detallado del servidor:", err.response?.data);
+        alert("Error: " + (err.response?.data?.error || "Fallo en el servidor"));
+    }
+};
 
     return (
-        <div className="chat-window">
-            <header className="chat-header">
-                <div className="chat-header-info">
-                    <MessageSquare size={20} className="text-olive" />
-                    <div className="header-text-group">
-                        <h2 className="chat-title">Conversación</h2>
-                        <div className="status-indicator">
-                            <span className={isChatActivo ? "online-dot" : "offline-dot"}></span>
-                            <span className="status-text">{isChatActivo ? "Chat Abierto" : "Finalizado"}</span>
-                        </div>
-                    </div>
+        <div className="chat-container-main">
+            {/* COLUMNA IZQUIERDA: LISTA DE CHATS */}
+            <aside className="chat-sidebar">
+                <div className="sidebar-header-chat">
+                    <MessageSquare size={20} className="text-green-udec" />
+                    <h3>Bandeja de Entrada</h3>
                 </div>
-                {onClose && (
-                    <button onClick={onClose} className="close-button">
-                        <X size={20} />
-                    </button>
-                )}
-            </header>
-
-            {/* --- CORRECCIÓN 3: Asignar la referencia aquí --- */}
-            <div className="chat-body" ref={chatBodyRef}>
-                {!isChatActivo && (
-                    <div className="chat-disabled-alert">
-                        <Lock size={16} />
-                        <p>Esta conversación ha sido cerrada.</p>
-                    </div>
-                )}
-
-                {mensajes.length === 0 ? (
-                    <div className="empty-chat-placeholder">
-                        <p>Aún no hay mensajes. ¡Inicia la conversación!</p>
-                    </div>
-                ) : (
-                    mensajes.map((m) => (
+                <div className="conversations-list">
+                    {conversaciones.map((conv) => (
                         <div 
-                            key={m.id} 
-                            className={`message-wrapper ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}
+                            key={`${conv.vacanteId}-${conv.empresaId}`}
+                            className={`conv-item ${seleccionado?.vacanteId === conv.vacanteId ? 'active' : ''}`}
+                            onClick={() => setSeleccionado(conv)}
                         >
-                            <div className={`message-bubble ${m.senderType === 'USUARIO' ? 'sent' : 'received'}`}>
-                                <p className="message-content">{m.contenido}</p>
-                                <span className="message-time">
-                                    {m.fechaEnvio ? new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                                </span>
+                            <div className="conv-icon">
+                                <Building2 size={18} />
+                            </div>
+                            <div className="conv-info">
+                                <div className="conv-info-top">
+                                    <span className="conv-name">{conv.nombreEmpresa}</span>
+                                </div>
+                                <span className="conv-subject">{conv.tituloVacante}</span>
+                                <p className="conv-last-msg">{conv.ultimoMensaje}</p>
                             </div>
                         </div>
-                    ))
-                )}
-                {/* --- SE ELIMINÓ EL DIV REF TEMPORAL --- */}
-            </div>
+                    ))}
+                </div>
+            </aside>
 
-            <form onSubmit={handleEnviar} className={`chat-footer ${!isChatActivo ? 'footer-disabled' : ''}`}>
-                <input 
-                    type="text"
-                    value={nuevoMensaje}
-                    onChange={(e) => setNuevoMensaje(e.target.value)}
-                    placeholder={isChatActivo ? "Escribe un mensaje..." : "Chat deshabilitado"}
-                    className="chat-input"
-                    disabled={!isChatActivo}
-                />
-                <button 
-                    type="submit" 
-                    disabled={!nuevoMensaje.trim() || !isChatActivo || !usuario?.id} 
-                    className={`send-button ${!isChatActivo ? 'btn-disabled' : ''}`}
-                >
-                    <Send size={18} />
-                </button>
-            </form>
+            {/* COLUMNA DERECHA: VENTANA DE CHAT */}
+            <main className="chat-window-main">
+                {seleccionado ? (
+                    <>
+                        <header className="chat-header-top">
+                            <div className="chat-header-user">
+                                <div className="user-avatar-placeholder">
+                                    {seleccionado.nombreEmpresa.charAt(0)}
+                                </div>
+                                <div className="user-status-info">
+                                    <h4>{seleccionado.nombreEmpresa}</h4>
+                                    <p>{seleccionado.tituloVacante}</p>
+                                </div>
+                            </div>
+                            <div className="chat-header-actions">
+                                <MoreVertical size={20} className="icon-btn" />
+                            </div>
+                        </header>
+
+                        <div className="chat-messages-area" ref={chatBodyRef}>
+                            {!isChatActivo && (
+                                <div className="chat-locked-banner">
+                                    <Lock size={14} /> Esta conversación ha finalizado
+                                </div>
+                            )}
+                            <div className="messages-list-wrapper">
+                                {mensajes.map((m) => (
+                                    <div key={m.id} className={`msg-group ${m.senderType === 'USUARIO' ? 'own' : 'other'}`}>
+                                        <div className="msg-bubble">
+                                            <p>{m.contenido}</p>
+                                            <span className="msg-time">
+                                                {new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <footer className="chat-input-area">
+                            <form onSubmit={handleEnviar} className="input-form-wrapper">
+                                <input 
+                                    type="text"
+                                    value={nuevoMsg}
+                                    onChange={(e) => setNuevoMsg(e.target.value)}
+                                    placeholder={isChatActivo ? "Escribe un mensaje..." : "Chat deshabilitado"}
+                                    disabled={!isChatActivo}
+                                />
+                                <button type="submit" className="send-msg-btn" disabled={!isChatActivo || !nuevoMsg.trim()}>
+                                    <Send size={18} />
+                                </button>
+                            </form>
+                        </footer>
+                    </>
+                ) : (
+                    <div className="no-chat-selected">
+                        <MessageSquare size={64} />
+                        <p>Selecciona una conversación para empezar</p>
+                    </div>
+                )}
+            </main>
         </div>
     );
 }
