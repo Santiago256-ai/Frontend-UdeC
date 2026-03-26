@@ -15,14 +15,14 @@ export default function CrearCV({ isInline, setVistaActiva }) {
     
     // Estado inicial unificado con Prisma
     const [cvData, setCvData] = useState({
-        telefono: "",
+        celular: "",
         email: usuarioLogueado?.correo || "",
         direccion: "",
         descripcion: "",
         habilidades: "", // Se guarda como String separado por comas
         educacion: [{ titulo: "", institucion: "", periodo: "" }],
         experiencia: [{ cargo: "", empresa: "", periodo: "" }],
-        referencias: [{ nombre: "", cargo: "", telefono: "" }],
+        referencias: [{ nombre: "", cargo: "", celular: "" }],
         aptitudes: [{ aptitud: "" }],
         idiomas: [{ idioma: "", nivel: "0" }]
     });
@@ -66,22 +66,35 @@ export default function CrearCV({ isInline, setVistaActiva }) {
 
     // --- LOGICA DE GUARDADO ---
     const handleGuardar = async () => {
-        if (!usuarioLogueado?.id) {
-            alert("Error: Usuario no identificado.");
-            return;
-        }
+    if (!usuarioLogueado?.id) {
+        alert("Error: Usuario no identificado.");
+        return;
+    }
 
-        setIsLoading(true);
-        try {
-            await API.post(`/cvs/${usuarioLogueado.id}`, cvData);
-            alert("¡Hoja de vida guardada exitosamente!");
-        } catch (error) {
-            console.error("Error al guardar CV:", error);
-            alert("Hubo un error al guardar la hoja de vida.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    setIsLoading(true);
+    try {
+        // --- AGREGA ESTA LÓGICA DE LIMPIEZA ---
+        const limpiar = (arr) => arr.map(({ id, perfilId, perfilCVId, ...resto }) => resto);
+
+        const dataLimpia = {
+            ...cvData,
+            experiencia: limpiar(cvData.experiencia),
+            educacion: limpiar(cvData.educacion),
+            referencias: limpiar(cvData.referencias),
+            aptitudes: limpiar(cvData.aptitudes),
+            idiomas: limpiar(cvData.idiomas),
+        };
+
+        // Enviamos dataLimpia en lugar de cvData
+        await API.post(`/cvs/${usuarioLogueado.id}`, dataLimpia);
+        alert("¡Hoja de vida guardada exitosamente!");
+    } catch (error) {
+        console.error("Error al guardar CV:", error);
+        alert("Hubo un error al guardar la hoja de vida.");
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     // --- VISTA DE PREVISUALIZACIÓN ---
     if (isPreview) {
@@ -148,7 +161,7 @@ export default function CrearCV({ isInline, setVistaActiva }) {
         {usuarioLogueado?.nombres} {usuarioLogueado?.apellidos}
     </h1>
     <div className="cv-contact-row">
-        <span><Phone size={14} /> {cvData.telefono || 'Sin teléfono'}</span>
+        <span><Phone size={14} /> {cvData.celular || 'Sin teléfono'}</span>
         <span><Mail size={14} /> {cvData.email || usuarioLogueado?.correo}</span>
         <span><MapPin size={14} /> {cvData.direccion || 'Cundinamarca, Colombia'}</span>
     </div>
@@ -192,7 +205,7 @@ export default function CrearCV({ isInline, setVistaActiva }) {
                                         <div className="cv-reference-item" key={i}>
                                             <strong>{ref.nombre}</strong>
                                             <p>{ref.cargo}</p>
-                                            <p>Cel: {ref.telefono}</p>
+                                            <p>Cel: {ref.celular}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -225,7 +238,7 @@ export default function CrearCV({ isInline, setVistaActiva }) {
                     <h3><User size={20} /> Datos Básicos y Perfil</h3>
                     <div className="input-group">
                         <label>Teléfono Celular</label>
-                        <input type="text" name="telefono" value={cvData.telefono} onChange={handleChangeBasico} placeholder="Ej. 300 123 4567"/>
+                        <input type="text" name="celular" value={cvData.celular} onChange={handleChangeBasico} placeholder="Ej. 300 123 4567"/>
                     </div>
                     <div className="input-group">
                         <label>Dirección de Residencia</label>
@@ -281,23 +294,20 @@ export default function CrearCV({ isInline, setVistaActiva }) {
                             <div className="input-group"><label>Nombre</label><input type="text" value={ref.nombre} onChange={(e) => handleArrayChange(index, 'referencias', 'nombre', e.target.value)} /></div>
                             <div className="form-row">
                                 <div className="input-group"><label>Cargo</label><input type="text" value={ref.cargo} onChange={(e) => handleArrayChange(index, 'referencias', 'cargo', e.target.value)} /></div>
-                               <div className="input-group">
+<div className="input-group">
     <label>Teléfono</label>
     <input 
         type="text" 
-        /* ESTE ES EL CAMBIO CLAVE: 
-           Lee 'telefono' (si acabas de escribirlo) 
-           o 'celular' (si viene de la base de datos) 
-        */
-        value={ref.telefono || ref.celular || ""} 
-        onChange={(e) => handleArrayChange(index, 'referencias', 'telefono', e.target.value)} 
+        /* Cambia esto para que use el campo 'celular' directamente */
+        value={ref.celular || ""} 
+        onChange={(e) => handleArrayChange(index, 'referencias', 'celular', e.target.value)} 
     />
 </div>
                             </div>
                             <button className="btn-remove-text" onClick={() => removeArrayItem(index, 'referencias')}><Trash2 size={14}/> Eliminar</button>
                         </div>
                     ))}
-                    <button className="btn-add-more" onClick={() => addArrayItem('referencias', { nombre: "", cargo: "", telefono: "" })}><Plus size={16} /> Añadir referencia</button>
+                    <button className="btn-add-more" onClick={() => addArrayItem('referencias', { nombre: "", cargo: "", celular: "" })}><Plus size={16} /> Añadir referencia</button>
                 </div>
 
                 {/* Aptitudes */}

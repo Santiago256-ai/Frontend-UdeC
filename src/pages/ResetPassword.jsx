@@ -5,7 +5,7 @@ import './ResetPassword.css';
 
 // Reutilizamos tus logos
 const logoUrl = '/Logo.png'; 
-const logoSecundarioUrl = '/UdeC2_blanco.png';
+const logoSecundarioUrl = '/UdeC2.png';
 
 function ResetPassword() {
     const { token } = useParams(); // Extrae el token de la URL
