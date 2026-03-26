@@ -16,39 +16,53 @@ function ResetPassword() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState({ message: '', type: '' });
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleReset = async (e) => {
-        e.preventDefault();
-        
-        if (password !== confirmPassword) {
-            setStatus({ message: "Las contraseñas no coinciden", type: 'error' });
-            return;
+    e.preventDefault();
+    setStatus({ message: '', type: '' });
+
+    // --- VALIDACIÓN DE FUERZA (Punto 4) ---
+    // Mínimo 8 caracteres, 1 Mayúscula, 1 Número, 1 Carácter Especial
+    const regexSeguridad = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    
+    if (!regexSeguridad.test(password)) {
+        setStatus({ 
+            message: "La clave debe tener 8 caracteres, una mayúscula, números y un carácter especial (@$!%*?&).", 
+            type: 'error' 
+        });
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        setStatus({ message: "Las contraseñas no coinciden.", type: 'error' });
+        return;
+    }
+
+    setLoading(true);
+
+    try {
+        const response = await fetch('https://backend-ude-c.vercel.app/api/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, newPassword: password }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            setStatus({ message: "¡Contraseña actualizada con éxito!", type: 'success' });
+            setTimeout(() => navigate('/'), 3000);
+        } else {
+            // Aquí el backend puede decirte si es la misma contraseña antigua (Punto 3)
+            setStatus({ message: data.message || "Error al actualizar.", type: 'error' });
         }
-
-        setLoading(true);
-        setStatus({ message: '', type: '' });
-
-        try {
-            const response = await fetch('https://backend-ude-c.vercel.app/api/auth/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, newPassword: password }),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setStatus({ message: "¡Contraseña actualizada! Redirigiendo...", type: 'success' });
-                setTimeout(() => navigate('/'), 3000);
-            } else {
-                setStatus({ message: data.message || "Token inválido o expirado.", type: 'error' });
-            }
-        } catch (error) {
-            setStatus({ message: "Error de conexión con el servidor.", type: 'error' });
-        } finally {
-            setLoading(false);
-        }
-    };
+    } catch (error) {
+        setStatus({ message: "Error de conexión.", type: 'error' });
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <div className="reset-main-container">
@@ -84,15 +98,20 @@ function ResetPassword() {
                     </div>
 
                     <div className="input-group-reset">
-                        <label>Confirmar Contraseña</label>
-                        <input 
-                            type="password" 
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                            placeholder="••••••••"
-                        />
-                    </div>
+    <label>Confirmar Contraseña</label>
+    <div className="password-wrapper-reset">
+        <input 
+            type={showConfirmPassword ? "text" : "password"} 
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            placeholder="••••••••"
+        />
+        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+        </button>
+    </div>
+</div>
 
                     {status.message && (
                         <div className={`status-msg-${status.type}`}>
