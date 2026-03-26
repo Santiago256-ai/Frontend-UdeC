@@ -15,10 +15,49 @@ function Landing() {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  // --- Agrega estos estados al inicio de tu componente Landing ---
+const [showResetModal, setShowResetModal] = useState(false);
+const [emailRecuperacion, setEmailRecuperacion] = useState('');
+const [resetLoading, setResetLoading] = useState(false);
+const [resetMessage, setResetMessage] = useState({ texto: '', tipo: '' });
+
+// --- Función para enviar el correo de recuperación ---
+const handleRequestReset = async (e) => {
+  e.preventDefault();
+  setResetLoading(true);
+  setResetMessage({ texto: '', tipo: '' });
+
+  try {
+    const response = await fetch('https://backend-ude-c.vercel.app/api/auth/request-password-reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correo: emailRecuperacion }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setResetMessage({ texto: "Enlace enviado. Revisa tu correo.", tipo: 'success' });
+      setTimeout(() => {
+        setShowResetModal(false);
+        setEmailRecuperacion('');
+        setResetMessage({ texto: '', tipo: '' });
+      }, 3000);
+    } else {
+      setResetMessage({ texto: data.message || "Error al enviar el correo.", tipo: 'error' });
+    }
+  } catch (error) {
+    setResetMessage({ texto: "Error de conexión con el servidor.", tipo: 'error' });
+  } finally {
+    setResetLoading(false);
+  }
+};
 
   // ESTA ES LA FUNCIÓN DONDE VA EL CÓDIGO
   const handleLogin = async (e) => {
   e.preventDefault();
+  setError('');
 
   // 🟢 VALIDACIÓN DE ADMINISTRADOR ÚNICO (Hardcoded)
   // Usamos el correo "admin@udec.edu.co" para que pase la validación de tipo email del navegador
@@ -47,27 +86,28 @@ function Landing() {
 
     const data = await response.json();
 
-    if (response.ok) {
-        // 1. Guardamos el token (para las peticiones API)
+    if (response.ok && data.success !== false) {
+        // 1. Guardamos el token
         localStorage.setItem('token', data.token);
         
-        // 2. GUARDAMOS EL USUARIO (Esto es lo que te falta para que el Dashboard no te rebote)
-        // Convertimos el objeto a texto con JSON.stringify
+        // 2. Guardamos el objeto usuario (necesario para los Dashboards)
         localStorage.setItem('usuario', JSON.stringify(data.usuario));
         
-        // 3. Ahora sí, redireccionamos
+        // 3. Redireccionamos según el tipo que viene del Backend
         if (data.tipo === "egresado") {
           navigate('/vacantes-dashboard');
         } else if (data.tipo === "empresa") {
           navigate('/empresa-dashboard');
         }
       } else {
-      alert(data.message || "Credenciales incorrectas");
+        // ❌ Si success es false (o la respuesta no es ok), mostramos el mensaje sutil
+        setError(data.message || "Credenciales no encontradas");
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      setError("No se pudo conectar con el servidor.");
     }
-  } catch (error) {
-    alert("No se pudo conectar con el servidor.");
-  }
-};
+  };
 
   return (
     <div className="landing-udec-main">
@@ -119,8 +159,12 @@ function Landing() {
   type="email" 
   placeholder="Correo electrónico" 
   className="udec-input-field" 
-  value={correo} // <--- Conectar
-  onChange={(e) => setCorreo(e.target.value)} // <--- Guardar cambio
+  value={correo}
+  onChange={(e) => {
+    // Forzamos minúsculas en tiempo real
+    setCorreo(e.target.value.toLowerCase()); 
+    if (error) setError('');
+  }}
   required 
 />
               
@@ -128,12 +172,14 @@ function Landing() {
               {/* Contenedor para el campo de contraseña */}
 <div className="password-input-wrapper">
   <input 
-    // --- CAMBIO DINÁMICO DE TIPO ---
     type={showPassword ? "text" : "password"} 
     placeholder="Contraseña" 
     className="udec-input-field password-field" 
     value={password}
-    onChange={(e) => setPassword(e.target.value)}
+    onChange={(e) => {
+      setPassword(e.target.value); // Guarda el cambio
+      if (error) setError('');     // <--- ¡ESTO TAMBIÉN BORRA EL MENSAJE!
+    }}
     required 
   />
   
@@ -156,14 +202,23 @@ function Landing() {
 </button>
 </div>
               
-              <div className="login-form-extras">
-                <a href="#olvidaste" className="forgot-password-link">
-                  ¿Olvidaste tu contraseña?
-                </a>
-                <button type="submit" className="udec-green-btn btn-login-submit">
-                  INGRESAR
-                </button>
-              </div>
+              {/* Busca la sección del formulario de login */}
+<div className="login-form-extras">
+  <a 
+  href="#olvidaste" 
+  className="forgot-password-link" 
+  onClick={(e) => { e.preventDefault(); setShowResetModal(true); }}
+>
+  ¿Olvidaste tu contraseña?
+</a>
+
+  {/* 🔴 AGREGAMOS EL MENSAJE DE ERROR AQUÍ */}
+  {error && <span className="error-message-sutil">{error}</span>}
+
+  <button type="submit" className="udec-green-btn btn-login-submit">
+    INGRESAR
+  </button>
+</div>
             </form>
           </div>
 
@@ -175,7 +230,7 @@ function Landing() {
   <div className="register-buttons-group">
     <button 
       className="udec-green-btn register-big-btn"
-      onClick={() => navigate('/register/student')} // Redirección a Estudiante
+      onClick={() => navigate('/registro-egresado')} // Redirección a Estudiante
     >
       SOY EGRESADO
     </button>
@@ -210,9 +265,47 @@ function Landing() {
           </div>
         </div>
       </footer>
+{showResetModal && (
+  <div className="modal-overlay-reset fade-in">
+    <div className="modal-content-reset scale-up">
+      <button className="close-modal-btn" onClick={() => setShowResetModal(false)}>×</button>
+      
+      <h2>Recuperar Contraseña</h2>
+      <p>Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu clave.</p>
 
+      <form onSubmit={handleRequestReset}>
+        <input 
+          type="email" 
+          placeholder="tu-correo@ejemplo.com"
+          className="udec-input-field"
+          value={emailRecuperacion}
+          onChange={(e) => setEmailRecuperacion(e.target.value)}
+          required
+        />
+
+        {resetMessage.texto && (
+          <span className={`message-sutil-${resetMessage.tipo}`}>
+            {resetMessage.texto}
+          </span>
+        )}
+
+        <div className="modal-actions-reset">
+          <button 
+            type="submit" 
+            className="udec-green-btn btn-reset-submit"
+            disabled={resetLoading}
+          >
+            {resetLoading ? "Enviando..." : "ENVIAR ENLACE"}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
+
+  
 }
 
 export default Landing;

@@ -1,0 +1,353 @@
+/* RegistrarEgresado.module.css - Diseño Premium Institucional UdeC */
+
+:root {
+  /* 🌲 PALETA DE COLORES OFICIAL UDEC */
+  --udec-green-dark: #004d2b;     /* Verde institucional muy oscuro */
+  --udec-green-primary: #1F603A;  /* Verde principal (Sidebar) */
+  --udec-accent: #a28945;         /* 🏆 Dorado/Ocre Elegante UdeC */
+  --bg-main: #F4F7F6;            /* Fondo gris muy claro */
+  --text-light: #FFFFFF;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.udec-register-container {
+    background: #004d2b !important; /* Verde oscuro sólido */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* --- TARJETA PRINCIPAL (CON EL SOMBREADO ELEGANTE) --- */
+.udec-register-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 900px;
+  border-radius: 15px;
+  overflow: hidden;
+  /* 🌑 CORRECCIÓN: Sombreado elegante y profundo solicidado */
+  box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+}
+
+/* --- ENCABEZADO NIVEL 1: BLANCO (LOGOS INSTITUCIONALES) --- */
+.header-top-white {
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centra los dos logos y la línea */
+    padding: 15px 40px;
+    gap: 30px; /* Espacio simétrico entre logos y el divisor */
+    position: relative;
+    z-index: 10;
+}
+
+/* Estilo para el Logo (Corregido para que coincida con el JSX) */
+.udec-logo-img {
+    height: 50px; 
+    width: auto;
+    display: block;
+}
+
+/* Línea Divisoria Vertical */
+.header-divider {
+    width: 1px;
+    height: 45px; /* Altura ajustada para que no sea más alta que los logos */
+    background-color: #e0e0e0;
+}
+
+/* 🟢 NUEVO: Estilo para el Logo de la Universidad (Derecha) */
+.udec-logo-small {
+    height: 55px; /* Un poco más alto si es el escudo circular para que resalte */
+    width: auto;
+    display: block;
+    object-fit: contain;
+}
+
+/* --- ENCABEZADO NIVEL 2: VERDE INSTITUCIONAL --- */
+.header-bottom-green {
+  background-color: var(--udec-green-dark);
+  padding: 30px 40px;
+  text-align: center;
+  position: relative;
+  z-index: 9;
+  /* Acento dorado superior elegante */
+  border-bottom: 5px solid var(--udec-accent); 
+}
+
+.register-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 2.6rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  /* ⚪ CORRECCIÓN: Texto en Blanco Nítido */
+  color: var(--text-light) !important;
+  /* 🌑 Sombra de texto suave para profundidad */
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+}
+
+.register-subtitle {
+  font-size: 1rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.4;
+  margin: 0;
+  /* 🏆 CORRECCIÓN: Dorado Institucional Elegante */
+  color: var(--udec-accent) !important;
+  /* 🌑 Sombra de texto suave para legibilidad */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* --- CUERPO DEL FORMULARIO --- */
+.udec-register-form {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.form-row {
+  display: flex;
+  gap: 25px;
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.half-width {
+  flex: 1;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Iconos de info sutiles dorados */
+.info-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  background-color: rgba(197, 160, 89, 0.1); /* Fondo dorado muy suave */
+  border: 1px solid #C5A059; /* Borde dorado */
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #C5A059; /* Texto dorado */
+  cursor: help; /* Cambia el cursor a un signo de interrogación al pasar el mouse */
+  margin-left: 8px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.info-icon:hover {
+  background-color: #C5A059;
+  color: white;
+} 
+
+.udec-register-form input, 
+.udec-register-form select {
+  width: 100%;
+  padding: 13px 18px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fdfdfd;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.udec-register-form input:focus {
+  border-color: var(--udec-green-primary);
+  outline: none;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(31, 96, 58, 0.1);
+}
+
+/* --- BOTONES PREMIUM UDEC --- */
+.form-actions {
+  display: flex;
+  justify-content: center; /* Centrados horizontalmente */
+  gap: 20px; /* Espacio entre botones */
+  margin-top: 30px;
+  width: 100%;
+}
+
+.udec-button {
+  padding: 16px 35px; /* Más padding para que sean altos y elegantes */
+  border-radius: 10px; /* Bordes suaves */
+  font-weight: 700; /* Negrita */
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: none; /* Mantener mayúsculas/minúsculas normales */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* 🟢 BOTÓN PRINCIPAL (CON EL BORDE DORADO SOLICITADO) */
+.primary-button {
+  background-color: var(--udec-green-dark); /* Verde oscuro institucional */
+  color: var(--udec-accent) !important; /* Texto blanco nítido */
+  border: 3px solid #C5A059 !important; 
+  flex: 2; /* Para que sea más ancho como en la imagen */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.primary-button:hover {
+  background-color: #0d2b1a; /* Verde aún más oscuro al pasar el mouse */
+  color: #ffffff !important; /* Texto blanco nítido */
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.primary-button:disabled {
+  background-color: #CCC;
+  border-color: #BBB;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* 🔘 BOTÓN SECUNDARIO (Regresar) */
+.secondary-button {
+  background-color: transparent;
+  color: var(--udec-green-dark);
+  border: 2px solid var(--udec-green-dark);
+  flex: 1;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.secondary-button:hover {
+  background-color: rgba(22, 72, 43, 0.03); /* Un fondo verde casi imperceptible */
+  color: var(--udec-green-primary);
+  border-color: var(--udec-green-primary);
+  transform: translateY(-3px); 
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); 
+}
+
+.secondary-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* --- FOOTER --- */
+.udec-register-footer {
+  text-align: center;
+  padding: 25px;
+  font-size: 0.9rem;
+  color: #555;
+  background-color: #f9f9f9;
+}
+
+.login-link {
+  color: var(--udec-green-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.login-link:hover {
+  color: var(--udec-green-dark);
+  text-decoration: underline;
+}
+
+/* Errores */
+.error-message {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+input.error, select.error {
+  border-color: #dc3545;
+  background-color: rgba(220, 53, 69, 0.03);
+}
+
+/* --- ESTILOS SUTILES PARA EL OJITO (MOSTRAR/OCULTAR) --- */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 50px !important; /* Espacio para el icono del ojito */
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 15px; 
+    top: 50%;
+    transform: translateY(-50%); 
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--udec-green-primary);
+    box-shadow: none;
+    text-shadow: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+    z-index: 5; 
+    padding: 0;
+    line-height: 0;
+}
+
+.eye-icon {
+    width: 20px; 
+    height: 20px;
+    opacity: 0.85; 
+    transition: opacity 0.2s ease;
+}
+
+.toggle-password-btn:hover .eye-icon {
+    color: #C5A059; 
+    opacity: 1;
+}
+
+.password-wrapper input[type="password"]::-ms-reveal,
+.password-wrapper input[type="password"]::-ms-clear {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+@media (max-width: 768px) {
+    .udec-register-container { padding: 10px; }
+    .udec-register-card { border-radius: 10px; }
+    .header-top-white { flex-direction: column; padding: 20px; gap: 15px; }
+    .header-divider { width: 60px; height: 1px; }
+    .udec-logo-small { height: 50px; }
+    .header-portal-text { font-size: 1rem; text-align: center; }
+    .register-title { font-size: 1.8rem; }
+    .register-subtitle { font-size: 0.9rem; }
+    .form-row { flex-direction: column; gap: 15px; }
+    .udec-register-form { padding: 20px; }
+    .form-actions { flex-direction: column; gap: 10px; }
+    .udec-button { width: 100%; margin-left: 0; }
+}
+
+@media (max-width: 480px) {
+    .register-title { font-size: 1.5rem; }
+    .udec-logo-img { height: 45px; }
+}

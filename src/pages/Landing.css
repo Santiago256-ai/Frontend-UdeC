@@ -528,3 +528,100 @@
   flex-direction: column;
   min-height: 100vh; /* Ocupa el 100% de la altura de la ventana (viewport height) */
 }
+
+/* Estilo para el error sutil */
+.error-message-sutil {
+  color: #e53e3e; /* Rojo profesional, no chillón */
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 10px;
+  text-align: right; /* Alineado con el botón */
+  animation: fadeInError 0.3s ease-in-out;
+  align-self: flex-end;
+}
+
+/* Animación de entrada suave */
+@keyframes fadeInError {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- MODAL DE RECUPERACIÓN --- */
+.modal-overlay-reset {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
+  backdrop-filter: blur(4px); /* Efecto de desenfoque profesional */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content-reset {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 450px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  border-top: 5px solid #1b4332; /* El verde de la UdeC */
+}
+
+.modal-content-reset h2 {
+  color: #1b4332;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.modal-content-reset p {
+  color: #4a5568;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #a0aec0;
+  transition: color 0.3s;
+}
+
+.close-modal-btn:hover { color: #e53e3e; }
+
+.modal-actions-reset {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Mensajes de éxito y error dentro del modal */
+.message-sutil-success { color: #38a169; font-size: 13px; display: block; margin-top: 10px; }
+.message-sutil-error { color: #e53e3e; font-size: 13px; display: block; margin-top: 10px; }
+
+/* Animaciones */
+.fade-in { animation: fadeIn 0.3s ease; }
+.scale-up { animation: scaleUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+

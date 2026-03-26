@@ -1,0 +1,727 @@
+/* ==========================================================================
+   RegistrarCompany.module.css
+   Diseño Ultra-Premium / Corporativo / B2B Elite - Versión Final Ajustada
+   ========================================================================== */
+
+/* 1. CONTENEDOR PRINCIPAL - Inmersión Total */
+.companyContainer {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #004d2b 0%, #002816 100%);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* 2. TARJETA PRINCIPAL - Ajustada para evitar scroll excesivo */
+/* RegistrarCompany.module.css */
+
+/* --- 2. TARJETA PRINCIPAL (ESTILO PREMIUM EGRESADOS) --- */
+.companyCard {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 880px; 
+    border-radius: 15px; /* Un poco más pronunciado para que se note */
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    margin: 20px auto;
+    
+    /* 🟢 ESTA ES LA CLAVE: Corta los hijos que sobresalgan de las esquinas */
+    overflow: hidden; 
+}
+
+/* Espaciado interno del formulario (Ajustado como Egresados) */
+.formContent {
+    padding: 25px 60px;
+}
+
+/* 3. ENCABEZADO INSTITUCIONAL */
+.headerTopWhite {
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 40px;
+    gap: 30px;
+    position: relative;
+    z-index: 10;
+    border-radius: 15px 15px 0 0;
+}
+
+.logoImg {
+    height: 50px;
+    width: auto;
+    display: block;
+}
+
+.headerDivider {
+    width: 1px;
+    height: 40px;
+    background-color: #e5e7eb;
+}
+
+.logoUdec {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+.headerBottomGreen {
+    background-color: #004d2b;
+    padding: 25px 40px;
+    text-align: center;
+    /* 🏆 Línea dorada más delgada y elegante */
+    border-bottom: 5px solid #a28945; 
+}
+
+/* Tipografía Serif elegante igual a Egresados */
+.formTitle {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 2.2rem;
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+}
+
+.formSubtitle {
+    font-size: 0.95rem;
+    color: #a28945;
+    font-weight: 500;
+    font-style: italic;
+    margin: 0;
+}
+
+/* 4. BARRA DE PROGRESO - Alineación perfecta */
+.progressSteps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 35px;
+    position: relative;
+    padding: 0 10px;
+    z-index: 1;
+}
+
+/* Línea gris de fondo */
+/* 1. Línea gris de fondo (La base) */
+.progressSteps::before {
+    content: '';
+    position: absolute;
+    top: 18px; 
+    /* 🟢 CAMBIO: En lugar de usar left/right fijos, 
+       usamos un margen que coincida con el centro del primer y último círculo */
+    left: 30px; 
+    right: 30px; 
+    height: 2px;
+    background-color: #f1f3f5;
+    z-index: -1;
+}
+
+/* 2. Línea verde (El progreso) */
+.progressSteps::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    /* 🟢 CAMBIO: Debe empezar en el mismo punto que la gris */
+    left: 30px; 
+    /* El ancho se calcula sobre el espacio disponible entre los círculos */
+    width: calc(var(--progress-width, 0%) * 0.93); /* Ajuste fino del porcentaje */
+    height: 2px;
+    background-color: #004d2b;
+    z-index: -1;
+    transition: width 0.4s ease-in-out;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ffffff;
+    padding: 0 10px;
+    z-index: 2;
+}
+
+.stepNumber {
+    width: 36px;
+    height: 36px;
+    background-color: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #9ca3af;
+    transition: all 0.4s ease;
+}
+
+.step.active .stepNumber {
+    border-color: #C5A059;
+    background-color: #004d2b;
+    color: #ffffff;
+}
+
+.step.completed .stepNumber {
+    border-color: #004d2b;
+    background-color: #004d2b;
+}
+
+/* Icono Check Dorado */
+.checkIcon {
+    color: #C5A059;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+/* 5. CUERPO DEL FORMULARIO - Finura y Estilo */
+.companyForm {
+    position: relative;
+    z-index: 1;
+}
+
+.stepTitle {
+    font-size: 1.2rem;
+    color: #111827;
+    font-weight: 600;
+    margin-bottom: 20px;
+    position: relative;
+    display: inline-block;
+}
+
+.stepTitle::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 70px;
+    height: 2px;
+    background-color: #C5A059;
+}
+
+/* Reemplaza tu .formRow por este */
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 0;
+    /* 🟢 CLAVE: Permitir que las filas manejen profundidad */
+    position: relative; 
+}
+
+/* 🟢 Esto hace que la fila de arriba siempre gane a la de abajo 
+   cuando un menú esté abierto */
+.formRow:first-of-type {
+    z-index: 50;
+}
+
+.formRow:nth-of-type(2) {
+    z-index: 40;
+}
+
+.formRow:nth-of-type(3) {
+    z-index: 30;
+}
+
+/* 🟢 Si una fila tiene un dropdown abierto, sube toda la fila de nivel */
+.formRow:has(.customSelectDropdown) {
+    z-index: 1001; 
+}
+
+.companyForm, .formStep {
+    overflow: visible !important;
+}
+
+/* Busca la clase .formGroup y asegúrate de que tenga esto */
+.formGroup {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 15px;
+    /* Quitamos cualquier z-index de acá para que mande la fila */
+}
+
+/* 🟢 Solo subimos el grupo si tiene el menú abierto */
+.formGroup:has(.customSelectDropdown) {
+    z-index: 100 !important;
+}
+
+
+
+.formLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.formInput {
+    width: 100%;
+    padding: 10px 14px;
+    background-color: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #111827;
+    transition: all 0.3s ease;
+}
+
+.formInput:focus {
+    outline: none;
+    border-color: #C5A059;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+}
+
+.customSelectHeader {
+    width: 100%;
+    padding: 10px 14px;
+    background-color: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 8. SECCIONES ESPECIALES */
+.policyBlock {
+    background-color: rgba(0, 77, 43, 0.02);
+    border-left: 3px solid #004d2b;
+    padding: 15px 20px;
+    font-size: 0.85rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.checkboxGroup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #374151;
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+.checkboxGroup input[type="checkbox"] {
+    accent-color: #004d2b;
+    width: 17px;
+    height: 17px;
+}
+
+.resumenContainer {
+    background-color: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.resumenContainer p {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.resumenContainer strong {
+    color: #004d2b;
+    min-width: 100px;
+    display: inline-block;
+}
+
+.errorMessage {
+    font-size: 0.75rem;
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* 9. NAVEGACIÓN */
+/* --- 9. NAVEGACIÓN (BOTONES ESTILO PREMIUM EGRESADOS) --- */
+.formNavigation {
+    display: flex;
+    justify-content: center; /* Centrados horizontalmente como en tu imagen */
+    gap: 20px;
+    margin-top: 30px;
+    padding-top: 0; 
+    border-top: none; 
+    width: 100%;
+}
+
+/* Clase base para todos los botones */
+.udecButton {
+    padding: 16px 35px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: none;
+}
+
+/* 🟢 BOTÓN PRINCIPAL (SIGUIENTE / FINALIZAR) - EL DEL BORDE DORADO */
+.btnPrimary, .btnSuccess {
+    background-color: #004d2b; /* Verde UdeC */
+    color: #a28945 !important; /* Texto Dorado */
+    
+    /* 🏆 El secreto del diseño: Borde dorado grueso */
+    border: 3px solid #C5A059 !important; 
+    
+    flex: 2; /* Más ancho como en la imagen */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btnPrimary:hover, .btnSuccess:hover {
+    background-color: #0d2b1a; /* Más oscuro al pasar el mouse */
+    color: #ffffff !important; /* Texto blanco al hover */
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+/* 🔘 BOTÓN SECUNDARIO (REGRESAR / ANTERIOR) */
+.btnSecondary {
+    background-color: #ffffff;
+    color: #004d2b; /* Texto Verde */
+    border: 2px solid #004d2b; /* Borde Verde */
+    flex: 1; /* Más angosto */
+}
+
+.btnSecondary:hover {
+    background-color: rgba(0, 77, 43, 0.03);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* --- 10. FOOTER ESTILO EGRESADOS --- */
+.udecRegisterFooter {
+    text-align: center;
+    padding: 25px;
+    font-size: 0.9rem;
+    color: #555;
+    background-color: #f9f9f9; /* Gris suave del footer */
+    border-top: 1px solid #eee;
+    margin-top: 30px;
+}
+
+.loginLink {
+    color: #1F603A;
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.loginLink:hover {
+    text-decoration: underline;
+}
+
+/* 10. RESPONSIVIDAD */
+@media (max-width: 768px) {
+    .formContent { padding: 20px; }
+    .formRow { grid-template-columns: 1fr; }
+    .formNavigation { flex-direction: column-reverse; gap: 10px; }
+    .btnPrimary, .btnSecondary, .btnSuccess { width: 100%; }
+}
+
+/* Bordes rojos para los inputs con error */
+.formInput.inputError, 
+.customSelectHeader.inputError {
+    border-color: #e63946 !important; /* Rojo elegante */
+    background-color: #fff5f5; /* Fondo rosado muy tenue */
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1); /* Resplandor de error */
+}
+
+/* Mensajes de error debajo de cada campo */
+.errorMessage {
+    color: #e63946;
+    font-size: 0.7rem; /* Pequeño y fino */
+    font-weight: 600;
+    margin-top: 4px;
+    display: block;
+    text-transform: none;
+    letter-spacing: 0;
+    /* Animación de entrada suave */
+    animation: fadeInError 0.3s ease;
+}
+
+@keyframes fadeInError {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btnDisabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    filter: grayscale(0.8);
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* --- ESTILOS PARA EL OJITO (MOSTRAR/OCULTAR CONTRASEÑA) --- */
+
+/* Contenedor relativo para posicionar el botón */
+.passwordWrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Ajuste del input para que el texto no pise el icono */
+.passwordWrapper input {
+    width: 100%;
+    padding-right: 50px !important; /* Espacio para el icono */
+}
+
+/* Botón del ojito (invisible como botón, solo se ve el icono) */
+.togglePasswordBtn {
+    position: absolute;
+    right: 15px; 
+    top: 50%;
+    transform: translateY(-50%); 
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 5; 
+    padding: 0;
+    line-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    
+    /* 🟢 COLOR VERDE POR DEFECTO */
+    color: #004d2b; 
+    
+    /* Pequeña opacidad para que se vea más fino */
+    opacity: 0.8; 
+}
+
+/* 🟢 COMPORTAMIENTO AL PASAR EL CURSOR (HOVER) */
+.togglePasswordBtn:hover {
+    color: #C5A059 !important; /* Dorado Institucional UdeC */
+    opacity: 1; /* Opacidad total al hover */
+    transform: translateY(-50%) scale(1.1); /* Ligero aumento de tamaño */
+}
+
+/* Asegura que el icono no tenga sombra de texto de títulos antiguos */
+.togglePasswordBtn svg {
+    text-shadow: none !important;
+}
+
+/* Oculta los iconos por defecto de navegadores (como Edge/IE) */
+.passwordWrapper input[type="password"]::-ms-reveal,
+.passwordWrapper input[type="password"]::-ms-clear {
+    display: none !important;
+}
+
+/* Contenedor del desplegable */
+.customSelectDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    /* 🟢 Z-index altísimo */
+    z-index: 9999 !important; 
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Cada opción individual (el label que envuelve el checkbox) */
+.dropdownOption {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #374151;
+    transition: background 0.2s;
+    /* 🟢 Evita que se amontonen en una sola línea */
+    width: 100%;
+}
+
+.dropdownOption:hover {
+    background-color: rgba(197, 160, 89, 0.08); /* Fondo dorado suave */
+    color: #004d2b;
+}
+
+/* Estilo para el checkbox */
+.dropdownOption input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #004d2b; /* Verde institucional */
+    cursor: pointer;
+}
+
+/* Estilo para el scrollbar en navegadores modernos */
+.customSelectDropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.customSelectDropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.customSelectDropdown::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.customSelectDropdown::-webkit-scrollbar-thumb:hover {
+    background: #a28945; /* Dorado UdeC al pasar el mouse */
+}
+
+/* Capa de fondo oscura y borrosa */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px); /* Efecto de desenfoque moderno */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Caja del Modal */
+.statusModal {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 15px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    animation: modalIn 0.3s ease-out;
+}
+
+.modalIcon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.statusModal h3 {
+    color: #111827;
+    margin-bottom: 10px;
+    font-family: 'Georgia', serif;
+}
+
+.statusModal p {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+/* Botón del Modal */
+.modalBtn {
+    background: #004d2b;
+    color: #C5A059;
+    border: 2px solid #C5A059;
+    padding: 10px 30px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modalBtn:hover {
+    background: #0d2b1a;
+    transform: scale(1.05);
+}
+
+/* Animación de entrada */
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Título del Modal */
+.modalTitle {
+    color: #111827;
+    margin-bottom: 15px;
+    font-family: 'Georgia', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center; /* El título siempre centrado */
+}
+
+/* 🟢 Texto del Modal JUSTIFICADO */
+.modalText {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+    line-height: 1.6;
+    
+    /* Justificación perfecta */
+    text-align: justify;
+    
+    /* Un pequeño margen interno para que no pegue a los bordes */
+    padding: 0 5px;
+    
+    /* Esto ayuda a que la última línea no se vea rara */
+    text-justify: inter-word;
+}
+.modalActions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+/* Botón Secundario (Verificar Datos) */
+.modalBtnSecondary {
+    background: #ffffff;
+    color: #004d2b;
+    border: 2px solid #004d2b;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.modalBtnSecondary:hover {
+    background: rgba(0, 77, 43, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Ajuste al botón principal para que no se vea gigante al lado del otro */
+.modalBtn {
+    padding: 10px 25px;
+    font-size: 0.9rem;
+}
+
+/* 🟢 CLASE DE RESALTE TEMPORAL */
+.inputHighlight {
+    border-color: #ef4444 !important; /* Rojo intenso */
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2); /* Resplandor rojo */
+    animation: shakeError 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    background-color: #fff5f5 !important;
+}
+
+/* Animación de sacudida (Shake) */
+@keyframes shakeError {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}

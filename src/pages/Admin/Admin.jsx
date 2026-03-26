@@ -204,7 +204,7 @@ const cargarEmpresas = async () => {
                   <div className="card-icon"><Icon name="users" /></div>
                   <div className="card-info">
                     <h3>Total Usuarios</h3>
-                    <p>{stats?.totalUsuarios || 0}</p>
+                    <p>{stats?.totalEgresados || 0}</p>
                     <span className="growth">2.1% ↑</span>
                   </div>
                 </div>
@@ -409,7 +409,7 @@ const cargarEmpresas = async () => {
             datasets: [
               {
                 label: 'Egresados',
-                data: stats.datosCrecimiento.map(d => d.usuarios),
+                data: stats.datosCrecimiento.map(d => d.egresados),
                 borderColor: '#28a745',
                 backgroundColor: 'rgba(40, 167, 69, 0.1)',
                 fill: true,
@@ -523,7 +523,7 @@ const cargarEmpresas = async () => {
                 <tbody>
                   {todasLasPostulaciones.map(p => (
                     <tr key={p.id}>
-                      <td><strong>{p.usuario.nombres} {p.usuario.apellidos}</strong></td>
+                      <td><strong>{p.egresado?.nombres || 'N/A'} {p.egresado?.apellidos || ''}</strong></td>
                       <td>{p.vacante?.titulo || 'N/A'}</td>
                       <td>{new Date(p.fecha).toLocaleDateString()}</td>
                       <td><span className={`status-badge ${p.estado.toLowerCase()}`}>{p.estado}</span></td>
@@ -568,7 +568,7 @@ const cargarEmpresas = async () => {
                             <td>{u.id}</td>
                             <td><strong>{u.nombres} {u.apellidos}</strong></td>
                             <td>{u.correo}</td>
-                            <td>@{u.usuario}</td>
+                            <td>@{u.correo.split('@')[0]}</td>
                             <td>
                                 <span className="status-badge abierta">
                                     {u._count?.postulaciones || 0} Aplicaciones
@@ -659,8 +659,8 @@ const cargarEmpresas = async () => {
                 <tbody>
                   {postuladosVacante.map(p => (
                     <tr key={p.id}>
-                      <td>{p.usuario.nombres} {p.usuario.apellidos}</td>
-                      <td>{p.usuario.correo}</td>
+                      <td>{p.egresado?.nombres} {p.usuario.apellidos}</td>
+                      <td>{p.egresado?.correo}</td>
                       <td><span className={`status-badge ${p.estado.toLowerCase()}`}>{p.estado}</span></td>
                     </tr>
                   ))}
