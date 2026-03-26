@@ -5,7 +5,7 @@ import './ResetPassword.css';
 
 // Reutilizamos tus logos
 const logoUrl = '/Logo.png'; 
-const logoSecundarioUrl = '/UdeC2.png';
+const logoSecundarioUrl = '/UdeC2_blanco.png';
 
 function ResetPassword() {
     const { token } = useParams(); // Extrae el token de la URL
@@ -127,7 +127,7 @@ function ResetPassword() {
             </div>
 
             <footer className="reset-footer">
-                <p>© 2026 Universidad de Cundinamarca - Vigilada Mineducación</p>
+                <p>© 2026  Derechos Reservados - Universidad de Cundinamarca</p>
             </footer>
         </div>
     );
