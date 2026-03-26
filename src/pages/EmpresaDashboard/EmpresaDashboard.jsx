@@ -23,6 +23,15 @@ export default function EmpresaDashboard() {
     const location = useLocation();
     const navigate = useNavigate();
     
+    const PIPELINE_STAGES = {
+    PENDIENTE: { label: 'Recibido', color: '#64748b', bg: '#f1f5f9' },    // Gris
+    REVISION: { label: 'En Revisión CV', color: '#0ea5e9', bg: '#e0f2fe' }, // Azul
+    ENTREVISTA: { label: 'Entrevista', color: '#8b5cf6', bg: '#f5f3ff' },  // Morado
+    PRUEBA: { label: 'Prueba Técnica', color: '#f59e0b', bg: '#fffbeb' },  // Naranja
+    FINALISTA: { label: 'Finalista', color: '#10b981', bg: '#ecfdf5' },    // Esmeralda
+    CONTRATADO: { label: 'Contratado', color: '#006b3f', bg: '#f0fdf4' },  // Verde UdeC
+    RECHAZADO: { label: 'Descartado', color: '#ef4444', bg: '#fef2f2' }    // Rojo
+};
     // --- ESTADOS ---
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [empresa, setEmpresa] = useState(() => {
@@ -74,25 +83,30 @@ export default function EmpresaDashboard() {
     }, [empresa?.id]);
 
     const checkNewPostulaciones = useCallback(async () => {
-        if (!empresa?.id || vacantes.length === 0) return;
-        try {
-            // Consultamos los detalles reales para comparar
-            const promesas = vacantes.map(v => API.get(`/postulaciones/vacante/${v.id}`));
-            const resultados = await Promise.all(promesas);
-            const totalActual = resultados.reduce((acc, res) => acc + (res.data?.length || 0), 0);
+    if (!empresa?.id || vacantes.length === 0) return;
+    try {
+        const promesas = vacantes.map(v => API.get(`/postulaciones/vacante/${v.id}`));
+        const resultados = await Promise.all(promesas);
+        const totalActual = resultados.reduce((acc, res) => acc + (res.data?.length || 0), 0);
 
-            // Si detectamos incremento, suena y avisa
-            if (prevTotalPostulaciones > 0 && totalActual > prevTotalPostulaciones) {
-                toast.info("🚀 ¡Nueva postulación recibida!");
-                const audio = new Audio('public/sounds/notification.mp3');
-                audio.play().catch(e => console.log("Audio esperando interacción", e));
-                cargarVacantes(); 
+        if (prevTotalPostulaciones > 0 && totalActual > prevTotalPostulaciones) {
+            toast.info("🚀 ¡Nueva postulación recibida!");
+            const audio = new Audio('/sounds/notification.mp3');
+            audio.play().catch(() => {});
+            
+            // ESTO ACTUALIZA EL NÚMERO DE LA TARJETA DE LA IZQUIERDA
+            cargarVacantes(); 
+
+            // Si tienes abierta la vacante actual, actualiza la lista de la derecha
+            if (vacanteSeleccionadaId) {
+                handleVerPostulaciones(vacanteSeleccionadaId);
             }
-            setPrevTotalPostulaciones(totalActual);
-        } catch (error) {
-            console.error("Error en polling:", error);
         }
-    }, [empresa?.id, vacantes, prevTotalPostulaciones, cargarVacantes]);
+        setPrevTotalPostulaciones(totalActual);
+    } catch (error) {
+        console.error(error);
+    }
+}, [empresa?.id, vacantes, prevTotalPostulaciones, vacanteSeleccionadaId, cargarVacantes]);
 
     // 3. --- EFECTOS (Van DESPUÉS de las funciones) ---
 
@@ -138,14 +152,23 @@ export default function EmpresaDashboard() {
     }, []);
 
     const handleVerPostulaciones = async (vacanteId) => {
-        setVacanteSeleccionadaId(vacanteId);
-        try {
-            const res = await API.get(`/postulaciones/vacante/${vacanteId}`);
-            setPostulaciones(res.data);
-        } catch (err) {
-            setPostulaciones([]);
-        }
-    };
+    setVacanteSeleccionadaId(vacanteId);
+    try {
+        const res = await API.get(`/postulaciones/vacante/${vacanteId}`);
+        setPostulaciones(res.data);
+        
+        // ACTUALIZACIÓN MANUAL DEL CONTADOR LOCAL
+        setVacantes(prevVacantes => 
+            prevVacantes.map(v => 
+                v.id === vacanteId 
+                ? { ...v, _count: { ...v._count, postulaciones: res.data.length } } 
+                : v
+            )
+        );
+    } catch (err) {
+        setPostulaciones([]);
+    }
+};
 
     const handleVerPerfil = (usuario) => {
         console.log("🔍 Datos enviados al modal VerCV:", usuario); 
@@ -220,6 +243,20 @@ export default function EmpresaDashboard() {
     if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
 
     const vacanteActual = vacantes.find(v => v.id === vacanteSeleccionadaId);
+
+    const handleCambiarEstado = async (postulacionId, nuevoEstado) => {
+    try {
+        await API.put(`/postulaciones/${postulacionId}/estado`, { estado: nuevoEstado });
+        toast.success(`Estado actualizado a: ${PIPELINE_STAGES[nuevoEstado].label}`);
+        
+        // Refrescar la lista de postulaciones para ver el cambio
+        if (vacanteSeleccionadaId) {
+            handleVerPostulaciones(vacanteSeleccionadaId);
+        }
+    } catch (error) {
+        toast.error("No se pudo actualizar el estado");
+    }
+};
 
     return (
         <div className={`dashboard-layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -303,7 +340,13 @@ export default function EmpresaDashboard() {
                                             <div className="card-main-info">
                                                 <h4 style={{fontWeight:'700'}}>{v.titulo}</h4>
                                                 <p>{v.modalidad} • {v.ubicacion}</p>
-                                                <div className="card-meta-tags"><span className="badge-slots"><Users size={12} /> {v._count?.postulaciones || 0} postulantes</span></div>
+                                             <div className="card-meta-tags">
+    <span className="badge-slots">
+        <Users size={12} /> 
+        {/* Si el backend no trae _count, usamos la longitud de las postulaciones directamente */}
+        {v.postulaciones?.length || v._count?.postulaciones || 0} postulantes
+    </span>
+</div>
                                             </div>
                                             <div className="card-actions-row" style={{display:'flex', gap:'5px', marginTop:'10px'}}>
                                                 <button className="btn-details-action" onClick={(e) => { e.stopPropagation(); handlePrepararEdicion(v); }}>Editar</button>
@@ -315,33 +358,97 @@ export default function EmpresaDashboard() {
                             </section>
 
                             <aside className="vacante-detail-panel">
-                                {vacanteSeleccionadaId ? (
-                                    <div className="detail-content-wrapper fade-in">
-                                        <h3>Postulantes para: {vacanteActual?.titulo}</h3>
-                                        <div className="candidatos-list" style={{display:'flex', flexDirection:'column', gap:'10px', marginTop: '20px'}}>
-                                            {postulaciones.length > 0 ? postulaciones.map(p => (
-                                                <div key={p.id} className="vacante-card-item" style={{cursor:'default'}}>
-                                                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                                                        <div>
-                                                            <span style={{fontWeight:'600', display:'block'}}>{p.usuario?.nombres} {p.usuario?.apellidos}</span>
-                                                            <span className="badge-published" style={{fontSize:'10px', marginTop:'4px'}}>{p.estado}</span>
-                                                        </div>
-                                                        <div style={{display:'flex', gap:'8px'}}>
-                                                            <button className="btn-details-action" onClick={() => handleVerPerfil(p.usuario)} title="Ver Hoja de Vida"><Eye size={14}/></button>
-                                                            <button className="btn-details-action" onClick={() => { setChatPostulante(p); setIsChatOpen(true); }} title="Abrir Chat"><MessageSquare size={14}/></button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )) : <p className="no-data">No hay postulaciones aún para esta vacante.</p>}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="no-selection-state">
-                                        <Users size={50} color="#cbd5e0" />
-                                        <p>Selecciona una vacante para gestionar candidatos.</p>
-                                    </div>
-                                )}
-                            </aside>
+  {vacanteSeleccionadaId ? (
+    <div className="detail-content-wrapper fade-in">
+      <div className="detail-header-pro">
+        <h3>Candidatos para: <span>{vacanteActual?.titulo}</span></h3>
+        <span className="count-badge-total">{postulaciones.length} postulaciones</span>
+      </div>
+
+      <div className="candidatos-list-pro">
+        {postulaciones.length > 0 ? (
+          postulaciones.map((p) => (
+            <div key={p.id} className="candidato-item-card-pro fade-in">
+              <div className="cand-main-wrapper">
+                
+                {/* 1. Identidad del Candidato */}
+                <div className="cand-identity">
+                  <div className="cand-avatar-circle">
+                    {p.egresado?.nombres?.charAt(0)}{p.egresado?.apellidos?.charAt(0)}
+                  </div>
+                  <div className="cand-info">
+                    <h4>{p.egresado?.nombres} {p.egresado?.apellidos}</h4>
+                    <div className="cand-meta-tags">
+                      <span className="meta-tag">
+                        <Clock size={12} /> {new Date(p.fecha).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Pipeline de Selección (Selector Profesional) */}
+                <div className="cand-pipeline">
+    <label className="pipeline-label">Etapa del Proceso</label>
+    <div className="pipeline-select-wrapper" style={{
+        backgroundColor: PIPELINE_STAGES[p.estado]?.bg || '#f1f5f9',
+        border: `2px solid ${PIPELINE_STAGES[p.estado]?.color || '#cbd5e1'}`
+    }}>
+        <select 
+            className="pipeline-select-custom"
+            value={p.estado}
+            onChange={(e) => handleCambiarEstado(p.id, e.target.value)}
+            style={{ color: PIPELINE_STAGES[p.estado]?.color || '#64748b' }}
+        >
+            {Object.keys(PIPELINE_STAGES).map(key => (
+                <option key={key} value={key} style={{backgroundColor: '#fff', color: '#000'}}>
+                    {PIPELINE_STAGES[key].label}
+                </option>
+            ))}
+        </select>
+    </div>
+</div>
+
+                {/* 3. Acciones Rápidas */}
+                <div className="cand-quick-actions">
+                  <button 
+                    className="btn-icon-pro" 
+                    onClick={() => handleVerPerfil(p.egresado)} 
+                    title="Ver Hoja de Vida"
+                  >
+                    <FileText size={18} />
+                  </button>
+                  
+                  <button 
+                    className="btn-icon-pro chat-active" 
+                    onClick={() => { setChatPostulante(p); setIsChatOpen(true); }} 
+                    title="Abrir Chat"
+                  >
+                    <MessageSquare size={18} />
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="empty-state-simple">
+            <User size={40} color="#cbd5e0" />
+            <p>Aún no hay postulantes para esta oferta.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  ) : (
+    <div className="no-selection-state">
+      <div className="no-selection-icon-circle">
+        <Users size={40} color="#006b3f" />
+      </div>
+      <h4>Gestión de Candidatos</h4>
+      <p>Selecciona una vacante de la izquierda para gestionar el flujo de selección.</p>
+    </div>
+  )}
+</aside>
+ 
                         </div>
                     )}
 

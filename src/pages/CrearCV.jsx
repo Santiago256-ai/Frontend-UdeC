@@ -9,12 +9,14 @@ import './CrearCV.css';
 export default function CrearCV({ isInline, setVistaActiva }) {
     const [isPreview, setIsPreview] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [originalData, setOriginalData] = useState(null);
 
     // Obtener el usuario logueado del localStorage
     const usuarioLogueado = JSON.parse(localStorage.getItem('usuario'));
     
     // Estado inicial unificado con Prisma
     const [cvData, setCvData] = useState({
+         // 👈 Nuevo estado
         celular: "",
         email: usuarioLogueado?.correo || "",
         direccion: "",
@@ -29,19 +31,33 @@ export default function CrearCV({ isInline, setVistaActiva }) {
 
     // Cargar los datos del CV si ya existen al montar el componente
     useEffect(() => {
-        const cargarDatos = async () => {
-            if (!usuarioLogueado?.id) return;
-            try {
-                const res = await API.get(`/cvs/${usuarioLogueado.id}`);
-                if (res.data) {
-                    setCvData(res.data);
-                }
-            } catch (error) {
-                console.log("No se encontró CV previo o hubo un error al cargar");
+    const cargarDatos = async () => {
+        if (!usuarioLogueado?.id) return;
+        try {
+            const res = await API.get(`/cvs/${usuarioLogueado.id}`);
+            if (res.data) {
+                setCvData(res.data);
+                setOriginalData(res.data); // 👈 Guardamos la copia fiel de la BD
             }
-        };
-        cargarDatos();
-    }, [usuarioLogueado?.id]);
+        } catch (error) {
+        console.log("No se encontró CV previo");
+        // ✅ 2. Define el estado inicial vacío exacto para comparar correctamente
+        setOriginalData({
+            celular: "",
+            email: usuarioLogueado?.correo || "",
+            direccion: "",
+            descripcion: "",
+            habilidades: "",
+            educacion: [{ titulo: "", institucion: "", periodo: "" }],
+            experiencia: [{ cargo: "", empresa: "", periodo: "" }],
+            referencias: [{ nombre: "", cargo: "", celular: "" }],
+            aptitudes: [{ aptitud: "" }],
+            idiomas: [{ idioma: "", nivel: "0" }]
+        });
+    }
+    };
+    cargarDatos();
+}, [usuarioLogueado?.id]);
 
     // --- MANEJADORES DE ESTADO ---
     const handleChangeBasico = (e) => {
@@ -73,21 +89,31 @@ export default function CrearCV({ isInline, setVistaActiva }) {
 
     setIsLoading(true);
     try {
-        // --- AGREGA ESTA LÓGICA DE LIMPIEZA ---
-        const limpiar = (arr) => arr.map(({ id, perfilId, perfilCVId, ...resto }) => resto);
-
-        const dataLimpia = {
+        // 🛑 FILTRO DE SEGURIDAD: Solo enviamos lo que tiene contenido real
+        const dataParaEnviar = {
             ...cvData,
-            experiencia: limpiar(cvData.experiencia),
-            educacion: limpiar(cvData.educacion),
-            referencias: limpiar(cvData.referencias),
-            aptitudes: limpiar(cvData.aptitudes),
-            idiomas: limpiar(cvData.idiomas),
+            experiencia: cvData.experiencia.filter(e => e.cargo.trim() !== ""),
+            educacion: cvData.educacion.filter(e => e.titulo.trim() !== ""),
+            referencias: cvData.referencias.filter(r => r.nombre.trim() !== ""), // 👈 Clave para Referencias
+            aptitudes: cvData.aptitudes.filter(a => a.aptitud.trim() !== ""),
+            idiomas: cvData.idiomas.filter(i => i.idioma.trim() !== ""),
         };
 
-        // Enviamos dataLimpia en lugar de cvData
-        await API.post(`/cvs/${usuarioLogueado.id}`, dataLimpia);
+        // Ahora limpiamos los IDs (como hablamos antes)
+        const limpiar = (arr) => arr.map(({ id, perfilId, perfilCVId, ...resto }) => resto);
+        
+        const finalData = {
+            ...dataParaEnviar,
+            experiencia: limpiar(dataParaEnviar.experiencia),
+            educacion: limpiar(dataParaEnviar.educacion),
+            referencias: limpiar(dataParaEnviar.referencias),
+            aptitudes: limpiar(dataParaEnviar.aptitudes),
+            idiomas: limpiar(dataParaEnviar.idiomas),
+        };
+
+        await API.post(`/cvs/${usuarioLogueado.id}`, finalData);
         alert("¡Hoja de vida guardada exitosamente!");
+        setOriginalData(cvData);
     } catch (error) {
         console.error("Error al guardar CV:", error);
         alert("Hubo un error al guardar la hoja de vida.");
@@ -96,6 +122,7 @@ export default function CrearCV({ isInline, setVistaActiva }) {
     }
 };
 
+const hayCambios = JSON.stringify(cvData) !== JSON.stringify(originalData);
     // --- VISTA DE PREVISUALIZACIÓN ---
     if (isPreview) {
         return (
@@ -104,9 +131,18 @@ export default function CrearCV({ isInline, setVistaActiva }) {
                     <button className="btn-secondary" onClick={() => setIsPreview(false)}>
                         <ArrowLeft size={18} /> Volver a Editar
                     </button>
-                    <button className="btn-primary" onClick={handleGuardar} disabled={isLoading}>
-                        <Save size={18} /> {isLoading ? 'Guardando...' : 'Guardar CV'}
-                    </button>
+                    <button 
+    className="btn-primary" 
+    onClick={handleGuardar} 
+    // ✅ 3. Aplica la lógica de bloqueo también aquí
+    disabled={!hayCambios || isLoading} 
+    style={{ 
+        opacity: !hayCambios ? 0.5 : 1, 
+        cursor: !hayCambios ? 'not-allowed' : 'pointer' 
+    }}
+>
+    <Save size={18} /> {isLoading ? 'Guardando...' : 'Guardar'}
+</button>
                 </div>
 
                 <div className="cv-document-wrapper">
@@ -226,9 +262,19 @@ export default function CrearCV({ isInline, setVistaActiva }) {
                     <button className="btn-secondary" onClick={() => setIsPreview(true)}>
                         <Eye size={18} /> Previsualizar
                     </button>
-                    <button className="btn-primary" onClick={handleGuardar} disabled={isLoading}>
-                        <Save size={18} /> {isLoading ? 'Guardando...' : 'Guardar'}
-                    </button>
+                    {/* Busca el botón de Guardar en la parte inferior de tu archivo */}
+<button 
+    className="btn-primary" 
+    onClick={handleGuardar} 
+    // ✅ 1. Añade la lógica de deshabilitado
+    disabled={!hayCambios || isLoading} 
+    style={{ 
+        opacity: !hayCambios ? 0.5 : 1, 
+        cursor: !hayCambios ? 'not-allowed' : 'pointer' 
+    }}
+>
+    <Save size={18} /> {isLoading ? 'Guardando...' : 'Guardar'}
+</button>
                 </div>
             </header>
 
@@ -236,10 +282,7 @@ export default function CrearCV({ isInline, setVistaActiva }) {
                 {/* Datos Básicos */}
                 <div className="form-card">
                     <h3><User size={20} /> Datos Básicos y Perfil</h3>
-                    <div className="input-group">
-                        <label>Teléfono Celular</label>
-                        <input type="text" name="celular" value={cvData.celular} onChange={handleChangeBasico} placeholder="Ej. 300 123 4567"/>
-                    </div>
+                    
                     <div className="input-group">
                         <label>Dirección de Residencia</label>
                         <input type="text" name="direccion" value={cvData.direccion} onChange={handleChangeBasico} placeholder="Ciudad, Departamento"/>

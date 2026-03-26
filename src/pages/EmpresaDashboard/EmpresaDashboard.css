@@ -434,3 +434,201 @@
     font-weight: 600;
     cursor: pointer;
 }
+
+/* Contenedor de candidatos */
+.candidatos-list-pro {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Card de cada candidato */
+.candidato-item-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.candidato-item-card:hover {
+    border-color: #006b3f;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Avatar circular */
+.cand-avatar {
+    width: 45px;
+    height: 45px;
+    background: #f1f5f9;
+    color: #006b3f;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.cand-info-main {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.cand-text h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #1e293b;
+}
+
+/* Estados (Pills) */
+.status-pill {
+    font-size: 0.7rem;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pill.pendiente { background: #fef3c7; color: #92400e; }
+.status-pill.aceptada { background: #dcfce7; color: #166534; }
+
+/* Botones de acción */
+.btn-action-outline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    border: 1px solid #e2e8f0;
+    background: white;
+}
+
+.btn-action-outline.cv { color: #006b3f; }
+.btn-action-outline.cv:hover { background: #f0fdf4; border-color: #006b3f; }
+
+.btn-action-outline.chat { background: #006b3f; color: white; border: none; }
+.btn-action-outline.chat:hover { background: #005532; }
+
+.candidato-item-card-pro {
+    background: #ffffff;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    padding: 20px;
+    border: 1px solid #eef2f6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.candidato-item-card-pro:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.cand-main-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+/* Identidad */
+.cand-identity { display: flex; align-items: center; gap: 15px; flex: 1; }
+.cand-avatar-circle {
+    width: 48px; height: 48px; background: #006b3f15; color: #006b3f;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.1rem; border: 2px solid #006b3f20;
+}
+.cand-info h4 { margin: 0; color: #1e293b; font-size: 1.05rem; }
+.cand-meta-tags { display: flex; gap: 10px; margin-top: 4px; }
+.meta-tag { font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+
+/* Pipeline Selector */
+.cand-pipeline { flex: 1; display: flex; flex-direction: column; gap: 4px; max-width: 200px; }
+.pipeline-label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+
+
+/* Acciones */
+.cand-quick-actions { display: flex; gap: 10px; }
+.btn-icon-pro {
+    width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e2e8f0;
+    background: white; color: #64748b; display: flex; align-items: center; justify-content: center;
+    transition: 0.2s; cursor: pointer;
+}
+.btn-icon-pro:hover { background: #f8fafc; color: #006b3f; border-color: #006b3f; }
+.btn-icon-pro.chat-active { background: #006b3f; color: white; border: none; }
+.btn-icon-pro.chat-active:hover { background: #005532; }
+
+.pipeline-select {
+    /* Desactivar completamente el diseño del sistema */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    
+    /* Hacerlo transparente para que se vea el DIV de atrás */
+    background-color: transparent !important;
+    border: none !important; /* Quitamos el borde para que no ensucie */
+    
+    width: 100% !important;
+    padding: 10px 35px 10px 15px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    outline: none !important;
+    
+    /* Flecha elegante */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 14px !important;
+}
+
+.pipeline-select:hover {
+    filter: contrast(1.1) brightness(0.95);
+    transform: translateY(-1px);
+}
+
+.pipeline-select-wrapper {
+    border-radius: 12px;
+    padding: 2px 8px;
+    transition: all 0.4s ease;
+    display: flex;
+    align-items: center;
+}
+
+.pipeline-select-custom {
+    background: transparent !important;
+    border: none !important;
+    font-weight: 800 !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+    width: 100%;
+    padding: 8px 5px;
+    appearance: none; /* Quita la flecha nativa */
+    /* Añadimos una flecha personalizada elegante */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 14px;
+    padding-right: 25px;
+}
+
+.pipeline-label {
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+    letter-spacing: 1px;
+}

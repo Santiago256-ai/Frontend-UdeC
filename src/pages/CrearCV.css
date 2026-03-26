@@ -10,8 +10,9 @@
 }
 
 .cv-actions-header {
+    /* --- TUS ESTILOS ACTUALES (Se mantienen) --- */
     position: sticky;
-    top: -20px; /* Se pega arriba */
+    top: -20px;
     z-index: 10;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
@@ -21,36 +22,62 @@
     border-radius: 0 0 15px 15px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     margin-bottom: 30px;
+
+    /* --- 🆕 LO QUE DEBES AGREGAR PARA ALINEAR --- */
+    display: flex;                /* Convierte el header en un contenedor flexible */
+    justify-content: space-between; /* Empuja el H2 a la izquierda y el DIV de botones a la derecha */
+    align-items: center;          /* Centra verticalmente el título con los botones */
 }
 
 .action-buttons {
     display: flex;
-    gap: 10px;
+    gap: 12px; /* Un poco más de aire entre botones queda mejor */
 }
 
 .btn-primary, .btn-secondary {
     display: flex;
     align-items: center;
+    justify-content: center; /* 👈 CLAVE: Centra el contenido si el botón se estira */
     gap: 8px;
-    padding: 8px 16px;
-    border-radius: 6px;
+    
+    /* --- AJUSTES DE TAMAÑO UNIFORME --- */
+    min-width: 160px;       /* 👈 Obliga a ambos a medir al menos esto */
+    height: 42px;          /* 👈 Altura fija para que no varíen por el texto */
+    padding: 0 20px;       /* 👈 Padding lateral equilibrado */
+    
+    border-radius: 8px;    /* Un radio de 8px se ve más moderno que 6px */
     font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
-    border: none;
-    transition: all 0.2s;
+    border: 1px solid transparent;
+    transition: all 0.3s ease; /* 0.3s es el "dulce punto" de suavidad */
 }
 
 .btn-primary {
     background-color: #004731; /* Verde UdeC */
     color: white;
 }
-.btn-primary:hover { background-color: #003324; }
+
+.btn-primary:hover {
+    background-color: #003a21;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 77, 44, 0.25);
+}
 
 .btn-secondary {
-    background-color: #e2e8f0;
-    color: #4a5568;
+    background-color: #f8fafc !important; /* 👈 El !important asegura que cambie sí o sí */
+    color: #004731 !important;           /* Texto en verde UdeC */
+    border: 1px solid #004731 !important; /* Borde verde UdeC */
 }
-.btn-secondary:hover { background-color: #cbd5e0; }
+
+.btn-secondary:hover {
+    /* Al pasar el mouse, se invierten o se aclaran sutilmente */
+    background-color: #f0fdf4; /* Un verde muy clarito de fondo */
+    color: #003a21;
+    border-color: #003a21;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 77, 44, 0.15);
+}
 
 /* =========================================
    DISEÑO DE LA PREVISUALIZACIÓN (EL PAPEL)
@@ -511,9 +538,9 @@
 }
 
 .cv-header-modern {
-    border-bottom: 2px solid #004731; /* Línea verde divisoria */
-    padding-bottom: 15px;
-    margin-bottom: 25px;
+    /* ... tus otros estilos ... */
+    border-bottom: none !important; /* 👈 Esto quita la línea superior */
+    padding-bottom: 5px; /* Ajusta el espacio para que no quede pegado */
 }
 
 .cv-header-modern h1 {

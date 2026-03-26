@@ -254,7 +254,7 @@ const closeStatusModal = (targetStep = null) => {
     setStatusModal({ 
         show: true, 
         type: 'success', 
-        message: '¡Registro Exitoso! La empresa ha sido vinculada correctamente al sistema de la Universidad de Cundinamarca.' 
+        message: '¡Registro Exitoso! La empresa ha sido vinculada correctamente en el sistema.' 
     });
 } catch (err) {
     setStatusModal({ 
@@ -263,7 +263,7 @@ const closeStatusModal = (targetStep = null) => {
         targetStep: 1, // 👈 Indica que debe volver al primer paso
         message: (
             <span>
-                No se pudo completar el registro. Es posible que el <strong>correo institucional</strong> o el <strong>NIT</strong> ya se encuentren registrados en nuestra base de datos.
+                No se pudo completar el registro. Es posible que el <strong>correo electrónico</strong> o el <strong>NIT</strong> ya se encuentren registrados en nuestra base de datos.
             </span>
         )
     });

@@ -154,6 +154,7 @@ const obtenerEstiloCupos = (cupos) => {
 };
 
     const handlePostulacion = async () => {
+        
         if (!selectedVacante) return;
         try {
             const res = await API.post(`/estudiantes/${selectedVacante.id}/postular`);
@@ -179,6 +180,9 @@ const obtenerEstiloCupos = (cupos) => {
     };
 
     const dataFiltrada = getFilteredData();
+    // Coloca esto justo antes del return del componente
+// En tu VacantesDashboard.js
+const yaPostulado = selectedVacante?.postulaciones?.some(p => p.egresadoId === usuario?.id);
 
     if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
 
@@ -470,8 +474,31 @@ const obtenerEstiloCupos = (cupos) => {
                                         </div>
 
                                         <div className="actions-footer" style={{marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                                            <button className="btn-apply-main" onClick={handlePostulacion}>POSTULARME AHORA</button>
-                                            <button className="btn-cv-secondary" onClick={() => setVistaActiva('crear-cv')}>MI HOJA DE VIDA (PDF)</button>
+    
+    {yaPostulado ? (
+        /* Este bloque evita que el usuario haga clic de nuevo */
+        <div className="already-applied-banner">
+            <div className="applied-content">
+                <div className="applied-icon-wrapper">
+                    <FileText size={18} style={{ color: '#16a34a' }} />
+                </div>
+                <div className="applied-text">
+                    <span className="applied-title">Postulación enviada</span>
+                    <p>Ya estás participando en este proceso de selección.</p>
+                </div>
+            </div>
+            <div className="applied-status-tag">Enviado</div>
+        </div>
+    ) : (
+        /* Solo mostramos el botón si NO está postulado */
+        <button className="btn-apply-main" onClick={handlePostulacion}>
+            POSTULARME AHORA
+        </button>
+    )}
+
+    <button className="btn-cv-secondary" onClick={() => setVistaActiva('crear-cv')}>
+        MI HOJA DE VIDA
+    </button>
                                             <div className="drag-drop-area" style={{border: '2px dashed #e2e8f0', borderRadius: '12px', padding: '20px', textAlign: 'center', background: '#f9fafb'}}>
                                                 <span style={{fontSize: '13px', color: '#718096'}}>Subir archivos adicionales</span>
                                                 <small style={{display: 'block', color: '#a0aec0', marginTop: '4px'}}>Drag and drop</small>
