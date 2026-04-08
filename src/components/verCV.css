@@ -8,19 +8,31 @@
     backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
-    align-items: center;
+    /* CAMBIO: Alínea al inicio para permitir scroll natural */
+    align-items: flex-start; 
+    /* CAMBIO: Activa el scroll aquí */
+    overflow-y: auto; 
+    padding: 40px 20px; /* Espacio para que no pegue a los bordes */
     z-index: 3000;
+    cursor: pointer;
 }
 
 .cv-preview-container {
     background: white;
-    width: 850px;
-    height: 95vh;
+    width: 210mm; 
+    /* ELIMINA height: 297mm o min-height: 297mm temporalmente para la descarga */
+    height: 297mm !important;
     display: flex;
+    align-items: stretch; /* Esto hace que el verde siga al blanco siempre */
     position: relative;
-    box-shadow: var(--shadow-lg);
-    border-radius: 20px; /* Radio de los paneles de tu Dashboard */
-    overflow: hidden;
+    overflow: hidden !important; /* Permite que el contenido fluya sin cortes raros */
+    border-radius: 0 !important;
+    box-sizing: border-box;
+}
+
+.cv-aside-green, .cv-main-white {
+    height: auto !important;
+    min-height: 100%; /* Esto hace que se estiren proporcionalmente */
 }
 
 /* Botón cerrar con estilo de tus botones de acción */
@@ -47,12 +59,18 @@
 /* SIDEBAR IZQUIERDO (Verde Oscuro UdeC) */
 .cv-aside-green {
     width: 35%;
-    background-color: var(--udec-green-dark); /* Usando tu variable */
+    background-color: var(--udec-green-dark);
     color: white;
-    padding: 40px 30px;
+    padding: 30px 25px; /* 👈 Bajamos padding de 40px/30px a 30px/25px */
     display: flex;
     flex-direction: column;
-    gap: 35px;
+    gap: 15px !important; /* 👈 Bajamos gap de 20px a 15px */
+    flex-grow: 1; 
+    min-height: 297mm; 
+    max-height: 297mm;
+    box-sizing: border-box;
+    height: 100%; 
+    align-self: stretch;
 }
 
 .cv-aside-logo {
@@ -121,9 +139,12 @@
 /* CUERPO DERECHO (Blanco) */
 .cv-main-white {
     width: 65%;
-    padding: 60px 45px;
-    overflow-y: auto;
+    padding: 20px 35px !important; /* 👈 Bajamos de 25px a 20px */
     background: white;
+}
+
+.cv-content-section {
+    margin-bottom: 10px !important; /* 👈 Bajamos de 15px a 10px */
 }
 
 .cv-main-header h1 {
@@ -161,7 +182,8 @@
 .detail-body-text p {
     font-size: 12px;
     color: #4a5568;
-    line-height: 1.6;
+    line-height: 1.4;
+    text-align: justify; /* 👈 AGREGA ESTA LÍNEA */
 }
 
 /* TIMELINE (Timeline Marker estilo UdeC) */
@@ -169,7 +191,7 @@
 
 .timeline-item {
     display: flex;
-    margin-bottom: 25px;
+    margin-bottom: 12px; /* 👈 Bajamos de 25px a 12px */
     position: relative;
 }
 
@@ -217,3 +239,57 @@
 /* Scrollbar sutil como en tu Dashboard */
 .cv-main-white::-webkit-scrollbar { width: 4px; }
 .cv-main-white::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+
+/* Contenedor de botones sobre el modal */
+.cv-actions-nav {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1001;
+}
+
+.btn-download-cv {
+    background: #006b3f; /* Verde UdeC */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: 0.3s;
+}
+
+.btn-download-cv:hover {
+    background: #004d2e;
+    transform: translateY(-2px);
+}
+
+.btn-close-cv {
+    background: #ef4444; /* Rojo */
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* IMPORTANTE PARA EL PDF: Asegura que el contenedor tenga tamaño fijo al exportar */
+@media print {
+    .cv-preview-container {
+        width: 210mm;
+        height: 297mm;
+        margin: 0;
+        box-shadow: none;
+    }
+}
+

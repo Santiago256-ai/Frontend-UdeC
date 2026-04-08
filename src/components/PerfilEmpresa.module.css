@@ -1,0 +1,265 @@
+/* --- VARIABLES INSTITUCIONALES UDEC --- */
+:root {
+    --pe-green: #1b4332;
+    --pe-gold: #b7903e;
+    --pe-bg: #f8fafc;
+    --pe-white: #ffffff;
+    --pe-text-dark: #1e293b;
+    --pe-text-muted: #64748b;
+}
+
+.peMainContainer {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--pe-bg);
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* --- ENCABEZADO (HERO) --- */
+.peHeaderCard {
+    background: var(--pe-green);
+    padding: 2.5rem;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    border-bottom: 5px solid var(--pe-gold);
+}
+
+.peHeaderInfo {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.peAvatarCircle {
+    width: 85px;
+    height: 85px;
+    background: var(--pe-white);
+    color: var(--pe-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    border: 3px solid var(--pe-gold);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.peTitle {
+    margin: 0;
+    color: var(--pe-white);
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.peSubtitle {
+    margin: 5px 0 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    font-weight: 300;
+}
+
+/* --- ACCIONES (BOTONES CABECERA) --- */
+.peHeaderActions {
+    display: flex;
+    align-items: center;
+}
+
+.peEditGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.peBtnEdit {
+    background: var(--pe-white);
+    color: var(--pe-green);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.peBtnEdit:hover {
+    background: var(--pe-gold);
+    color: white;
+}
+
+.peBtnCancel {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 6px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.peBtnCancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- BOTÓN GUARDAR CON ANIMACIÓN PRO --- */
+.peBtnSave {
+    background-color: var(--pe-gold);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.peBtnSave:hover:not(:disabled) {
+    background-color: #967532;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(183, 144, 62, 0.4);
+}
+
+.peBtnSave:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.peBtnSave:disabled {
+    background-color: #555 !important;
+    color: #999 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* --- GRID DE TARJETAS --- */
+.peGridInfo {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.peSectionCard {
+    background: var(--pe-white);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #edf2f7;
+    transition: transform 0.3s ease;
+}
+
+.peSectionCard:hover {
+    transform: translateY(-5px);
+}
+
+.peSectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--pe-green);
+    font-size: 1.25rem;
+    margin-bottom: 1.8rem;
+    border-left: 5px solid var(--pe-gold);
+    padding-left: 15px;
+    font-weight: 700;
+}
+
+/* --- FORMULARIO E INPUTS --- */
+.peFieldGroup {
+    margin-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.peFieldRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+}
+
+.peFieldGroup label {
+    font-size: 0.85rem;
+    color: var(--pe-green);
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.peFieldGroup input, 
+.peFieldGroup textarea {
+    padding: 0.85rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #ffffff;
+    width: 100%;
+    transition: all 0.3s ease;
+    color: #334155;
+}
+
+.peFieldGroup input:focus,
+.peFieldGroup textarea:focus {
+    outline: none;
+    border-color: var(--pe-gold);
+    box-shadow: 0 0 0 3px rgba(183, 144, 62, 0.1);
+}
+
+.peFieldGroup input:disabled, 
+.peFieldGroup textarea:disabled {
+    background-color: #f8fafc;
+    color: #64748b;
+    border-color: transparent;
+    cursor: not-allowed;
+}
+
+/* --- LOADER --- */
+.peLoader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: var(--pe-green);
+    font-weight: 700;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 900px) {
+    .peGridInfo {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .peFieldRow {
+        grid-template-columns: 1fr;
+    }
+    .peHeaderCard {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    .peHeaderInfo {
+        flex-direction: column;
+    }
+    .peEditGroup {
+        align-items: center;
+    }
+}

@@ -1,0 +1,141 @@
+.containerInicio {
+    padding: 20px;
+    animation: fadeIn 0.5s ease;
+}
+
+.welcomeHeader h1 {
+    font-size: 28px;
+    color: #1a202c;
+    margin-bottom: 5px;
+}
+
+.welcomeHeader p {
+    color: #64748b;
+    margin-bottom: 30px;
+}
+
+/* Grid de tarjetas superiores */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.statCard {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f1f5f9;
+}
+
+.iconBox {
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blue { background: #eff6ff; color: #3b82f6; }
+.green { background: #f0fdf4; color: #22c55e; }
+.orange { background: #fff7ed; color: #f97316; }
+
+.statInfo span {
+    display: block;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.statInfo strong {
+    font-size: 22px;
+    color: #1e293b;
+}
+
+/* Grid Principal */
+.mainDashboardGrid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+}
+
+.recentActivity, .cvStatus {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    border: 1px solid #f1f5f9;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: #006b3f; /* Color Udec */
+}
+
+.sectionTitle h2 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.miniCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+}
+
+.miniCard:hover { background: #f8fafc; }
+
+.miniCard h4 { font-size: 15px; color: #1e293b; }
+.miniCard span { font-size: 13px; color: #64748b; }
+
+.btnVer {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #e2e8f0;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.progressBarContainer {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.progressBar {
+    height: 100%;
+    background: linear-gradient(90deg, #006b3f, #84cc16);
+}
+
+.btnUpdate {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    background: #006b3f;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+    .mainDashboardGrid { grid-template-columns: 1fr; }
+}

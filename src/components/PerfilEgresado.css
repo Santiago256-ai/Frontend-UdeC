@@ -1,0 +1,218 @@
+/* Variables Institucionales UdeC */
+:root {
+    --vdp-color-dark: #1b4332;
+    --vdp-color-brand: #1b4332;
+    --vdp-color-gold: #b7903e;
+    --vdp-color-success: #2d6a4f;
+    --vdp-bg-soft: #f4f7f6;
+    --vdp-white: #ffffff;
+    --vdp-gray-text: #555b5e;
+    --vdp-border-soft: #e0e0e0;
+    --vdp-radius: 12px;
+}
+
+.vdp-main-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: var(--vdp-bg-soft);
+    min-height: 100vh;
+}
+
+/* --- HERO SECTION --- */
+.vdp-profile-hero {
+    background: var(--vdp-color-brand);
+    padding: 40px;
+    border-radius: var(--vdp-radius);
+    display: flex;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    position: relative;
+    border-bottom: 5px solid var(--vdp-color-gold);
+}
+
+.vdp-user-avatar {
+    width: 100px;
+    height: 100px;
+    background: var(--vdp-white);
+    color: var(--vdp-color-brand);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-right: 25px;
+    border: 3px solid var(--vdp-color-gold);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.vdp-user-fullname {
+    margin: 0;
+    font-size: 2rem;
+    color: var(--vdp-white);
+}
+
+.vdp-user-tag {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* --- CONTENEDOR DE ACCIONES (Lado derecho) --- */
+.vdp-header-actions-container {
+    margin-left: auto; /* Empuja los botones a la derecha */
+}
+
+/* Botón Editar Inicial */
+.vdp-action-btn-edit {
+    padding: 10px 25px;
+    border: 2px solid var(--vdp-white);
+    background: transparent;
+    color: var(--vdp-white);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.vdp-action-btn-edit:hover {
+    background: var(--vdp-color-gold);
+    border-color: var(--vdp-color-gold);
+}
+
+/* Grupo vertical para Cancelar y Guardar */
+.vdp-edit-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.vdp-btn-cancel-header {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 6px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%; /* Para que ocupen el mismo ancho si quieres */
+    max-width: 150px;
+    transition: 0.3s;
+}
+
+.vdp-btn-cancel-header:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- BOTÓN GUARDAR CON ANIMACIÓN --- */
+.vdp-btn-save-header {
+    background-color: var(--vdp-color-gold);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    /* 🕒 Transición suave para todas las propiedades */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Sombra inicial sutil */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ✨ Animación al pasar el mouse (Solo si NO está deshabilitado) */
+.vdp-btn-save-header:hover:not(:disabled) {
+    background-color: #967532; /* Un dorado un poco más oscuro */
+    transform: translateY(-3px) scale(1.02); /* Se eleva y crece un poquito */
+    box-shadow: 0 8px 20px rgba(183, 144, 62, 0.4); /* Sombra más profunda y dorada */
+    letter-spacing: 0.5px; /* Un ligero espaciado de letras para efecto moderno */
+}
+
+/* 📥 Efecto de "pulsar" al hacer clic */
+.vdp-btn-save-header:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.1s;
+}
+
+/* 🔒 Estado Deshabilitado (Sin animaciones) */
+.vdp-btn-save-header:disabled {
+    background-color: #555 !important;
+    color: #999 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none !important; /* Evita que se mueva si está bloqueado */
+    box-shadow: none !important;
+}
+
+/* --- GRID Y TARJETAS --- */
+.vdp-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.vdp-info-card {
+    background: var(--vdp-white);
+    padding: 30px;
+    border-radius: var(--vdp-radius);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+    border: 1px solid var(--vdp-border-soft);
+}
+
+.vdp-col-span-2 {
+    grid-column: span 2;
+}
+
+.vdp-card-header {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    color: var(--vdp-color-brand);
+    border-left: 5px solid var(--vdp-color-gold);
+    padding-left: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* --- FORMULARIO --- */
+.vdp-field-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--vdp-color-brand);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.vdp-field-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--vdp-border-soft);
+    border-radius: 8px;
+    background: #ffffff;
+    color: #333;
+    transition: border-color 0.3s;
+}
+
+.vdp-field-input:focus {
+    outline: none;
+    border-color: var(--vdp-color-brand);
+    box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.1);
+}
+
+.vdp-field-input:disabled {
+    background: #f8f9fa;
+    color: #888;
+    border-color: #eee;
+}

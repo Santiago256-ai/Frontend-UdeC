@@ -1,0 +1,862 @@
+/* Variables únicas para evitar conflictos en el proyecto */
+:root {
+    --u-chat-bg-canvas: #f8fafc;
+    --u-chat-bg-white: #ffffff;
+    --u-chat-primary-green: #0a4d28; /* Verde Institucional */
+    --u-chat-accent-gold: #f2a900;  /* Oro Institucional */
+    --u-chat-text-main: #1e293b;
+    --u-chat-text-muted: #64748b;
+    --u-chat-border-color: #e2e8f0;
+    --u-chat-shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --u-chat-shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --u-chat-radius-lg: 16px;
+    --u-chat-radius-md: 10px;
+    --u-chat-bubble-empresa: #0a4d28;
+    --u-chat-bubble-user: #f1f5f9;
+}
+
+.mensajes-container {
+    display: flex;
+    height: calc(100vh - 120px); /* Ajusta según tu header */
+    background: var(--u-chat-bg-white);
+    margin: 20px;
+    border-radius: var(--u-chat-radius-lg);
+    box-shadow: var(--u-chat-shadow-md);
+    overflow: hidden;
+    border: 1px solid var(--u-chat-border-color);
+}
+
+/* Sidebar de Chats */
+.chats-sidebar {
+    width: 350px;
+    border-right: 1px solid var(--u-chat-border-color);
+    display: flex;
+    flex-direction: column;
+    background: #fdfdfd;
+}
+
+/* --- CONTENEDOR DE CABECERA --- */
+.chats-header {
+    padding: 24px 20px;
+    background: linear-gradient(to bottom, #ffffff, #f8fafc);
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Animación de entrada para el título */
+.chats-header h3 {
+    font-size: 1.4rem;        /* Lo subimos un poquito para compensar el grosor */
+    font-weight: 600;         /* Aquí está el cambio: 600 es elegante y legible */
+    color: #1e293b;           /* Un gris muy oscuro, menos agresivo que el negro puro */
+    margin-bottom: 18px;
+    letter-spacing: -0.3px;   /* Un espaciado sutil para que se vea más 'premium' */
+    animation: slideDown 0.5s ease-out;
+}
+
+/* --- BUSCADOR DINÁMICO --- */
+.search-chat {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transición elástica */
+    cursor: text;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+/* Efecto al pasar el mouse (Hover) */
+.search-chat:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Efecto al hacer clic (Focus) */
+.search-chat:focus-within {
+    border-color: #006b3f; /* Tu verde institucional */
+    background: #ffffff;
+    transform: scale(1.02); /* Se agranda sutilmente */
+    box-shadow: 0 10px 20px rgba(0, 107, 63, 0.08);
+}
+
+/* Animación del icono de lupa */
+.search-chat:focus-within svg {
+    color: #006b3f;
+    transform: rotate(15deg) scale(1.1);
+    transition: all 0.3s ease;
+}
+
+.search-chat input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.search-chat input::placeholder {
+    color: #94a3b8;
+    transition: all 0.3s ease;
+}
+
+/* El placeholder se mueve un poco a la derecha al hacer focus */
+.search-chat input:focus::placeholder {
+    transform: translateX(5px);
+    opacity: 0.5;
+}
+
+/* --- KEYFRAMES --- */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chats-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.chat-item {
+    position: relative; /* Crítico para que el badge se posicione respecto al item */
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* --- ESTADO VACÍO (SIDEBAR) --- */
+.empty-state-sidebar {
+    padding: 40px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon-container {
+    width: 80px;
+    height: 80px;
+    background: #ffffff;
+    border-radius: 20px; /* Bordes redondeados modernos */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0, 107, 63, 0.1); /* Sombra suave verde */
+    margin-bottom: 20px;
+    border: 1px solid rgba(0, 107, 63, 0.05);
+}
+
+.empty-state-sidebar h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 4px;
+}
+
+.empty-state-sidebar p {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+/* --- 1. DEFINICIÓN DE ANIMACIONES --- */
+
+/* Animación 1: La "Vibración" o escalado suave del icono central */
+@keyframes vibeControl {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); } /* Crece sutilmente */
+  100% { transform: scale(1); }
+}
+
+/* Animación 2: Las "Olas" o pulsos concéntricos */
+@keyframes pulseWaves {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.2); /* La ola se expande */
+    opacity: 0;           /* Y desaparece */
+  }
+}
+
+/* --- 2. ESTILO DEL CONTENEDOR PRINCIPAL (EL CÍRCULO CON SOMBRA) --- */
+.no-chat-selected .icon-container {
+  position: relative; /* Necesario para posicionar las olas */
+  width: 100px;
+  height: 100px;
+  background: #ffffff;
+  border-radius: 50%; /* Círculo perfecto */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* LA SOMBRA ELEGANTE (Verde institucional muy suave) */
+  box-shadow: 0 10px 30px rgba(0, 107, 63, 0.15);
+  
+  margin-bottom: 24px;
+  border: 1px solid rgba(0, 107, 63, 0.05); /* Borde casi invisible */
+}
+
+/* --- 3. CREACIÓN DE LAS OLAS (Pseudoelementos) --- */
+.no-chat-selected .icon-container::before,
+.no-chat-selected .icon-container::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(0, 107, 63, 0.1); /* El color de la ola (verde suave) */
+  
+  /* Aplicamos la animación de ondas */
+  animation: pulseWaves 2.5s infinite cubic-bezier(0.36, 0.11, 0.89, 0.32);
+  
+  z-index: 1; /* Detrás del icono principal */
+}
+
+/* Desfasamos la segunda ola para que no salgan juntas */
+.no-chat-selected .icon-container::after {
+  animation-delay: 1.25s;
+}
+
+/* --- 4. ESTILO DEL ICONO SVG (EL CENTRAL) --- */
+.no-chat-selected .icon-container svg {
+  position: relative;
+  z-index: 2; /* Por encima de las olas */
+  color: #006b3f; /* Verde institucional */
+  
+  /* Aplicamos la animación de vibración al icono mismo */
+  animation: vibeControl 4s infinite ease-in-out;
+}
+
+/* --- 5. TEXTOS DEL ESTADO VACÍO --- */
+.no-chat-selected h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b; /* Casi negro profesional */
+  margin-top: 0;
+}
+
+.no-chat-selected p {
+  font-size: 1rem;
+  color: #64748b; /* Gris azulado secundario */
+  max-width: 320px;
+  text-align: center;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* Animación de vibración/titileo suave */
+@keyframes vibrarSuave {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05); /* Crece un poquito */
+    opacity: 0.8;          /* Se atenúa un poco */
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Clase para aplicar al contenedor del icono */
+.animate-vibe {
+  animation: vibrarSuave 3s infinite ease-in-out;
+}
+
+/* Si quieres que solo vibre cuando NO hay chats (Empty State) */
+.empty-state-sidebar .icon-container svg,
+.no-chat-selected svg {
+  animation: vibrarSuave 4s infinite ease-in-out;
+  color: #006b3f; /* Usando el verde de tu otra imagen para coherencia */
+}
+
+/* Evitamos el borde inferior en el último elemento */
+.chat-item:last-child {
+    border-bottom: none;
+}
+
+.chat-item:hover {
+    background-color: #f8fafc;
+}
+
+/* --- ESTADO ACTIVO SELECCIONADO (VERSIÓN MINIMALISTA) --- */
+.chat-item.active {
+    background-color: #f1f5f9;
+    border-left: 4px solid #0f172a; /* Un detalle elegante para el chat seleccionado */
+}
+
+/* --- AVATAR CIRCULAR PERFECTO (FIJO) --- */
+.chat-avatar {
+    /* 1. Mantenemos tus colores y estilo base */
+    background: linear-gradient(135deg, var(--u-chat-primary-green), #1a7a42);
+    color: white;
+    border-radius: 50%; /* Esto crea el círculo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+    box-shadow: var(--u-chat-shadow-sm);
+    text-transform: uppercase; /* Asegura inicial mayúscula */
+
+    /* --- 2. LA CORRECCIÓN CLAVE PARA EL ÓVALO --- */
+    width: 50px;       /* Ancho fijo */
+    height: 50px;      /* Alto fijo igual al ancho */
+    min-width: 50px;   /* Mínimo ancho garantizado */
+    flex-shrink: 0;    /* !!! IMPORTANTE: Impide que flexbox lo aplaste !!! */
+    /* ------------------------------------------- */
+}
+
+.chat-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-right: 30px; /* Espacio reservado para el badge */
+}
+
+.user-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- BADGE DE VACANTE PERSONALIZADO --- */
+.vacante-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; /* Centra el texto ahora que no hay icono */
+    margin-top: 6px;
+    padding: 3px 12px; /* Un poco más de padding lateral para compensar la falta de icono */
+    background-color: rgba(247, 147, 30, 0.12); 
+    color: #b36b15; 
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    width: fit-content;
+    border: 1px solid rgba(247, 147, 30, 0.2);
+    /* Eliminamos el gap ya que no hay dos elementos */
+}
+
+.vacante-tag span {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Animación para que el badge "salte" cuando aparezca */
+@keyframes bounceIn {
+    0% {
+        transform: translateY(-50%) scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+    }
+}
+
+/* --- OPCIONAL: Estilo para "9+" si hay demasiados mensajes --- */
+.chat-badge-count:empty {
+    display: none;
+}
+
+/* Efecto opcional cuando pasas el mouse por el chat */
+.chat-item:hover .vacante-tag {
+    background-color: rgba(247, 147, 30, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Vista del Chat Principal */
+.chat-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--u-chat-bg-white);
+}
+
+.chat-view-header {
+    padding: 16px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--u-chat-border-color);
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-user h4 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.status-online {
+    font-size: 0.75rem;
+    color: #10b981;
+    font-weight: 500;
+}
+
+.status-offline {
+    font-size: 0.75rem;
+    color: var(--u-chat-text-muted);
+}
+
+/* Burbujas de Mensaje */
+.messages-body {
+    flex: 1;
+    padding: 20px; /* Puedes bajarlo a 15px si quieres más espacio lateral */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    /* --- CAMBIO CLAVE: Reducimos la separación entre burbujas --- */
+    gap: 8px; 
+    /* ------------------------------------------------------------ */
+    background-color: #f8fafc;
+    background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
+    background-size: 20px 20px;
+    position: relative;
+    scroll-behavior: smooth;
+}
+
+.message-bubble {
+    max-width: 70%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px; /* Espacio estándar */
+    transition: margin 0.2s ease;
+}
+
+.message-bubble.same-sender {
+    margin-top: -4px; /* Reduce el gap drásticamente */
+}
+
+.message-bubble.empresa {
+    align-self: flex-end;
+}
+
+.message-bubble.estudiante {
+    align-self: flex-start;
+}
+
+.bubble-content {
+    padding: 8px 14px; /* Reduje un poco el padding interno para que no sean tan "gordas" */
+    border-radius: 14px; /* Un radio un poco más cerrado las hace ver más modernas */
+    position: relative;
+    box-shadow: var(--u-chat-shadow-sm);
+    line-height: 1.4; /* Mejora la lectura del texto */
+}
+
+.empresa .bubble-content {
+    background: var(--u-chat-bubble-empresa);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.estudiante .bubble-content {
+    background: var(--u-chat-bg-white);
+    color: var(--u-chat-text-main);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--u-chat-border-color);
+}
+
+.msg-time {
+    font-size: 0.65rem;
+    margin-top: 2px; /* Reducido de 5px a 2px */
+    display: block;
+    opacity: 0.7;
+    text-align: right;
+}
+
+/* Área de Input */
+.chat-input-area {
+    padding: 20px 30px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background: var(--u-chat-bg-white);
+    border-top: 1px solid var(--u-chat-border-color);
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 25px;
+    border: 1px solid var(--u-chat-border-color);
+    background: var(--u-chat-bg-canvas);
+    outline: none;
+    transition: 0.3s;
+}
+
+.chat-input-area input:focus {
+    border-color: var(--u-chat-primary-green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(10, 77, 40, 0.1);
+}
+
+.send-btn {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0; /* Evita que el botón se aplaste */
+    border-radius: 50%;
+    border: none;
+    background: var(--u-chat-primary-green);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.send-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    background: #0e6335;
+}
+
+.send-btn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+/* Pantalla vacía */
+.no-chat-selected {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--u-chat-text-muted);
+    text-align: center;
+    padding: 40px;
+}
+
+.empty-illustration {
+    margin-bottom: 20px;
+    color: var(--u-chat-border-color);
+}
+
+/* Banner de chat desactivado */
+.chat-disabled-banner {
+    background: #fff1f2;
+    color: #be123c;
+    padding: 10px;
+    text-align: center;
+    border-radius: var(--u-chat-radius-md);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    border: 1px solid #fecdd3;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* --- SEPARADORES DE FECHA ÚNICOS PARA SIDEBAR --- */
+:root {
+    --u-sidebar-date-bg: rgba(241, 245, 249, 0.92); /* Un gris azulado muy limpio */
+    --u-sidebar-date-text: #64748b;
+    --u-sidebar-date-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+
+/* Contenedor del separador */
+.u-sidebar-date-container {
+    position: sticky;
+    top: 10px; /* Se queda pegado arriba mientras scrolleas */
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    pointer-events: none; /* No interfiere con el scroll del mouse */
+}
+
+/* La burbuja de la fecha */
+.u-sidebar-date-bubble {
+    background: var(--u-sidebar-date-bg);
+    color: var(--u-sidebar-date-text);
+    backdrop-filter: blur(4px); /* Efecto cristalmerilado */
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+    box-shadow: var(--u-sidebar-date-shadow);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    text-transform: capitalize;
+}
+
+/* Banner flotante al final del chat */
+/* Banner flotante al final del chat (Versión Roja) */
+.u-sidebar-status-banner-floating {
+    position: sticky;
+    bottom: 0;
+    /* --- CAMBIO DE COLORES A ROJO --- */
+    background-color: #fff1f2; /* Rojo rosa muy suave */
+    color: #be123c; /* Rojo oscuro/vino corporativo */
+    border: 1px solid #fecdd3; /* Borde rosa suave */
+    /* ---------------------------------- */
+    padding: 12px 20px;
+    margin-top: 20px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+    z-index: 5;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Ajuste al footer para que sea más limpio */
+.u-sidebar-footer-container {
+    padding: 20px 30px;
+    background: #ffffff;
+    border-top: 1px solid var(--u-chat-border-color);
+}
+
+/* El banner rosa/rojo fijo abajo */
+.u-sidebar-status-banner {
+    background-color: #fff1f2; /* Rojo muy suave */
+    color: #be123c; /* Rojo oscuro corporativo */
+    padding: 10px 15px;
+    border-radius: var(--u-chat-radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #fecdd3;
+    animation: slideInUp 0.3s ease-out;
+}
+
+.chat-input-area-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%; /* Ocupa todo el ancho del footer */
+}
+
+/* IMPORTANTE: Esto hará que el input se estire */
+.chat-input-area-wrapper input {
+    flex: 1; 
+    padding: 14px 20px;
+    border-radius: 25px;
+    border: 1px solid var(--u-chat-border-color);
+    background: var(--u-chat-bg-canvas);
+    outline: none;
+    font-size: 0.95rem;
+    transition: 0.3s;
+}
+
+.chat-input-area-wrapper input:focus {
+    border-color: var(--u-chat-primary-green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(10, 77, 40, 0.1);
+}
+
+/* Limpiamos el padding del chat-input-area original si lo tenías 
+   para que no se duplique con el nuevo contenedor */
+.chat-input-area {
+    padding: 0 !important;
+    border-top: none !important;
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Badge Dinámico para Activar/Desactivar */
+.u-sidebar-toggle-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+/* Estado: Chat Habilitado (El botón invita a finalizarlo en Rojo) */
+.u-sidebar-toggle-badge.enabled {
+    background-color: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
+}
+
+.u-sidebar-toggle-badge.enabled:hover {
+    background-color: #be123c;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(190, 18, 60, 0.2);
+}
+
+/* Estado: Chat Deshabilitado (El botón invita a reabrirlo en Verde) */
+.u-sidebar-toggle-badge.disabled {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+
+.u-sidebar-toggle-badge.disabled:hover {
+    background-color: #065f46;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(6, 95, 70, 0.2);
+}
+
+/* Animación de presión al hacer click */
+.u-sidebar-toggle-badge:active {
+    transform: scale(0.95);
+}
+
+/* Contenedor del estado para alinear el punto y el texto */
+/* --- ESTADOS CON TITILEO (PING ANIMATION) --- */
+
+.status-online, .status-offline {
+    display: flex;
+    align-items: center;
+    position: relative; /* Clave: Ancla el pulso al contenedor */
+    padding-left: 16px; /* Espacio para que el punto no tape el texto */
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+/* Punto Base (El círculo sólido) */
+.status-online::before, .status-offline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%); /* Centrado vertical perfecto */
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    z-index: 2; /* Siempre encima del pulso */
+}
+
+/* Pulso Animado (El que titila) */
+.status-online::after, .status-offline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    /* No olvides el translateY aquí también para que expandan desde el centro */
+    transform: translateY(-50%) scale(1); 
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    z-index: 1;
+    opacity: 0.7;
+}
+
+/* Colores y Animación VERDE */
+.status-online { color: #10b981; }
+.status-online::before, .status-online::after { background-color: #10b981; }
+.status-online::after { animation: u-pulse-green 2s infinite; }
+
+/* Colores y Animación ROJO */
+.status-offline { color: #be123c; }
+.status-offline::before, .status-offline::after { background-color: #be123c; }
+.status-offline::after { animation: u-pulse-red 2s infinite; }
+
+/* --- KEYFRAMES ACTUALIZADOS --- */
+/* Importante mantener el translateY(-50%) para que no se mueva de lugar al crecer */
+
+@keyframes u-pulse-green {
+    0% { transform: translateY(-50%) scale(1); opacity: 0.8; }
+    100% { transform: translateY(-50%) scale(3.5); opacity: 0; }
+}
+
+@keyframes u-pulse-red {
+    0% { transform: translateY(-50%) scale(1); opacity: 0.8; }
+    100% { transform: translateY(-50%) scale(3.5); opacity: 0; }
+}
+
+/* --- AVATAR DEL HEADER (CÍRCULO PERFECTO) --- */
+.avatar-small {
+    /* Mantenemos tus colores corporativos */
+    background: linear-gradient(135deg, var(--u-chat-primary-green), #1a7a42);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    text-transform: uppercase;
+
+    /* --- LA SOLUCIÓN AL ÓVALO --- */
+    width: 40px !important;    /* Tamaño fijo */
+    height: 40px !important;   /* Alto igual al ancho */
+    min-width: 40px !important; /* Evita que se encoja */
+    flex-shrink: 0;            /* BLOQUEA la deformación por flexbox */
+    /* ---------------------------- */
+    
+    box-shadow: var(--u-chat-shadow-sm);
+}
+
+/* --- BADGE DE NOTIFICACIÓN (CONTADOR) --- */
+.chat-badge-count {
+    position: absolute;
+    right: 20px; /* Alineado a la derecha */
+    top: 50%;
+    transform: translateY(-50%);
+    
+    background-color: #ef4444; /* Rojo elegante (Tailwind Red 500) */
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px; /* Forma circular/ovalada */
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    
+    /* Sombra suave para dar profundidad */
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    
+    /* Animación de entrada sutil */
+    animation: bounceIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 10;
+}
+
+/* Efecto cuando el chat está activo: el rojo resalta más */
+.chat-item.active .chat-badge-count {
+    box-shadow: 0 0 0 2px #ecf3ee, 0 2px 5px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes badgePop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}

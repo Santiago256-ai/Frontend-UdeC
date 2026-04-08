@@ -1,0 +1,311 @@
+.solicitudesContainer {
+    padding: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease;
+}
+
+.solicitudesHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #f0f2f5;
+    padding-bottom: 15px;
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.iconTitle { color: #006b3f; }
+
+.headerTitle h2 {
+    font-size: 1.5rem;
+    color: #1a202c;
+    margin: 0;
+    font-weight: 700;
+}
+
+.countBadge {
+    background: #e6f4ea;
+    color: #006b3f;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.solicitudesGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.solicitudCard {
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.solicitudCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.cardIndicator {
+    width: 6px;
+    background: linear-gradient(to bottom, #006b3f, #ff6b00);
+}
+
+.cardBody {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.empresaTag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.vacanteTitulo {
+    font-size: 1.2rem;
+    color: #1e293b;
+    margin: 0 0 10px 0;
+}
+
+.metaInfo {
+    display: flex;
+    gap: 20px;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.metaInfo span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.statusSection {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.statusBadge {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+}
+
+.btnVerSeguimiento {
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btnVerSeguimiento:hover {
+    background: #f8fafc;
+    border-color: #cbd5e0;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 60px;
+    color: #cbd5e0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .cardBody { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .statusSection { align-items: flex-start; width: 100%; }
+}
+
+/* COLORES DINÁMICOS POR ESTADO */
+.estadoPendiente { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.estadoRevision { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.estadoEntrevista { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; } /* Morado como en tu captura */
+.estadoPrueba { background: #fef9c3; color: #a16207; border: 1px solid #fef08a; }
+.estadoFinalista { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.estadoContratado { background: #006b3f; color: white; border: 1px solid #005a35; }
+.estadoRechazado { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+/* Indicador lateral dinámico */
+.cardIndicator.estadoEntrevista { background: #7e22ce; }
+.cardIndicator.estadoContratado { background: #006b3f; }
+.cardIndicator.estadoRechazado { background: #b91c1c; }
+.cardIndicator.estadoRevision { background: #0369a1; }
+
+/* --- ESTILOS DEL MODAL --- */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modalContent {
+    background: white;
+    width: 90%;
+    max-width: 750px;
+    max-height: 85vh;
+    border-radius: 20px;
+    padding: 40px;
+    position: relative;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.closeModal {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f1f5f9;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.closeModal:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.modalHeader h2 {
+    margin-top: 15px;
+    font-size: 24px;
+    color: #1e293b;
+}
+
+.modalBadgeEmpresa {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fdf4;
+    color: #166534;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.modalGridInfo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.infoBox {
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #475569;
+}
+
+.infoBox strong { color: #1e293b; }
+
+.modalDescription {
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+.modalDescription h3 {
+    font-size: 16px;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.modalDescription p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #4b5563;
+    white-space: pre-line; /* Mantiene los saltos de línea de la DB */
+}
+
+.modalFooter {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px dashed #e2e8f0;
+}
+
+.postulacionInfo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f0fdf4;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.postulacionInfo strong { color: #166534; display: block; }
+.postulacionInfo p { font-size: 13px; color: #15803d; margin: 0; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.udecPostHighlight {
+    animation: glowOrangePost 2s ease-in-out infinite !important;
+    border: 2px solid #f39200 !important;
+    box-shadow: 0 0 20px rgba(243, 146, 0, 0.6) !important;
+    position: relative;
+    z-index: 10;
+}
+
+@keyframes glowOrangePost {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.01); box-shadow: 0 0 30px rgba(243, 146, 0, 0.8); }
+    100% { transform: scale(1); }
+}

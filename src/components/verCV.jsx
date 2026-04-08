@@ -1,24 +1,71 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { X, Mail, Phone, MapPin } from 'lucide-react';
+import html2pdf from 'html2pdf.js'; // npm install html2pdf.js
 import './verCV.css';
 
-const VerCV = ({ perfil, onClose }) => {
-    // 1. Extraemos el objeto CV del perfil del usuario
+const VerCV = ({ perfil, onClose, isAutoDownloading = false }) => {
+    // Referencia al contenedor que queremos convertir en PDF
+    const cvRef = useRef();
+
     const cv = perfil?.cv || {};
 
-    // 2. Función de ayuda para extraer texto de los objetos (Aptitudes, Idiomas, etc.)
     const obtenerTexto = (item) => {
         if (!item) return "";
         if (typeof item === 'string') return item;
-        // Mapeo según nombres de campos en tu schema.prisma
         return item.idioma || item.aptitud || item.habilidad || item.nombre;
     };
 
-    // 3. Preparación de listas según tu schema.prisma
-    // 'habilidades' es un String? en tu PerfilCV
-    const habilidades = cv.habilidades ? cv.habilidades.split(',') : [];
+    const manejarClicFondo = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
+    // Función para generar y descargar el PDF
+ const descargarPDF = () => {
+    const elemento = cvRef.current;
     
-    // Las siguientes son relaciones (Arrays de objetos)
+    // 1. Aplicamos una micro-escala temporal para asegurar que entre en A4
+    elemento.style.transform = "scale(0.98)"; 
+    elemento.style.transformOrigin = "top center";
+
+    const opciones = {
+        margin: 0,
+        filename: `CV_${perfil?.nombres || 'Candidato'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            letterRendering: true,
+            scrollY: 0, // Evita el hueco blanco arriba
+            height: elemento.offsetHeight // Captura la altura exacta
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+        },
+        pagebreak: { mode: 'avoid-all' } // Evita cortes de página automáticos
+    };
+
+    html2pdf().set(opciones).from(elemento).save().then(() => {
+        // 2. Quitamos la escala después de generar el PDF para que el modal no se vea raro
+        elemento.style.transform = "none";
+    });
+};
+
+    // Efecto para disparo automático desde la tabla en el Dashboard
+    useEffect(() => {
+        if (isAutoDownloading) {
+            // Un pequeño retraso asegura que el logo y estilos estén listos en el DOM invisible
+            const timer = setTimeout(() => {
+                descargarPDF();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isAutoDownloading]);
+
+    const habilidades = cv.habilidades ? cv.habilidades.split(',') : [];
     const aptitudes = Array.isArray(cv.aptitudes) ? cv.aptitudes : [];
     const idiomas = Array.isArray(cv.idiomas) ? cv.idiomas : [];
     const experiencias = Array.isArray(cv.experiencia) ? cv.experiencia : [];
@@ -26,12 +73,26 @@ const VerCV = ({ perfil, onClose }) => {
     const referencias = Array.isArray(cv.referencias) ? cv.referencias : [];
 
     return (
-        <div className="cv-modal-overlay">
-            <div className="cv-preview-container fade-in">
-                {/* BOTÓN CERRAR */}
-                <button className="cv-close-x" onClick={onClose} title="Cerrar">
-                    <X size={20} />
-                </button>
+        /* Si es auto-descarga, quitamos el fondo oscuro y animaciones para evitar parpadeos */
+        <div 
+            className={isAutoDownloading ? "" : "cv-modal-overlay"} 
+            onClick={isAutoDownloading ? null : manejarClicFondo}
+        >
+            
+            {/* BOTÓN OCULTO: Permite que el Dashboard dispare la descarga por ID si es necesario */}
+            {isAutoDownloading && (
+                <button id="btn-trigger-pdf-hidden" onClick={descargarPDF} style={{ display: 'none' }} />
+            )}
+
+            {/* 2. CONTENEDOR DEL CV (Lo que se captura para el PDF) */}
+            <div className="cv-preview-container fade-in" ref={cvRef}>
+                
+                {/* BOTÓN CERRAR: Solo aparece cuando el usuario está viendo el CV, no al descargar */}
+                {!isAutoDownloading && (
+                    <button className="cv-close-x" onClick={onClose} title="Cerrar">
+                        <X size={20} />
+                    </button>
+                )}
 
                 {/* COLUMNA IZQUIERDA: VERDE UDEC */}
                 <aside className="cv-aside-green">
@@ -68,7 +129,6 @@ const VerCV = ({ perfil, onClose }) => {
                             <div className="cv-skill-item" key={i}>
                                 <span>{obtenerTexto(item)}</span>
                                 <div className="skill-bar">
-                                    {/* Usamos el campo 'nivel' (0-100) de tu schema */}
                                     <div className="progress" style={{width: `${item.nivel || 70}%`}}></div>
                                 </div>
                             </div>
@@ -81,7 +141,7 @@ const VerCV = ({ perfil, onClose }) => {
                     <header className="cv-main-header">
                         <h1>{perfil?.nombres} <br /> {perfil?.apellidos}</h1>
                         <div className="cv-contact-row">
-                            <span><Phone size={12} /> {cv.telefono || 'N/A'}</span>
+                            <span><Phone size={12} /> {cv.celular || 'N/A'}</span>
                             <span><Mail size={12} /> {cv.email || perfil?.correo}</span>
                             <span><MapPin size={12} /> {cv.direccion || 'Cundinamarca, Colombia'}</span>
                         </div>
@@ -90,7 +150,6 @@ const VerCV = ({ perfil, onClose }) => {
                     <section className="cv-content-section">
                         <h2 className="cv-section-title">PERFIL PROFESIONAL</h2>
                         <div className="detail-body-text">
-                            {/* En tu schema el campo es 'descripcion' */}
                             <p>{cv.descripcion || 'Perfil no redactado.'}</p>
                         </div>
                     </section>
@@ -116,7 +175,6 @@ const VerCV = ({ perfil, onClose }) => {
                         <div className="cv-timeline">
                             {educaciones.length > 0 ? educaciones.map((edu, i) => (
                                 <div className="timeline-item" key={i}>
-                                    {/* Cambiado 'anio' por 'periodo' según tu schema */}
                                     <span className="timeline-date">{edu.periodo}</span>
                                     <div className="timeline-marker"></div>
                                     <div className="timeline-info">
@@ -135,7 +193,6 @@ const VerCV = ({ perfil, onClose }) => {
                                 <div className="ref-item" key={i}>
                                     <strong>{ref.nombre}</strong>
                                     <p>{ref.cargo}</p>
-                                    {/* Cambiado 'telefono' por 'celular' según tu schema */}
                                     <p>Cel: {ref.celular}</p>
                                 </div>
                             )) : <p className="no-data">Sin referencias.</p>}

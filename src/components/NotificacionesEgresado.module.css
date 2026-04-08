@@ -1,0 +1,271 @@
+.notifContainer {
+    --ntf-primary: #006b3f; /* Verde UdeC */
+    --ntf-accent: #f39200;  /* Naranja UdeC */
+    --ntf-bg: #ffffff;
+    --ntf-hover: #f8fafc;
+    --ntf-border: #e2e8f0;
+    --ntf-text-main: #1e293b;
+    --ntf-text-muted: #64748b;
+
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.notifHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid var(--ntf-border);
+    padding-bottom: 15px;
+}
+
+.titleGroup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mainIcon {
+    color: var(--ntf-primary);
+}
+
+.notifHeader h2 {
+    font-size: 1.5rem;
+    color: var(--ntf-text-main);
+    margin: 0;
+    font-weight: 700;
+}
+
+.countBadge {
+    background: var(--ntf-accent);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.notifList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* --- ESTADO BASE DE LA NOTIFICACIÓN --- */
+.notifItem {
+    border: 1px solid var(--ntf-border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.notifItem:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* --- ESTADO: NO LEÍDA (MÁS OSCURO / RESALTADO) --- */
+.unseen {
+    background: #f0fdf4; /* Un verde éxito muy tenue */
+    border-left: 5px solid var(--ntf-primary); /* Resalte verde UdeC */
+}
+
+.unseen .message {
+    font-weight: 700; /* Texto en negrita */
+    color: var(--ntf-text-main);
+}
+
+/* Puntito indicador de "Nuevo" */
+.unreadDot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--ntf-accent);
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* --- ESTADO: LEÍDA (MÁS CLARO / TENUE) --- */
+.seen {
+    background: var(--ntf-bg);
+    border-left: 5px solid #cbd5e1; /* Gris neutro */
+    opacity: 0.8; /* Efecto de que ya pasó */
+}
+
+.seen .message {
+    font-weight: 400; /* Texto normal */
+    color: var(--ntf-text-muted);
+}
+
+.seen .iconWrapper {
+    filter: grayscale(0.6); /* Apaga un poco los colores de los iconos */
+    opacity: 0.7;
+}
+
+/* --- COMPONENTES INTERNOS --- */
+.iconWrapper {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.iconMsg { color: #3b82f6; }
+.iconPost { color: #10b981; }
+.iconSys { color: #64748b; }
+
+.content {
+    flex: 1;
+}
+
+.message {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    transition: color 0.2s;
+}
+
+.time {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: var(--ntf-text-muted);
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.deleteBtn {
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.deleteBtn:hover {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.arrow {
+    color: #cbd5e1;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+    color: var(--ntf-text-muted);
+}
+
+.emptyState h3 {
+    margin: 15px 0 5px 0;
+    color: var(--ntf-text-main);
+    font-size: 1.2rem;
+}
+
+.emptyState p {
+    font-size: 1rem;
+}
+
+.loader {
+    display: flex;
+    justify-content: center;
+    padding: 50px;
+    font-weight: 600;
+    color: var(--ntf-primary);
+}
+
+/* Contenedor del filtro */
+.filterWrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto; /* Empuja el switch a la derecha antes del badge */
+    margin-right: 20px;
+}
+
+.filterLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ntf-text-main);
+}
+
+/* Estilo del Switch (Toggle) */
+.toggleBtn {
+    width: 44px;
+    height: 24px;
+    border-radius: 20px;
+    background-color: #e2e8f0; /* Gris apagado */
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+/* Color cuando está activo (Azul suave como tu imagen) */
+.toggleActive {
+    background-color: #cce4ff; 
+}
+
+.toggleCircle {
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transform: translateX(0);
+}
+
+/* Desplazamiento del círculo */
+.toggleActive .toggleCircle {
+    transform: translateX(18px);
+}
+
+.checkIcon {
+    color: #004a99; /* Azul oscuro para el check */
+    stroke-width: 3px;
+}
+
+/* Badge de conteo ajustado */
+.countBadge {
+    /* Mantén tus estilos anteriores */
+    flex-shrink: 0;
+}

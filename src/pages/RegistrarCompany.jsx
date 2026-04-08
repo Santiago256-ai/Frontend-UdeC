@@ -6,38 +6,60 @@ import styles from './RegistrarCompany.module.css';
 
 // --- DATOS ESTÁTICOS ---
 const DATOS_UBICACION = {
-    'Amazonas': ['Leticia'],
-    'Antioquia': ['Medellín', 'Bello', 'Envigado', 'Itagüí', 'Rionegro', 'Otra Ciudad'],
-    'Arauca': ['Arauca'],
-    'Atlántico': ['Barranquilla', 'Soledad', 'Malambo', 'Puerto Colombia', 'Otra Ciudad'],
-    'Bolívar': ['Cartagena', 'Magangué', 'Turbaco', 'Otra Ciudad'],
-    'Boyacá': ['Tunja', 'Duitama', 'Sogamoso', 'Otra Ciudad'],
-    'Caldas': ['Manizales', 'Riosucio', 'La Dorada', 'Otra Ciudad'],
-    'Caquetá': ['Florencia'],
-    'Casanare': ['Yopal'],
-    'Cauca': ['Popayán', 'Santander de Quilichao', 'Otra Ciudad'],
-    'Cesar': ['Valledupar', 'Aguachica', 'Otra Ciudad'],
-    'Chocó': ['Quibdó'],
+    'Amazonas': ['Leticia', 'Otra Ciudad...'],
+    'Antioquia': ['Medellín', 'Bello', 'Envigado', 'Itagüí', 'Rionegro', 'Otra Ciudad...'],
+    'Arauca': ['Arauca', 'Otra Ciudad...'],
+    'Atlántico': ['Barranquilla', 'Soledad', 'Malambo', 'Puerto Colombia', 'Otra Ciudad...'],
+    'Bolívar': ['Cartagena', 'Magangué', 'Turbaco', 'Otra Ciudad...'],
+    'Boyacá': ['Tunja', 'Duitama', 'Sogamoso', 'Otra Ciudad...'],
+    'Caldas': ['Manizales', 'Riosucio', 'La Dorada', 'Otra Ciudad...'],
+    'Caquetá': ['Florencia', 'Otra Ciudad...'],
+    'Casanare': ['Yopal', 'Otra Ciudad...'],
+    'Cauca': ['Popayán', 'Santander de Quilichao', 'Otra Ciudad...'],
+    'Cesar': ['Valledupar', 'Aguachica', 'Otra Ciudad...'],
+    'Chocó': ['Quibdó', 'Otra Ciudad...'],
     'Córdoba': ['Montería', 'Sahagún', 'Lorica', 'Otra Ciudad'],
-    'Cundinamarca': ['Bogotá', 'Soacha', 'Facatativá', 'Chía', 'Zipaquirá', 'Otra Ciudad'],
+    'Cundinamarca': [
+  'Agua de Dios', 'Albán', 'Anapoima', 'Anolaima', 'Apulo', 'Arbeláez', 
+  'Beltrán', 'Bituima', 'Bojacá', 'Cabrera', 'Cachipay', 'Cajicá', 
+  'Caparrapí', 'Cáqueza', 'Carmen de Carupa', 'Chaguaní', 'Chía', 
+  'Chipaque', 'Choachí', 'Chocontá', 'Cogua', 'Cota', 'Cucunubá', 
+  'El Colegio', 'El Peñón', 'El Rosal', 'Facatativá', 'Fómeque', 
+  'Fosca', 'Funza', 'Fúquene', 'Fusagasugá', 'Gachalá', 'Gachetá', 
+  'Gachancipá', 'Gama', 'Girardot', 'Granada', 'Guachetá', 'Guaduas', 
+  'Guasca', 'Guataquí', 'Guatavita', 'Guayabal de Síquima', 'Guayabetal', 
+  'Gutiérrez', 'Jerusalén', 'Junín', 'La Calera', 'La Mesa', 'La Palma', 
+  'La Peña', 'La Vega', 'Lenguazaque', 'Machetá', 'Madrid', 'Manta', 
+  'Medina', 'Mosquera', 'Nariño', 'Nemocón', 'Nilo', 'Nimaima', 
+  'Nocaima', 'Pacho', 'Paime', 'Pandi', 'Paratebueno', 'Pasca', 
+  'Puerto Salgar', 'Pulí', 'Quebradanegra', 'Quetame', 'Quipile', 
+  'Ricaurte', 'San Antonio del Tequendama', 'San Bernardo', 
+  'San Cayetano', 'San Francisco', 'San Juan de Rioseco', 'Sasaima', 
+  'Sesquilé', 'Sibaté', 'Silvania', 'Simijaca', 'Soacha', 'Sopó', 
+  'Subachoque', 'Suesca', 'Supatá', 'Susa', 'Sutatausa', 'Tabio', 
+  'Tausa', 'Tena', 'Tenjo', 'Tibacuy', 'Tibirita', 'Tocaima', 
+  'Tocancipá', 'Topaipí', 'Ubalá', 'Ubaque', 'Ubaté', 'Une', 
+  'Utica', 'Venecia', 'Vergara', 'Vianí', 'Villagómez', 'Villapinzón', 
+  'Villeta', 'Viotá', 'Yacopí', 'Zipacón', 'Zipaquirá','Otra Ciudad...'
+],
     'Guainía': ['Inírida'],
     'Guaviare': ['San José del Guaviare'],
-    'Huila': ['Neiva', 'Pitalito', 'Garzón', 'Otra Ciudad'],
-    'La Guajira': ['Riohacha', 'Maicao', 'Otra Ciudad'],
-    'Magdalena': ['Santa Marta', 'Ciénaga', 'Plato', 'Otra Ciudad'],
-    'Meta': ['Villavicencio', 'Puerto López', 'Granada', 'Otra Ciudad'],
-    'Nariño': ['Pasto', 'Ipiales', 'Tumaco', 'Otra Ciudad'],
-    'Norte de Santander': ['Cúcuta', 'Ocaña', 'Pamplona', 'Otra Ciudad'],
-    'Putumayo': ['Mocoa', 'Puerto Asís', 'Otra Ciudad'],
-    'Quindío': ['Armenia', 'Quimbaya', 'Montenegro', 'Otra Ciudad'],
-    'Risaralda': ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal', 'Otra Ciudad'],
+    'Huila': ['Neiva', 'Pitalito', 'Garzón', 'Otra Ciudad...'],
+    'La Guajira': ['Riohacha', 'Maicao', 'Otra Ciudad...'],
+    'Magdalena': ['Santa Marta', 'Ciénaga', 'Plato', 'Otra Ciudad...'],
+    'Meta': ['Villavicencio', 'Puerto López', 'Granada', 'Otra Ciudad...'],
+    'Nariño': ['Pasto', 'Ipiales', 'Tumaco', 'Otra Ciudad...'],
+    'Norte de Santander': ['Cúcuta', 'Ocaña', 'Pamplona', 'Otra Ciudad...'],
+    'Putumayo': ['Mocoa', 'Puerto Asís', 'Otra Ciudad...'],
+    'Quindío': ['Armenia', 'Quimbaya', 'Montenegro', 'Otra Ciudad...'],
+    'Risaralda': ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal', 'Otra Ciudad...'],
     'San Andrés y Providencia': ['San Andrés'],
-    'Santander': ['Bucaramanga', 'Floridablanca', 'Barrancabermeja', 'Giron', 'Otra Ciudad'],
-    'Sucre': ['Sincelejo', 'Corozal', 'Since', 'Otra Ciudad'],
-    'Tolima': ['Ibagué', 'Espinal', 'Honda', 'Otra Ciudad'],
-    'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura', 'Tuluá', 'Otra Ciudad'],
-    'Vaupés': ['Mitú'],
-    'Vichada': ['Puerto Carreño'],
+    'Santander': ['Bucaramanga', 'Floridablanca', 'Barrancabermeja', 'Giron', 'Otra Ciudad...'],
+    'Sucre': ['Sincelejo', 'Corozal', 'Since', 'Otra Ciudad...'],
+    'Tolima': ['Ibagué', 'Espinal', 'Honda', 'Otra Ciudad...'],
+    'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura', 'Tuluá', 'Otra Ciudad...'],
+    'Vaupés': ['Mitú', 'Otra Ciudad...'],
+    'Vichada': ['Puerto Carreño', 'Otra Ciudad...'],
 };
 
 const SECTORES_ECONOMICOS = ['Agricultura', 'Industria', 'Servicios', 'Comercio', 'Financiero', 'Tecnología', 'Otro'];
@@ -47,7 +69,7 @@ export default function RegistrarCompany() {
     const navigate = useNavigate();
     const initialFormData = {
         companyName: '', email: '', phones: '', contactName: '', nit: '', modalidad: '',
-        address: '', department: '', city: '',
+        address: '', department: '', city: '', otherCity: '',
         companyType: '', otherCompanyType: '', // 👈 Agrégala aquí
         economicSector: [], foundationYear: '', employees: '',
         annualRevenue: '', totalAssets: '', equity: '',
@@ -59,6 +81,25 @@ export default function RegistrarCompany() {
 const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formData, setFormData] = useState(initialFormData);
+    const [searchTermDept, setSearchTermDept] = useState('');
+const [searchTermCity, setSearchTermCity] = useState('');
+const [showDeptOpts, setShowDeptOpts] = useState(false);
+const [showCityOpts, setShowCityOpts] = useState(false);
+const [openMenus, setOpenMenus] = useState({
+    companyType: false,
+    foundationYear: false,
+    employees: false,
+    annualRevenue: false,
+    modalidad: false
+});
+
+// Función para abrir uno y cerrar los demás
+const toggleMenu = (menuName) => {
+    setOpenMenus(prev => ({
+        companyType: false, foundationYear: false, employees: false, annualRevenue: false, // cerramos todos
+        [menuName]: !prev[menuName] // abrimos el seleccionado
+    }));
+};
     const [currentStep, setCurrentStep] = useState(1);
     const [errors, setErrors] = useState({});
     const [otroSector, setOtroSector] = useState('');
@@ -68,16 +109,37 @@ const [showPassword, setShowPassword] = useState(false);
     const [highlightError, setHighlightError] = useState(false);
 
     const economicRef = useRef(null);
+    const cityInputRef = useRef(null);
     const channelsRef = useRef(null);
 
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (economicRef.current && !economicRef.current.contains(event.target)) setIsEconomicDropdownOpen(false);
-            if (channelsRef.current && !channelsRef.current.contains(event.target)) setIsChannelsDropdownOpen(false);
+    function handleClickOutside(event) {
+        // 1. Manejo de Sector Económico y Canales (Usando refs)
+        if (economicRef.current && !economicRef.current.contains(event.target)) {
+            setIsEconomicDropdownOpen(false);
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+        if (channelsRef.current && !channelsRef.current.contains(event.target)) {
+            setIsChannelsDropdownOpen(false);
+        }
+
+        // 2. Manejo de Departamentos, Ciudades y Menús Simples (Usando closest)
+        // Solo cerramos si el clic NO fue dentro de un grupo de formulario
+        if (!event.target.closest(`.${styles.formGroup}`)) {
+            setShowDeptOpts(false);
+            setShowCityOpts(false);
+            setOpenMenus({ 
+                companyType: false, 
+                foundationYear: false, 
+                employees: false, 
+                annualRevenue: false,
+                modalidad: false
+            });
+        }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+}, [economicRef, channelsRef]); // Agregamos las refs a las dependencias por buena práctica
 
 
     // Actualiza tu función de cierre
@@ -151,10 +213,15 @@ const closeStatusModal = (targetStep = null) => {
             if (!formData.modalidad) stepErrors.modalidad = 'Requerido';
         }
         if (step === 2) {
-            if (!formData.address.trim()) stepErrors.address = 'Dirección requerida';
-            if (!formData.department) stepErrors.department = 'Requerido';
-            if (!formData.city) stepErrors.city = 'Requerido';
-        }
+    if (!formData.address.trim()) stepErrors.address = 'Dirección requerida';
+    if (!formData.department) stepErrors.department = 'Requerido';
+    if (!formData.city) stepErrors.city = 'Requerido';
+    
+    // 🟢 Nueva validación
+    if ((formData.city === 'Otra Ciudad' || formData.city === 'Otra Ciudad...') && !formData.otherCity?.trim()) {
+        stepErrors.otherCity = 'Escriba el nombre de la ciudad';
+    }
+}
         if (step === 3) {
             if (!formData.companyType) stepErrors.companyType = 'Requerido';
             if (formData.companyType === 'otra' && !formData.otherCompanyType?.trim()) stepErrors.otherCompanyType = 'Especifique el tipo';
@@ -187,8 +254,9 @@ const closeStatusModal = (targetStep = null) => {
             return !formData.companyName.trim() || !formData.email.trim() || !formData.password || !formData.confirmPassword || formData.phones.length !== 10 || !formData.modalidad ;
         }
         if (currentStep === 2) {
-            return !formData.address.trim() || !formData.department || !formData.city;
-        }
+    const isOtherCityInvalid = (formData.city === 'Otra Ciudad' || formData.city === 'Otra Ciudad...') && !formData.otherCity?.trim();
+    return !formData.address.trim() || !formData.department || !formData.city || isOtherCityInvalid;
+}
         if (currentStep === 3) {
             // Si es 'otra', también validamos que haya escrito cuál
             const otherTypeValid = formData.companyType === 'otra' ? !!formData.otherCompanyType?.trim() : true;
@@ -231,9 +299,14 @@ const closeStatusModal = (targetStep = null) => {
         ? [...formData.distributionChannels.filter(c => c !== 'Otro Canal'), formData.otroCanalDistribucion.trim()]
         : formData.distributionChannels;
 
+    const cityFinal = (formData.city === 'Otra Ciudad' || formData.city === 'Otra Ciudad...') 
+        ? formData.otherCity.trim() 
+        : formData.city;    
+
     // 3. Crear el objeto final para el envío
     const finalFormData = {
         ...formData,
+        city: cityFinal,
         // 🟢 NUEVA MODIFICACIÓN: Si eligió 'otra', enviamos el contenido de otherCompanyType
         companyType: formData.companyType === 'otra' 
             ? formData.otherCompanyType?.trim() 
@@ -244,6 +317,7 @@ const closeStatusModal = (targetStep = null) => {
 
     // 4. Limpieza de campos temporales o de validación
     delete finalFormData.confirmPassword;
+    delete finalFormData.otherCity;
     delete finalFormData.otroCanalDistribucion;
     delete finalFormData.otherCompanyType; // 👈 Ya lo movimos a companyType arriba
     delete finalFormData.confirmacionFinal;
@@ -270,6 +344,18 @@ const closeStatusModal = (targetStep = null) => {
 }
 }; 
 
+// Filtrar listas en tiempo real
+// Filtrar listas en tiempo real (Protección contra valores undefined)
+const departamentosFiltrados = Object.keys(DATOS_UBICACION).filter(dept =>
+    dept.toLowerCase().includes((searchTermDept || '').toLowerCase())
+);
+
+const ciudadesFiltradas = formData.department 
+    ? DATOS_UBICACION[formData.department].filter(city =>
+        city.toLowerCase().includes((searchTermCity || '').toLowerCase())
+      )
+    : [];
+    
     const progressPercentage = ((currentStep - 1) / 5) * 100;
 
     return (
@@ -385,21 +471,43 @@ const closeStatusModal = (targetStep = null) => {
     </div>
 
     {/* 🟢 Selector de Modalidad */}
-    <div className={styles.formGroup}>
-        <label className={styles.formLabel}>Modalidad de Empresa *</label>
-        <select 
-            name="modalidad" 
-            value={formData.modalidad} 
-            onChange={handleChange} 
-            className={`${styles.formInput} ${errors.modalidad ? styles.inputError : ''}`}
-        >
-            <option value="">Seleccione...</option>
-            <option value="Física">Física (Sede Principal)</option>
-            <option value="Virtual">Virtual / E-commerce</option>
-            <option value="Híbrida">Híbrida</option>
-        </select>
-        {errors.modalidad && <span className={styles.errorMessage}>{errors.modalidad}</span>}
+    {/* 🟢 Selector de Modalidad con diseño personalizado */}
+<div className={styles.formGroup} style={{ position: 'relative' }}>
+    <label className={styles.formLabel}>Modalidad de Empresa *</label>
+    <div 
+        className={`${styles.customSelectHeader} ${errors.modalidad ? styles.inputError : ''}`} 
+        onClick={() => toggleMenu('modalidad')}
+    >
+        {formData.modalidad ? (
+            formData.modalidad === 'Física' ? 'Física (Sede Principal)' :
+            formData.modalidad === 'Virtual' ? 'Virtual / E-commerce' : 'Híbrida'
+        ) : 'Seleccione...'}
     </div>
+    
+    {openMenus.modalidad && (
+        <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+            {[
+                { v: 'Física', l: 'Física (Sede Principal)' },
+                { v: 'Virtual', l: 'Virtual / E-commerce' },
+                { v: 'Híbrida', l: 'Híbrida' }
+            ].map(item => (
+                <div 
+                    key={item.v} 
+                    className={styles.dropdownOption} 
+                    onMouseDown={(e) => {
+                        e.preventDefault(); // 🟢 Evita que el menú se cierre antes de capturar el dato
+                        setFormData({ ...formData, modalidad: item.v });
+                        toggleMenu('modalidad');
+                        setErrors(prev => ({ ...prev, modalidad: '' }));
+                    }}
+                >
+                    {item.l}
+                </div>
+            ))}
+        </div>
+    )}
+    {errors.modalidad && <span className={styles.errorMessage}>{errors.modalidad}</span>}
+</div>
 </div>
 
                             <div className={styles.formRow}>
@@ -456,231 +564,500 @@ const closeStatusModal = (targetStep = null) => {
     </div>
 )}
 
-                    {currentStep === 2 && (
-                        <div className={styles.formStep}>
-                            <h2 className={styles.stepTitle}>Ubicación</h2>
-                            <div className={styles.formGroup}>
-    <label className={styles.formLabel}>Dirección Principal *</label>
-    <input 
-        type="text" 
-        name="address" 
-        value={formData.address} 
-        onChange={handleChange} 
-        /* 🟢 Si hay error en 'address', aplica la clase 'inputError' */
-        className={`${styles.formInput} ${errors.address ? styles.inputError : ''}`} 
-    />
-    {/* 🟢 Si existe el error, muestra el texto pequeño en rojo */}
-    {errors.address && <span className={styles.errorMessage}>{errors.address}</span>}
-</div>
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Departamento *</label>
-                                    <select name="department" value={formData.department} onChange={handleChange} className={`${styles.formInput} ${errors.department ? styles.inputError : ''}`}>
-                                        <option value="">Seleccione...</option>
-                                        {Object.keys(DATOS_UBICACION).map(d => <option key={d} value={d}>{d}</option>)}
-                                    </select>
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Ciudad *</label>
-                                    <select name="city" value={formData.city} onChange={handleChange} className={`${styles.formInput} ${errors.city ? styles.inputError : ''}`} disabled={!formData.department}>
-                                        <option value="">Seleccione...</option>
-                                        {formData.department && DATOS_UBICACION[formData.department].map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                   {currentStep === 2 && (
+    <div className={styles.formStep}>
+        <h2 className={styles.stepTitle}>Ubicación</h2>
+        
+        {/* --- DIRECCIÓN --- */}
+        <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Dirección Principal *</label>
+            <input 
+                type="text" 
+                name="address" 
+                value={formData.address} 
+                onChange={handleChange} 
+                className={`${styles.formInput} ${errors.address ? styles.inputError : ''}`} 
+            />
+            {errors.address && <span className={styles.errorMessage}>{errors.address}</span>}
+        </div>
 
-                    {currentStep === 3 && (
-                        <div className={styles.formStep}>
-                            <h2 className={styles.stepTitle}>Información Empresarial</h2>
-                            <div className={styles.formRow}>
-    <div className={styles.formGroup}>
-        <label className={styles.formLabel}>Tipo de Empresa *</label>
-        <select 
-            name="companyType" 
-            value={formData.companyType} 
-            onChange={handleChange} 
-            className={`${styles.formInput} ${errors.companyType ? styles.inputError : ''}`}
-        >
-            <option value="">Seleccione...</option>
-            <option value="sas">S.A.S</option>
-            <option value="sa">S.A</option>
-            <option value="ltda">Limitada</option>
-            <option value="pn">Persona Natural</option>
-            <option value="otra">Otra</option>
-        </select>
-        {errors.companyType && <span className={styles.errorMessage}>{errors.companyType}</span>}
+        <div className={styles.formRow}>
+            {/* --- BUSCADOR DE DEPARTAMENTO --- */}
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
+                <label className={styles.formLabel}>Departamento *</label>
+                <input 
+                    type="text"
+                    placeholder="Escriba para buscar..."
+                    // Prioriza lo que el usuario escribe, si no, muestra lo guardado
+                    value={showDeptOpts ? searchTermDept : (formData.department || searchTermDept)}
+                    onChange={(e) => {
+                        setSearchTermDept(e.target.value);
+                        setShowDeptOpts(true);
+                    }}
+                    onFocus={() => {
+                        setSearchTermDept(''); // Limpia búsqueda para mostrar todos al dar foco
+                        setShowDeptOpts(true);
+                    }}
+                    className={`${styles.formInput} ${errors.department ? styles.inputError : ''}`}
+                />
+                
+                {showDeptOpts && (
+                    <div className={styles.customSelectDropdown} style={{ display: 'block', maxHeight: '200px', overflowY: 'auto', zIndex: 100 }}>
+                        {departamentosFiltrados.length > 0 ? (
+                            departamentosFiltrados.map(d => (
+                                <div 
+                                    key={d} 
+                                    className={styles.dropdownOption}
+                                    // 🟢 onMouseDown evita que el onBlur del input cierre el menú antes del clic
+                                    onMouseDown={(e) => {
+    e.preventDefault(); 
+    setFormData(prev => ({ ...prev, department: d, city: '', otherCity: '' }));
+    setSearchTermDept(d);
+    setSearchTermCity('');
+    
+    // 1. Cerramos departamento
+    setShowDeptOpts(false);
 
-        {/* 🟢 NUEVO: Campo condicional para "Otra" empresa */}
-        {formData.companyType === 'otra' && (
+    // 2. Usamos un pequeño retraso para abrir Ciudad y darle el foco
+    setTimeout(() => {
+        setShowCityOpts(true); // Abre el menú
+        cityInputRef.current?.focus(); // Pone el cursor allí
+    }, 100); 
+
+    setErrors(prev => ({ ...prev, department: '' }));
+}}
+                                >
+                                    {d}
+                                </div>
+                            ))
+                        ) : (
+                            <div className={styles.dropdownOption} style={{ color: '#999', cursor: 'default' }}>No se encontraron resultados</div>
+                        )}
+                    </div>
+                )}
+                {errors.department && <span className={styles.errorMessage}>{errors.department}</span>}
+            </div>
+
+            {/* --- BUSCADOR DE CIUDAD --- */}
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
+                <label className={styles.formLabel}>Ciudad *</label>
+                <input 
+                ref={cityInputRef}
+                    type="text"
+                    placeholder={formData.department ? "Escriba para buscar..." : "Primero elija departamento"}
+                    value={showCityOpts ? searchTermCity : (formData.city || searchTermCity)}
+                    disabled={!formData.department}
+                    onChange={(e) => {
+                        setSearchTermCity(e.target.value);
+                        setShowCityOpts(true);
+                    }}
+                    onFocus={() => {
+                        setSearchTermCity('');
+                        setShowCityOpts(true);
+                    }}
+                    className={`${styles.formInput} ${errors.city ? styles.inputError : ''}`}
+                />
+                
+                {showCityOpts && formData.department && (
+                    <div className={styles.customSelectDropdown} style={{ display: 'block', maxHeight: '200px', overflowY: 'auto', zIndex: 100 }}>
+                        {ciudadesFiltradas.length > 0 ? (
+                            ciudadesFiltradas.map(c => (
+                                <div 
+                                    key={c} 
+                                    className={styles.dropdownOption}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        setFormData(prev => ({ ...prev, city: c }));
+                                        setSearchTermCity(c);
+                                        setShowCityOpts(false);
+                                        setErrors(prev => ({ ...prev, city: '' }));
+                                    }}
+                                >
+                                    {c}
+                                </div>
+                            ))
+                        ) : (
+                            <div className={styles.dropdownOption} style={{ color: '#999', cursor: 'default' }}>No se encontraron resultados</div>
+                        )}
+                    </div>
+                )}
+                {errors.city && <span className={styles.errorMessage}>{errors.city}</span>}
+            </div>
+        </div>
+
+        {/* --- CAMPO MANUAL PARA "OTRA CIUDAD" --- */}
+        {(formData.city === 'Otra Ciudad' || formData.city === 'Otra Ciudad...') && (
             <div style={{ marginTop: '10px' }}>
-                <label className={styles.formLabel}>¿Cuál tipo de empresa? *</label>
+                <label className={styles.formLabel}>¿Cuál ciudad? *</label>
                 <input 
                     type="text" 
-                    name="otherCompanyType" // Asegúrate de que este nombre coincida con tu initialFormData si lo tienes
-                    value={formData.otherCompanyType || ''} 
+                    name="otherCity" 
+                    value={formData.otherCity || ''} 
                     onChange={handleChange} 
-                    className={`${styles.formInput} ${errors.otherCompanyType ? styles.inputError : ''}`}
-                    placeholder="Escriba el tipo de empresa..."
+                    className={`${styles.formInput} ${errors.otherCity ? styles.inputError : ''}`}
+                    placeholder="Nombre de la ciudad manual..."
                 />
-                {errors.otherCompanyType && <span className={styles.errorMessage}>{errors.otherCompanyType}</span>}
+                {errors.otherCity && <span className={styles.errorMessage}>{errors.otherCity}</span>}
             </div>
         )}
     </div>
-                                <div className={styles.formGroup} ref={economicRef}>
-                                    <label className={styles.formLabel}>Sector Económico *</label>
-                                    <div className={`${styles.customSelectHeader} ${errors.economicSector ? styles.inputError : ''}`} onClick={() => setIsEconomicDropdownOpen(!isEconomicDropdownOpen)}>
-                                        {formData.economicSector.length > 0 ? formData.economicSector.join(', ') : 'Seleccione...'}
-                                    </div>
-                                    {isEconomicDropdownOpen && (
-    <div className={styles.customSelectDropdown}>
-        {SECTORES_ECONOMICOS.map(s => (
-            <label key={s} className={styles.dropdownOption}>
-                <input 
-                    type="checkbox" 
-                    value={s} 
-                    checked={formData.economicSector.includes(s)} 
-                    onChange={(e) => handleMultiSelectChange('economicSector', e)} 
-                />
-                <span>{s}</span>
-            </label>
-        ))}
-    </div>
 )}
-                                    {formData.economicSector.includes('Otro') && (
-    <div className={styles.formGroup} style={{marginTop: '10px'}}>
-        <label className={styles.formLabel}>¿Cuál otro sector? *</label>
-        <input 
-            type="text" 
-            value={otroSector} 
-            onChange={(e) => setOtroSector(e.target.value)} 
-            className={styles.formInput} 
-            placeholder="Escriba su sector..."
-        />
-    </div>
-)}
-                                </div>
-                            </div>
 
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Año de Fundación *</label>
-                                    <select name="foundationYear" value={formData.foundationYear} onChange={handleChange} className={`${styles.formInput} ${errors.foundationYear ? styles.inputError : ''}`}>
-                                        <option value="">Seleccione...</option>
-                                        {Array.from({length: 50}, (_, i) => new Date().getFullYear() - i).map(year => <option key={year} value={year}>{year}</option>)}
-                                    </select>
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Empleados *</label>
-                                    <select name="employees" value={formData.employees} onChange={handleChange} className={`${styles.formInput} ${errors.employees ? styles.inputError : ''}`}>
-                                        <option value="">Seleccione...</option>
-                                        <option value="1-10">1-10</option>
-                                        <option value="11-50">11-50</option>
-                                        <option value="51-200">51-200</option>
-                                        <option value="201-500">201-500</option>
-                                        <option value="501+">Más de 500</option>
-                                    </select>
-                                </div>
+                  {currentStep === 3 && (
+    <div className={styles.formStep}>
+        <h2 className={styles.stepTitle}>Información Empresarial</h2>
+        <div className={styles.formRow}>
+            {/* --- TIPO DE EMPRESA --- */}
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
+                <label className={styles.formLabel}>Tipo de Empresa *</label>
+                <div 
+                    className={`${styles.customSelectHeader} ${errors.companyType ? styles.inputError : ''}`} 
+                    onClick={() => toggleMenu('companyType')}
+                >
+                    {formData.companyType ? (
+                        formData.companyType === 'sas' ? 'S.A.S' : 
+                        formData.companyType === 'sa' ? 'S.A' : 
+                        formData.companyType === 'ltda' ? 'Limitada' : 
+                        formData.companyType === 'pn' ? 'Persona Natural' : 
+                        formData.companyType === 'otra' ? 'Otra' : formData.companyType.toUpperCase()
+                    ) : 'Seleccione...'}
+                </div>
+                {openMenus.companyType && (
+                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+                        {['sas', 'sa', 'ltda', 'pn', 'otra'].map(opcion => (
+                            <div key={opcion} className={styles.dropdownOption} onMouseDown={(e) => {
+                                e.preventDefault(); // 🟢 Evita errores de clic
+                                setFormData({...formData, companyType: opcion});
+                                toggleMenu('companyType');
+                                setErrors(prev => ({ ...prev, companyType: '' }));
+                            }}>
+                                {opcion === 'sas' ? 'S.A.S' : opcion === 'sa' ? 'S.A' : opcion === 'ltda' ? 'Limitada' : opcion === 'pn' ? 'Persona Natural' : 'Otra'}
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
+                )}
+                {errors.companyType && <span className={styles.errorMessage}>{errors.companyType}</span>}
 
-                    {currentStep === 4 && (
-                        <div className={styles.formStep}>
-                            <h2 className={styles.stepTitle}>Información Financiera</h2>
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Rango de Ingresos *</label>
-                                    <select name="annualRevenue" value={formData.annualRevenue} onChange={handleChange} className={`${styles.formInput} ${errors.annualRevenue ? styles.inputError : ''}`}>
-                                        <option value="">Seleccione...</option>
-                                        <option value="0-100">0 - 100 Millones</option>
-                                        <option value="100-500">100 - 500 Millones</option>
-                                        <option value="500+">Más de 500 Millones</option>
-                                    </select>
-                                </div>
-                                {/* --- CANALES DE DISTRIBUCIÓN --- */}
-<div className={styles.formGroup} ref={channelsRef}>
-    <label className={styles.formLabel}>Canales de Distribución *</label>
-    <div 
-        className={`${styles.customSelectHeader} ${errors.distributionChannels ? styles.inputError : ''}`} 
-        onClick={() => setIsChannelsDropdownOpen(!isChannelsDropdownOpen)}
-    >
-        {formData.distributionChannels.length > 0 ? formData.distributionChannels.join(', ') : 'Seleccione...'}
-    </div>
-    
-    {isChannelsDropdownOpen && (
-        <div className={styles.customSelectDropdown}>
-            {CANALES_DISTRIBUCION_OPCIONES.map(c => (
-                <label key={c} className={styles.dropdownOption}>
-                    <input 
-                        type="checkbox" 
-                        value={c} 
-                        checked={formData.distributionChannels.includes(c)} 
-                        onChange={(e) => handleMultiSelectChange('distributionChannels', e)} 
-                    /> 
-                    <span>{c}</span>
-                </label>
-            ))}
+                {formData.companyType === 'otra' && (
+                    <div style={{ marginTop: '10px' }}>
+                        <label className={styles.formLabel}>¿Cuál tipo de empresa? *</label>
+                        <input 
+                            type="text" 
+                            name="otherCompanyType" 
+                            value={formData.otherCompanyType || ''} 
+                            onChange={handleChange} 
+                            className={`${styles.formInput} ${errors.otherCompanyType ? styles.inputError : ''}`}
+                            placeholder="Escriba el tipo de empresa..."
+                        />
+                        {errors.otherCompanyType && <span className={styles.errorMessage}>{errors.otherCompanyType}</span>}
+                    </div>
+                )}
+            </div>
+
+            {/* --- SECTOR ECONÓMICO --- */}
+            <div className={styles.formGroup} ref={economicRef} style={{ position: 'relative' }}>
+                <label className={styles.formLabel}>Sector Económico *</label>
+                <div 
+                    className={`${styles.customSelectHeader} ${errors.economicSector ? styles.inputError : ''}`} 
+                    onClick={() => setIsEconomicDropdownOpen(!isEconomicDropdownOpen)}
+                >
+                    {formData.economicSector.length > 0 ? formData.economicSector.join(', ') : 'Seleccione...'}
+                </div>
+                {isEconomicDropdownOpen && (
+                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+                        {SECTORES_ECONOMICOS.map(s => (
+                            <label key={s} className={styles.dropdownOption} onMouseDown={(e) => e.stopPropagation()}>
+                                <input 
+                                    type="checkbox" 
+                                    value={s} 
+                                    checked={formData.economicSector.includes(s)} 
+                                    onChange={(e) => handleMultiSelectChange('economicSector', e)} 
+                                />
+                                <span>{s}</span>
+                            </label>
+                        ))}
+                    </div>
+                )}
+                {formData.economicSector.includes('Otro') && (
+                    <div style={{marginTop: '10px'}}>
+                        <label className={styles.formLabel}>¿Cuál otro sector? *</label>
+                        <input 
+                            type="text" 
+                            value={otroSector} 
+                            onChange={(e) => setOtroSector(e.target.value)} 
+                            className={styles.formInput} 
+                            placeholder="Escriba su sector..."
+                        />
+                    </div>
+                )}
+                {errors.economicSector && <span className={styles.errorMessage}>{errors.economicSector}</span>}
+            </div>
         </div>
-    )}
 
-    {/* 🟢 NUEVO: Campo condicional para "Otro Canal" */}
-    {formData.distributionChannels.includes('Otro Canal') && (
-        <div style={{ marginTop: '10px' }}>
-            <label className={styles.formLabel}>¿Cuál otro canal? *</label>
-            <input 
-                type="text" 
-                name="otroCanalDistribucion" 
-                value={formData.otroCanalDistribucion} 
+        <div className={styles.formRow}>
+            {/* --- AÑO DE FUNDACIÓN --- */}
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
+                <label className={styles.formLabel}>Año de Fundación *</label>
+                <div 
+                    className={`${styles.customSelectHeader} ${errors.foundationYear ? styles.inputError : ''}`} 
+                    onClick={() => toggleMenu('foundationYear')}
+                >
+                    {formData.foundationYear || 'Seleccione...'}
+                </div>
+                {openMenus.foundationYear && (
+                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+                        {Array.from({length: 50}, (_, i) => new Date().getFullYear() - i).map(year => (
+                            <div key={year} className={styles.dropdownOption} onMouseDown={(e) => {
+                                e.preventDefault();
+                                setFormData({...formData, foundationYear: year.toString()});
+                                toggleMenu('foundationYear');
+                                setErrors(prev => ({ ...prev, foundationYear: '' }));
+                            }}>{year}</div>
+                        ))}
+                    </div>
+                )}
+                {errors.foundationYear && <span className={styles.errorMessage}>{errors.foundationYear}</span>}
+            </div>
+
+            {/* --- EMPLEADOS --- */}
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
+                <label className={styles.formLabel}>Empleados *</label>
+                <div 
+                    className={`${styles.customSelectHeader} ${errors.employees ? styles.inputError : ''}`} 
+                    onClick={() => toggleMenu('employees')}
+                >
+                    {formData.employees ? (formData.employees === '501+' ? 'Más de 500' : formData.employees) : 'Seleccione...'}
+                </div>
+                {openMenus.employees && (
+                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+                        {['1-10', '11-50', '51-200', '201-500', '501+'].map(val => (
+                            <div key={val} className={styles.dropdownOption} onMouseDown={(e) => {
+                                e.preventDefault();
+                                setFormData({...formData, employees: val});
+                                toggleMenu('employees');
+                                setErrors(prev => ({ ...prev, employees: '' }));
+                            }}>
+                                {val === '501+' ? 'Más de 500' : val}
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {errors.employees && <span className={styles.errorMessage}>{errors.employees}</span>}
+            </div>
+        </div>
+    </div>
+)}
+
+                 {currentStep === 4 && (
+    <div className={styles.formStep}>
+        <h2 className={styles.stepTitle}>Información Financiera</h2>
+        <div className={styles.formRow}>
+            {/* --- RANGO DE INGRESOS --- */}
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
+                <label className={styles.formLabel}>Rango de Ingresos *</label>
+                <div 
+                    className={`${styles.customSelectHeader} ${errors.annualRevenue ? styles.inputError : ''}`} 
+                    onClick={() => toggleMenu('annualRevenue')}
+                >
+                    {formData.annualRevenue ? (
+                        formData.annualRevenue === '0-100' ? '0 - 100 Millones' :
+                        formData.annualRevenue === '100-500' ? '100 - 500 Millones' :
+                        formData.annualRevenue === '500+' ? 'Más de 500 Millones' : formData.annualRevenue
+                    ) : 'Seleccione...'}
+                </div>
+                {openMenus.annualRevenue && (
+                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+                        {[
+                            {v: '0-100', l: '0 - 100 Millones'},
+                            {v: '100-500', l: '100 - 500 Millones'},
+                            {v: '500+', l: 'Más de 500 Millones'}
+                        ].map(item => (
+                            <div key={item.v} className={styles.dropdownOption} onMouseDown={(e) => {
+                                e.preventDefault();
+                                setFormData({...formData, annualRevenue: item.v});
+                                toggleMenu('annualRevenue');
+                                setErrors(prev => ({ ...prev, annualRevenue: '' }));
+                            }}>{item.l}</div>
+                        ))}
+                    </div>
+                )}
+                {errors.annualRevenue && <span className={styles.errorMessage}>{errors.annualRevenue}</span>}
+            </div>
+
+            {/* --- CANALES DE DISTRIBUCIÓN --- */}
+            <div className={styles.formGroup} ref={channelsRef} style={{ position: 'relative' }}>
+                <label className={styles.formLabel}>Canales de Distribución *</label>
+                <div 
+                    className={`${styles.customSelectHeader} ${errors.distributionChannels ? styles.inputError : ''}`} 
+                    onClick={() => setIsChannelsDropdownOpen(!isChannelsDropdownOpen)}
+                >
+                    {formData.distributionChannels.length > 0 ? formData.distributionChannels.join(', ') : 'Seleccione...'}
+                </div>
+                
+                {isChannelsDropdownOpen && (
+                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+                        {CANALES_DISTRIBUCION_OPCIONES.map(c => (
+                            <label key={c} className={styles.dropdownOption} onMouseDown={(e) => e.stopPropagation()}>
+                                <input 
+                                    type="checkbox" 
+                                    value={c} 
+                                    checked={formData.distributionChannels.includes(c)} 
+                                    onChange={(e) => handleMultiSelectChange('distributionChannels', e)} 
+                                /> 
+                                <span>{c}</span>
+                            </label>
+                        ))}
+                    </div>
+                )}
+                {formData.distributionChannels.includes('Otro Canal') && (
+                    <div style={{ marginTop: '10px' }}>
+                        <label className={styles.formLabel}>¿Cuál otro canal? *</label>
+                        <input 
+                            type="text" 
+                            name="otroCanalDistribucion" 
+                            value={formData.otroCanalDistribucion} 
+                            onChange={handleChange} 
+                            className={`${styles.formInput} ${errors.otroCanalDistribucion ? styles.inputError : ''}`}
+                            placeholder="Escriba el canal..."
+                        />
+                        {errors.otroCanalDistribucion && <span className={styles.errorMessage}>{errors.otroCanalDistribucion}</span>}
+                    </div>
+                )}
+                {errors.distributionChannels && <span className={styles.errorMessage}>{errors.distributionChannels}</span>}
+            </div>
+        </div>
+
+        <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Principales Clientes *</label>
+            <textarea 
+                name="mainClients" 
+                value={formData.mainClients} 
                 onChange={handleChange} 
-                className={`${styles.formInput} ${errors.otroCanalDistribucion ? styles.inputError : ''}`}
-                placeholder="Escriba el canal de distribución..."
+                className={`${styles.formInput} ${errors.mainClients ? styles.inputError : ''}`} 
+                rows="3" 
+                placeholder="Describa sus principales clientes..."
             />
-            {errors.otroCanalDistribucion && <span className={styles.errorMessage}>{errors.otroCanalDistribucion}</span>}
+            {errors.mainClients && <span className={styles.errorMessage}>{errors.mainClients}</span>}
         </div>
-    )}
-</div>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label className={styles.formLabel}>Principales Clientes *</label>
-                                <textarea name="mainClients" value={formData.mainClients} onChange={handleChange} className={`${styles.formInput} ${errors.mainClients ? styles.inputError : ''}`} rows="3" />
-                            </div>
-                        </div>
-                    )}
+    </div>
+)}
 
                     {currentStep === 5 && (
-                        <div className={styles.formStep}>
-                            <h2 className={styles.stepTitle}>Autorización de Datos</h2>
-                            <div className={styles.policyBlock}>
-                                <p>Al marcar la casilla, usted autoriza el tratamiento de sus datos personales bajo la ley de protección de datos vigente...</p>
-                            </div>
-                            <label className={styles.checkboxGroup}>
-                                <input type="checkbox" name="autorizaDatos" checked={formData.autorizaDatos} onChange={handleChange} />
-                                <span className={errors.autorizaDatos ? styles.errorMessage : ''}>Autorizo el uso de datos personales *</span>
-                            </label>
-                            <label className={styles.checkboxGroup}>
-                                <input type="checkbox" name="aceptaMarketing" checked={formData.aceptaMarketing} onChange={handleChange} />
-                                Acepto recibir comunicaciones de marketing.
-                            </label>
-                        </div>
-                    )}
+    <div className={styles.formStep}>
+        <h2 className={styles.stepTitle}>Autorización para el Tratamiento de Datos Personales</h2>
+        
+        <div className={styles.policyContainer}>
+            <div className={styles.policyScrollBox}>
+                
+                <p>Para nosotros es fundamental proteger su privacidad. Al vincularse, usted acepta las siguientes condiciones:</p>
+                
+                <div className={styles.policySection}>
+                    <h4>1. Recolección de Datos</h4>
+                    <p>Recopilamos información personal como nombre, dirección de correo electrónico, número de teléfono y otros datos relevantes para la prestación de nuestros servicios empresariales.</p>
+                </div>
+
+                <div className={styles.policySection}>
+                    <h4>2. Uso de la Información</h4>
+                    <p>Utilizamos sus datos para proporcionar y mejorar nuestros servicios, personalizar su experiencia, procesar transacciones y mantener una comunicación efectiva con usted.</p>
+                </div>
+
+                <div className={styles.policySection}>
+                    <h4>3. Protección de Datos</h4>
+                    <p>Implementamos medidas de seguridad técnicas y organizativas para proteger sus datos personales contra acceso no autorizado, alteración, divulgación o destrucción.</p>
+                </div>
+
+                <div className={styles.policySection}>
+                    <h4>4. Compartir Información</h4>
+                    <p>Podemos compartir su información con terceros de confianza que nos ayudan a operar nuestro negocio, siempre bajo estrictas normas de confidencialidad y cumplimiento legal.</p>
+                </div>
+
+                <div className={styles.policySection}>
+                    <h4>5. Sus Derechos</h4>
+                    <p>Usted tiene derecho a acceder, corregir, actualizar o solicitar la eliminación de sus datos personales en cualquier momento a través de nuestros canales oficiales.</p>
+                </div>
+
+                <div className={styles.policySection}>
+                    <h4>6. Cambios en la Política</h4>
+                    <p>Nos reservamos el derecho de modificar esta política. Los cambios entrarán en vigor inmediatamente después de su publicación en nuestro sitio web oficial.</p>
+                </div>
+
+                <div className={styles.policySection}>
+                    <h4>7. Consentimiento</h4>
+                    <p>Al marcar la casilla de aceptación y utilizar nuestros servicios, usted consiente la recopilación y uso de su información de acuerdo con esta política.</p>
+                </div>
+
+                <div className={styles.policySection}>
+                    <h4>8. Contacto</h4>
+                    <p>Si tiene preguntas sobre esta política o el manejo de sus datos, por favor contáctenos a través de los canales proporcionados en nuestro portal.</p>
+                </div>
+            </div>
+        </div>
+
+        <div className={styles.checkboxWrapper}>
+            <label className={styles.checkboxGroup}>
+                <input type="checkbox" name="autorizaDatos" checked={formData.autorizaDatos} onChange={handleChange} />
+                <span className={errors.autorizaDatos ? styles.errorMessage : ''}>
+                    He leído y autorizo el tratamiento de mis datos personales *
+                </span>
+            </label>
+            
+        
+        </div>
+    </div>
+)}
 
                     {currentStep === 6 && (
-                        <div className={styles.formStep}>
-                            <h2 className={styles.stepTitle}>Confirmación Final</h2>
-                            <div className={styles.resumenContainer}>
-                                <p><strong>Empresa:</strong> {formData.companyName}</p>
-                                <p><strong>Correo:</strong> {formData.email}</p>
-                                <p><strong>Contacto:</strong> {formData.contactName} ({formData.phones})</p>
-                                <p><strong>Ubicación:</strong> {formData.city}, {formData.department}</p>
-                            </div>
-                            <label className={styles.checkboxGroup}>
-                                <input type="checkbox" name="confirmacionFinal" checked={formData.confirmacionFinal} onChange={handleChange} />
-                                <span className={errors.confirmacionFinal ? styles.errorMessage : ''}>Confirmo que toda la información es verídica *</span>
-                            </label>
-                        </div>
-                    )}
+    <div className={styles.formStep}>
+        <h2 className={styles.stepTitle}>Confirmación Final</h2>
+        
+        {/* 🟢 NUEVO: Contenedor Wrapper para el resumen y el ícono */}
+        <div className={styles.resumenWrap}>
+    <div className={styles.resumenContainer}>
+        <p><strong>Empresa:</strong> {formData.companyName}</p>
+        <p><strong>Correo:</strong> {formData.email}</p>
+        <p><strong>Contacto:</strong> {formData.contactName} ({formData.phones})</p>
+        <p>
+            <strong>Ubicación:</strong> {
+                (formData.city === 'Otra Ciudad' || formData.city === 'Otra Ciudad...') 
+                ? formData.otherCity 
+                : formData.city
+            }, {formData.department}
+        </p>
+    </div>
+
+            {/* 🟢 NUEVO: Contenedor para el ícono de Check */}
+            {/* --- Contenedor para el ícono de Check --- */}
+{/* --- Contenedor para el ícono de Check --- */}
+<div className={styles.finalCheckIcon}>
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path 
+            /* 🟢 Solo aplicamos la animación si el checkbox está marcado */
+            className={formData.confirmacionFinal ? styles.checkPath : ''} 
+            d="M8.5 12.5L10.5 14.5L15.5 9.5" 
+            stroke="currentColor" 
+            strokeWidth="1.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+        <path 
+            className={formData.confirmacionFinal ? styles.checkPath : ''} 
+            d="M7 3.33782C8.47087 2.48697 10.1786 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 10.1786 2.48697 8.47087 3.33782 7" 
+            stroke="currentColor" 
+            strokeWidth="1.5" 
+            strokeLinecap="round"
+        />
+    </svg>
+</div>
+        </div>
+
+        <label className={styles.checkboxGroup} style={{ marginTop: '20px' }}>
+            <input type="checkbox" name="confirmacionFinal" checked={formData.confirmacionFinal} onChange={handleChange} />
+            <span className={errors.confirmacionFinal ? styles.errorMessage : ''}>
+                Confirmo que toda la información es verídica *
+            </span>
+        </label>
+    </div>
+)}
 
                     {/* Controles de Navegación */}
                     <div className={styles.formNavigation}>

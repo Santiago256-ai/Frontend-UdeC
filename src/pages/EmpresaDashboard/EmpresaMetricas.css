@@ -164,3 +164,104 @@
 
 .empty-chart-msg p { margin: 10px 0 0 0; font-weight: 600; color: #64748b; }
 .empty-chart-msg span { font-size: 0.8rem; }
+
+/* --- Ajustes para el Formulario Horizontal de Creación --- */
+
+.professional-form-card {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+/* Contenedor de inputs con icono (como el de Salario o Fecha) */
+.input-with-icon {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.input-with-icon:focus-within {
+    border-color: #006b3f; /* Verde UdeC */
+    box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1);
+}
+
+.input-with-icon input {
+    border: none !important; /* Quitamos el borde interno del input */
+    background: transparent;
+    padding: 10px;
+    width: 100%;
+    outline: none;
+}
+
+/* Ajuste para los Selects y Labels */
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.form-group select, 
+.form-group input[type="text"], 
+.form-group input[type="number"], 
+.form-group input[type="date"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.form-group textarea {
+    resize: none; /* Evita que el usuario deforme el layout */
+}
+
+/* Estilo para los subtítulos de sección dentro del formulario */
+.section-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: #006b3f;
+    font-weight: 700;
+    font-size: 1rem;
+    border-bottom: 2px solid #f0fdf4;
+    padding-bottom: 8px;
+}
+
+/* Botones del footer del formulario */
+.form-actions-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding-top: 25px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-primary-udec {
+    background-color: #006b3f;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary-udec:hover {
+    background-color: #004d2e;
+    transform: translateY(-2px);
+}
+

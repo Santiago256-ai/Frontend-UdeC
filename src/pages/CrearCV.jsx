@@ -17,7 +17,7 @@ export default function CrearCV({ isInline, setVistaActiva }) {
     // Estado inicial unificado con Prisma
     const [cvData, setCvData] = useState({
          // 👈 Nuevo estado
-        celular: "",
+        celular: usuarioLogueado?.celular || "",
         email: usuarioLogueado?.correo || "",
         direccion: "",
         descripcion: "",
@@ -197,7 +197,10 @@ const hayCambios = JSON.stringify(cvData) !== JSON.stringify(originalData);
         {usuarioLogueado?.nombres} {usuarioLogueado?.apellidos}
     </h1>
     <div className="cv-contact-row">
-        <span><Phone size={14} /> {cvData.celular || 'Sin teléfono'}</span>
+        <span>
+        <Phone size={14} /> 
+        {usuarioLogueado?.celular || cvData.celular || 'Sin teléfono'}
+    </span>
         <span><Mail size={14} /> {cvData.email || usuarioLogueado?.correo}</span>
         <span><MapPin size={14} /> {cvData.direccion || 'Cundinamarca, Colombia'}</span>
     </div>

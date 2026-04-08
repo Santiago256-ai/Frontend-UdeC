@@ -2,9 +2,9 @@
 
 /* 1. VARIABLES INSTITUCIONALES (Basadas en VacantesDashboard) */
 :root {
-  --udec-green: #006b3f;
+  --udec-green: #00482b;
   --udec-green-dark: #004d2e;
-  --udec-orange: #f29400;
+  --udec-orange: #f7931e;
   --white: #ffffff;
   --text-main: #1a202c;
   --text-muted: #718096;
@@ -171,16 +171,24 @@
 }
 
 .vacantes-list-panel {
-  width: 40%;
-  overflow-y: auto;
-  padding-right: 10px;
+    width: 40%;
+    height: calc(100vh - 100px); /* Ajusta según el alto de tu header para que el scroll sea interno */
+    overflow-y: auto;
+    padding: 10px; /* Un poco de padding general para que las sombras no se corten */
+    position: relative; /* Necesario para que los hijos sticky se orienten respecto a este panel */
+    scrollbar-gutter: stable; /* Evita que el contenido "salte" cuando aparece el scroll */
 }
 
+/* Contenedor del título - UNIFICADO Y CORREGIDO */
 .section-title-container {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 25px;
+    display: flex;
+    align-items: center; /* Centra verticalmente icono, texto y flecha */
+    gap: 12px;
+    margin-bottom: 15px; /* Espacio hacia los filtros */
+    padding-bottom: 12px; /* Espacio hacia la línea divisoria */
+    padding-top: 0; /* Eliminamos cualquier aire extra arriba */
+    border-bottom: 1px solid #f1f5f9; /* Línea divisoria sutil */
+    width: 100%;
 }
 
 .vacantes-count-badge {
@@ -194,20 +202,33 @@
 
 /* 5. TARJETAS (ESTILO ESTUDIANTE) */
 .vacante-card-item {
-  background: var(--white);
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 15px;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: 0.3s;
-  border: 2px solid transparent;
+    background: var(--white);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    /* Cambiamos la transición para que incluya la escala y el borde */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #e2e8f0; /* Un borde sutil para que no flote en el aire */
+    border-left: 5px solid transparent; /* Un poco más grueso para que se note al activar */
+    position: relative;
+    overflow: hidden;
 }
 
-.vacante-card-item:hover, .vacante-card-item.active {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--udec-green);
+/* Efecto al pasar el mouse (Hover) y cuando está seleccionada (Active) */
+.vacante-card-item:hover, 
+.vacante-card-item.active {
+    transform: translateY(-4px) scale(1.01); /* Un pequeño salto y aumento de tamaño */
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    border-color: #e2e8f0; /* Mantenemos el borde gris */
+    border-left-color: var(--udec-green); /* Solo iluminamos el borde izquierdo con el verde UdeC */
+}
+
+/* Detalle extra: Si está activa, le ponemos un fondo muy sutilmente verde */
+.vacante-card-item.active {
+    background: linear-gradient(to right, #f0fdf4, #ffffff);
 }
 
 .btn-details-action {
@@ -225,16 +246,7 @@
 .btn-details-action:hover { background-color: var(--udec-green-dark); }
 
 /* 6. PANEL DERECHO (DETALLE / POSTULANTES) */
-.vacante-detail-panel {
-  width: 60%;
-  background: var(--white);
-  border-radius: 20px;
-  box-shadow: var(--shadow-lg);
-  padding: 40px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
+
 
 /* BADGES (Clases del VacantesDashboard) */
 .badge-slots, .badge-published, .badge-deadline, .meta-tag-badge {
@@ -435,119 +447,17 @@
     cursor: pointer;
 }
 
-/* Contenedor de candidatos */
-.candidatos-list-pro {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
+.vacante-detail-panel {
+  width: 65%; /* Le damos un poco más de ancho (era 60%) para que la tabla no se vea apretada */
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  padding: 20px; /* Reducido de 40px a 20px para que la tabla respire mejor */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Card de cada candidato */
-.candidato-item-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.2s ease;
-}
-
-.candidato-item-card:hover {
-    border-color: #006b3f;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* Avatar circular */
-.cand-avatar {
-    width: 45px;
-    height: 45px;
-    background: #f1f5f9;
-    color: #006b3f;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-.cand-info-main {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.cand-text h4 {
-    margin: 0;
-    font-size: 1rem;
-    color: #1e293b;
-}
-
-/* Estados (Pills) */
-.status-pill {
-    font-size: 0.7rem;
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.status-pill.pendiente { background: #fef3c7; color: #92400e; }
-.status-pill.aceptada { background: #dcfce7; color: #166534; }
-
-/* Botones de acción */
-.btn-action-outline {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-    border: 1px solid #e2e8f0;
-    background: white;
-}
-
-.btn-action-outline.cv { color: #006b3f; }
-.btn-action-outline.cv:hover { background: #f0fdf4; border-color: #006b3f; }
-
-.btn-action-outline.chat { background: #006b3f; color: white; border: none; }
-.btn-action-outline.chat:hover { background: #005532; }
-
-.candidato-item-card-pro {
-    background: #ffffff;
-    border-radius: 16px;
-    margin-bottom: 12px;
-    padding: 20px;
-    border: 1px solid #eef2f6;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.candidato-item-card-pro:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.cand-main-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-}
-
-/* Identidad */
-.cand-identity { display: flex; align-items: center; gap: 15px; flex: 1; }
-.cand-avatar-circle {
-    width: 48px; height: 48px; background: #006b3f15; color: #006b3f;
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 1.1rem; border: 2px solid #006b3f20;
-}
 .cand-info h4 { margin: 0; color: #1e293b; font-size: 1.05rem; }
 .cand-meta-tags { display: flex; gap: 10px; margin-top: 4px; }
 .meta-tag { font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
@@ -557,71 +467,13 @@
 .pipeline-label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
 
 
-/* Acciones */
-.cand-quick-actions { display: flex; gap: 10px; }
-.btn-icon-pro {
-    width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e2e8f0;
-    background: white; color: #64748b; display: flex; align-items: center; justify-content: center;
-    transition: 0.2s; cursor: pointer;
-}
-.btn-icon-pro:hover { background: #f8fafc; color: #006b3f; border-color: #006b3f; }
-.btn-icon-pro.chat-active { background: #006b3f; color: white; border: none; }
-.btn-icon-pro.chat-active:hover { background: #005532; }
 
-.pipeline-select {
-    /* Desactivar completamente el diseño del sistema */
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    
-    /* Hacerlo transparente para que se vea el DIV de atrás */
-    background-color: transparent !important;
-    border: none !important; /* Quitamos el borde para que no ensucie */
-    
-    width: 100% !important;
-    padding: 10px 35px 10px 15px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    outline: none !important;
-    
-    /* Flecha elegante */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 12px center !important;
-    background-size: 14px !important;
-}
 
 .pipeline-select:hover {
     filter: contrast(1.1) brightness(0.95);
     transform: translateY(-1px);
 }
 
-.pipeline-select-wrapper {
-    border-radius: 12px;
-    padding: 2px 8px;
-    transition: all 0.4s ease;
-    display: flex;
-    align-items: center;
-}
-
-.pipeline-select-custom {
-    background: transparent !important;
-    border: none !important;
-    font-weight: 800 !important;
-    font-size: 0.85rem !important;
-    text-transform: uppercase;
-    cursor: pointer;
-    outline: none;
-    width: 100%;
-    padding: 8px 5px;
-    appearance: none; /* Quita la flecha nativa */
-    /* Añadimos una flecha personalizada elegante */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right center;
-    background-size: 14px;
-    padding-right: 25px;
-}
 
 .pipeline-label {
     font-size: 0.65rem;
@@ -631,4 +483,1117 @@
     margin-bottom: 4px;
     display: block;
     letter-spacing: 1px;
+}
+
+/* Contenedor del encabezado del select */
+.customSelectHeader {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+    min-height: 42px;
+}
+
+.customSelectHeader:hover {
+    border-color: #004d2b;
+}
+
+/* El menú que cae */
+.customSelectDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 5px;
+}
+
+/* Las opciones individuales */
+.dropdownOption {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #004d2b;
+    transition: all 0.3s ease;
+}
+
+.dropdownOption:hover {
+    background-color: #e6f7f6; /* El turquesa suave */
+    padding-left: 23px; /* El movimiento leve a la derecha */
+}
+
+/* Flecha del select */
+.selectArrow {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+/* Scrollbar personalizado verde oscuro */
+.customSelectDropdown::-webkit-scrollbar {
+    width: 6px;
+}
+.customSelectDropdown::-webkit-scrollbar-thumb {
+    background-color: #004d2b;
+    border-radius: 10px;
+}
+
+/* Personalización del scrollbar para todos los textarea del Dashboard */
+.professional-form-card textarea::-webkit-scrollbar {
+    width: 8px; /* Ancho del scroll */
+}
+
+.professional-form-card textarea::-webkit-scrollbar-track {
+    background: #f1f5f9; /* Color del fondo del caminito del scroll */
+    border-radius: 10px;
+}
+
+.professional-form-card textarea::-webkit-scrollbar-thumb {
+    background: #006b3f; /* Tu verde institucional */
+    border-radius: 10px;
+    border: 2px solid #f1f5f9; /* Crea un pequeño margen para que se vea más elegante */
+}
+
+.professional-form-card textarea::-webkit-scrollbar-thumb:hover {
+    background: #004d2e; /* Un verde un poco más oscuro cuando pasas el mouse */
+}
+
+/* Compatibilidad para Firefox */
+.professional-form-card textarea {
+    scrollbar-width: thin;
+    scrollbar-color: #006b3f #f1f5f9;
+}
+
+/* Estilos para el Modal de Confirmación */
+.custom-confirm-modal {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: modalSpring 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.confirm-icon-wrapper {
+    background: #fff7ed;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+}
+
+.custom-confirm-modal h3 {
+    color: #1e293b;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.custom-confirm-modal p {
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-modal-exit {
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-modal-exit:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-modal-stay {
+    background: #006b3f; /* Verde UdeC */
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 107, 63, 0.2);
+}
+
+.btn-modal-stay:hover {
+    background: #004d2e;
+    transform: translateY(-1px);
+}
+
+@keyframes modalSpring {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Contenedor de acciones */
+.card-actions-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9; /* Separación sutil */
+}
+
+/* Base para ambos botones */
+.btn-action-edit, .btn-action-delete {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+/* ESTILO EDITAR (Naranja Elegante) */
+.btn-action-edit {
+    background-color: #fff7ed;
+    color: #c2410c;
+    border: 2px solid #ffedd5;
+}
+
+.btn-action-edit:hover {
+    background-color: #f59e0b;
+    color: white;
+    border-color: #d97706;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+/* ESTILO ELIMINAR (Rojo Suave / Soft Red) */
+.btn-action-delete {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 2px solid #fee2e2;
+}
+
+.btn-action-delete:hover {
+    background-color: #ef4444; /* Rojo más vivo al hover */
+    color: white;
+    border-color: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Efecto Click (Active) */
+.btn-action-edit:active, .btn-action-delete:active {
+    transform: translateY(0);
+}
+
+/* Contenedor de ubicación y modalidad */
+.card-location-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #475569; /* Gris azulado elegante */
+    font-size: 13.5px;
+    font-weight: 500;
+}
+
+/* Estilo para los chips de texto con icono */
+.location-chip, .modalidad-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
+}
+
+.vertical-separator {
+    color: #e2e8f0; /* Un gris muy suave (Slate 200) */
+    font-weight: 300; /* Línea delgada */
+    margin: 0 4px; /* Espaciado lateral */
+    font-size: 16px;
+    user-select: none; /* Para que no se seleccione al copiar texto */
+}
+
+/* Cambio de color suave cuando el mouse está sobre la tarjeta */
+.vacante-card-item:hover .card-location-row {
+    color: #475569;
+}
+
+/* Ajuste de iconos para que se vean finos */
+.card-location-row svg {
+    opacity: 0.8;
+    stroke-width: 2.5px;
+}
+
+.card-main-info h4 {
+    margin: 0;
+    line-height: 1.2;
+    transition: color 0.2s ease;
+}
+
+.vacante-card-item:hover .card-main-info h4 {
+    color: #006b3f; /* Se vuelve verde UdeC */
+}
+
+/* --- CABECERA INSTITUCIONAL SÓLIDA --- */
+.vacante-header-card-solid-container {
+    display: flex;
+    align-items: center;
+    background-color: #00482b; /* Verde UdeC solicitado */
+    padding: 16px 24px; /* Reducimos padding vertical de 24px a 16px */
+    border-radius: 12px;
+    border: 1px solid #b8860b; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+/* Sección del Icono */
+.header-icon-section .icon-pills-wrapper {
+    background-color: #ffffff;
+    padding: 10px; /* Un poco más pequeño */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icon-section .pills-icon {
+    color: #00482b;
+    width: 20px; /* Icono más discreto */
+    height: 20px;
+}
+
+/* Etiquetas y Título */
+.header-text-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.selection-process-label {
+    font-size: 10px; /* Más pequeño */
+    font-weight: 700;
+    color: #d1d5db;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 2px;
+}
+
+.vacante-title-main {
+    font-size: 19px; /* Título un poco más pequeño para elegancia */
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+/* --- CONTADOR COMPACTO A LA DERECHA --- */
+.header-stats-section {
+    margin-left: auto; /* ESTO LO EMPUJA TOTALMENTE A LA DERECHA */
+}
+
+.header-stats-section .header-stats-quick {
+    background-color: #ffffff;
+    padding: 8px 14px; /* Padding reducido para hacerlo más pequeño */
+    border-radius: 8px;
+    border: 1.2px solid #b8860b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px; /* Ancho mínimo reducido */
+}
+
+.header-stats-section .stat-value {
+    font-size: 20px; /* Número más pequeño y refinado */
+    font-weight: 800;
+    color: #00482b;
+    line-height: 1;
+}
+
+.header-stats-section .stat-label {
+    font-size: 8px; /* Texto muy pequeño */
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+}
+
+/* Contenedor Mini (Pastilla) */
+.header-stats-quick-mini {
+    background-color: #ffffff;
+    width: 40px;  /* Tamaño fijo para que sea simétrico */
+    height: 40px;
+    border-radius: 8px; /* Bordes suaves estilo la imagen */
+    border: 1.5px solid #b8860b; /* Tu borde dorado */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Efecto sutil al pasar el mouse */
+.header-stats-quick-mini:hover {
+    transform: scale(1.05);
+    background-color: #f8fafc;
+}
+
+/* El número solo */
+.stat-value-mini {
+    font-size: 18px;
+    font-weight: 800;
+    color: #00482b; /* Tu verde institucional */
+    line-height: 1;
+    user-select: none;
+}
+
+/* Color naranja para el icono anclado y fondo crema para la fila */
+.postulacion-row.is-pinned {
+    background-color: #fffbeb !important; /* Crema suave */
+    border-left: 5px solid #f59e0b !important; /* Borde naranja lateral */
+}
+
+.pin-button {
+    transition: transform 0.2s ease;
+}
+
+.pin-button:hover {
+    transform: scale(1.2);
+}
+
+/* Contenedor Principal de Bienvenida */
+.no-selection-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(240, 253, 244, 0.5) 100%);
+}
+
+/* Ilustración e Icono */
+.welcome-illustration {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.icon-circle-main {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #006b3f; /* Verde UdeC */
+    box-shadow: 0 10px 25px -5px rgba(0, 107, 63, 0.2);
+    z-index: 2;
+    position: relative;
+}
+
+/* Efecto de anillo pulsante sutil */
+.pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    border: 2px solid #dcfce7;
+    border-radius: 40px;
+    animation: welcome-pulse 3s infinite;
+}
+
+@keyframes welcome-pulse {
+    0% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+}
+
+/* Textos */
+.welcome-text-content h3 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.welcome-text-content p {
+    font-size: 16px;
+    color: #64748b;
+    max-width: 400px;
+    line-height: 1.6;
+}
+
+.welcome-text-content strong {
+    color: #006b3f;
+    font-weight: 600;
+}
+
+/* Footer con tips */
+.welcome-footer-hint {
+    margin-top: 50px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 25px;
+    background: white;
+    border-radius: 50px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.hint-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.hint-separator {
+    width: 1px;
+    height: 20px;
+    background: #e2e8f0;
+}
+
+/* Contenedor Principal del Estado Vacío */
+.empty-state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    background: #ffffff;
+    border-radius: 20px;
+    margin-top: 20px;
+    border: 2px dashed #e2e8f0; /* Un borde punteado sugiere que el espacio está disponible */
+}
+
+/* Ilustración con círculos y puntos */
+.empty-state-illustration {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.icon-bg-circle {
+    width: 90px;
+    height: 90px;
+    background: #f0fdf4; /* Fondo verde muy claro */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #006b3f; /* Verde UdeC */
+    position: relative;
+    z-index: 2;
+}
+
+/* Puntos decorativos (Efecto visual de "buscando") */
+.dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    opacity: 0.3;
+}
+
+.dot-1 { top: -10px; right: -10px; animation: float 3s infinite ease-in-out; }
+.dot-2 { bottom: 10px; left: -20px; animation: float 4s infinite ease-in-out 1s; }
+.dot-3 { top: 20px; left: -15px; animation: float 5s infinite ease-in-out 0.5s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Textos */
+.empty-state-text {
+    text-align: center;
+    max-width: 320px;
+}
+
+.empty-state-text h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.empty-state-text p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Badge de estado inferior */
+.empty-state-badge {
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 100px;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Animación para la Lupa */
+.searching-icon-anim {
+    color: #006b3f; /* Verde UdeC para dar sensación de "OK / Activo" */
+    animation: lupa-scan 2.5s infinite ease-in-out;
+}
+
+@keyframes lupa-scan {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(2px, -2px) rotate(5deg);
+    }
+    50% {
+        transform: translate(-1px, 1px) rotate(-5deg);
+    }
+    75% {
+        transform: translate(1px, -1px) rotate(3deg);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+}
+
+/* Opcional: Dale un color de fondo muy suave al badge para que resalte el verde */
+.empty-state-badge {
+    background: #f0fdf4 !important; /* Verde ultra claro */
+    border: 1px solid #dcfce7 !important;
+    color: #166534 !important; /* Texto verde oscuro para legibilidad */
+}
+
+.user-full-name-empresa {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 14px;
+    /* 🟢 Esto evita que el nombre largo desplace el avatar */
+    max-width: 180px; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    text-transform: uppercase; /* 🟢 Todo a mayúsculas automáticamente */
+    letter-spacing: 0.5px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Alinea el texto a la derecha junto al avatar */
+    margin-right: 12px;
+}
+
+/* Contenedor de filtros */
+.search-filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 5px 20px 5px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 15px;
+}
+
+/* El input de búsqueda */
+.search-input-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.search-inner-icon {
+    position: absolute;
+    left: 12px;
+    color: #94a3b8;
+}
+
+
+.search-input-inner input {
+    width: 100%;
+    box-sizing: border-box; /* Vital para que no se desborde */
+    padding: 10px 12px 10px 40px; /* Equilibrio entre los dos */
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px; /* Un poco más redondeado se ve más moderno */
+    font-size: 13px; /* Tamaño ideal para que no ocupe tanto espacio en portátiles */
+    transition: all 0.3s ease; /* Para que el cambio de color al hacer clic sea suave */
+}
+
+.search-input-inner input:focus {
+    outline: none;
+    border-color: #006b3f;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1);
+}
+
+/* El filtro de fecha */
+.filter-date-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+.filter-icon {
+    color: #006b3f;
+}
+
+.filter-select {
+    border: none;
+    font-size: 13px;
+    color: #475569;
+    width: 100%;
+    cursor: pointer;
+    background: transparent;
+}
+
+.filter-select:focus {
+    outline: none;
+}
+
+/* El nuevo contenedor principal */
+.vacantes-tools-header {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 15px 20px 20px 20px; /* Reduje un poco el padding */
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    width: 100%; /* Asegura que no se salga */
+    box-sizing: border-box;
+}
+
+/* Icono con fondo suave */
+.title-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0fdf4;
+    padding: 8px; /* 🟢 Si es muy grande, baja el padding */
+    border-radius: 10px;
+    color: #006b3f;
+}
+
+.section-title-container h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+/* El badge del contador más estilizado */
+.vacantes-count-badge {
+    background: #1e293b;
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* Ajuste de los filtros para que encajen en el nuevo container */
+.search-filters-container {
+    display: grid;
+    grid-template-columns: 1fr 140px; /* Búsqueda ancha, fecha pequeña */
+    gap: 10px;
+    padding: 0;
+    border: none;
+    margin: 0;
+}
+
+.search-input-inner input, .filter-date-wrapper {
+    background: #f8fafc; /* Color de fondo para los inputs */
+    border: 1px solid #e2e8f0;
+    height: 40px; /* Altura uniforme */
+}
+
+/* Contenedor de las herramientas en columna */
+.search-filters-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espacio entre la búsqueda y las fechas */
+}
+
+/* Contenedor de los dos selectores de fecha */
+.date-range-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite saltar de línea en portátiles */
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-clear-filters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 15px;
+    transition: all 0.3s ease;
+    flex: 1; /* 🟢 También flexible */
+    min-width: 100px;
+}
+
+.btn-clear-filters:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+}
+
+.btn-clear-filters:active {
+    transform: scale(0.95);
+}
+
+/* Responsivo: Si la pantalla es pequeña, el botón baja a una nueva fila */
+@media (max-width: 1300px) {
+    .date-range-container {
+        grid-template-columns: 1fr 1fr;
+    }
+    .btn-clear-filters {
+        grid-column: span 2;
+        height: 38px;
+    }
+}
+
+/* Cada item de fecha (Desde/Hasta) */
+.filter-date-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    border-radius: 10px;
+    flex: 1 1 140px; /* Crece y se ajusta, mínimo 140px */
+    min-width: 0; /* Evita desbordamiento */
+}
+
+.filter-date-item:focus-within {
+    border-color: #006b3f;
+    box-shadow: 0 0 0 2px rgba(0, 107, 63, 0.05);
+}
+
+.date-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    min-width: 40px;
+}
+
+/* El input de fecha nativo ocultando bordes propios */
+.date-input-field {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    width: 100%;
+    color: #334155;
+    cursor: pointer;
+}
+
+.filter-icon {
+    color: #006b3f;
+    flex-shrink: 0;
+}
+
+.empty-search-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+    text-align: center;
+    gap: 10px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px dashed #e2e8f0;
+    margin: 10px;
+}
+
+@media (max-width: 1366px) { /* Resolución típica de portátiles */
+    .date-label {
+        display: none; /* Oculta el texto para ganar espacio */
+    }
+    
+    .filter-date-item {
+        padding: 5px 8px;
+    }
+    
+    .vacantes-count-badge {
+        margin-left: auto; /* Mueve el contador al final si el título es largo */
+    }
+}
+
+/* 2. DISEÑO PARA PANTALLAS GRANDES (Escritorio/Monitor) */
+@media (min-width: 1400px) {
+    .search-filters-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* En monitores grandes, intentamos que todo quepa en menos filas */
+    .date-range-container {
+        display: grid;
+        /* Tres columnas: Desde, Hasta y el botón Limpiar al final */
+        grid-template-columns: 1fr 1fr auto; 
+        align-items: center;
+    }
+
+    .btn-clear-filters {
+        height: 40px; /* Misma altura que los inputs */
+        padding: 0 20px;
+        flex: none; /* Que no se estire innecesariamente */
+    }
+}
+
+/* Botón de la flechita */
+.btn-toggle-filters {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-toggle-filters:hover {
+    background: #f0fdf4;
+    color: #006b3f;
+    border-color: #006b3f;
+}
+
+/* Animación de rotación de la flecha */
+.btn-toggle-filters svg {
+    transform: rotate(90deg); /* Apunta abajo por defecto */
+    transition: transform 0.3s ease;
+}
+
+.btn-toggle-filters.is-collapsed svg {
+    transform: rotate(0deg); /* Apunta a la derecha al cerrar */
+}
+
+/* Contenedor colapsable */
+.filters-collapsible-content {
+    max-height: 500px; /* Un valor lo suficientemente alto */
+    opacity: 1;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filters-collapsible-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none; /* Evita clics accidentales cuando está oculto */
+}
+
+
+/* Reutilizamos las clases de tu modal de aviso de salida para consistencia */
+.custom-confirm-modal {
+    background: white;
+    padding: 32px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* --- ANIMACIONES DE ELIMINACIÓN --- */
+
+/* Animación 1: La "Vibración" sutil del icono de basura */
+@keyframes vibeTrash {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); } /* Crece un poquito */
+  100% { transform: scale(1); }
+}
+
+/* Animación 2: Las "Olas" o pulsos concéntricos rojos */
+@keyframes pulseWavesRed {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.2); /* La ola se expande */
+    opacity: 0;           /* Y desaparece */
+  }
+}
+
+/* --- ESTILOS DEL MODAL DE ELIMINACIÓN (Variación del de Logout) --- */
+.delete-modal-premium {
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.15); /* Sombra suave roja */
+    border: 1px solid #fee2e2;
+}
+
+.delete-modal-premium h3 {
+    margin-top: 15px;
+    color: #991b1b; /* Rojo oscuro profesional */
+    font-weight: 700;
+}
+
+/* CONTENEDOR DEL ICONO ANIMADO */
+.delete-icon-animated {
+    position: relative; /* Necesario para las olas */
+    background-color: #fef2f2 !important; /* Rojo muy suave */
+    border: 2px solid #fee2e2;
+    margin-bottom: 25px;
+}
+
+/* CREACIÓN DE LAS OLAS (Pseudoelementos) */
+.delete-icon-animated::before,
+.delete-icon-animated::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.15); /* El color de la ola (rojo suave) */
+    
+    /* Aplicamos la animación de ondas rojas */
+    animation: pulseWavesRed 2.5s infinite cubic-bezier(0.36, 0.11, 0.89, 0.32);
+    
+    z-index: 1; /* Detrás del icono principal */
+}
+
+/* Desfasamos la segunda ola para que no salgan juntas */
+.delete-icon-animated::after {
+    animation-delay: 1.25s;
+}
+
+/* ESTILO DEL ICONO SVG (EL CENTRAL) */
+.delete-icon-animated svg {
+    position: relative;
+    z-index: 2; /* Por encima de las olas */
+    
+    /* Aplicamos la animación de vibración al icono mismo */
+    animation: vibeTrash 3s infinite ease-in-out;
+}
+
+/* --- BOTÓN DE ELIMINACIÓN DANGER (Variación del .btn-confirm) --- */
+.btn-delete-danger {
+    background-color: #ef4444 !important; /* Rojo vibrante */
+    color: white !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-delete-danger:hover {
+    background-color: #dc2626 !important; /* Rojo más oscuro al hover */
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3); /* Sombra roja al hover */
+    transform: translateY(-1px);
+}
+
+.btn-delete-danger:active {
+    transform: translateY(1px);
+}
+
+/* Contenedor del menú que sale del avatar */
+.profile-dropdown-container {
+    position: absolute;
+    top: 60px; /* Ajusta según la altura de tu header */
+    right: 0;
+    width: 180px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    border: 1px solid #e2e8f0;
+    padding: 6px;
+    z-index: 9999; /* Para que esté por encima de todo */
+}
+
+.dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: none;
+    background: none;
+    color: #475569;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: #f1f5f9;
+    color: #006b3f;
+}
+
+.dropdown-item.logout:hover {
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 4px 0;
 }

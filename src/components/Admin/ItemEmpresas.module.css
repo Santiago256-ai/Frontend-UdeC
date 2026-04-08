@@ -1,0 +1,110 @@
+.container {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    animation: slideUp 0.3s ease-out;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.title {
+    color: #006837;
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.subtitle {
+    color: #777;
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    width: 300px;
+}
+
+.searchBox i { color: #006837; margin-right: 10px; }
+.searchBox input { border: none; background: transparent; outline: none; width: 100%; }
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 15px;
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    border-bottom: 2px solid #ffcc00; /* Línea Amarilla UdeC */
+}
+
+.table td {
+    padding: 15px;
+    border-bottom: 1px solid #f4f4f4;
+    font-size: 0.9rem;
+}
+
+.companyInfo, .sectorInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.companyInfo span, .sectorInfo small {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.badgeVacantes {
+    background: #fff3cd;
+    color: #856404;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.actions { display: flex; gap: 8px; }
+
+.actionBtn {
+    background: #f8f9fa;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #666;
+}
+
+.actionBtn:hover { background: #006837; color: white; }
+.actionBtn.delete:hover { background: #dc3545; color: white; }
+
+.loaderContainer { text-align: center; padding: 80px; }
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #006837;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -300,28 +300,147 @@
     margin-bottom: 20px;
 }
 
+/* Contenedor del checkbox y su texto */
 .checkboxGroup {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.9rem;
+    /* 🟢 Alinea el checkbox con la primera línea de texto */
+    align-items: flex-start; 
+    gap: 12px;
+    font-size: 0.95rem; /* Un poco más grande para legibilidad */
     color: #374151;
     cursor: pointer;
-    padding: 5px 0;
+    padding: 8px 0;
+    transition: color 0.2s ease;
 }
 
+/* Estilo del cuadrito (input) */
 .checkboxGroup input[type="checkbox"] {
-    accent-color: #004d2b;
-    width: 17px;
-    height: 17px;
+    accent-color: #004d2b; /* Verde institucional UdeC */
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    /* 🟢 Evita que el checkbox se haga pequeño si el texto es largo */
+    flex-shrink: 0; 
+    /* 🟢 Baja un poquito el cuadro para que quede alineado visualmente con el texto */
+    margin-top: 3px; 
 }
 
-.resumenContainer {
-    background-color: #fafafa;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 20px;
+/* Efecto opcional al pasar el mouse por el texto */
+.checkboxGroup:hover {
+    color: #000000;
+}
+
+/* Estilo específico cuando hay un error (opcional si usas la clase en el span) */
+.checkboxGroup .errorMessage {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+/* Contenedor principal con fondo suave */
+.policyContainer {
+    /* 🟢 Fondo verde muy suave */
+    background-color: #f0fdf4 !important; 
+    
+    /* 🟢 Borde verde institucional */
+    border: 1px solid #004d2b !important; 
+    
+    /* 🟢 La línea gruesa al lado izquierdo */
+    border-left: 6px solid #004d2b !important; 
+    
+    border-radius: 12px;
+    padding: 10px; /* Espacio para que el contenido interno respire */
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0, 77, 43, 0.08);
+    overflow: hidden; /* Mantiene el borde redondeado con el contenido interno */
+}
+
+/* Caja con scroll */
+/* 1. Contenedor principal con scroll y justificado */
+.policyScrollBox {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 20px 30px;
+    background-color: transparent !important;
+    border: none !important;
+    text-align: justify;
+    hyphens: auto;
+}
+
+/* 2. Personalización del scrollbar (Verde UdeC) */
+.policyScrollBox::-webkit-scrollbar {
+    width: 6px;
+}
+
+.policyScrollBox::-webkit-scrollbar-thumb {
+    background-color: #004d2b;
+    border-radius: 10px;
+}
+
+/* 3. Título principal de la política (El que tiene la línea dorada) */
+.policyScrollBox h3 {
+    color: #004d2b;
+    font-size: 1.15rem;
     margin-bottom: 20px;
+    border-bottom: 2px solid #c5a059; /* Dorado UdeC */
+    padding-bottom: 5px;
+    display: inline-block;
+    font-weight: 700;
+}
+
+/* 4. Títulos de los puntos (1. Recolección, 2. Uso, etc.) */
+/* 🟢 Esto pone los números y títulos en VERDE */
+.policyScrollBox h4 {
+    color: #004d2b !important;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    text-align: left; /* Los títulos cortos se ven mejor a la izquierda */
+}
+
+/* 5. Todos los párrafos (Incluyendo el de introducción) */
+/* 🟢 Esto unifica la fuente y el peso visual (negrita suave) */
+.policyScrollBox p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #1f2937; /* Un gris muy oscuro, casi negro */
+    font-weight: 500; /* 👈 Este es el peso que unifica la fuente */
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+/* Estilo extra por si usas etiquetas <strong> dentro de los párrafos */
+.policyScrollBox strong {
+    color: #004d2b;
+    font-weight: 700;
+}
+
+.policySection {
+    margin-bottom: 22px;
+}
+
+.policySection h4 {
+    color: #1f2937;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    /* Los títulos suelen verse mejor alineados a la izquierda o centrados, 
+       pero el párrafo sí irá justificado */
+    text-align: left; 
+}
+
+.policySection p {
+    font-size: 0.9rem;
+    line-height: 1.6; /* Un interlineado más amplio para que no se vea amontonado al justificar */
+    color: #4b5563;
+    margin: 0;
+}
+
+/* Envoltura de checkboxes para separarlos de la caja */
+.checkboxWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-left: 5px;
 }
 
 .resumenContainer p {
@@ -524,46 +643,88 @@
 }
 
 /* Contenedor del desplegable */
+/* 1. El contenedor que flota (Dropdown) */
 .customSelectDropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 5px); /* Un pequeño espacio de 5px del input */
     left: 0;
     width: 100%;
     background-color: #ffffff !important;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    /* 🟢 Z-index altísimo */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     z-index: 9999 !important; 
-    max-height: 200px;
+    max-height: 220px; /* Un poco más de aire */
     overflow-y: auto;
+    /* Suavizamos el scroll en navegadores modernos */
+    scrollbar-width: thin;
+    scrollbar-color: #004d2b #f3f4f6;
 }
 
-/* Cada opción individual (el label que envuelve el checkbox) */
+/* 2. Cada opción individual de la lista filtrada */
 .dropdownOption {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 20px;
+    /* 🟢 El espacio entre el checkbox y el texto */
+    gap: 15px; 
+    /* 🟢 Padding: 12px arriba/abajo y 20px a los lados para alejarlo de los bordes */
+    padding: 12px 20px; 
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #374151;
-    transition: background 0.2s;
-    /* 🟢 Evita que se amontonen en una sola línea */
+    transition: all 0.2s ease;
     width: 100%;
+    border-bottom: 1px solid #f3f4f6;
 }
 
-.dropdownOption:hover {
-    background-color: rgba(197, 160, 89, 0.08); /* Fondo dorado suave */
-    color: #004d2b;
+/* 3. Última opción sin borde inferior */
+.dropdownOption:last-child {
+    border-bottom: none;
 }
+
+/* 4. Efecto Hover (Estilo UdeC) */
+.dropdownOption:hover {
+    background-color: #f0fdf4; /* Verde institucional muy claro */
+    color: #004d2b;
+    /* 🟢 Desplazamiento sutil para dar sensación de selección */
+    padding-left: 25px; 
+}
+
+/* 5. Estilo para el mensaje de "No se encontraron resultados" */
+.dropdownOption[style*="cursor: default"] {
+    background-color: #f9fafb;
+    font-style: italic;
+    color: #9ca3af;
+}
+
+/* 6. Opcional: Personalizar la barra de scroll para que no se vea tosca */
+.customSelectDropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.customSelectDropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.customSelectDropdown::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.customSelectDropdown::-webkit-scrollbar-thumb:hover {
+    background: #004d2b;
+} 
 
 /* Estilo para el checkbox */
 .dropdownOption input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #004d2b; /* Verde institucional */
+    /* 🟢 El color verde UdeC cuando está marcado */
+    accent-color: #004d2b; 
     cursor: pointer;
+    /* 🟢 Evita que el checkbox se encoja si el texto es muy largo */
+    flex-shrink: 0; 
 }
 
 /* Estilo para el scrollbar en navegadores modernos */
@@ -724,4 +885,93 @@
     20%, 80% { transform: translate3d(2px, 0, 0); }
     30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
     40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* 🟢 NUEVO: El wrapper que usa Flexbox para poner datos a la izq e ícono a la der */
+/* 🟢 ESTE ES EL CONTENEDOR GRANDE (El que quieres que sea verde) */
+.resumenWrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 30px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    
+    /* Fondo verde muy suave institucional */
+    background-color: #f0fdf4; 
+    
+    /* Borde verde oscuro UdeC */
+    border: 1px solid #004d2b; 
+    border-left: 6px solid #004d2b; /* Detalle de barra lateral profesional */
+    
+    box-shadow: 0 4px 12px rgba(0, 77, 43, 0.08);
+}
+
+/* 🟢 ESTE ES EL QUE TENÍA EL GRIS (Ahora lo hacemos invisible) */
+.resumenContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+    /* 🔴 ELIMINAMOS TODO EL DISEÑO DE CUADRO AQUÍ */
+    background: transparent !important; 
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* Estilo para los textos dentro del verde */
+.resumenContainer p {
+    font-size: 1.05rem;
+    color: #1f2937;
+    margin: 0;
+}
+
+.resumenContainer p strong {
+    color: #004d2b; /* Etiquetas en verde oscuro */
+    min-width: 110px;
+    display: inline-block;
+    font-weight: 700;
+}
+
+/* 🟢 NUEVO: Estilos para el ícono de Check final */
+/* 🟢 ACTUALIZADO: Estilos para el ícono de Check final */
+/* Contenedor del ícono */
+.finalCheckIcon {
+    width: 95px;
+    height: 95px;
+    /* 🟢 Empieza en un gris suave mientras no esté confirmado */
+    color: #e5e7eb; 
+    flex-shrink: 0;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
+    transition: all 0.5s ease; /* Para que el cambio de color sea suave */
+}
+
+/* 🟢 Efecto cuando se activa la confirmación: Cambia a Verde UdeC */
+.finalCheckIcon:has(.checkPath) {
+    color: #004d2b;
+    filter: drop-shadow(0 4px 10px rgba(0, 77, 43, 0.25));
+    transform: scale(1.05); /* Un ligero pulso de crecimiento */
+}
+
+.finalCheckIcon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* 🟢 Animación del trazo (Dibujo) */
+.checkPath {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    /* 🟢 El dibujo dura 1.2s cuando aparece la clase */
+    animation: drawCheckPath 1.2s ease-in-out forwards;
+}
+
+@keyframes drawCheckPath {
+    to {
+        stroke-dashoffset: 0;
+    }
 }

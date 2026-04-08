@@ -1,0 +1,381 @@
+/* --- CONTENEDOR PRINCIPAL FLOTANTE (TIPO MESSENGER) --- */
+.chat-widget-container {
+    position: fixed;
+    bottom: 0;
+    right: 30px; /* Separación del borde derecho */
+    width: 340px;
+    height: 480px;
+    background: #ffffff;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.15);
+    z-index: 10000; /* Asegura que esté por encima de tablas y menús */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    animation: slideUpWidget 0.3s ease-out;
+}
+
+@keyframes slideUpWidget {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* --- CABECERA --- */
+.widget-header {
+    background: #006b3f; /* Verde Institucional UdeC */
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar-mini {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.text-container h4 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.status-dot {
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-dot.online { color: #bbf7d0; }
+.status-dot.offline { color: #fecaca; }
+
+/* --- BOTONES DE ACCIÓN --- */
+.header-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.action-icon-btn, .close-icon-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-icon-btn:hover { background: rgba(255, 255, 255, 0.15); }
+.close-icon-btn:hover { background: #ef4444; }
+
+/* --- CUERPO DE MENSAJES --- */
+.widget-messages-body {
+    /* 1. Estructura y Flexibilidad */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Un poco más de espacio entre mensajes para elegancia */
+    padding: 15px;
+    
+    /* 2. Control de Scroll y Posicionamiento */
+    overflow-y: auto;
+    position: relative; /* CRUCIAL: Para que las fechas "sticky" floten bien */
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+
+    /* 3. Estética Visual */
+    /* Cambiamos #f8fafc por este gris azulado (#f1f5f9) 
+       Esto hace que las burbujas blancas se vean SÚPER nítidas */
+    background-color: #f1f5f9; 
+    
+    /* Opcional: Un degradado muy sutil para dar profundidad */
+    background-image: linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+    background-size: 20px 20px; /* Crea un patrón de malla muy fino, casi imperceptible */
+}
+
+.widget-messages-body::-webkit-scrollbar { width: 5px; }
+.widget-messages-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+.widget-disabled-notice {
+    background: #fffbeb;
+    color: #b45309;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    text-align: center;
+    border: 1px solid #fef3c7;
+    margin-bottom: 5px;
+}
+
+.widget-empty-text {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+
+/* --- BURBUJAS DE CHAT --- */
+.message-bubble {
+    max-width: 75%; /* Reducido para mejor lectura */
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+/* Alineación */
+.message-bubble.empresa {
+    align-self: flex-end;
+    align-items: flex-end;
+}   
+
+.message-bubble.estudiante {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+/* Texto de la burbuja */
+.bubble-text {
+    padding: 10px 14px 6px 14px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Esto pone el texto arriba y la hora abajo */
+    min-width: 45px; /* Evita que burbujas muy cortas se vean raras */
+    max-width: 85%;
+    word-wrap: break-word;
+}
+
+/* El texto del mensaje */
+.message-content {
+    margin: 0;
+    padding-bottom: 4px; /* Espacio para que la hora no lo toque */
+    color: inherit;
+}
+
+/* Estilo Empresa (Remitente) */
+.message-bubble.empresa .bubble-text {
+    background: #006b3f;
+    color: #ffffff;
+    /* Bordes asimétricos estilo WhatsApp moderno */
+    border-radius: 16px 16px 2px 16px;
+}
+
+/* Estilo Estudiante (Receptor) */
+.message-bubble.estudiante .bubble-text {
+    background-color: #ffffff;
+    color: #1e293b; 
+    border: 1px solid rgba(226, 232, 240, 0.8); /* Borde muy fino */
+    /* Sombra con un toque de elevación */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+    border-radius: 16px 16px 16px 2px;
+}
+
+/* --- LA HORA (Integrada) --- */
+.bubble-time {
+    font-size: 10px;
+    align-self: flex-end;
+    margin-top: 4px; /* Un poquito más de espacio arriba de la hora */
+    margin-left: 20px; /* Margen a la izquierda para que no toque el texto si la línea es corta */
+    opacity: 0.8;
+}
+
+.empresa .bubble-time {
+    color: rgba(255, 255, 255, 0.8);
+    text-align: right;
+}
+
+.estudiante .bubble-time {
+    color: #64748b;
+}
+
+/* --- EFECTO DE "NUEVO MENSAJE" --- */
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.message-bubble {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 1. El contenedor principal del footer (Aviso + Input) */
+.widget-footer-container {
+    padding: 12px;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacio entre el banner y la barra de escritura */
+}
+
+/* 2. El banner de aviso (Chat desactivado) */
+.widget-status-banner {
+    background-color: #fffbeb; /* Amarillo suave */
+    color: #92400e; 
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #fef3c7;
+    animation: fadeIn 0.3s ease;
+}
+
+/* 3. La fila donde viven el input y el botón */
+.widget-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* 4. Estilos del Input (Barra de escritura) */
+.widget-input-row input {
+    flex: 1; /* Esto hace que el input ocupe todo el ancho disponible */
+    padding: 10px 15px;
+    border-radius: 25px; /* Estilo píldora moderno */
+    border: 1px solid #e2e8f0;
+    font-size: 13.5px;
+    outline: none;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+}
+
+.widget-input-row input:focus {
+    border-color: #006b3f;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(0, 107, 63, 0.1);
+}
+
+.widget-input-row input:disabled {
+    background: #f1f5f9;
+    cursor: not-allowed;
+    color: #94a3b8;
+}
+
+/* 5. El botón circular de enviar */
+.widget-send-btn {
+    background-color: #006b3f;
+    color: white;
+    border: none;
+    width: 40px; /* Tamaño un poco más grande para que sea fácil de tocar */
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    flex-shrink: 0; /* IMPORTANTE: evita que el botón se aplaste */
+}
+
+.widget-send-btn:hover:not(:disabled) {
+    background-color: #005632;
+    transform: scale(1.08);
+}
+
+.widget-send-btn:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+    transform: scale(1) !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cuando el chat está minimizado, forzamos un alto pequeño */
+.chat-widget-container.minimized {
+    height: 55px; /* Altura de la cabecera únicamente */
+    overflow: hidden;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.minimize-icon-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.minimize-icon-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Ajuste para que la cabecera ocupe todo el ancho en modo minimizado */
+.minimized .widget-header {
+    border-bottom: none;
+}
+
+/* Contenedor del separador de fecha */
+.chat-date-sticky {
+    position: sticky;
+    top: 5px; /* Se queda a 5px del tope del área de scroll */
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    margin: 15px 0;
+    pointer-events: none; /* Para que no estorbe al hacer scroll */
+}
+
+/* La burbujita de la fecha */
+.chat-date-sticky span {
+    background: rgba(225, 232, 235, 0.9); /* Color grisáceo suave tipo WhatsApp */
+    color: #54656f;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-transform: capitalize;
+}
+
+
+
+@media (max-width: 480px) {
+    .message-bubble {
+        max-width: 90%;
+    }
+}

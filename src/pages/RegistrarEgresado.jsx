@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // 👈 Agregué useEffect aquí
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api'; 
 // 🟢 IMPORTANTE: Importamos como CSS Module
@@ -40,9 +40,48 @@ const programasPorFacultad = {
   ]
 };
 
+const ErrorModal = ({ isOpen, onClose, message }) => {
+  if (!isOpen) return null;
+  return (
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalContent}>
+        <div className={styles.modalIcon}>✕</div>
+        <h2 className={styles.modalTitle}>Hubo un inconveniente</h2>
+        
+        {/* 🟢 NUEVO: Usamos la clase modalMessageJustify */}
+        <p className={`${styles.modalMessage} ${styles.modalMessageJustify}`}>
+          {message}
+        </p>
+        
+        <div className={styles.modalActions}>
+          {/* 🔴 Botón 'Verificar Datos' ELIMINADO */}
+          <button onClick={onClose} className={styles.btnCerrar}>Cerrar</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SuccessModal = ({ isOpen, onClose, message }) => {
+  if (!isOpen) return null;
+  return (
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalContent}>
+        <div className={`${styles.modalIcon} ${styles.iconSuccess}`}>✓</div>
+        <h2 className={styles.modalTitle}>Operación Exitosa</h2>
+        <p className={styles.modalMessage}>{message}</p>
+        <div className={styles.modalActions}>
+          <button onClick={onClose} className={styles.btnCerrar}>Ir al Inicio</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function RegistrarEgresado() {
   const navigate = useNavigate();
-
+const [showErrorModal, setShowErrorModal] = useState(false);
+const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     nombres: '',
     apellidos: '',
@@ -57,6 +96,34 @@ export default function RegistrarEgresado() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Estado para controlar qué menú está abierto
+  const [openMenus, setOpenMenus] = useState({
+    facultad: false,
+    programa: false
+  });
+
+  // 🟢 Hook para cerrar menús al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Importante: Verifica que la clase coincida con tu CSS
+      if (!event.target.closest(`.${styles['form-group']}`)) {
+        setOpenMenus({ facultad: false, programa: false });
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  
+  // Función para alternar la visibilidad de los menús
+  const toggleMenu = (menu) => {
+    setOpenMenus(prev => ({
+      facultad: menu === 'facultad' ? !prev.facultad : false,
+      programa: menu === 'programa' ? !prev.programa : false
+    }));
+  };
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -99,36 +166,77 @@ export default function RegistrarEgresado() {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = validateForm();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const newErrors = validateForm();
 
-    if (Object.keys(newErrors).length === 0) {
-      setErrors({});
-      setLoading(true);
-      const dataToSend = { 
-        nombres: formData.nombres,
-        apellidos: formData.apellidos,
-        correo: formData.correo,
-        password: formData.contraseña,
-        facultad: formData.facultad,
-        programa: formData.programa,
-        celular: formData.celular
-      };
+  if (Object.keys(newErrors).length === 0) {
+    setErrors({});
+    setLoading(true);
+    
+    const dataToSend = { 
+      nombres: formData.nombres,
+      apellidos: formData.apellidos,
+      correo: formData.correo,
+      password: formData.contraseña,
+      facultad: formData.facultad,
+      programa: formData.programa,
+      celular: formData.celular
+    };
 
-      try {
-        await API.post("/auth/register", dataToSend); 
-        alert('¡Registro de egresado exitoso!');
-        navigate('/'); 
-      } catch (error) {
-        alert(error.response?.data?.error || 'Error al conectar');
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setErrors(newErrors);
+    try {
+      // 1. Intentamos el registro
+      await API.post("/auth/register", dataToSend); 
+      
+      // 🟢 ÉXITO: En lugar de alert, activamos el SuccessModal
+      setShowSuccessModal(true); 
+      
+      // Nota: No navegamos aquí directamente, dejamos que el usuario 
+      // vea el mensaje y navegue al darle clic en "Ir al Inicio" (handleSuccessClose)
+      
+    } catch (error) {
+      // 🔴 ERROR: Activamos el ErrorModal
+      setShowErrorModal(true); 
+      console.error("Error en el registro:", error.response?.data);
+      
+    } finally {
+      setLoading(false);
     }
-  };
+  } else {
+    // Si hay errores de validación local (campos vacíos, etc.)
+    setErrors(newErrors);
+  }
+};
+
+// 🟢 Esta función es la que vinculamos al botón del SuccessModal
+const handleSuccessClose = () => {
+  setShowSuccessModal(false);
+  navigate('/'); // Redirigimos al Login solo después de que el usuario cierre el aviso
+};
+
+  // --- Lógica para habilitar/deshabilitar botón ---
+const isFormValid = () => {
+  // 1. Verificamos que los campos requeridos tengan contenido
+  const requiredFields = [
+    formData.nombres, 
+    formData.apellidos, 
+    formData.facultad, 
+    formData.programa, 
+    formData.correo, 
+    formData.celular, 
+    formData.contraseña, 
+    formData.confirmarContraseña
+  ];
+
+  const allFilled = requiredFields.every(field => field.trim() !== '');
+
+  // 2. Verificamos que no existan mensajes de error y que las contraseñas coincidan
+  const noErrors = Object.values(errors).every(error => error === '');
+  const passwordsMatch = formData.contraseña === formData.confirmarContraseña;
+  const passwordStrong = validatePasswordStrength(formData.contraseña);
+
+  return allFilled && noErrors && passwordsMatch && passwordStrong;
+};
 
   return (
     <div className={styles['udec-register-container']}>
@@ -166,46 +274,82 @@ export default function RegistrarEgresado() {
           </div>
 
           <div className={styles['form-row']}>
-            <div className={`${styles['form-group']} ${styles['half-width']}`}>
-              <label>Facultad</label>
-              <select 
-                name="facultad" 
-                value={formData.facultad} 
-                onChange={handleChange} 
-                disabled={loading}
-                className={errors.facultad ? styles.error : ''}
-              >
-                <option value="" disabled hidden>Seleccione su facultad...</option>
-                <option value="FACULTAD DE CIENCIAS ADMINISTRATIVAS, ECONÓMICAS Y CONTABLES">Facultad de Ciencias Administrativas, Económicas y Contables</option>
-                <option value="FACULTAD DE CIENCIAS AGROPECUARIAS">Facultad de Ciencias Agropecuarias</option>
-                <option value="FACULTAD DE CIENCIAS DEL DEPORTE Y LA EDUCACIÓN FÍSICA">Facultad de Ciencias del Deporte y la Educación Física</option>
-                <option value="FACULTAD DE EDUCACIÓN">Facultad de Educación</option>
-                <option value="FACULTAD DE INGENIERÍA">Facultad de Ingeniería</option>
-                <option value="FACULTAD DE CIENCIAS DE LA SALUD">Facultad de Ciencias de la Salud</option>
-                <option value="FACULTAD DE CIENCIAS SOCIALES, HUMANIDADES Y CIENCIAS POLÍTICAS">Facultad de Ciencias Sociales, Humanidades y Ciencias Políticas</option>
-              </select>
-              {errors.facultad && <span className={styles['error-message']}>{errors.facultad}</span>}
-            </div>
+  {/* --- SELECTOR DE FACULTAD --- */}
+  <div className={`${styles['form-group']} ${styles['half-width']}`} style={{ position: 'relative' }}>
+    <label>Facultad</label>
+    <div 
+      className={`${styles.customSelectHeader} ${errors.facultad ? styles.error : ''}`} 
+      onClick={() => toggleMenu('facultad')}
+    >
+      {formData.facultad ? (
+        <span style={{ color: '#333', textTransform: 'capitalize' }}>
+          {formData.facultad.toLowerCase()}
+        </span>
+      ) : (
+        <span style={{ color: '#999' }}>Seleccione su facultad...</span>
+      )}
+      <span className={styles.selectArrow}>▾</span>
+    </div>
 
-            <div className={`${styles['form-group']} ${styles['half-width']}`}>
-              <label>Programa Académico</label>
-              <select 
-                name="programa" 
-                value={formData.programa} 
-                onChange={handleChange} 
-                disabled={loading || !formData.facultad}
-                className={errors.programa ? styles.error : ''}
-              >
-                <option value="" disabled hidden>Seleccione su programa...</option>
-                {formData.facultad && programasPorFacultad[formData.facultad]?.map((prog) => (
-                  <option key={prog} value={prog}>
-                    {prog}
-                  </option>
-                ))}
-              </select>
-              {errors.programa && <span className={styles['error-message']}>{errors.programa}</span>}
-            </div>
+    {openMenus.facultad && (
+      <div className={styles.customSelectDropdown}>
+        {Object.keys(programasPorFacultad).map((fac) => (
+          <div 
+            key={fac} 
+            className={styles.dropdownOption} 
+            onMouseDown={(e) => {
+              e.preventDefault();
+              setFormData(prev => ({ ...prev, facultad: fac, programa: '' }));
+              toggleMenu('facultad');
+              setErrors(prev => ({ ...prev, facultad: '' }));
+            }}
+          >
+            {fac.charAt(0) + fac.slice(1).toLowerCase()}
           </div>
+        ))}
+      </div>
+    )}
+    {errors.facultad && <span className={styles['error-message']}>{errors.facultad}</span>}
+  </div>
+
+  {/* --- SELECTOR DE PROGRAMA --- */}
+  <div className={`${styles['form-group']} ${styles['half-width']}`} style={{ position: 'relative' }}>
+    <label>Programa Académico</label>
+    <div 
+      className={`${styles.customSelectHeader} ${!formData.facultad ? styles.disabledSelect : ''} ${errors.programa ? styles.error : ''}`} 
+      onClick={() => formData.facultad && toggleMenu('programa')}
+    >
+      {formData.programa ? (
+        <span style={{ color: '#333' }}>{formData.programa}</span>
+      ) : (
+        <span style={{ color: '#999' }}>
+          {formData.facultad ? "Seleccione su programa..." : "Primero elija facultad"}
+        </span>
+      )}
+      <span className={styles.selectArrow}>▾</span>
+    </div>
+
+    {openMenus.programa && formData.facultad && (
+      <div className={styles.customSelectDropdown}>
+        {programasPorFacultad[formData.facultad]?.map((prog) => (
+          <div 
+            key={prog} 
+            className={styles.dropdownOption} 
+            onMouseDown={(e) => {
+              e.preventDefault();
+              setFormData(prev => ({ ...prev, programa: prog }));
+              toggleMenu('programa');
+              setErrors(prev => ({ ...prev, programa: '' }));
+            }}
+          >
+            {prog}
+          </div>
+        ))}
+      </div>
+    )}
+    {errors.programa && <span className={styles['error-message']}>{errors.programa}</span>}
+  </div>
+</div>
 
           <div className={styles['form-row']}>
             <div className={`${styles['form-group']} ${styles['half-width']}`}>
@@ -295,9 +439,18 @@ export default function RegistrarEgresado() {
             <button type="button" onClick={() => navigate('/')} className={`${styles['udec-button']} ${styles['secondary-button']}`} disabled={loading}>
               Regresar
             </button>
-            <button type="submit" className={`${styles['udec-button']} ${styles['primary-button']}`} disabled={loading}>
-              {loading ? 'Procesando...' : 'Crear Perfil'}
-            </button>
+            <button 
+  type="submit" 
+  /* 🟢 Se deshabilita si el formulario no es válido o si está cargando */
+  disabled={loading || !isFormValid()} 
+  className={`
+    ${styles['udec-button']} 
+    ${styles['primary-button']} 
+    ${(!isFormValid() || loading) ? styles.disabledButton : ''}
+  `}
+>
+  {loading ? 'Procesando...' : 'Crear Perfil'}
+</button>
           </div>
         </form>
 
@@ -305,6 +458,19 @@ export default function RegistrarEgresado() {
           <p>¿Ya tienes una cuenta? <a href="/" onClick={(e) => {e.preventDefault(); navigate('/')}} className={styles['login-link']}>Iniciar Sesión</a></p>
         </div>
       </div>
+      {/* 🟢 AQUÍ EXACTAMENTE DEBES PEGAR EL MODAL 🟢 */}
+      <ErrorModal 
+        isOpen={showErrorModal} 
+        onClose={() => setShowErrorModal(false)} 
+        message="No se pudo completar el registro. Es posible que el correo electrónico o Cédula ya se encuentren registrados en nuestra base de datos."
+      />
+
+      {/* 🟢 NUEVO: Modal de Éxito */}
+      <SuccessModal 
+        isOpen={showSuccessModal} 
+        onClose={handleSuccessClose} 
+        message="¡Registro Exitoso! El usuario ha sido vinculado correctamente en el sistema."
+      />
     </div>
   );
 }

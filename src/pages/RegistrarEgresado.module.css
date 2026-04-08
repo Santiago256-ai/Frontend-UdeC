@@ -351,3 +351,247 @@ input.error, select.error {
     .register-title { font-size: 1.5rem; }
     .udec-logo-img { height: 45px; }
 }
+
+.customSelectHeader {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    min-height: 42px;
+    transition: all 0.3s ease;
+}
+
+.customSelectHeader:hover {
+    border-color: #004d2b;
+}
+
+.disabledSelect {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    color: #999;
+}
+
+/* --- Contenedor del menú desplegable (El fondo principal) --- */
+.customSelectDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    /* ⚪ Fondo BLANCO limpio por defecto */
+    background-color: #ffffff; 
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* Sombra suave gris */
+    z-index: 1000;
+    max-height: 250px; /* Altura máxima para que salga el scroll */
+    overflow-y: auto; /* Activa el scroll vertical */
+    margin-top: 5px;
+    
+    /* 🟢 Personalización de la barra de scroll para navegadores Firefox y modernos */
+    scrollbar-width: thin;
+    /* 🟢 El primer color es el 'pulgar' (oscuro), el segundo es el 'fondo' (blanco) */
+    scrollbar-color: #004d2b #ffffff; 
+}
+
+/* --- Personalización de la barra de scroll para Chrome, Edge y Safari --- */
+.customSelectDropdown::-webkit-scrollbar {
+    width: 8px; /* Ancho de la barra */
+}
+
+/* El fondo de la barra de scroll (Blanco) */
+.customSelectDropdown::-webkit-scrollbar-track {
+    background: #ffffff; 
+    border-radius: 10px;
+}
+
+/* El 'pulgar' (la parte que mueves) */
+.customSelectDropdown::-webkit-scrollbar-thumb {
+    /* 🟢 Verde oscuro UdeC para el scroll */
+    background-color: #004d2b; 
+    border-radius: 10px;
+    /* Un pequeño borde blanco alrededor para que 'flote' */
+    border: 2px solid #ffffff; 
+}
+
+/* Cuando pasas el mouse por el pulgar del scroll */
+.customSelectDropdown::-webkit-scrollbar-thumb:hover {
+    background-color: #00361f; /* Un verde aún más oscuro */
+}
+
+/* --- Estilos de las opciones dentro del menú --- */
+/* --- Estilos base de las opciones --- */
+/* --- Estilos base de las opciones --- */
+.dropdownOption {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #004d2b; 
+    background-color: #ffffff;
+    font-weight: 400;
+    
+    /* 🟢 El fondo cambia suavemente, pero no se mueve */
+    transition: background-color 0.3s ease;
+    display: block;
+}
+
+/* --- Efecto Hover (Al pasar el cursor) --- */
+.dropdownOption:hover {
+    /* 🟢 El fondo turquesa se queda fijo en su lugar */
+    background-color: #e6f7f6; 
+    color: #00361f; 
+    
+    /* 🟢 OPCIÓN A: Usar padding para mover solo el texto */
+    /* Esta es la forma más limpia para que el fondo no se desplace */
+    padding-left: 23px; /* Aumentamos el espacio original (15px + 8px) */
+    
+    /* 🔴 ELIMINA EL translateX de aquí para que el cuadro no se mueva */
+    /* transform: translateX(8px);  <-- Quitar esta línea */
+}
+
+/* Estilo adicional para asegurar que la transición del movimiento sea suave */
+.dropdownOption {
+    transition: padding-left 0.3s ease, background-color 0.3s ease;
+}
+
+.disabledButton {
+  background-color: #9ca3af !important; /* Gris oscuro/medio */
+  border-color: #d1d5db !important;
+  color: #ffffff !important;
+  cursor: not-allowed !important; /* El cursor de círculo prohibido */
+  opacity: 0.7;
+  transform: none !important; /* Quitamos cualquier efecto de movimiento/escala */
+  box-shadow: none !important;
+}
+
+/* Evitamos que el hover funcione si está deshabilitado */
+.disabledButton:hover {
+  background-color: #9ca3af !important;
+  transform: none !important;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px); /* El efecto borroso de fondo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modalContent {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.modalIcon {
+  width: 60px;
+  height: 60px;
+  background-color: #fce7f3; /* Rosa suave */
+  color: #ef4444; /* Rojo */
+  font-size: 30px;
+  line-height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  font-weight: bold;
+}
+
+.modalTitle {
+  color: #111827;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.modalMessage {
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px; /* Espacio extra arriba del botón */
+}
+
+.btnVerificar {
+  padding: 10px 20px;
+  border: 1px solid #004d2b;
+  background: transparent;
+  color: #004d2b;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btnCerrar {
+    /* Hacemos que ocupe todo el ancho disponible para balancear el diseño */
+    width: 100%; 
+    max-width: 250px; /* Para que no se vea gigante en pantallas grandes */
+    
+    padding: 12px 25px;
+    background-color: #004d2b; /* Verde UdeC */
+    color: white;
+    
+    /* 🟢 NUEVO: Borde DORADO institucional suave */
+    border: 2px solid #c5a059; 
+    
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    
+    /* 🟢 NUEVO: Transición suave para el realce del botón */
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    
+    /* Aseguramos que el botón esté centrado si el contenedor es más ancho */
+    margin: 0 auto; 
+    display: block; 
+}
+
+/* --- ANIMACIÓN DE REALCE (HOVER): Al pasar el cursor por el botón Cerrar --- */
+.btnCerrar:hover {
+    /* 🟢 FONDO: Un verde un poco más oscuro institucional */
+    background-color: #00361f; 
+    
+    /* 🟢 ANIMACIÓN DE REALCE: El botón flota ligeramente hacia arriba */
+    transform: translateY(-3px); 
+    
+    /* 🟢 SOMBRA: Más profunda con tono dorado sutil */
+    box-shadow: 0 8px 20px rgba(197, 160, 89, 0.3); 
+    
+    /* Mantenemos el borde dorado */
+    border-color: #c5a059; 
+}
+
+.modalMessageJustify {
+  text-align: justify;
+  /* Opcional: añade un poco más de padding lateral para que 
+     las líneas justificadas no toquen el borde del modal */
+  padding: 0 10px; 
+}
+
+/* Variante para el icono de éxito */
+.iconSuccess {
+  background-color: #d1fae5 !important; /* Verde muy clarito */
+  color: #10b981 !important; /* Verde éxito */
+  border-radius: 12px !important; /* Más cuadradito como en tu imagen */
+}
+
+/* El resto de estilos (modalOverlay, modalContent, etc.) ya los tienes del error, 
+   así que se aplicarán automáticamente */

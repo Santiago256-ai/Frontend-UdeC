@@ -1265,3 +1265,175 @@
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Contenedor del avatar */
+.vdp-avatar-container {
+    display: flex;
+    align-items: center;
+}
+
+/* El menú flotante */
+.vdp-dropdown-menu {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 200px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border: 1px solid #edf2f7;
+    z-index: 1000;
+    padding: 8px 0;
+    animation: fadeInDown 0.2s ease-out;
+}
+
+.vdp-dropdown-header {
+    padding: 12px 20px 5px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.vdp-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    /* Forzamos el color del texto a gris oscuro o verde según prefieras */
+    color: #475569; 
+    transition: all 0.2s ease;
+}
+
+.vdp-dropdown-item:hover {
+    background-color: #f8fafc;
+    color: #1b4332; /* El texto también se pone verde al hacer hover */
+}
+
+.vdp-dropdown-item:hover .vdp-icon-green {
+    color: #006b3f !important;
+}
+.vdp-dropdown-divider {
+    margin: 8px 0;
+    border: 0;
+    border-top: 1px solid #edf2f7;
+}
+
+.vdp-dropdown-item.vdp-logout {
+    color: #e53e3e;
+}
+
+.vdp-dropdown-item.vdp-logout:hover {
+    background: #fff5f5;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.vdp-icon-green {
+    color: #1b4332 !important; /* Verde oscuro UdeC */
+}
+
+.no-selection-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.no-vacantes-content h3 {
+    margin-top: 20px;
+    color: #1e293b;
+    font-size: 1.5rem;
+}
+
+.no-vacantes-content p {
+    margin-top: 10px;
+    max-width: 300px;
+    line-height: 1.5;
+}
+
+.btn-refresh {
+    margin-top: 25px;
+    padding: 10px 20px;
+    background: #006b3f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-refresh:hover {
+    background: #005a35;
+}
+
+.no-selection-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 40px;
+    background-color: #fcfcfc;
+    border-radius: 16px;
+}
+
+.empty-selection-content h3 {
+    color: #1a202c;
+    font-size: 24px;
+    margin: 20px 0 10px;
+    font-weight: 700;
+}
+
+.empty-selection-content p {
+    color: #718096;
+    max-width: 320px;
+    line-height: 1.6;
+    margin: 0 auto 25px;
+}
+
+.icon-pulse-container {
+    background: #f0fdf4;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 2px dashed #006b3f;
+    animation: pulse-border 2s infinite;
+}
+
+.selection-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #006b3f;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+@keyframes pulse-border {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}

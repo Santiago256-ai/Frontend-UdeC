@@ -1,0 +1,171 @@
+.container {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.title {
+    color: #006837;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+}
+
+.selectFiltro {
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    outline: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.refreshBtn {
+    background: #006837;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.refreshBtn:hover { background: #004d2c; }
+
+/* Grid de Cards */
+.gridVacantes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.vacanteCard {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s;
+}
+
+.vacanteCard:hover {
+    transform: translateY(-5px);
+    border-color: #ffcc00;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.abierta { background: #e6f7ed; color: #155724; }
+.cerrada { background: #f8d7da; color: #721c24; }
+.pendiente { background: #fff3cd; color: #856404; }
+
+.idVacante { font-size: 0.8rem; color: #aaa; font-weight: bold; }
+
+.vacanteTitulo {
+    font-size: 1.1rem;
+    color: #333;
+    margin: 0 0 15px 0;
+    height: 2.4em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.vacanteDetalle p {
+    margin: 6px 0;
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vacanteDetalle i {
+    color: #006837;
+    width: 15px;
+    text-align: center;
+}
+
+.cardActions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+
+.btnVer {
+    background: #f4f7f6;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #006837;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btnVer:hover { background: #006837; color: white; }
+
+.btnEdit {
+    background: transparent;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.btnEdit:hover { color: #ffcc00; }
+
+.noData {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px;
+    color: #999;
+    font-style: italic;
+}
+
+.loaderContainer { text-align: center; padding: 100px; }
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #ffcc00;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
