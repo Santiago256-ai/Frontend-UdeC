@@ -14,47 +14,65 @@ export default function CrearCV({ isInline, setVistaActiva }) {
     // Obtener el usuario logueado del localStorage
     const usuarioLogueado = JSON.parse(localStorage.getItem('usuario'));
     
-    // Estado inicial unificado con Prisma
-    const [cvData, setCvData] = useState({
-         // 👈 Nuevo estado
-        celular: usuarioLogueado?.celular || "",
-        email: usuarioLogueado?.correo || "",
-        direccion: "",
-        descripcion: "",
-        habilidades: "", // Se guarda como String separado por comas
-        educacion: [{ titulo: "", institucion: "", periodo: "" }],
-        experiencia: [{ cargo: "", empresa: "", periodo: "" }],
-        referencias: [{ nombre: "", cargo: "", celular: "" }],
-        aptitudes: [{ aptitud: "" }],
-        idiomas: [{ idioma: "", nivel: "0" }]
-    });
+// Localiza el estado inicial y modifícalo así:
+const [cvData, setCvData] = useState({
+    celular: usuarioLogueado?.celular || "",
+    email: usuarioLogueado?.correo || "",
+    direccion: "",
+    descripcion: "",
+    // habilidades: "",  <-- ELIMINA ESTA LÍNEA
+    habilidades: [{ nombre: "", nivel: "50" }], // 👈 NUEVO: Ahora es un array con nivel
+    educacion: [{ titulo: "", institucion: "", periodo: "" }],
+    experiencia: [{ cargo: "", empresa: "", periodo: "" }],
+    referencias: [{ nombre: "", cargo: "", celular: "" }],
+    aptitudes: [{ aptitud: "" }], // Se queda solo texto como querías
+    idiomas: [{ idioma: "", nivel: "0" }]
+});
 
     // Cargar los datos del CV si ya existen al montar el componente
-    useEffect(() => {
+useEffect(() => {
     const cargarDatos = async () => {
         if (!usuarioLogueado?.id) return;
         try {
             const res = await API.get(`/cvs/${usuarioLogueado.id}`);
             if (res.data) {
-                setCvData(res.data);
-                setOriginalData(res.data); // 👈 Guardamos la copia fiel de la BD
+                // 1. Formateamos los datos antes de setearlos
+                const dataPreparada = {
+                    ...res.data,
+                    // Nos aseguramos que habilidades sea un array válido para el .map()
+                    habilidades: Array.isArray(res.data.habilidades) && res.data.habilidades.length > 0 
+                        ? res.data.habilidades 
+                        : [{ nombre: "", nivel: "50" }],
+                    // Hacemos lo mismo con los otros arrays por seguridad
+                    educacion: res.data.educacion?.length > 0 ? res.data.educacion : [{ titulo: "", institucion: "", periodo: "" }],
+                    experiencia: res.data.experiencia?.length > 0 ? res.data.experiencia : [{ cargo: "", empresa: "", periodo: "" }],
+                    referencias: res.data.referencias?.length > 0 ? res.data.referencias : [{ nombre: "", cargo: "", celular: "" }],
+                    aptitudes: res.data.aptitudes?.length > 0 ? res.data.aptitudes : [{ aptitud: "" }],
+                    idiomas: res.data.idiomas?.length > 0 ? res.data.idiomas : [{ idioma: "", nivel: "0" }]
+                };
+
+                setCvData(dataPreparada);
+                setOriginalData(JSON.parse(JSON.stringify(dataPreparada))); // Copia profunda para comparar cambios
             }
         } catch (error) {
-        console.log("No se encontró CV previo");
-        // ✅ 2. Define el estado inicial vacío exacto para comparar correctamente
-        setOriginalData({
-            celular: "",
-            email: usuarioLogueado?.correo || "",
-            direccion: "",
-            descripcion: "",
-            habilidades: "",
-            educacion: [{ titulo: "", institucion: "", periodo: "" }],
-            experiencia: [{ cargo: "", empresa: "", periodo: "" }],
-            referencias: [{ nombre: "", cargo: "", celular: "" }],
-            aptitudes: [{ aptitud: "" }],
-            idiomas: [{ idioma: "", nivel: "0" }]
-        });
-    }
+            console.log("No se encontró CV previo o hubo un error");
+            
+            const estadoInicialVacio = {
+                celular: usuarioLogueado?.celular || "",
+                email: usuarioLogueado?.correo || "",
+                direccion: "",
+                descripcion: "",
+                habilidades: [{ nombre: "", nivel: "50" }],
+                educacion: [{ titulo: "", institucion: "", periodo: "" }],
+                experiencia: [{ cargo: "", empresa: "", periodo: "" }],
+                referencias: [{ nombre: "", cargo: "", celular: "" }],
+                aptitudes: [{ aptitud: "" }],
+                idiomas: [{ idioma: "", nivel: "0" }]
+            };
+
+            setCvData(estadoInicialVacio);
+            setOriginalData(estadoInicialVacio);
+        }
     };
     cargarDatos();
 }, [usuarioLogueado?.id]);
@@ -90,26 +108,28 @@ export default function CrearCV({ isInline, setVistaActiva }) {
     setIsLoading(true);
     try {
         // 🛑 FILTRO DE SEGURIDAD: Solo enviamos lo que tiene contenido real
-        const dataParaEnviar = {
-            ...cvData,
-            experiencia: cvData.experiencia.filter(e => e.cargo.trim() !== ""),
-            educacion: cvData.educacion.filter(e => e.titulo.trim() !== ""),
-            referencias: cvData.referencias.filter(r => r.nombre.trim() !== ""), // 👈 Clave para Referencias
-            aptitudes: cvData.aptitudes.filter(a => a.aptitud.trim() !== ""),
-            idiomas: cvData.idiomas.filter(i => i.idioma.trim() !== ""),
-        };
+const dataParaEnviar = {
+    ...cvData,
+    experiencia: cvData.experiencia.filter(e => e.cargo.trim() !== ""),
+    educacion: cvData.educacion.filter(e => e.titulo.trim() !== ""),
+    referencias: cvData.referencias.filter(r => r.nombre.trim() !== ""),
+    aptitudes: cvData.aptitudes.filter(a => a.aptitud.trim() !== ""),
+    idiomas: cvData.idiomas.filter(i => i.idioma.trim() !== ""),
+    habilidades: cvData.habilidades.filter(h => h.nombre.trim() !== ""), // 👈 Añade esta línea
+};
 
         // Ahora limpiamos los IDs (como hablamos antes)
         const limpiar = (arr) => arr.map(({ id, perfilId, perfilCVId, ...resto }) => resto);
         
-        const finalData = {
-            ...dataParaEnviar,
-            experiencia: limpiar(dataParaEnviar.experiencia),
-            educacion: limpiar(dataParaEnviar.educacion),
-            referencias: limpiar(dataParaEnviar.referencias),
-            aptitudes: limpiar(dataParaEnviar.aptitudes),
-            idiomas: limpiar(dataParaEnviar.idiomas),
-        };
+const finalData = {
+    ...dataParaEnviar,
+    experiencia: limpiar(dataParaEnviar.experiencia),
+    educacion: limpiar(dataParaEnviar.educacion),
+    referencias: limpiar(dataParaEnviar.referencias),
+    aptitudes: limpiar(dataParaEnviar.aptitudes),
+    idiomas: limpiar(dataParaEnviar.idiomas),
+    habilidades: limpiar(dataParaEnviar.habilidades), // 👈 Añade esta línea
+};
 
         await API.post(`/cvs/${usuarioLogueado.id}`, finalData);
         alert("¡Hoja de vida guardada exitosamente!");
@@ -156,15 +176,24 @@ const hayCambios = JSON.stringify(cvData) !== JSON.stringify(originalData);
                             
 
                             {/* Habilidades */}
-                            <div className="cv-sidebar-section">
-                                <h3 className="cv-sidebar-title">HABILIDADES</h3>
-                                {cvData.habilidades.split(',').map((hab, index) => hab.trim() && (
-                                    <div className="cv-skill-item" key={index}>
-                                        <span>{hab.trim()}</span>
-                                        <div className="skill-bar-bg"><div className="skill-bar-fill" style={{width: `80%`}}></div></div>
-                                    </div>
-                                ))}
-                            </div>
+{/* Habilidades en la barra lateral verde */}
+<div className="cv-sidebar-section">
+    <h3 className="cv-sidebar-title">HABILIDADES</h3>
+    {cvData.habilidades.map((hab, index) => hab.nombre && (
+        <div className="cv-skill-item" key={index}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+                <span>{hab.nombre}</span>
+                <span>{hab.nivel}%</span>
+            </div>
+            <div className="skill-bar-bg">
+                <div 
+                    className="skill-bar-fill" 
+                    style={{ width: `${hab.nivel}%` }}
+                ></div>
+            </div>
+        </div>
+    ))}
+</div>
 
                             {/* Aptitudes */}
                             <div className="cv-sidebar-section">
@@ -294,12 +323,43 @@ const hayCambios = JSON.stringify(cvData) !== JSON.stringify(originalData);
                         <label>Perfil Profesional</label>
                         <textarea name="descripcion" value={cvData.descripcion} onChange={handleChangeBasico} placeholder="Cuéntanos sobre ti..."></textarea>
                     </div>
-                    <div className="input-group">
-                        <label>Habilidades (Separadas por comas)</label>
-                        <input type="text" name="habilidades" value={cvData.habilidades} onChange={handleChangeBasico} placeholder="React, Node.js, SQL..."/>
-                    </div>
                 </div>
-
+{/* Sección de Habilidades Técnicas (Antes era el input de comas) */}
+<div className="form-card">
+    <h3><BrainCircuit size={20} /> Habilidades Técnicas</h3>
+    {cvData.habilidades.map((hab, index) => (
+        <div key={index} className="dynamic-item-form">
+            <div className="form-row">
+                <div className="input-group" style={{ flex: 2 }}>
+                    <label>Habilidad</label>
+                    <input 
+                        type="text" 
+                        value={hab.nombre} 
+                        onChange={(e) => handleArrayChange(index, 'habilidades', 'nombre', e.target.value)} 
+                        placeholder="Ej. React, Node.js, SQL..." 
+                    />
+                </div>
+                <div className="input-group" style={{ flex: 1 }}>
+                    <label>Nivel: {hab.nivel}%</label>
+                    <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        value={hab.nivel} 
+                        onChange={(e) => handleArrayChange(index, 'habilidades', 'nivel', e.target.value)} 
+                        style={{ accentColor: '#00482b', marginTop: '10px' }}
+                    />
+                </div>
+            </div>
+            <button className="btn-remove-text" onClick={() => removeArrayItem(index, 'habilidades')}>
+                <Trash2 size={14}/> Eliminar
+            </button>
+        </div>
+    ))}
+    <button className="btn-add-more" onClick={() => addArrayItem('habilidades', { nombre: "", nivel: "50" })}>
+        <Plus size={16} /> Añadir Habilidad
+    </button>
+</div>
                 {/* Experiencia */}
                 <div className="form-card">
                     <h3><Briefcase size={20} /> Experiencia Laboral</h3>

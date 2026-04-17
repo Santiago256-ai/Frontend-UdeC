@@ -7,7 +7,10 @@ import {
     XCircle, 
     AlertTriangle,
     ChevronDown,
-    Search, Filter, Calendar, Pin, PinOff
+    Search, Filter, Calendar, Pin, PinOff, Sparkles, 
+    Send, 
+    X, 
+    Bot
 } from 'lucide-react';
 import './ListaPostulacionesTable.css';
 
@@ -23,6 +26,12 @@ const ListaPostulacionesTable = ({
     onDescargarDirecto 
 }) => {
 
+// Nuevos estados para el agente IA
+const [iaAbierta, setIaAbierta] = useState(false);
+const [iaMensaje, setIaMensaje] = useState("");
+const [iaChat, setIaChat] = useState([
+    { rol: 'ia', texto: "¡Hola! Soy el asistente IA de la UdeC. ¿En qué puedo ayudarte con estas postulaciones?" }
+]);
     // Estado para el modal de confirmación de rechazo
     const [confirmarRechazo, setConfirmarRechazo] = useState({ visible: false, id: null, nombre: "" });
     
@@ -77,6 +86,30 @@ const postulacionesFiltradas = filtrados.sort((a, b) => {
     return 0; // Si ambos son iguales, mantienen su orden original
 });
 
+
+const enviarConsultaIA = async () => {
+    if (!iaMensaje.trim()) return;
+
+    const nuevoMensaje = { rol: 'user', texto: iaMensaje };
+    setIaChat([...iaChat, nuevoMensaje]);
+    setIaMensaje("");
+
+    try {
+        const token = localStorage.getItem('token'); // O donde guardes tu JWT
+        const res = await fetch('https://backend-ude-c.vercel.app/api/ia/consultar', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ prompt: iaMensaje })
+        });
+        const data = await res.json();
+        setIaChat(prev => [...prev, { rol: 'ia', texto: data.respuesta }]);
+    } catch (error) {
+        setIaChat(prev => [...prev, { rol: 'ia', texto: "Lo siento, hubo un error al conectar con el servidor." }]);
+    }
+};
     return (
         <div className="postulaciones-table-container fade-in">
             {/* Barra de herramientas: Buscador y Filtro */}
@@ -369,6 +402,39 @@ const postulacionesFiltradas = filtrados.sort((a, b) => {
                     </div>
                 </div>
             )}
+            {/* AGENTE DE IA FLOTANTE */}
+<div className="ia-agent-container" style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1000 }}>
+    {!iaAbierta ? (
+        <button className="ia-floating-button" onClick={() => setIaAbierta(true)} style={{ backgroundColor: '#00482b', color: 'white', border: 'none', borderRadius: '50%', width: '60px', height: '60px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Bot size={28} />
+        </button>
+    ) : (
+        <div className="ia-chat-window fade-in" style={{ width: '350px', height: '480px', background: 'white', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+            <div className="ia-chat-header" style={{ background: '#00482b', color: 'white', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600' }}><Sparkles size={16} /> <span>Asistente UdeC</span></div>
+                <X size={18} onClick={() => setIaAbierta(false)} style={{ cursor: 'pointer' }} />
+            </div>
+            <div className="ia-chat-body" style={{ flex: 1, padding: '15px', overflowY: 'auto', background: '#f8fafc' }}>
+                {iaChat.map((m, i) => (
+                    <div key={i} style={{ marginBottom: '12px', display: 'flex', justifyContent: m.rol === 'ia' ? 'flex-start' : 'flex-end' }}>
+                        <div style={{ padding: '10px 14px', borderRadius: '12px', maxWidth: '85%', fontSize: '13px', background: m.rol === 'ia' ? 'white' : '#00482b', color: m.rol === 'ia' ? '#1e293b' : 'white', border: m.rol === 'ia' ? '1px solid #e2e8f0' : 'none' }}>{m.texto}</div>
+                    </div>
+                ))}
+            </div>
+            <div className="ia-chat-footer" style={{ padding: '12px', display: 'flex', gap: '8px', borderTop: '1px solid #e2e8f0' }}>
+                <input 
+                    type="text" 
+                    placeholder="Pregunta algo..." 
+                    value={iaMensaje} 
+                    onChange={(e) => setIaMensaje(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && enviarConsultaIA()}
+                    style={{ flex: 1, border: '1px solid #e2e8f0', padding: '8px 12px', borderRadius: '20px', fontSize: '13px', outline: 'none' }} 
+                />
+                <button onClick={enviarConsultaIA} style={{ background: '#00482b', color: 'white', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer' }}><Send size={16} /></button>
+            </div>
+        </div>
+    )}
+</div>
         </div>
     );
 };

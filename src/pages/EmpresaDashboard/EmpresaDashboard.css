@@ -1597,3 +1597,109 @@
     background: #e2e8f0;
     margin: 4px 0;
 }
+
+/* Badge flotante de nueva postulación */
+.new-postulation-badge {
+    position: absolute;
+    top: 10px; /* 👈 Bajado para que se vea dentro de la tarjeta */
+    right: 15px;
+    background: #006b3f;
+    color: white;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 3px 10px;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 2px solid white;
+    z-index: 20;
+    /* Agregamos una entrada animada también */
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Resaltado del contador de postulantes durante la animación */
+.highlight-count {
+    background-color: #dcfce7 !important;
+    color: #006b3f !important;
+    font-weight: 700;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+
+/* Animación de pulso institucional */
+.pulse-new-notification {
+    animation: pulse-border-udec 2s infinite ease-in-out;
+}
+
+@keyframes pulse-border-udec {
+    0% { box-shadow: 0 0 0 0 rgba(0, 107, 63, 0.4); }
+    70% { box-shadow: 0 0 0 12px rgba(0, 107, 63, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 107, 63, 0); }
+}
+
+@keyframes udec-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 107, 63, 0.6); }
+    70% { box-shadow: 0 0 0 15px rgba(0, 107, 63, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 107, 63, 0); }
+}
+
+/* Nueva animación de vibración para el recuadro del número */
+@keyframes shake-badge {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(2deg); }
+    50% { transform: scale(1.1) rotate(-2deg); }
+    75% { transform: scale(1.1) rotate(2deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.pulse-new-notification .badge-slots {
+    background-color: #dcfce7 !important; /* Verde clarito UdeC */
+    color: #006b3f !important; /* Texto verde oscuro */
+    border: 1px solid #006b3f !important;
+    font-weight: 800;
+    
+    /* 🔥 ESTO ES LO QUE BUSCAS: Titileo y Vibración */
+    animation: shake-vibrate 0.8s ease-in-out infinite; 
+    /* "infinite" hará que vibre todo el tiempo que la tarjeta esté en verde */
+}
+
+@keyframes shake-vibrate {
+    0% { transform: scale(1); }
+    10% { transform: scale(1.1) rotate(-2deg); }
+    20% { transform: scale(1.1) rotate(2deg); }
+    30% { transform: scale(1.1) rotate(-2deg); }
+    40% { transform: scale(1.1) rotate(2deg); }
+    50% { transform: scale(1.1) rotate(0deg); }
+    100% { transform: scale(1); }
+}
+
+/* Este es el recuadro de "X postulantes" */
+.badge-slots.highlight-count {
+    background-color: #dcfce7 !important; /* Verde clarito UdeC */
+    color: #006b3f !important;           /* Texto verde oscuro */
+    border: 1px solid #006b3f !important;
+    font-weight: 800;
+    
+    /* 🔥 Efecto de Vibración y Titileo */
+    animation: vibrate-pro 0.3s linear infinite; 
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Definición de la vibración rápida (titileo visual) */
+@keyframes vibrate-pro {
+    0% { transform: translate(0); }
+    20% { transform: translate(-1px, 1px); }
+    40% { transform: translate(-1px, -1px); }
+    60% { transform: translate(1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+    100% { transform: translate(0); }
+}

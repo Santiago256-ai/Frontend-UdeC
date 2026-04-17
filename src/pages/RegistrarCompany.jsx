@@ -10,6 +10,7 @@ const DATOS_UBICACION = {
     'Antioquia': ['Medellín', 'Bello', 'Envigado', 'Itagüí', 'Rionegro', 'Otra Ciudad...'],
     'Arauca': ['Arauca', 'Otra Ciudad...'],
     'Atlántico': ['Barranquilla', 'Soledad', 'Malambo', 'Puerto Colombia', 'Otra Ciudad...'],
+    'Bogotá D.C.': ['Bogotá D.C.', 'Otra Ciudad...'],
     'Bolívar': ['Cartagena', 'Magangué', 'Turbaco', 'Otra Ciudad...'],
     'Boyacá': ['Tunja', 'Duitama', 'Sogamoso', 'Otra Ciudad...'],
     'Caldas': ['Manizales', 'Riosucio', 'La Dorada', 'Otra Ciudad...'],

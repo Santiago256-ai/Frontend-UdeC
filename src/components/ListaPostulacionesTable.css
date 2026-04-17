@@ -740,3 +740,96 @@
 .postulacion-row.is-pinned td {
     background-color: transparent !important;
 }
+
+/* --- ESTILOS DEL AGENTE DE IA --- */
+
+/* Contenedor del Botón Flotante */
+.ia-floating-button {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ia-floating-button:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 20px rgba(0, 72, 43, 0.4) !important;
+}
+
+/* Ventana de Chat */
+.ia-chat-window {
+    animation: slideUp 0.4s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Animación de entrada */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Cuerpo del Chat (Scroll) */
+.ia-chat-body {
+    scrollbar-width: thin;
+    scrollbar-color: #00482b #f1f5f9;
+}
+
+.ia-chat-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ia-chat-body::-webkit-scrollbar-thumb {
+    background: #00482b;
+    border-radius: 10px;
+}
+
+/* Burbujas de Chat */
+.chat-bubble-ia {
+    background: white;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 2px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.chat-bubble-user {
+    background: #00482b;
+    color: white;
+    border-bottom-right-radius: 2px !important;
+    box-shadow: 0 2px 8px rgba(0, 72, 43, 0.2);
+}
+
+/* Input y Botones */
+.ia-chat-footer input:focus {
+    border-color: #00482b !important;
+    background: white !important;
+}
+
+.ia-chat-footer button {
+    transition: background 0.2s;
+}
+
+.ia-chat-footer button:hover {
+    background-color: #006b3f !important;
+}
+
+.ia-chat-footer button:active {
+    transform: scale(0.9);
+}
+
+/* Responsivo para móviles */
+@media (max-width: 480px) {
+    .ia-chat-window {
+        width: 90vw !important;
+        right: 5vw !important;
+        bottom: 85px !important;
+        height: 70vh !important;
+    }
+}

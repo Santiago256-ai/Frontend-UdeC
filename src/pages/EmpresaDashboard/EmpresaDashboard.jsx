@@ -5,6 +5,7 @@ import logoUdec from '../../assets/UdeC2.png';
 import logoGrande from '../../assets/Logo2.png'; 
 import logoPequeño from '../../assets/Logo3.png';
 import ListaPostulacionesTable from "../../components/ListaPostulacionesTable";
+import TotalPostulaciones from "./TotalPostulaciones"; // Ajusta la ruta si es necesario
 
 
 import { 
@@ -32,6 +33,8 @@ const [showFilters, setShowFilters] = useState(true);
 // --- ESTADOS ---
 const [showProfileMenu, setShowProfileMenu] = useState(false); // 👈 Nuevo estado
 const [confirmarEliminar, setConfirmarEliminar] = useState({ visible: false, vacanteId: null, titulo: "" });
+const [vacanteAnimadaId, setVacanteAnimadaId] = useState(null);
+const conteoReferencia = React.useRef({});
     
     const PIPELINE_STAGES = {
     PENDIENTE: { label: 'pendiente', color: '#64748b', bg: '#f1f5f9' },    // Gris
@@ -95,17 +98,26 @@ const limpiarFiltros = () => {
 };
 
     // --- LÓGICA DE DATOS ---
-    const cargarVacantes = useCallback(() => {
-        if (empresa?.id) {
-            API.get(`/vacantes/empresa/${empresa.id}`)
-                .then((res) => {
-                    setVacantes(res.data);
-                    const total = res.data.reduce((acc, v) => acc + (v._count?.postulaciones || 0), 0);
-                    setPrevTotalPostulaciones(prev => prev === 0 ? total : prev);
-                })
-                .catch((err) => console.error("Error al cargar vacantes:", err));
-        }
-    }, [empresa?.id]);
+const cargarVacantes = useCallback(() => {
+    if (empresa?.id) {
+        API.get(`/vacantes/empresa/${empresa.id}`)
+            .then((res) => {
+                setVacantes(res.data);
+                
+                // 🔥 ESTO ES CLAVE: Llenamos el conteo inicial para que el polling 
+                // tenga contra qué comparar desde el segundo 1.
+                res.data.forEach(v => {
+                    if (!conteoReferencia.current[v.id]) {
+                        conteoReferencia.current[v.id] = v._count?.postulaciones || 0;
+                    }
+                });
+
+                const total = res.data.reduce((acc, v) => acc + (v._count?.postulaciones || 0), 0);
+                setPrevTotalPostulaciones(prev => prev === 0 ? total : prev);
+            })
+            .catch((err) => console.error("Error al cargar vacantes:", err));
+    }
+}, [empresa?.id]);
 
     // 3. TODOS los useEffect (MUEVE EL DE CLOSEALL AQUÍ ARRIBA)
     useEffect(() => {
@@ -113,31 +125,6 @@ const limpiarFiltros = () => {
     window.addEventListener('click', closeAll);
     return () => window.removeEventListener('click', closeAll);
 }, []);
-
-// --- CORRECCIÓN 2: Polling inteligente ---
-const checkNewPostulaciones = useCallback(async () => {
-    if (!empresa?.id || vacantes.length === 0) return;
-    try {
-        const promesas = vacantes.map(v => API.get(`/postulaciones/vacante/${v.id}`));
-        const resultados = await Promise.all(promesas);
-        const totalActual = resultados.reduce((acc, res) => acc + (res.data?.length || 0), 0);
-
-        if (prevTotalPostulaciones > 0 && totalActual > prevTotalPostulaciones) {
-            toast.info("🚀 ¡Nueva postulación recibida!");
-            new Audio('/sounds/notification.mp3').play().catch(() => {});
-            
-            cargarVacantes(); // Actualiza la lista de la izquierda
-
-            // 🔥 ESTO ES LO NUEVO: Si el usuario está viendo una vacante, actualiza la tabla
-            if (vacanteSeleccionadaId) {
-                handleVerPostulaciones(vacanteSeleccionadaId);
-            }
-        }
-        setPrevTotalPostulaciones(totalActual);
-    } catch (error) {
-        console.error("Error en polling:", error);
-    }
-}, [empresa?.id, vacantes, prevTotalPostulaciones, vacanteSeleccionadaId, cargarVacantes]);
 
 const [perfilParaDescargaDirecta, setPerfilParaDescargaDirecta] = useState(null);
 
@@ -168,13 +155,7 @@ const handleDescargaDirecta = (usuario) => {
         return () => window.removeEventListener('click', unlock);
     }, []);
 
-    // Intervalo de revisión (Polling)
-    useEffect(() => {
-        const interval = setInterval(() => {
-            checkNewPostulaciones();
-        }, 30000); 
-        return () => clearInterval(interval);
-    }, [checkNewPostulaciones]);
+
 
     // Carga inicial
     useEffect(() => {
@@ -222,6 +203,54 @@ useEffect(() => {
         setPostulaciones([]);
     }
 };
+
+const checkNewPostulaciones = useCallback(async () => {
+    if (!empresa?.id || vacantes.length === 0) return;
+
+    try {
+        const res = await API.get(`/vacantes/empresa/${empresa.id}`);
+        const vacantesNuevas = res.data;
+        let huboNovedad = false;
+
+        vacantesNuevas.forEach((vNueva) => {
+            const cantidadPrevia = conteoReferencia.current[vNueva.id] || 0;
+            const cantidadActual = vNueva._count?.postulaciones || 0;
+
+            if (cantidadActual > cantidadPrevia) {
+                setVacanteAnimadaId(vNueva.id);
+                huboNovedad = true;
+
+                toast.info(`🚀 ¡Nueva postulación: ${vNueva.titulo}!`, {
+                    position: "bottom-right",
+                    autoClose: 5000,
+                });
+
+                const audio = new Audio('/sounds/notification.mp3');
+                audio.play().catch(err => console.log("Audio bloqueado:", err));
+
+                setTimeout(() => setVacanteAnimadaId(null), 7000);
+            }
+            conteoReferencia.current[vNueva.id] = cantidadActual;
+        });
+
+        if (huboNovedad) {
+            setVacantes(vacantesNuevas);
+            if (vacanteSeleccionadaId) {
+                handleVerPostulaciones(vacanteSeleccionadaId);
+            }
+        }
+    } catch (error) {
+        console.error("Error en polling:", error);
+    }
+}, [empresa?.id, vacantes, vacanteSeleccionadaId]); 
+
+    // Intervalo de revisión (Polling)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            checkNewPostulaciones();
+        }, 30000); 
+        return () => clearInterval(interval);
+    }, [checkNewPostulaciones]);
 
     const handleVerPerfil = (usuario) => {
         console.log("🔍 Datos enviados al modal VerCV:", usuario); 
@@ -540,6 +569,12 @@ const vacantesFiltradas = vacantes.filter((v) => {
     >
         <MessageSquare size={18}/> <span>MENSAJES / CHAT</span>
     </button>
+    <button 
+        className={`menu-item ${activeTab === 'total_postulaciones' ? 'active' : ''}`} 
+        onClick={() => verificarSalida('total_postulaciones')}
+    >
+        <ClipboardList size={18}/> <span>LISTADO POSTULADOS</span>
+    </button>
 </div>
                 </div>
 
@@ -691,13 +726,28 @@ const vacantesFiltradas = vacantes.filter((v) => {
 
                                 <div className="scrollable-cards">
     {/* 🟢 CAMBIO: Usamos vacantesFiltradas en lugar de vacantes */}
-    {vacantesFiltradas.length > 0 ? (
-        vacantesFiltradas.map((v) => (
+{vacantesFiltradas.length > 0 ? (
+    vacantesFiltradas.map((v) => {
+        // Verificamos si esta vacante específica es la que debe animarse
+        const esNueva = vacanteAnimadaId === v.id;
+
+        return (
             <div 
                 key={v.id} 
-                className={`vacante-card-item ${vacanteSeleccionadaId === v.id ? 'active' : ''}`} 
+                className={`vacante-card-item 
+                    ${vacanteSeleccionadaId === v.id ? 'active' : ''} 
+                    ${esNueva ? 'pulse-new-notification' : ''}`} // 👈 Clase de animación
                 onClick={() => handleVerPostulaciones(v.id)}
+                style={{ position: 'relative' }}
             >
+                {/* 🔔 INDICADOR FLOTANTE DE NUEVA POSTULACIÓN */}
+                {esNueva && (
+                    <div className="new-postulation-badge fade-in">
+                        <Bell size={10} />
+                        <span>¡NUEVA!</span>
+                    </div>
+                )}
+
                 <div className="card-main-info">
                     <h4 style={{ 
                         fontWeight: '700', 
@@ -707,7 +757,7 @@ const vacantesFiltradas = vacantes.filter((v) => {
                         alignItems: 'center',
                         gap: '10px'
                     }}>
-                        <Briefcase size={18} style={{ color: '#006b3f' }} /> 
+                        <Briefcase size={18} style={{ color: esNueva ? '#006b3f' : '#006b3f' }} /> 
                         <span>{v.titulo}</span>
                     </h4>
 
@@ -726,7 +776,7 @@ const vacantesFiltradas = vacantes.filter((v) => {
                     </div>
 
                     <div className="card-meta-tags">
-                        <span className="badge-slots">
+                        <span className={`badge-slots ${esNueva ? 'highlight-count' : ''}`}>
                             <Users size={12} /> 
                             {v.postulaciones?.length || v._count?.postulaciones || 0} postulantes
                         </span>
@@ -748,14 +798,14 @@ const vacantesFiltradas = vacantes.filter((v) => {
                     </button>
                 </div>
             </div>
-        ))
-    ) : (
-        /* 🔴 ESTO APARECE SI BUSCAS ALGO QUE NO EXISTE */
-        <div className="empty-search-results">
-            <Search size={32} style={{ opacity: 0.3 }} />
-            <p>No se encontraron vacantes con los filtros seleccionados.</p>
-        </div>
-    )}
+        );
+    })
+) : (
+    <div className="empty-search-results">
+        <Search size={32} style={{ opacity: 0.3 }} />
+        <p>No se encontraron vacantes con los filtros seleccionados.</p>
+    </div>
+)}
 </div>
                             </section>
 
@@ -1428,6 +1478,13 @@ const vacantesFiltradas = vacantes.filter((v) => {
             <PerfilEmpresa />
         </div>
     )}
+
+    {/* 👇 DÉJALO EXACTAMENTE AQUÍ (Antes del cierre del main) 👇 */}
+    {activeTab === 'total_postulaciones' && (
+        <div className="full-view fade-in">
+            <TotalPostulaciones empresaId={empresa?.id} />
+        </div>
+    )}
                 </main>
             </div>
 
@@ -1457,7 +1514,6 @@ const vacantesFiltradas = vacantes.filter((v) => {
         onClose={() => setIsChatOpen(false)} 
     />
 )}
-           
 
             {/* --- COMPONENTE FANTASMA PARA DESCARGA (Invisible para el usuario) --- */}
 <div style={{ position: 'fixed', left: '-2000px', top: '-2000px', zIndex: -1, opacity: 0 }}>

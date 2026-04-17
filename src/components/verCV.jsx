@@ -65,7 +65,7 @@ const VerCV = ({ perfil, onClose, isAutoDownloading = false }) => {
         }
     }, [isAutoDownloading]);
 
-    const habilidades = cv.habilidades ? cv.habilidades.split(',') : [];
+    const habilidades = Array.isArray(cv.habilidades) ? cv.habilidades : [];
     const aptitudes = Array.isArray(cv.aptitudes) ? cv.aptitudes : [];
     const idiomas = Array.isArray(cv.idiomas) ? cv.idiomas : [];
     const experiencias = Array.isArray(cv.experiencia) ? cv.experiencia : [];
@@ -101,18 +101,26 @@ const VerCV = ({ perfil, onClose, isAutoDownloading = false }) => {
                     </div>
 
                     <div className="cv-aside-section">
-                        <h3>HABILIDADES</h3>
-                        <div className="cv-skills-list">
-                            {habilidades.length > 0 ? habilidades.map((item, i) => (
-                                <div className="cv-skill-item" key={i}>
-                                    <span>{item.trim()}</span>
-                                    <div className="skill-bar">
-                                        <div className="progress" style={{width: '85%'}}></div>
-                                    </div>
-                                </div>
-                            )) : <p className="no-data">No registradas</p>}
-                        </div>
-                    </div>
+    <h3>HABILIDADES</h3>
+    <div className="cv-skills-list">
+        {habilidades.length > 0 ? habilidades.map((item, i) => (
+            <div className="cv-skill-item" key={i}>
+                {/* Mostramos nombre y porcentaje arriba de la barra */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '2px' }}>
+                    <span>{item.nombre || 'Habilidad'}</span>
+                    <span style={{ fontWeight: 'bold' }}>{item.nivel || 0}%</span>
+                </div>
+                {/* La barra de progreso con el ancho dinámico */}
+                <div className="skill-bar">
+                    <div 
+                        className="progress" 
+                        style={{ width: `${item.nivel || 0}%`, backgroundColor: '#DAAA00' }}
+                    ></div>
+                </div>
+            </div>
+        )) : <p className="no-data">No registradas</p>}
+    </div>
+</div>
 
                     <div className="cv-aside-section">
                         <h3>APTITUDES</h3>

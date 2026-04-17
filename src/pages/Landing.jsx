@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Info, Target, Award, Eye as VisionIcon, Users } from 'lucide-react';
 import './Landing.css';
 
 // URLs de Imágenes:
@@ -21,6 +21,7 @@ const [showResetModal, setShowResetModal] = useState(false);
 const [emailRecuperacion, setEmailRecuperacion] = useState('');
 const [resetLoading, setResetLoading] = useState(false);
 const [resetMessage, setResetMessage] = useState({ texto: '', tipo: '' });
+const [showAboutModal, setShowAboutModal] = useState(false); // Estado para el "Acerca de"
 
 // --- Función para enviar el correo de recuperación ---
 const handleRequestReset = async (e) => {
@@ -249,22 +250,90 @@ const handleRequestReset = async (e) => {
 
       {/* --- FOOTER (Verde Oscuro) --- */}
       <footer className="footer-dark-green">
-        <div className="footer-top-links">
-          {/* Espacio para los enlaces del footer */}
-        </div>
-        
         <div className="footer-logo-and-info">
-          {/* Logo pequeño de la UDEC */}
           <img src={logoUrl} alt="UDEC" className="footer-logo-small" />
-          
-          {/* Texto de información de la universidad */}
           <div className="footer-info-text">
             <p>© 2026 Todos los derechos reservados.</p>
-            <p>Desarrollado por Empres360 PRO.</p>
+            {/* Texto clickable en azul profesional */}
+            <p>
+              Desarrollado por{" "}
+              <span 
+                className="e360-clickable-brand" 
+                onClick={() => setShowAboutModal(true)}
+              >
+                Empres360 PRO.
+              </span>
+            </p>
             <p>Universidad de Cundinamarca.</p>
           </div>
         </div>
       </footer>
+
+      {/* --- MODAL INTERACTIVO: ACERCA DE --- */}
+{showAboutModal && (
+  <div className="e360-about-overlay" onClick={() => setShowAboutModal(false)}>
+    <div className="e360-about-card" onClick={(e) => e.stopPropagation()}>
+      <button className="e360-close-btn" onClick={() => setShowAboutModal(false)}>×</button>
+      
+      <div className="e360-modal-header">
+        {/* Logo imponente y protagonista */}
+        <img src={logoUrl} alt="Empres360 PRO" className="e360-modal-logo" />
+      </div>
+
+      <div className="e360-modal-body">
+        {/* 1. ¿Qué es el Portal? */}
+        <section className="e360-section">
+          <h3><Info size={18} /> 1. ¿Qué es Empres360 PRO?</h3>
+          <p>
+            Es una plataforma digital estratégica diseñada para fortalecer el vínculo entre nuestra comunidad académica y el sector productivo. Este ecosistema facilita el encuentro entre el talento de alta calidad y las organizaciones que buscan perfiles innovadores, éticos y con responsabilidad social.
+          </p>
+        </section>
+
+        {/* 2. Objetivos */}
+        <section className="e360-section">
+          <h3><Target size={18} /> 2. Objetivos</h3>
+          <p>
+            Dinamizar la empleabilidad de los <strong>Egresados UdeC</strong>, permitiéndoles gestionar sus perfiles profesionales de manera integral, acceder a ofertas exclusivas del sector y potenciar su trayectoria laboral mediante herramientas tecnológicas.
+          </p>
+        </section>
+
+        {/* 3. Nuestra Misión */}
+        <section className="e360-section">
+          <h3><Award size={18} /> 3. Nuestra Misión</h3>
+          <p>
+            Brindar una solución tecnológica eficiente y centralizada que simplifique los procesos de reclutamiento para las empresas y optimice la búsqueda de oportunidades para nuestros graduados, bajo los principios de transparencia y excelencia académica.
+          </p>
+        </section>
+
+        {/* 4. Nuestra Visión */}
+        <section className="e360-section">
+          <h3><Eye size={18} /> 4. Nuestra Visión</h3>
+          <p>
+            Consolidarnos para los proximos años como el principal ecosistema de vinculación laboral universitaria en la región, siendo reconocidos por la innovación en nuestros procesos de intermediación y por el alto impacto en el desarrollo profesional de nuestra comunidad de egresados.
+          </p>
+        </section>
+
+        {/* 5. Equipo de Desarrollo y Diseño */}
+        <section className="e360-section">
+          <h3><Users size={18} /> 5. Equipo de Desarrollo y Diseño</h3>
+          <p>
+            Esta plataforma ha sido desarrollada bajo estándares modernos de ingeniería de sistemas/software, integrando tecnologías de última generación para garantizar seguridad, velocidad y una experiencia de usuario intuitiva.
+          </p>
+          
+          <div className="e360-team-box">
+            <p><strong>• Dirección de Proyecto:</strong> Universidad de Cundinamarca.</p>
+            <p><strong>• Arquitectura y Desarrollo Full-stack:</strong> Empres360 PRO.</p>
+            <p><strong>• Diseño de Interfaz (UI/UX):</strong> Empres360 PRO.</p>
+          </div>
+        </section>
+      </div>
+
+      <div className="e360-modal-footer">
+        <p>Institución de Educación Superior sujeta a inspección y vigilancia por el Ministerio de Educación Nacional.</p>
+      </div>
+    </div>
+  </div>
+)}
 {showResetModal && (
   <div className="modal-overlay-reset fade-in">
     <div className="modal-content-reset scale-up">

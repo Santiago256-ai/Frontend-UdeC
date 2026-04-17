@@ -1,0 +1,449 @@
+/* ==========================================================================
+   TotalPostulaciones.css - Diseño Premium (Sincronizado con Admin)
+   ========================================================================== */
+
+/* Contenedor Principal con fondo gris suave */
+.tp-container {
+    padding: 2.5rem;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+/* Título con el verde institucional y borde dorado */
+.tp-title {
+    color: #00482B; /* Verde UdeC */
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    border-left: 6px solid #a28945; /* Dorado UdeC */
+    padding-left: 1.2rem;
+}
+
+/* Tabla transparente para permitir filas separadas */
+.tp-table-wrapper {
+    background: transparent;
+    overflow-x: auto;
+}
+
+.tp-custom-table {
+    width: 100%;
+    /* El secreto para las filas tipo tarjeta: separarlas */
+    border-spacing: 0 12px;
+    border-collapse: separate;
+}
+
+/* Cabecera de la tabla */
+.tp-th {
+    padding: 12px 24px;
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+/* Estilo de Fila tipo Tarjeta Blanca */
+.tp-row-card {
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.tp-row-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.tp-td {
+    padding: 18px 24px;
+    background-color: white;
+    vertical-align: middle;
+    border: none;
+}
+
+/* Redondear extremos de las tarjetas */
+.tp-td:first-child {
+    border-radius: 12px 0 0 12px;
+}
+
+.tp-th:last-child {
+    width: 120px; /* Ancho fijo para la columna de acciones */
+    text-align: center;
+}
+
+.tp-td:last-child {
+    border-radius: 0 12px 12px 0;
+    text-align: center; /* Centramos la estrella en su celda */
+    width: 120px;
+}
+
+.tp-actions-container {
+    display: flex;
+    justify-content: center; /* Centrado dentro de los 120px */
+    gap: 10px;
+}
+
+/* Celda del Nombre del Candidato */
+.tp-name-cell {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+/* Badge de Estado Dinámico 
+   (Los colores se aplican desde el JSX, aquí solo estructura) */
+.tp-badge-status {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: inline-block;
+    letter-spacing: 0.02em;
+}
+
+/* Botón de Acción / Calificar Estilo Icono */
+.tp-btn-action {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    color: #64748b;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    /* margin-left: auto;  <-- ELIMINA O COMENTA ESTA LÍNEA */
+    margin: 0 auto; /* Esto lo centra horizontalmente */
+}
+
+.tp-btn-action:hover {
+    border-color: #a28945;
+    color: #a28945;
+    background-color: #fffaf0;
+    transform: scale(1.1);
+}
+
+/* Ajustes Responsive */
+@media (max-width: 1024px) {
+    .tp-container {
+        padding: 1.5rem;
+    }
+    .tp-td {
+        padding: 15px;
+    }
+}
+
+/* --- ESTILOS DEL MODAL --- */
+.tp-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 72, 43, 0.15); /* Verde UdeC muy transparente */
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+}
+
+.tp-modal-card {
+    background: white;
+    width: 100%; max-width: 450px;
+    border-radius: 20px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.tp-modal-header {
+    padding: 25px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el contenido principal */
+    position: relative;  /* IMPORTANTE para posicionar la X */
+    width: 100%;
+}
+
+.tp-modal-header h3 { color: #00482B; font-weight: 800; margin: 0; }
+.tp-modal-header p { font-size: 0.8rem; color: #64748b; margin: 0; }
+
+.tp-modal-body { padding: 25px; }
+
+.tp-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.85rem; font-weight: 700; color: #1e293b;
+    margin-bottom: 12px; margin-top: 15px;
+}
+
+/* Sentimientos Positivo/Negativo */
+.tp-sentiment-row { display: flex; gap: 12px; margin-bottom: 20px; }
+.tp-sent-btn {
+    flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0;
+    background: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 8px; font-weight: 600; color: #64748b; transition: all 0.2s;
+}
+
+.tp-sent-btn.pos.active { background: #dcfce7; color: #15803d; border-color: #15803d; }
+.tp-sent-btn.neg.active { background: #fee2e2; color: #b91c1c; border-color: #b91c1c; }
+
+/* Estrellas */
+.tp-stars-row { display: flex; gap: 5px; margin-bottom: 20px; justify-content: center; }
+.tp-stars-row button { background: none; border: none; cursor: pointer; transition: transform 0.1s; }
+.tp-stars-row button:hover { transform: scale(1.2); }
+.tp-stars-row .on { color: #f59e0b; }
+.tp-stars-row .off { color: #e2e8f0; }
+
+.tp-textarea {
+    width: 100%; height: 100px; padding: 12px; border-radius: 12px;
+    border: 1px solid #e2e8f0; resize: none; font-size: 0.9rem; outline: none;
+}
+.tp-textarea:focus { border-color: #a28945; box-shadow: 0 0 0 3px rgba(162, 137, 69, 0.1); }
+
+.tp-modal-footer {
+    padding: 15px 25px; background: #f8fafc; border-top: 1px solid #e2e8f0;
+    display: flex; gap: 12px;
+}
+
+/* --- HOVER BOTONES PRINCIPALES DEL MODAL --- */
+
+/* Botón Cancelar */
+.tp-btn-cancel {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #e2e8f0;
+    color: #475569;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Transición suave */
+}
+
+.tp-btn-cancel:hover {
+    background: #cbd5e1; /* Gris un poco más oscuro */
+    color: #1e293b;
+    transform: translateY(-1px); /* Elevación sutil */
+}
+
+/* Botón Guardar Feedback (Verde UdeC) */
+.tp-btn-submit {
+    flex: 2;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #00482B; /* Tu verde institucional */
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Animación más fluida */
+    box-shadow: 0 4px 6px -1px rgba(0, 72, 43, 0.2); /* Sombra inicial verde */
+}
+
+.tp-btn-submit:hover {
+    background: #003620; /* Verde más profundo */
+    transform: translateY(-2px); /* Se eleva un poco más que el de cancelar */
+    box-shadow: 0 10px 15px -3px rgba(0, 72, 43, 0.3); /* Sombra proyectada */
+}
+
+/* Efecto de clic para ambos */
+.tp-btn-cancel:active, 
+.tp-btn-submit:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Estado deshabilitado (por si el backend está cargando) */
+.tp-btn-submit:disabled {
+    background: #00482B; /* Mantiene su color pero la opacidad del inline style hará el efecto */
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Nuevo botón X elegante */
+.tp-x-close-btn {
+    position: absolute; /* Sale del flujo y se va a la esquina */
+    top: 20px;
+    right: 20px;
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tp-x-close-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+    transform: rotate(90deg);
+}
+
+/* Modal de confirmación de salida */
+.tp-confirm-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.tp-confirm-card {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 350px;
+}
+
+/* --- HOVER PARA LOS BOTONES DE CONFIRMACIÓN --- */
+
+/* Botón "Continuar editando" / "Cancelar" */
+.tp-btn-stay {
+    background: #f1f5f9;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #475569;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 12px;
+    transition: all 0.3s ease;
+}
+
+.tp-btn-stay:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Botón "Sí, eliminar" / "Salir sin guardar" */
+.tp-btn-exit {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.tp-btn-exit:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Efecto cuando se hace clic (Active) */
+.tp-btn-stay:active, .tp-btn-exit:active {
+    transform: translateY(0);
+}
+
+/* Ajuste adicional para el contenedor de botones (el espacio que pediste antes) */
+.tp-confirm-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 8px; /* Controla el espacio entre ellos */
+}
+
+/* Botón eliminar en el footer */
+.tp-btn-delete {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    width: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.tp-btn-delete:hover { background: #ef4444; color: white; }
+
+.scale-in { animation: scaleIn 0.2s ease-out; }
+@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.tp-header-text-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    gap: 8px;
+}
+
+.tp-modal-main-title {
+    color: #00482B;
+    font-weight: 800;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.tp-candidate-context {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio sutil entre los badges */
+    flex-wrap: wrap; /* Para que no se corte en pantallas pequeñas */
+    margin-top: 5px; /* Separación del título */
+}
+
+.tp-candidate-name {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.tp-student-badge {
+    background-color: #fffbeb; /* Naranja muy clarito */
+    color: #a28945; /* Dorado UdeC */
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid #fef3c7;
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap; /* Evita que el nombre se corte */
+}
+
+/* El Badge de la Vacante (Verde UdeC) */
+.tp-vacancy-badge {
+    background-color: #f0fdf4; /* Verde muy clarito */
+    color: #00482B; /* Verde UdeC */
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid #dcfce7;
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap; /* Evita que el título se corte */
+}
+
+/* Cuando el botón tiene una calificación activa */
+.tp-btn-action.has-rating {
+    background-color: #fffbeb; /* Un fondo amarillo crema muy suave */
+    border-color: #e09513;     /* Borde a juego */
+    transition: all 0.3s ease;
+}
+
+.tp-btn-action.has-rating:hover {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+    transform: scale(1.1);
+}
