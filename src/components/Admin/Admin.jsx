@@ -80,7 +80,7 @@ const Admin = () => {
                 <Icon name="house" /> Inicio
               </li>
               <li className={vistaActiva === 'usuarios' ? 'active' : ''} onClick={() => setVistaActiva('usuarios')}>
-                <Icon name="users" /> Usuarios
+                <Icon name="users" /> Egresados
               </li>
               <li className={vistaActiva === 'empresas' ? 'active' : ''} onClick={() => setVistaActiva('empresas')}>
                 <Icon name="building" /> Empresas

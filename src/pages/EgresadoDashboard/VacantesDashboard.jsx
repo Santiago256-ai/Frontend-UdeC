@@ -26,9 +26,11 @@ import {
     Globe, 
     DollarSign,
     AlertTriangle,
-    User,        // <--- Asegúrate que esté aquí una sola vez
-    UserCircle,  // <--- Añade los nuevos aquí
-    Settings
+    User,
+    UserCircle,
+    Settings,
+    XCircle, // 👈 ¡AGREGA ESTE AQUÍ!
+    CheckCircle
 } from 'lucide-react';
 
 import Mensajeria from '../../components/Chat-Vacantes'; 
@@ -39,6 +41,17 @@ import PerfilEgresado from '../../components/PerfilEgresado'; // Ajusta la ruta 
 import SolicitudesEgresado from '../../components/SolicitudesEgresado';
 import InicioEgresados from '../../components/InicioEgresados';
 import NotificacionesEgresado from '../../components/NotificacionesEgresado';
+import 'react-quill-new/dist/quill.snow.css'; // Esto asegura que las clases de Quill funcionen
+import Quill from 'quill';
+
+// Esto es vital: le dice a Quill que use CLASES (ql-align-center) 
+// en lugar de estilos en línea, para que el CSS de arriba las detecte.
+const AlignStyle = Quill.import('attributors/class/align');
+Quill.register(AlignStyle, true);
+
+// También registraremos el tamaño para evitar que se guarden tamaños diminutos
+const SizeStyle = Quill.import('attributors/style/size');
+Quill.register(SizeStyle, true);
 
 
 export default function VacantesDashboard() {
@@ -191,7 +204,7 @@ const fetchVacantes = async () => {
     const diferenciaDias = (cierreAjustado - hoy) / (1000 * 60 * 60 * 24);
     
     // Es urgente si es hoy, mañana, o hasta en 3 días.
-    return diferenciaDias >= 0 && diferenciaDias <= 3;
+    return diferenciaDias >= 0 && diferenciaDias <= 2;
 };
 
     // Función para determinar el estilo y texto de los cupos
@@ -303,194 +316,84 @@ const yaPostulado = selectedVacante?.postulaciones?.some(p => p.egresadoId === u
     return (inicialNombre + inicialApellido).toUpperCase();
 };
 
-    return (
-        <div className={`dashboard-layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-            
-            {/* SIDEBAR CORREGIDO (UN SOLO NAV) */}
-            <nav className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
-                <div className="sidebar-top">
-                    <div className="logo-section">
-    <div className="platform-logo-container">
-        {isSidebarCollapsed ? (
-            /* Logo tipo icono para sidebar cerrado */
-            <img 
-                src={logoPequeño} 
-                alt="Icono" 
-                className="logo-icon-collapsed fade-in" 
-            />
-        ) : (
-            /* Logo completo para sidebar abierto */
-            <img 
-                src={logoGrande} 
-                alt="Empres 360 Pro" 
-                className="logo-full-expanded fade-in" 
-            />
-        )}
-    </div>
-</div>
-                    <div className="sidebar-menu">
-    {/* Inicio */}
-    <button 
-        className={`menu-item ${vistaActiva === 'inicio' ? 'active' : ''}`} 
-        onClick={() => navegarAVista('inicio')}
-    >
-        <Home size={18}/> <span>INICIO</span>
-    </button>
+return (
+    <div className="dashboard-layout">
+        {/* SIDEBAR: Diseño Expandible y Sutil */}
+        <nav 
+            className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}
+            onMouseEnter={() => setIsSidebarCollapsed(false)}
+            onMouseLeave={() => setIsSidebarCollapsed(true)}
+        >
+            <div className="sidebar-top">
+                <div className="sidebar-menu">
+                    <button className={`menu-item ${vistaActiva === 'inicio' ? 'active' : ''}`} onClick={() => navegarAVista('inicio')}>
+                        <Home size={20}/> <span>INICIO</span>
+                    </button>
 
-    {/* Solicitudes */}
-    <button 
-        className={`menu-item ${vistaActiva === 'solicitudes' ? 'active' : ''}`} 
-        onClick={() => navegarAVista('solicitudes')}
-    >
-        <ClipboardList size={18}/> <span>MIS SOLICITUDES</span>
-    </button>
+                    <button className={`menu-item ${vistaActiva === 'solicitudes' ? 'active' : ''}`} onClick={() => navegarAVista('solicitudes')}>
+                        <ClipboardList size={20}/> <span>MIS SOLICITUDES</span>
+                    </button>
 
-    {/* Vacantes */}
-    <button 
-        className={`menu-item ${vistaActiva === 'vacantes' ? 'active' : ''}`} 
-        onClick={() => navegarAVista('vacantes')}
-    >
-        <Briefcase size={18}/> <span>VACANTES DISPONIBLES</span>
-    </button>
+                    <button className={`menu-item ${vistaActiva === 'vacantes' ? 'active' : ''}`} onClick={() => navegarAVista('vacantes')}>
+                        <Briefcase size={20}/> <span>VACANTES DISPONIBLES</span>
+                    </button>
 
-    {/* Hoja de Vida */}
-    <button 
-        className={`menu-item ${vistaActiva === 'crear-cv' ? 'active' : ''}`} 
-        onClick={() => navegarAVista('crear-cv')}
-    >
-        <PlusCircle size={18}/> <span>MI HOJA DE VIDA</span>
-    </button>
+                    <button className={`menu-item ${vistaActiva === 'crear-cv' ? 'active' : ''}`} onClick={() => navegarAVista('crear-cv')}>
+                        <PlusCircle size={20}/> <span>MI HOJA DE VIDA</span>
+                    </button>
 
-    {/* Notificaciones */}
-    <button 
-        className={`menu-item ${vistaActiva === 'notificaciones' ? 'active' : ''}`} 
-        onClick={() => navegarAVista('notificaciones')}
-    >
-        <Bell size={18}/> <span>NOTIFICACIONES</span>
-    </button>
+                    <button className={`menu-item ${vistaActiva === 'notificaciones' ? 'active' : ''}`} onClick={() => navegarAVista('notificaciones')}>
+                        <Bell size={20}/> <span>NOTIFICACIONES</span>
+                    </button>
 
-    {/* Mensajes / Chat */}
-    <button 
-        className={`menu-item ${vistaActiva === 'mensajes' ? 'active' : ''}`} 
-        onClick={() => {
-            // Cuando el usuario hace clic manualmente, queremos que se limpie 
-            // el chat activo para ver la lista completa de conversaciones.
-            setChatActivo(null); 
-            navegarAVista('mensajes');
-        }}
-    >
-        <MessageSquare size={18}/> <span>MENSAJES / CHAT</span>
-    </button>
-</div>
-                </div>
-
-                <div className="sidebar-footer">
-                    <button className="collapse-btn-footer" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
-    <div className="btn-content">
-        <ChevronRight size={20} className={`icon-transition ${isSidebarCollapsed ? "" : "rotate-180"}`} />
-        {/* Este span es el que se convertirá en tooltip al contraer */}
-        <span>{isSidebarCollapsed ? "ABRIR MENÚ" : "CONTRAER MENÚ"}</span>
-    </div>
-</button>
-<div className="menu-item logout-item" onClick={() => setShowLogoutModal(true)}>
-    <LogOut size={20} className="sidebar-icon" />
-    {!isSidebarCollapsed && <span className="menu-label">CERRAR SESIÓN</span>}
-</div>
-                </div>
-            </nav>
-
-            <div className="glass-container">
-                <header className="main-header-container">
-    {/* Franja superior de colores */}
-    <div className="header-top-bar">
-        <div className="bar-green"></div>
-        <div className="bar-orange"></div>
-    </div>
-
-    {/* Franja inferior blanca con contenido */}
-    <div className="header-content">
-    {/* LADO IZQUIERDO: LOGO (Se queda igual) */}
-    <div className="header-left">
-        <div className="udec-brand">
-            <img src={logoUdec} alt="Logo UdeC" className="header-logo-img" />
-        </div>
-    </div>
-
-    {/* CENTRO: BUSCADOR (Lo movimos aquí) */}
-    <div className="header-center">
-        <div className="search-wrapper">
-            <Search size={18} className="search-icon-inside" />
-            <input type="text" placeholder="Buscar" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-        </div>
-    </div>
-
-    {/* LADO DERECHO: PERFIL Y SETTINGS (Lo movimos aquí) */}
-    <div className="header-right">
-    <div className="user-profile-info">
-        <div className="user-details">
-            <span className="user-full-name">
-                {usuario?.nombres} {usuario?.apellidos}
-            </span>
-            <span className="user-career">
-    Egresado - {usuario?.programa || "Sin programa registrado"}
-</span>
-        </div>
-        
-        {/* Contenedor del Avatar con Dropdown */}
-        <div className="vdp-avatar-container" style={{ position: 'relative' }}>
-            <div 
-                className="user-avatar-initials" 
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                style={{ cursor: 'pointer' }}
-            >
-                {usuario?.foto ? (
-                    <img src={usuario.foto} alt="Avatar" />
-                ) : (
-                    <span>{obtenerIniciales(usuario?.nombres, usuario?.apellidos)}</span>
-                )}
-            </div>
-
-            {/* Menú Desplegable */}
-            {showProfileDropdown && (
-                <div className="vdp-dropdown-menu">
-                    <div className="vdp-dropdown-header">
-                        <strong>Mi Cuenta</strong>
-                    </div>
-                    <button 
-    className="vdp-dropdown-item" 
-    onClick={() => {
-        setVistaActiva('ver-perfil');
-        setShowProfileDropdown(false);
-    }}
->
-    <User size={18} className="vdp-icon-green" /> 
-    <span>Ver Perfil</span>
-</button>
-
-<button 
-    className="vdp-dropdown-item" 
-    onClick={() => {
-        setVistaActiva('ajustes');
-        setShowProfileDropdown(false);
-    }}
->
-    <Settings size={18} className="vdp-icon-green" /> 
-    <span>Ajustes</span>
-</button>
-                    <hr className="vdp-dropdown-divider" />
-                    <button 
-                        className="vdp-dropdown-item vdp-logout" 
-                        onClick={() => setShowLogoutModal(true)}
-                    >
-                        <LogOut size={16} /> Cerrar Sesión
+                    <button className={`menu-item ${vistaActiva === 'mensajes' ? 'active' : ''}`} onClick={() => { setChatActivo(null); navegarAVista('mensajes'); }}>
+                        <MessageSquare size={20}/> <span>MENSAJES / CHAT</span>
                     </button>
                 </div>
-            )}
-        </div>
-    </div>
-</div>
-</div>
-</header>
+            </div>
+        </nav>
+
+        {/* CONTENEDOR PRINCIPAL */}
+        <div className="glass-container">
+            <header className="main-header-container">
+                <div className="header-top-bar">
+                    <div className="bar-green"></div>
+                    <div className="bar-orange"></div>
+                </div>
+                <div className="header-content">
+                    {/* Logos integrados UdeC + Empres360 */}
+                    <div className="header-left-brands">
+                        <img src={logoGrande} alt="Empres 360 Pro" className="header-brand-logo" />
+                        <div className="brand-divider"></div>
+                        <img src={logoUdec} alt="UdeC" className="header-udec-logo" />
+                    </div>
+
+                    <div className="header-right">
+                        <div className="user-profile-info" style={{ position: 'relative' }}>
+                            <div className="user-details">
+                                <span className="user-full-name">{usuario?.nombres} {usuario?.apellidos}</span>
+                                <span className="user-career">Egresado - {usuario?.programa || "UdeC"}</span>
+                            </div>
+                            <div className="vdp-avatar-container">
+                                <div className="user-avatar-initials" onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
+                                    {usuario?.foto ? <img src={usuario.foto} alt="Avatar" /> : <span>{obtenerIniciales(usuario?.nombres, usuario?.apellidos)}</span>}
+                                </div>
+                                {showProfileDropdown && (
+                                    <div className="vdp-dropdown-menu fade-in">
+                                        <button className="vdp-dropdown-item" onClick={() => { setVistaActiva('ver-perfil'); setShowProfileDropdown(false); }}>
+                                            <User size={18} /> <span>Ver Perfil</span>
+                                        </button>
+                                        <div className="dropdown-divider"></div>
+                                        <button className="vdp-dropdown-item vdp-logout" onClick={() => setShowLogoutModal(true)}>
+                                            <LogOut size={16} /> Cerrar Sesión
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
                 <main className="content-inner">
                     {vistaActiva === 'notificaciones' && (
@@ -516,303 +419,268 @@ const yaPostulado = selectedVacante?.postulaciones?.some(p => p.egresadoId === u
         setResaltarPostulacionId={setResaltarPostulacionId} // <-- Para quitar el brillo luego
     />
 )}
-                    {vistaActiva === 'vacantes' && (
-                        <div className="vacantes-view-container">
-                            <section className="vacantes-list-panel">
-    <div className="section-title-container">
-    <Briefcase size={28} className="title-icon" />
-    <h2>
-        VACANTES DISPONIBLES 
-        <span className="vacantes-count-badge">{dataFiltrada.length}</span>
-    </h2>
-</div>
-                                <div className="scrollable-cards">
-                                    {dataFiltrada.map((v) => {
-                                        const cuposDisponibles = v.limitePostulantes ? (v.limitePostulantes - (v._count?.postulaciones || 0)) : null;
-                                        const esUrgente = esFechaCercana(v.fechaCierre);
-
-                                        return (
-                                            <div key={v.id} className={`vacante-card-item ${selectedVacante?.id === v.id ? 'active' : ''}`} onClick={() => setSelectedVacante(v)}>
-                                                <div className="card-main-info">
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-    {/* Icono de Maletín para el Título de la Vacante */}
-    <div className="card-role-icon" style={{ color: '#64748b', display: 'flex', alignItems: 'center' }}>
-        <Briefcase size={18} strokeWidth={2.5} />
-    </div>
-    
-    <h4 style={{ 
-        fontSize: '16px', 
-        fontWeight: '700', 
-        color: '#1a202c', 
-        margin: '0',
-        lineHeight: '1.2' 
-    }}>
-        {v.titulo}
-    </h4>
-</div>
-                                                    {/* CONTENEDOR DE UNA SOLA LÍNEA (Empresa | Ubicación | Fecha) */}
-<div className="card-info-row" style={{ 
-    display: 'flex', 
-    alignItems: 'center', 
-    gap: '10px', 
-    marginBottom: '10px',
-    flexWrap: 'wrap' // Permite que baje si la pantalla es muy pequeña
-}}>
-    
-    {/* 1. NOMBRE DE LA EMPRESA */}
-    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-        <Building2 size={14} style={{ color: '#006b3f' }} />
-        <span style={{ 
-            fontSize: '13px', 
-            fontWeight: '700', 
-            color: '#1a202c', 
-            textTransform: 'uppercase'
-        }}>
-            {v.empresa?.nombre || 'Empresa Aliada'}
-        </span>
-    </div>
-
-    {/* Separador barra vertical */}
-    <span style={{ color: '#cbd5e0', fontSize: '14px' }}>|</span>
-
-    {/* 2. UBICACIÓN (Estilo limpio sin fondo para no saturar la línea) */}
-    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#4a5568', fontSize: '12px', fontWeight: '500' }}>
-        <MapPin size={13} style={{ color: '#3182ce' }} />
-        <span>{v.ubicacion}</span>
-    </div>
-
-    {/* Separador barra vertical */}
-    <span style={{ color: '#cbd5e0', fontSize: '14px' }}>|</span>
-
-    {/* 3. FECHA DE PUBLICACIÓN */}
-    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#718096', fontSize: '12px' }}>
-        <Calendar size={13} style={{ color: '#a0aec0' }} />
-        <span>Publicado: {formatDate(v.fechaCreacion)}</span>
-    </div>
-</div>
-                                                    <div className="card-meta-tags" style={{display: 'flex', gap: '6px', flexWrap: 'wrap'}}>
-                                                        <span style={{display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#475569'}}>
-                                                            <DollarSign size={12} style={{marginRight: '4px'}} />
-                                                            {v.salario && !isNaN(parseFloat(v.salario)) ? `${parseFloat(v.salario).toLocaleString('es-CO')}` : 'A convenir'}
-                                                        </span>
-                                                        {/* Dentro de scrollable-cards -> dataFiltrada.map */}
-{cuposDisponibles !== null && (
-    <span 
-        className={`badge-slots ${obtenerEstiloCupos(cuposDisponibles).clase}`} 
-        style={{display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600'}}
-    >
-        <Users size={12} style={{marginRight: '4px'}} /> 
-        {cuposDisponibles} cupos
-        {obtenerEstiloCupos(cuposDisponibles).texto && (
-            <b style={{marginLeft: '4px'}}>{obtenerEstiloCupos(cuposDisponibles).texto}</b>
-        )}
-    </span>
-)}
-                                                        <span 
-    className={`badge-deadline ${esFechaCercana(v.fechaCierre) ? 'fecha-urgente' : ''}`} 
-    style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '500' }}
->
-    <Clock size={12} style={{ marginRight: '6px' }} /> 
-    
-    {/* 1. Texto de urgencia en negrita al inicio */}
-    {esFechaCercana(v.fechaCierre) ? (
-        <>
-            {/* 1. Primero la fecha con formato discreto */}
-            <span style={{ marginRight: '4px' }}>
-                ({formatDate(v.fechaCierre)})
-            </span>
-
-            {/* 2. Luego el aviso de urgencia en negrita */}
-            <b style={{ fontWeight: '700', textTransform: 'uppercase' }}>
-                ¡Pronto!
-            </b>
-        </>
-    ) : (
-        `Cierre: ${formatDate(v.fechaCierre)}`
-    )}
-
-    {/* 2. Icono de Alerta al FINAL (solo si es urgente) */}
-    {esFechaCercana(v.fechaCierre) && (
-        <AlertTriangle 
-            size={13} 
-            className="blink-icon" 
-            style={{ marginLeft: '6px', color: '#dc2626' }} 
-        />
-    )}
-</span>
-                                                    </div>
-                                                </div>
-                                                <button className="btn-details-action" style={{marginTop: '12px', padding: '6px 12px', fontSize: '12px'}}>Ver Detalles</button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </section>
-
-                            <aside className="vacante-detail-panel">
-                                {selectedVacante ? (
-                                    <div className="detail-content-wrapper fade-in" key={selectedVacante.id}>
-                                        <div className="detail-header-info">
-                                            <h3 style={{fontSize: '22px', color: '#1a202c', marginBottom: '15px'}}>{selectedVacante.titulo}</h3>
-                                            
-                                            
-                                            <div className="detail-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '20px' }}>
-    
-    {/* 1. UBICACIÓN */}
-    <span className="meta-tag-badge badge-published">
-        <MapPin size={14} style={{marginRight: '6px'}} /> <b>Ubicación:</b> {selectedVacante.ubicacion}
-    </span>
-
-    {/* 2. CONTRATO */}
-    <span className="meta-tag-badge badge-published">
-        <FileText size={14} style={{marginRight: '6px'}} /> <b>Contrato:</b> {selectedVacante.tipo}
-    </span>
-
-    {/* 3. MODALIDAD */}
-    <span className="meta-tag-badge badge-published">
-        <Globe size={14} style={{marginRight: '6px'}} /> <b>Modalidad:</b> {selectedVacante.modalidad}
-    </span>
-
-    {/* 4. SALARIO (Lógica mejorada con tipoSalario) */}
-    <span className="meta-tag-badge badge-slots">
-        <DollarSign size={14} style={{marginRight: '6px'}} /> 
-        <b>SALARIO:</b> {selectedVacante.tipoSalario === 'A convenir' 
-            ? 'A convenir' 
-            : (selectedVacante.salario && !isNaN(parseFloat(selectedVacante.salario)) 
-                ? `${parseFloat(selectedVacante.salario).toLocaleString('es-CO')}` 
-                : (selectedVacante.tipoSalario || 'A convenir'))
-        }
-    </span>
-
-    {/* 5. PUBLICADO */}
-    <span className="meta-tag-badge badge-published">
-        <Calendar size={14} style={{marginRight: '6px'}} /> <b>Publicado:</b> {formatDate(selectedVacante.fechaCreacion)}
-    </span>
-
-    {/* 6. JORNADA (Nuevo campo) */}
-    <span className="meta-tag-badge badge-published">
-        <Clock size={14} style={{marginRight: '6px'}} /> <b>Jornada:</b> {selectedVacante.jornada || 'No definida'}
-    </span>
-
-    {/* 7. CUPOS (Mantiene tu lógica original) */}
-    {selectedVacante.limitePostulantes && (
-        <span className={`meta-tag-badge badge-slots ${obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).clase}`}>
-            <Users size={14} style={{ marginRight: '6px' }} />
-            <b>CUPOS:</b> {selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)}
-            
-            {obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).texto && (
-                <b style={{ marginLeft: '5px' }}>
-                    {obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).texto}
-                </b>
-            )}
-
-            {obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).texto && (
-                <AlertTriangle 
-                    size={16} 
-                    className={(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)) <= 2 ? "blink-icon" : ""} 
-                    style={{ 
-                        marginLeft: '8px', 
-                        color: (selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)) <= 2 ? '#dc2626' : '#a16207' 
-                    }} 
-                />
-            )}
-        </span>
-    )}
-
-    {/* 8. CIERRE (Mantiene tu lógica de urgencia y tooltip) */}
-    <span className={`meta-tag-badge badge-deadline ${esFechaCercana(selectedVacante.fechaCierre) ? 'urgent' : ''}`}>
-    <Clock size={14} style={{ marginRight: '6px' }} />
-    <b>Cierre:</b> <span>{formatDate(selectedVacante.fechaCierre)}</span>
-
-    {esFechaCercana(selectedVacante.fechaCierre) && (
-        <div className="tooltip-container">
-            <AlertTriangle 
-                size={16} 
-                className="blink-icon" 
-                style={{ marginLeft: '6px', color: '#dc2626', cursor: 'pointer' }} 
-            />
-            <span className="tooltip-text">¡Esta vacante cierra muy pronto!</span>
-        </div>
-    )}
-</span>
-
-    {/* 9. HORARIO (Nuevo campo) */}
-    <span className="meta-tag-badge badge-published">
-        <Calendar size={14} style={{marginRight: '6px'}} /> <b>Horario:</b> {selectedVacante.horario || 'Ver descripción'}
-    </span>
-</div>
-                                        </div>
-
-                                        <div className="detail-body-text" style={{background: '#fcfcfc', border: '1px solid #f0f0f0', borderRadius: '12px', padding: '20px'}}>
-                                            <strong style={{display: 'block', marginBottom: '10px', color: '#2d3748', fontSize: '15px'}}>Descripción de la vacante:</strong>
-                                            <p style={{fontSize: '14px', lineHeight: '1.7', color: '#4a5568'}}>{selectedVacante.descripcion}</p>
-                                        </div>
-
-                                        <div className="actions-footer" style={{marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '10px'}}>
-    
-    {yaPostulado ? (
-        /* Este bloque evita que el usuario haga clic de nuevo */
-        <div className="already-applied-banner">
-            <div className="applied-content">
-                <div className="applied-icon-wrapper">
-                    <FileText size={18} style={{ color: '#16a34a' }} />
+                {vistaActiva === 'vacantes' && (
+    <div className="vacantes-grid-wrapper fade-in">
+        
+        {/* 1. CABECERA ESTILO HUB (Toda la pantalla) */}
+        <header className="vacantes-grid-header">
+            <div className="hub-left">
+                <div className="hub-icon-wrapper">
+                    <Briefcase size={28} />
                 </div>
-                <div className="applied-text">
-                    <span className="applied-title">Postulación enviada</span>
-                    <p>Ya estás participando en este proceso de selección.</p>
+                <div className="hub-title-text">
+                    <h2>Vacantes Disponibles</h2>
+                    <p>Explora las mejores oportunidades para tu perfil profesional</p>
                 </div>
             </div>
-            <div className="applied-status-tag">Enviado</div>
-        </div>
-    ) : (
-        /* Solo mostramos el botón si NO está postulado */
-        <button className="btn-apply-main" onClick={handlePostulacion}>
-            POSTULARME AHORA
-        </button>
-    )}
-
-    <button className="btn-cv-secondary" onClick={() => setVistaActiva('crear-cv')}>
-        MI HOJA DE VIDA
-    </button>
-                                            <div className="drag-drop-area" style={{border: '2px dashed #e2e8f0', borderRadius: '12px', padding: '20px', textAlign: 'center', background: '#f9fafb'}}>
-                                                <span style={{fontSize: '13px', color: '#718096'}}>Subir archivos adicionales</span>
-                                                <small style={{display: 'block', color: '#a0aec0', marginTop: '4px'}}>Drag and drop</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="no-selection-state">
-            {dataFiltrada.length > 0 ? (
-                /* CASO A: Hay vacantes en la lista, pero no ha tocado ninguna */
-                <div className="empty-selection-content fade-in">
-                    <div className="icon-pulse-container">
-                        <Search size={60} color="#006b3f" strokeWidth={1.5} />
-                    </div>
-                    <h3>Explora las Vacantes</h3>
-                    <p>
-                        Hay <strong>{dataFiltrada.length}</strong> ofertas esperando por ti. 
-                        Selecciona una de la lista para ver los detalles y postularte.
-                    </p>
-                    <div className="selection-hint">
-                        <span>Haz clic en una vacante de la izquierda</span>
-                    </div>
+            <div className="hub-right">
+                <div className="hub-stat-card">
+                    <span className="stat-label">Ofertas encontradas</span>
+                    <span className="stat-number">{dataFiltrada.length}</span>
                 </div>
-            ) : (
-                /* CASO B: Realmente no hay vacantes disponibles (Tu código original) */
-                <div className="no-vacantes-content fade-in">
-                    <Briefcase size={60} color="#cbd5e0" strokeWidth={1} />
+            </div>
+        </header>
+
+        {/* 2. REJILLA DE TARJETAS (Grid Layout - Ocupa todo el ancho) */}
+<div className="vacantes-main-grid">
+    {dataFiltrada.length > 0 ? (
+        dataFiltrada.map((v) => {
+            const cuposDisponibles = v.limitePostulantes ? (v.limitePostulantes - (v._count?.postulaciones || 0)) : null;
+            const esUrgente = esFechaCercana(v.fechaCierre);
+            const estiloCupos = obtenerEstiloCupos(cuposDisponibles);
+
+ return (
+    <div key={v.id} className="vacante-card-compact" onClick={() => setSelectedVacante(v)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '20px' }}>
+        <div className="card-content-left" style={{ flex: '1 1 auto', maxWidth: 'calc(100% - 70px)' }}>
+            
+            {/* 1. Encabezado: Icono con fondo y Título Verde UdeC */}
+            <div className="card-header-mini" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+                <div className="hub-icon-wrapper-mini" style={{ background: 'rgba(0, 72, 43, 0.1)', padding: '10px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Briefcase size={20} style={{ color: '#00482b' }} />
+                </div>
+                <h4 className="titulo-vacante" style={{ color: '#00482b', fontWeight: '800', margin: 0, fontSize: '1.15rem', letterSpacing: '-0.5px' }}>
+                    {v.titulo}
+                </h4>
+            </div>
+
+            {/* 2. Info secundaria (Empresa, Ciudad, Publicación) - Limpia y sin fecha de cierre aquí */}
+<div className="card-details-row" style={{ 
+    display: 'flex', 
+    gap: '15px', 
+    marginBottom: '15px', 
+    color: '#64748b', 
+    fontSize: '0.85rem', // Lo bajé un pelín para dar más aire
+    alignItems: 'center',
+    whiteSpace: 'nowrap' // 👈 Evita que el texto se salte de línea
+}}>
+    <div className="detail-group" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <Building2 size={14} />
+        <span>{v.empresa?.nombre || 'Empresa Aliada'}</span>
+    </div>
+    <span style={{ opacity: 0.3 }}>•</span>
+    <div className="detail-group" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <MapPin size={14} />
+        <span>{v.ubicacion}</span>
+    </div>
+    <span style={{ opacity: 0.3 }}>•</span>
+    <div className="detail-group" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <Calendar size={14} />
+        <span>{formatDate(v.fechaCreacion)}</span>
+    </div>
+</div>
+
+            {/* 3. Fila de Badges UNIFICADA (Salario + Cierre + Cupos) */}
+{/* Fila de Badges con texto más pequeño y elegante */}
+{/* Fila de Badges con Tooltips (Titles) */}
+<div className="card-badges-row" style={{ 
+    display: 'flex', 
+    gap: '8px', 
+    alignItems: 'center', 
+    marginTop: '12px',
+    flexWrap: 'nowrap' 
+}}>
+    {/* 1. SALARIO */}
+ <div className="badge-salary" title="Salario mensual ofrecido">
+    <DollarSign size={12} strokeWidth={2.5} />
+    <span style={{ fontWeight: '700' }}>
+        {v.salario && !isNaN(parseFloat(v.salario)) 
+            ? parseFloat(v.salario).toLocaleString('es-CO') 
+            : 'A convenir'}
+    </span>
+</div>
+
+    {/* 2. FECHA DE CIERRE con Title dinámico */}
+{/* 2. FECHA DE CIERRE */}
+{v.fechaCierre && (
+    <div 
+        className={`badge-pill ${esFechaCercana(v.fechaCierre) ? 'fecha-alerta' : 'fecha-normal'}`} 
+        title={esFechaCercana(v.fechaCierre) ? "¡Cierra pronto esta vacante!" : "Fecha límite de postulación"}
+        style={{ 
+            padding: '4px 12px', 
+            fontSize: '0.75rem', 
+            cursor: 'help',
+            display: 'flex',      // 👈 Alinea icono y texto
+            alignItems: 'center', // 👈 Los centra verticalmente
+            gap: '8px'            // 👈 El espacio que necesitabas
+        }}
+    >
+        <Clock size={12} />
+        <span style={{ fontWeight: '700' }}>
+            Cierre: {formatDate(v.fechaCierre)}
+        </span>
+    </div>
+)}
+
+{/* 3. CUPOS */}
+{cuposDisponibles !== null && (
+    <div 
+        className={`badge-pill ${estiloCupos.clase}`} 
+        title={cuposDisponibles <= 3 ? "¡Quedan pocas vacantes!" : "Cupos disponibles para esta oferta"}
+        style={{ 
+            padding: '4px 12px', 
+            fontSize: '0.75rem', 
+            cursor: 'help',
+            display: 'flex',      // 👈 Alinea icono y texto
+            alignItems: 'center', // 👈 Los centra verticalmente
+            gap: '8px'            // 👈 El espacio que necesitabas
+        }}
+    >
+        <Users size={12} />
+        <span style={{ fontWeight: '700' }}>
+            {cuposDisponibles} {cuposDisponibles === 1 ? 'Vacante' : 'Vacantes'}
+        </span>
+    </div>
+)}
+</div>
+        </div>
+
+        {/* 4. Acción lateral con la flecha minimalista */}
+        <div className="card-action-right" style={{ flex: '0 0 50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div className="action-circle">
+                <ChevronRight size={22} strokeWidth={3} />
+            </div>
+        </div>
+    </div>
+);
+        })
+    ) : (
+                <div className="empty-grid-state">
+                    <Search size={60} color="#cbd5e0" strokeWidth={1} />
                     <h3>No hay vacantes disponibles</h3>
-                    <p>Por el momento no tenemos nuevas ofertas o ya te has postulado a todas las activas.</p>
-                    <button className="btn-refresh" onClick={fetchVacantes}>
-                        Actualizar lista
-                    </button>
+                    <p>Por el momento no tenemos nuevas ofertas. Intenta actualizar la lista.</p>
+                    <button className="btn-refresh-grid" onClick={fetchVacantes}>Actualizar lista</button>
                 </div>
             )}
         </div>
-    )}
-</aside>
+
+        {/* 3. MODAL DE DETALLES (Mantiene todo tu diseño original pero centrado) */}
+        {selectedVacante && (
+            <div className="vdp-modal-overlay fade-in" onClick={() => setSelectedVacante(null)}>
+                <div className="vdp-modal-content scale-up" onClick={(e) => e.stopPropagation()}>
+                    
+                    <button className="vdp-btn-close" onClick={() => setSelectedVacante(null)}>
+                        <XCircle size={28} />
+                    </button>
+
+                    <div className="detail-content-wrapper">
+                        <div className="detail-header-info">
+                            <h3 style={{fontSize: '26px', fontWeight: '800', color: '#1a202c', marginBottom: '20px', letterSpacing: '-0.5px'}}>
+                                {selectedVacante.titulo}
+                            </h3>
+                            
+                            {/* Tu Rejilla de Fichas Técnicas original */}
+                            {/* Rejilla de Fichas Técnicas dentro del Modal */}
+<div className="detail-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '25px' }}>
+    
+    {/* CUPOS (Añadido aquí) */}
+{/* Reemplaza el bloque de CUPOS dentro del Modal por este */}
+{selectedVacante.limitePostulantes && (
+<span className={`meta-tag-badge ${obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).clase}`}>
+    <Users size={14} /> 
+    <b>Cupos:</b> {selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)} 
+    
+    {/* CAMBIO AQUÍ: Usamos span con clase específica */}
+    <span className="text-alerta-inner">
+        { (selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)) === 1 
+            ? '¡Última vacante!' 
+            : (obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).texto) 
+        }
+    </span>
+</span>
+)}
+
+    <span className="meta-tag-badge badge-published">
+        <MapPin size={14} /> <b>Ubicación:</b> {selectedVacante.ubicacion}
+    </span>
+    
+    <span className="meta-tag-badge badge-published">
+        <FileText size={14} /> <b>Contrato:</b> {selectedVacante.tipo}
+    </span>
+    
+    <span className="meta-tag-badge badge-published">
+        <Globe size={14} /> <b>Modalidad:</b> {selectedVacante.modalidad}
+    </span>
+    
+    <span className="meta-tag-badge badge-slots">
+        <DollarSign size={14} /> 
+        <b>SALARIO:</b> {selectedVacante.tipoSalario === 'A convenir' ? 'A convenir' : `$${parseFloat(selectedVacante.salario).toLocaleString('es-CO')}`}
+    </span>
+    
+    <span className="meta-tag-badge badge-published">
+        <Clock size={14} /> <b>Jornada:</b> {selectedVacante.jornada || 'No definida'}
+    </span>
+
+{/* Reemplaza el span de Cierre por este */}
+{selectedVacante.fechaCierre && (
+    <span className={`meta-tag-badge ${esFechaCercana(selectedVacante.fechaCierre) ? 'fecha-alerta' : 'badge-published'}`}>
+        <Clock size={14} /> 
+        <b>{esFechaCercana(selectedVacante.fechaCierre) ? '¡CIERRA PRONTO!:' : 'Cierre:'}</b> 
+        <span style={{ marginLeft: '4px' }}>{formatDate(selectedVacante.fechaCierre)}</span>
+    </span>
+)}
+
+    {/* HORARIO Y PUBLICACIÓN */}
+    <span className="meta-tag-badge badge-published">
+        <Calendar size={14} /> <b>Publicado:</b> {formatDate(selectedVacante.fechaCreacion)}
+    </span>
+    <span className="meta-tag-badge badge-published">
+        <Clock size={14} /> <b>Horario:</b> {selectedVacante.horario || 'Lunes a Viernes'}
+    </span>
+</div>
                         </div>
-                    )}
+
+<div className="detail-body-text" style={{background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '30px', marginBottom: '20px'}}>
+    <strong style={{display: 'block', marginBottom: '12px', color: '#1e293b', fontSize: '17px'}}>
+        Descripción de la vacante:
+    </strong>
+
+    {/* Bloque de descripción optimizado */}
+    <div 
+        className="ql-editor-view" 
+        dangerouslySetInnerHTML={{ __html: selectedVacante.descripcion || "Sin descripción disponible." }} 
+    />
+</div>
+
+                        <div className="actions-footer" style={{marginTop: '10px', display: 'flex', gap: '15px'}}>
+                            {yaPostulado ? (
+                                <div className="already-applied-banner" style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#f0fdf4', color: '#166534', padding: '15px', borderRadius: '12px', border: '1px solid #bbf7d0', fontWeight: '600'}}>
+                                    <CheckCircle size={20} /> <span>Ya estás participando en este proceso</span>
+                                </div>
+                            ) : (
+                                <button className="btn-apply-main" onClick={handlePostulacion} style={{flex: 1, padding: '16px', fontWeight: '700', fontSize: '15px'}}>
+                                    POSTULARME AHORA
+                                </button>
+                            )}
+                            <button className="btn-cv-secondary" onClick={() => setVistaActiva('crear-cv')} style={{padding: '16px', fontWeight: '600'}}>
+                                VER MI HOJA DE VIDA
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+    </div>
+)}
 
                     {vistaActiva === 'crear-cv' && <div className="full-view"><CrearCV isInline={true} setVistaActiva={setVistaActiva} /></div>}
                     

@@ -31,18 +31,23 @@
 
 /* 2. BARRA LATERAL (SIDEBAR) */
 .sidebar {
-    width: 260px; /* <--- ESTO ES VITAL */
-    min-width: 260px; 
-    height: 100vh;
-    background-color: var(--udec-green); /* Asegúrate que tenga el color */
-    display: flex;
-    flex-direction: column;
-    position: sticky;
-    top: 0;
-    left: 0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Animación suave */
-    z-index: 100;
+    position: fixed;
+    left: 15px;
+    top: 100px; /* Ajustado al header delgado */
+    width: 55px; 
+    height: fit-content;
+    padding: 8px 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 18px;
+    z-index: 9999;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
 }
+
+.sidebar:hover { width: 230px !important; }
 
 .sidebar-top {
     flex: 1; /* Ocupa todo el espacio disponible */
@@ -157,19 +162,64 @@
 }
 
 .menu-item {
-  display: flex;
-  align-items: center; /* Centra verticalmente icono y texto */
-  gap: 10px;           /* Un poco menos de espacio para que no se amontone */
-  padding: 12px 18px;  /* Reducimos el padding para que sea más estilizado */
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  width: 100%;
-  transition: all 0.3s ease;
-  text-align: left;    /* Asegura que el contenido se alinee a la izquierda */
+    display: flex;
+    align-items: center;
+    /* 1. Centrado inicial del icono */
+    justify-content: center; 
+    
+    /* 2. Dimensiones reducidas para máxima sutileza */
+    padding: 8px 0; 
+    margin: 3px auto;
+    width: 38px;  /* 👈 Un poco más estrecho para el sidebar de 55px */
+    height: 38px;
+    border-radius: 10px;
+    
+    background: none;
+    border: none;
+    cursor: pointer;
+    /* 3. Transición suave para el movimiento y color */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    color: #64748b; /* Gris suave institucional */
+}
+
+.sidebar:hover .menu-item {
+    width: calc(100% - 24px) !important; /* Deja un pequeño margen a los lados */
+    justify-content: flex-start;
+    padding-left: 18px;
+}
+
+.menu-item span {
+    display: none;
+    font-size: 0.75rem; 
+    font-weight: 700;
+    letter-spacing: 0.2px; 
+    margin-left: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    color: inherit;
+}
+
+/* 5. Estado Activo (Verde UdeC + Letras Blancas) */
+.menu-item.active {
+    background: #00482b; /* Verde UdeC */
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.15);
+}
+
+.menu-item.active svg {
+    color: #ffffff !important;
+}
+
+.menu-item.active span {
+    color: #ffffff !important;
+}
+/* 6. Hover sutil para los no activos */
+.menu-item:hover:not(.active) {
+    background: rgba(0, 72, 43, 0.05);
+    color: #00482b;
 }
 
 .menu-item:hover {
@@ -177,17 +227,11 @@
   background: rgba(255, 255, 255, 0.1); /* Un poco más de brillo en el hover */
 }
 
-.menu-item.active {
-  background-color: var(--udec-orange);
-  color: white;
-}
-
 /* 🛡️ ESTO ES CLAVE PARA LA ALINEACIÓN DEL ICONO */
 .menu-item svg {
-  flex-shrink: 0;      /* Evita que el icono se encoja si el texto es largo */
-  min-width: 20px;     /* Asegura que todos los iconos ocupen el mismo ancho visual */
-  display: flex;
-  justify-content: center;
+    min-width: 20px; /* 👈 Volvemos a un tamaño estándar elegante */
+    height: 20px;
+    stroke-width: 2px;
 }
 
 .logout-item {
@@ -479,14 +523,6 @@
     border: 1px solid #ffead0 !important;
 }
 
-/* 3. ESTADO CRÍTICO (2 o menos cupos) - Rojo + Parpadeo */
-.badge-slots.cupos-critico {
-    background-color: #fef2f2 !important;
-    color: #b91c1c !important;
-    border: 1px solid #fecaca !important;
-    /* Usamos la animación que ya creamos para la fecha */
-    animation: simpleBlink 1.5s infinite; 
-}
 
 /* 4. ESTILO PARA LAS NEGRITAS (¡Últimos! / ¡Alerta!) */
 .badge-slots b {
@@ -519,11 +555,10 @@
 
 /* Animación sutil de pulso para llamar la atención */
 @keyframes pulse-red {
-    0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.2); }
-    70% { box-shadow: 0 0 0 5px rgba(229, 62, 62, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
 }
-
 
 /* --- FOOTER DEL SIDEBAR --- */
 .sidebar-footer {
@@ -1437,3 +1472,805 @@
     50% { transform: scale(1.05); opacity: 0.8; }
     100% { transform: scale(1); opacity: 1; }
 }
+
+/* Overlay: Fondo oscuro y desenfocado */
+.vdp-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 40, 20, 0.4); /* Un toque de verde oscuro muy transparente */
+    backdrop-filter: blur(8px); /* Desenfoque estilo Apple */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000; /* Por encima de todo */
+    padding: 20px;
+}
+
+/* Contenido del Modal */
+.vdp-modal-content {
+    background: white;
+    width: 100%;
+    max-width: 900px; /* Ancho cómodo para lectura */
+    max-height: 90vh; /* Para que no se salga de la pantalla */
+    border-radius: 28px;
+    position: relative;
+    padding: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow-y: auto; /* Scroll interno si la descripción es larga */
+}
+
+/* Botón de cerrar flotante */
+.vdp-btn-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.vdp-btn-close:hover {
+    background: #fee2e2;
+    color: #ef4444;
+    transform: rotate(90deg);
+}
+
+/* Animación de entrada */
+.scale-up {
+    animation: scaleUp 0.3s ease-out;
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Contenedor principal de la rejilla */
+.vacantes-grid-wrapper {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vacantes-grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* LA REJILLA MÁGICA */
+.vacantes-main-grid-layout {
+    display: grid;
+    /* Esto crea columnas automáticas que se ajustan al ancho de la pantalla */
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    padding-bottom: 50px;
+}
+
+/* Estilo de la tarjeta individual */
+.vacante-card-grid-item {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid #edf2f7;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 220px;
+}
+
+.vacante-card-grid-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+    border-color: #006b3f;
+}
+
+.vacante-card-grid-item h3 {
+    color: #1a202c;
+    font-size: 1.1rem;
+    margin: 15px 0;
+}
+
+/* Estilos del Modal (Efecto EmpresaDashboard) */
+.modal-overlay-vacante {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.vacante-detail-modal {
+    background: white;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 24px;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-vacante-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+}
+
+/* Contenedor de la Rejilla */
+.vacantes-main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 25px;
+    padding: 20px;
+}
+
+.vacante-card-compact {
+    /* Degradado sutil con el verde UdeC */
+    background: linear-gradient(135deg, rgba(0, 72, 43, 0.08) 0%, rgba(0, 72, 43, 0.02) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    
+    /* Borde refinado */
+    border: 1px solid rgba(0, 72, 43, 0.15);
+    border-radius: 24px; /* Un poco más redondeado para modernidad */
+    padding: 22px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: relative;
+    overflow: hidden; /* Para el brillo del hover */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px -10px rgba(0, 72, 43, 0.1);
+    flex-direction: row !important;
+    width: 100%;
+}
+
+.card-content-left {
+    flex: 1 1 auto;
+    min-width: 0; /* Importante para que Flexbox no se rompa */
+}
+
+/* El contenedor de la flecha SIEMPRE tiene el mismo ancho */
+.card-action-right {
+    flex: 0 0 50px; /* No crece, no se encoge, siempre mide 50px */
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* EFECTO HOVER PROFESIONAL */
+.vacante-card-compact:hover {
+    transform: translateY(-8px) scale(1.01);
+    background: linear-gradient(135deg, rgba(0, 72, 43, 0.12) 0%, rgba(0, 72, 43, 0.05) 100%);
+    border-color: rgba(0, 72, 43, 0.3);
+    box-shadow: 0 20px 40px -15px rgba(0, 72, 43, 0.2);
+}
+
+/* Sutil brillo que cruza la tarjeta al pasar el mouse */
+.vacante-card-compact::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.6s;
+}
+
+.vacante-card-compact:hover::after {
+    left: 100%;
+}
+
+.titulo-vacante {
+    color: #00482b; /* Verde institucional */
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em; 
+    line-height: 1.2;
+}
+
+.hub-icon-wrapper-mini {
+    background: rgba(0, 72, 43, 0.1);
+    color: #00482b;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detail-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b; /* Gris azulado sutil */
+    font-size: 0.85rem;
+}
+
+.badge-salary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 12px;
+    
+    /* Estilo Oro UdeC Refinado */
+    background: linear-gradient(135deg, rgba(162, 137, 69, 0.1) 0%, rgba(162, 137, 69, 0.05) 100%);
+    color: #866d2d; /* Un tono de oro más oscuro para legibilidad */
+    border: 1px solid rgba(162, 137, 69, 0.3); /* Borde sutil */
+    
+    /* Sombra muy suave para darle relieve */
+    box-shadow: 0 2px 4px rgba(162, 137, 69, 0.05);
+    transition: all 0.3s ease;
+}
+
+.badge-salary:hover {
+    background: rgba(162, 137, 69, 0.15);
+    border-color: rgba(162, 137, 69, 0.5);
+    transform: translateY(-1px);
+}
+
+.badge-salary svg {
+    color: #a28945; /* El oro brillante para el icono */
+}
+
+.badge-pill {
+    background: rgba(226, 232, 240, 0.5);
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    color: #475569;
+}
+
+.btn-ver-detalles-compact {
+    background: #00482b;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: background 0.3s;
+}
+
+.btn-ver-detalles-compact:hover {
+    background: #00331e;
+    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.3);
+}
+/* La tarjeta con su diseño original */
+.vacante-card-grid-item {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.vacante-card-grid-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: #006b3f;
+}
+
+/* Recuperamos tus estilos de texto internos */
+.vacante-titulo-grid {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 10px 0;
+    line-height: 1.2;
+}
+
+.company-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #006b3f;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Filas de detalles (Ubicación, Modalidad) */
+.grid-details-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.detail-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #4a5568;
+    font-size: 12px;
+}
+
+/* Footer de la tarjeta con Precio y Botón */
+.card-grid-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.salary-info {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.btn-grid-action {
+    background: #00482b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-grid-action:hover {
+    background: #003620;
+}
+
+.urgent-tag-mini {
+    background: #fff5f5;
+    color: #e53e3e;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.floating-cupos-badge {
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.cupos-warning { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+
+/* Definición de la animación de pulso profundo */
+@keyframes deep-pulse-alert {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+        background-color: rgba(254, 226, 226, 1); /* Rojo muy suave */
+    }
+    50% {
+        transform: scale(1.05); /* Crece ligeramente */
+        box-shadow: 0 0 15px 5px rgba(220, 38, 38, 0.2); /* Brillo exterior */
+        background-color: rgba(254, 202, 202, 1); /* Se intensifica el fondo */
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+        background-color: rgba(254, 226, 226, 1);
+    }
+}
+
+/* La clase que aplicaremos cuando el cupo sea crítico */
+.cupos-critico {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    border: 1.5px solid #dc2626; /* Borde rojo sólido para definir */
+    color: #b91c1c;
+    font-weight: 700;
+    font-size: 0.8rem;
+    
+    /* Aplicamos la animación */
+    animation: deep-pulse-alert 1.5s infinite ease-in-out;
+    
+    /* Para que el icono también resalte */
+    svg {
+        stroke-width: 3px;
+    }
+}
+
+.cupos-warning { 
+    background: #fef3c7 !important; /* Naranja/Amarillo suave */
+    color: #d97706 !important;     /* Texto naranja */
+    border: 1px solid #fde68a;
+}
+
+/* Animación opcional para el badge de Alerta (si quieres que parpadee) */
+.cupos-critico b {
+    animation: pulse-red 2s infinite;
+}
+
+/* --- DISEÑO DE TARJETA LIMPIA --- */
+.vacante-card-clean {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    position: relative;
+    overflow: hidden;
+}
+
+.action-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 72, 43, 0.2); /* Verde UdeC muy suave */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00482b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.vacante-card-compact:hover .action-circle {
+    background: #00482b;
+    color: #ffffff;
+    border-color: #00482b;
+    transform: translateX(5px) scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 72, 43, 0.2);
+}
+
+.vacante-card-clean:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08);
+    border-color: #bee3f8; /* Un azul suave al hover */
+}
+
+/* 1. SECCIÓN SUPERIOR: TÍTULO Y EMPRESA */
+.card-section-top {
+    margin-bottom: 16px;
+}
+
+.vacante-titulo-clean {
+    font-size: 1.15rem; /* Título grande y destacado */
+    font-weight: 800;
+    color: #1a202c;
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+    letter-spacing: -0.3px;
+}
+
+.company-info-clean {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #006b3f; /* Verde UdeC solo para la empresa */
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 2. SECCIÓN DETALLES (Gris sutil, sin bordes) */
+.card-section-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-item-clean {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b; /* Gris suave para info logística */
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.detail-item-clean svg {
+    color: #94a3b8; /* Iconos más claros que el texto */
+}
+
+/* 3. SECCIÓN META (Salario y Estados) */
+.card-section-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    margin-bottom: 16px;
+}
+
+.meta-salary-clean {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #1e293b;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.meta-salary-clean svg {
+    color: #006b3f;
+}
+
+.meta-right-clean {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* Badges de Estado (Rojo/Naranja) */
+.status-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px; /* Bordes muy redondeados (pill) */
+    text-transform: uppercase;
+}
+
+/* Reutilizamos tus clases dinámicas pero con diseño pill */
+.status-pill.cupos-warning { background: #fef3c7; color: #d97706; }
+
+/* Nuevo estilo para Cierra Pronto */
+.status-pill.urgent {
+    background: #00482b; /* Verde UdeC invertido */
+    color: #ffffff;
+}
+
+/* 4. BOTÓN DE ACCIÓN */
+.btn-view-details-clean {
+    background: #f1f5f9;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin-top: auto;
+}
+
+.btn-view-details-clean:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e0;
+}
+
+.detail-group.text-urgente {
+    color: #c2410c; /* Un naranja quemado elegante, no un rojo chillón */
+    font-weight: 600;
+}
+
+.detail-group.text-urgente svg {
+    color: #c2410c;
+    animation: simple-spin 4s linear infinite; /* Un giro muy lento opcional */
+}
+
+@keyframes simple-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Estado Normal: Sutil y profesional */
+.fecha-normal {
+    background: rgba(226, 232, 240, 0.4);
+    color: #475569;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+/* Estado Alerta: < 2 días (Igual al estilo de cupos pero en Naranja/Rojo) */
+.fecha-alerta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    
+    /* Colores de urgencia */
+    border: 1.5px solid #ea580c; 
+    color: #9a3412;
+    background-color: #fff7ed;
+
+    /* Usamos la misma animación de pulso profundo pero más rápida para denotar tiempo */
+    animation: deep-pulse-orange 1.2s infinite ease-in-out;
+}
+
+/* Animación específica para tiempo (Naranja) */
+@keyframes deep-pulse-orange {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.3);
+    }
+    50% {
+        transform: scale(1.03);
+        box-shadow: 0 0 10px 3px rgba(234, 88, 12, 0.15);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(234, 88, 12, 0);
+    }
+}
+
+.text-alerta-inner {
+    margin-left: 8px;
+    font-size: 0.7rem; /* Un poco más grande */
+    font-weight: 900;    /* Máximo grosor para que resalte */
+    text-transform: uppercase; /* Opcional: En mayúsculas se ve más imponente */
+    letter-spacing: 0.5px;
+}
+
+/* Si quieres que el parpadeo del texto sea independiente */
+.cupos-critico .text-alerta-inner {
+    color: #b91c1c;
+    text-shadow: 0px 0px 8px rgba(220, 38, 38, 0.2);
+}
+
+.badge-pill, .badge-salary {
+    font-size: 0.75rem !important; /* Tamaño más pequeño y refinado */
+    padding: 4px 10px !important;
+    white-space: nowrap;
+    letter-spacing: 0.3px; /* Un poco de espacio entre letras para legibilidad */
+}
+
+.badge-pill svg, .badge-salary svg {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+/* Quitamos el texto extra de los cupos si es muy largo para que quepa en una línea */
+.cupos-critico span {
+    text-transform: none; /* Evita que las mayúsculas ocupen demasiado espacio */
+}
+
+.badge-pill, .badge-salary, .badge-normal {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important; /* Espacio generoso entre icono y texto */
+    padding: 5px 12px !important;
+    transition: all 0.3s ease;
+}
+
+/* Estilo para el estado normal (grisáceo) para que no sea tan oscuro */
+.fecha-normal, .badge-normal {
+    background: rgba(226, 232, 240, 0.4);
+    color: #475569;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+/* =======================================================
+   ESTILOS PARA RENDERIZAR EL CONTENIDO DEL EDITOR (EGRESADO)
+   ======================================================= */
+
+.ql-editor-view {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 16px !important; /* Tamaño de letra profesional y legible */
+    line-height: 1.8;
+    color: #475569;
+    width: 100%;
+}
+
+/* 1. Unificación de fuentes y limpieza de fondos */
+.ql-editor-view p, 
+.ql-editor-view li,
+.ql-editor-view h1, 
+.ql-editor-view h2, 
+.ql-editor-view h3 {
+    font-size: 16px !important;
+    background-color: transparent !important; /* Quita los parches claros */
+    margin-bottom: 12px;
+}
+
+/* 2. Mantener el resaltado amarillo intencional */
+.ql-editor-view span {
+    font-size: inherit; /* Hereda los 16px del padre */
+}
+
+/* Solo permite fondo si es explícitamente amarillo, si no, transparente */
+.ql-editor-view span:not([style*="background-color: yellow"]):not([style*="background-color: rgb(255, 255, 0)"]) {
+    background-color: transparent !important;
+}
+
+/* 3. Corrección de alineaciones (Centrado, Justificado, etc.) */
+.ql-editor-view .ql-align-center {
+    text-align: center !important;
+    display: block;
+    width: 100%;
+}
+
+.ql-editor-view .ql-align-right {
+    text-align: right !important;
+    display: block;
+    width: 100%;
+}
+
+.ql-editor-view .ql-align-justify {
+    text-align: justify !important;
+    display: block;
+    width: 100%;
+}
+
+/* 4. Estilos para Listas y Negritas */
+.ql-editor-view ul, 
+.ql-editor-view ol {
+    padding-left: 25px;
+    margin-bottom: 15px;
+    text-align: left; /* Las listas suelen verse mejor alineadas a la izquierda */
+}
+
+.ql-editor-view li {
+    margin-bottom: 8px;
+}
+
+.ql-editor-view strong {
+    color: #1a202c;
+    font-weight: 700;
+}
+
+/* 5. Títulos dentro de la descripción */
+.ql-editor-view h1 { font-size: 24px !important; font-weight: 800; color: #00482b; }
+.ql-editor-view h2 { font-size: 20px !important; font-weight: 700; color: #00482b; }
+.ql-editor-view h3 { font-size: 18px !important; font-weight: 600; color: #00482b; }

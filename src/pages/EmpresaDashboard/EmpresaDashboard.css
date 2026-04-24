@@ -15,6 +15,27 @@
   --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
 }
 
+html, body {
+    height: auto !important; 
+    min-height: 100vh;
+    overflow-y: auto !important; /* 👈 ESTA ES LA MAGIA QUE DEVUELVE LA BARRA */
+    overflow-x: hidden !important; /* Evita scrolls horizontales feos */
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    /* Mantén el resto de propiedades de scroll que pusimos */
+}
+
+/* 2. El contenedor de React también debe poder crecer */
+#root {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-y: visible !important;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -23,31 +44,43 @@
 }
 
 .dashboard-layout {
-  display: flex;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  background-color: var(--bg-main);
+    display: flex;
+    flex-direction: column;
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important; /* Asegura que el contenido sobrante se vea */
+    pointer-events: auto !important; /* Asegura que puedas hacer clic */
 }
 
 /* 2. SIDEBAR (Estructura idéntica) */
 .sidebar {
-  width: var(--sidebar-width);
-  min-width: var(--sidebar-width);
-  height: 100vh;
-  background-color: var(--udec-green);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  left: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100;
+    position: fixed;
+    left: 15px;
+    top: 108px;
+    bottom: auto;
+    
+    /* 🤏 Mucho más sutil */
+    width: 55px; 
+    height: fit-content;
+    
+    padding: 8px 0;
+    background: rgba(255, 255, 255, 0.85); /* Un poco más de transparencia */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 18px; /* Bordes un poco más finos */
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); /* Sombra casi invisible */
+    overflow: hidden;
+}
+
+.sidebar:hover {
+    width: 190px; /* 👈 Antes 220px, ahora mucho más estrecho */
 }
 
 .sidebar.collapsed {
-  width: var(--sidebar-collapsed-width) !important;
-  min-width: var(--sidebar-collapsed-width) !important;
+    width: 75px;
+    background: rgba(255, 255, 255, 0.7);
 }
 
 .sidebar-top {
@@ -72,22 +105,73 @@
 .sidebar-menu { display: flex; flex-direction: column; }
 
 .menu-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 18px;
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0; /* Más compacto */
+    margin: 4px auto;
+    width: 42px; /* Reducido para que quepa bien en los 55px */
+    height: 42px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+.menu-item:hover { color: white; background: rgba(255, 255, 255, 0.1); }
+.menu-item.active {
+    background: #00482b; /* Verde UdeC */
+    color: #ffffff !important; /* 👈 Forzamos el texto a blanco puro */
+    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.2);
 }
 
-.menu-item:hover { color: white; background: rgba(255, 255, 255, 0.1); }
-.menu-item.active { background-color: var(--udec-orange); color: white; }
+.menu-item.active svg {
+    color: #ffffff !important;
+}
+
+.menu-item.active span {
+    color: #ffffff !important;
+    opacity: 1; /* Asegura que se vea al expandir */
+}
+
+.menu-item.active:hover {
+    background: #003620; /* Un verde un pelín más oscuro al pasar el mouse */
+    color: #ffffff !important;
+}
+
+.sidebar:hover .menu-item {
+    justify-content: flex-start;
+    padding-left: 14px;
+    width: calc(100% - 12px);
+}
+
+.menu-item:hover:not(.active) {
+    background: rgba(0, 72, 43, 0.04);
+    scale:(1.02);
+    transform: translateX(6px);
+}
+
+.menu-item span {
+    display: none;
+    font-size: 0.8rem; /* 👈 Fuente más pequeña */
+    font-weight: 500; /* Menos peso visual */
+    letter-spacing: 0.3px;
+    color: #475569;
+}
+
+.sidebar:hover .menu-item span {
+    display: block;
+    margin-left: 12px;
+}
+
+.menu-item svg {
+    min-width: 20px; /* 👈 Iconos más pequeños y finos */
+    height: 20px;
+    stroke-width: 1.8px; /* Menos grueso para mayor sutileza */
+    color: #64748b; /* Gris más suave que el negro */
+}
+
+.sidebar.collapsed .menu-item span {
+    opacity: 0; /* Desaparece el texto cuando se cierra */
+    pointer-events: none;
+}
 
 .sidebar-footer {
   border-top: 1px solid rgba(255,255,255,0.1);
@@ -105,32 +189,111 @@
 
 /* 3. CONTENEDOR MAESTRO DEL HEADER */
 .glass-container {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+    width: 100%;
+    margin-left: 0 !important; /* Mantiene el ancho completo */
+    padding-top: 0 !important;  /* 👈 CAMBIO CLAVE: De 20px a 0 para subir a tope */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    pointer-events: auto; /* Asegura que el contenido sea clicable */
 }
 
 .main-header-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  background: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    width: 100%;
+    position: sticky;
+    top: 0;
+    margin-top: 0 !important; /* 👈 Asegura que no haya margen superior */
+    z-index: 1100;
+    background: white;
 }
 
-.header-top-bar { height: 35px; display: flex; }
+.header-top-bar {
+    height: 20px; /* Tu barra verde/naranja */
+    display: flex;
+    margin-top: 0; /* 👈 Refuerzo */
+    width: 100%;
+}
 .bar-green { flex: 2; background-color: var(--udec-green); }
 .bar-orange { flex: 1; background-color: var(--udec-orange); }
 
 .header-content {
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 30px;
+    display: flex;
+    justify-content: flex-start; /* 👈 Alinea todo al inicio (izquierda) */
+    align-items: center;
+    gap: 40px; /* Espacio entre el bloque de logos y el resto del header */
+    padding: 0 30px;
+    height: 100%;
 }
 
+.header-project-logo {
+    height: 45px; /* Ajusta el tamaño según prefieras */
+    width: auto;
+    object-fit: contain;
+}
+
+.header-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Logo UdeC centrado */
+.header-udec-logo-centered {
+    height: 55px; /* Un poco más grande para que resalte */
+    width: auto;
+    object-fit: contain;
+}
+
+/* Alineación de la derecha */
+.header-right {
+    display: flex;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+/* Responsivo: Si la pantalla es pequeña, ocultamos el del centro o ajustamos */
+@media (max-width: 768px) {
+    .brand-divider, .header-udec-logo {
+        display: none; /* En móviles muy pequeños dejamos solo tu logo principal */
+    }
+}
+
+.header-left-brands {
+    display: flex;
+    align-items: center;
+    gap: 0; /* 👈 Ponemos el gap en 0 para controlar el espacio manualmente */
+    margin-left: -10px; /* 👈 Opcional: mueve todo el grupo un poco más a la izquierda si quieres */
+}
+
+.header-brand-logo {
+    height: 58px; /* 👈 Antes estaba en 40px, lo subimos a 55px */
+    width: auto;
+    object-fit: contain;
+    /* Un pequeño filtro de brillo lo hará resaltar más sobre el fondo claro */
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.05)); 
+    margin-right: -10px;
+    transition: transform 0.3s ease;
+}
+.header-brand-logo:hover {
+    transform: scale(1.05); /* Efecto sutil al pasar el mouse */
+}
+
+/* ➖ La línea divisoria */
+.brand-divider {
+    width: 2px; /* Un poquito más gruesa */
+    height: 38px; 
+    background-color: #cbd5e1; /* Un gris un poco más oscuro para que se note */
+    opacity: 0.8;
+    margin-left: -5px;
+}
+
+.header-udec-logo {
+    height: 48px; /* 👈 Bajamos un poco este para que el tuyo destaque más */
+    width: auto;
+    object-fit: contain;
+    margin-left: 14px;
+    opacity: 0.9; /* Un toque de transparencia para que sea secundario */
+}
 .header-logo-img { height: 60px; object-fit: contain; }
 
 .search-wrapper {
@@ -157,9 +320,10 @@
 
 /* 4. ÁREA DE CONTENIDO (LISTA + DETALLE) */
 .content-inner {
-  flex-grow: 1;
-  padding: 0 20px 20px 20px;
-  overflow-y: auto;
+    /* Ajustamos el margen para que el contenido no quede tan lejos */
+    margin-left: 70px; 
+    padding: 20px 40px;
+    transition: margin-left 0.3s ease;
 }
 
 .vacantes-view-container {
@@ -1702,4 +1866,660 @@
     60% { transform: translate(1px, 1px); }
     80% { transform: translate(1px, -1px); }
     100% { transform: translate(0); }
+}
+
+.vacantes-main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    padding: 20px 0;
+}
+
+.vacante-card-grid-item {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.vacante-card-grid-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 72, 43, 0.1);
+    border-color: #00482b;
+}
+
+.postulantes-pill {
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 600;
+}
+
+.icon-postulantes { color: #00482b; }
+
+/* Sección del título con el maletín */
+.title-section-grid {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 18px 0;
+}
+
+.briefcase-icon-container {
+    background: #f0fdf4;
+    padding: 8px;
+    border-radius: 10px;
+    color: #00482b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vacante-titulo-grid {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Iconos de Ubicación y Modalidad */
+.details-grid-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detail-item-grid {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.detail-item-grid.location svg { color: #3b82f6; } /* Azul */
+.detail-item-grid.modality svg { color: #f59e0b; } /* Naranja */
+
+/* Botones inferiores con tus colores originales */
+.card-grid-footer {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-action-edit-grid, .btn-action-delete-grid {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-action-edit-grid {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.btn-action-edit-grid:hover { background: #ffedd5; }
+
+.btn-action-delete-grid {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.btn-action-delete-grid:hover { background: #fee2e2; }
+
+/* Modal de gestión */
+.gestion-modal-content {
+    background: white;
+    width: 95%;
+    max-width: 1300px;
+    height: 90vh;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-gestion-header {
+    background: #00482b;
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Contenedor de filtros Premium */
+.search-filters-stack-premium {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 5px 0;
+}
+
+/* Barra de búsqueda principal */
+/* Contenedor principal del input */
+.search-input-wrapper-full {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    margin-bottom: 5px; /* Espacio con las fechas */
+}
+
+.search-input-wrapper-full:focus-within {
+    border-color: #00482b; /* Verde UdeC */
+    background: white;
+    box-shadow: 0 0 0 4px rgba(0, 72, 43, 0.05);
+}
+.search-input-field-premium {
+    border: none !important;      /* Quita el borde por defecto */
+    outline: none !important;     /* Quita el resaltado azul del navegador */
+    background: transparent;      /* Usa el fondo del contenedor */
+    width: 100%;                  /* Que use todo el ancho */
+    font-size: 1rem;
+    color: #1e293b;
+    font-family: inherit;
+}
+/* Color del icono de la lupa */
+.search-icon-main {
+    color: #64748b;
+    flex-shrink: 0; /* Evita que la lupa se aplaste */
+}
+
+/* Fila inferior de acciones */
+.filters-row-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.date-inputs-group {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+}
+
+/* Las "Pills" de fecha con iconos */
+.filter-date-pill {
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 250px;
+}
+
+.date-icon { color: #00482b; }
+
+.date-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.filter-date-pill input[type="date"] {
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    color: #1e293b;
+    font-family: inherit;
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Botón Limpiar estilizado */
+.btn-clear-filters-premium {
+    background: #fff5f5;
+    color: #e53e3e;
+    border: 1px solid #fed7d7;
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-clear-filters-premium:hover {
+    background: #feb2b2;
+    color: #fff;
+}
+
+/* Contenedor Principal de la Cabecera */
+.vacantes-header-container-premium {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    
+    /* 🚀 AQUÍ ESTÁ EL TRUCO: */
+    margin-top: 10px;     /* Separa el contenedor del header superior */
+    margin-bottom: 15px;  /* Separa el contenedor de las tarjetas de abajo */
+    
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    
+    /* Si quieres que se alinee perfectamente con el resto del contenido */
+    width: 100%;
+    box-sizing: border-box; 
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Barra Superior: Título y Contador */
+.vacantes-top-bar-hub {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.hub-left { display: flex; align-items: center; gap: 15px; }
+
+.hub-icon-wrapper {
+    background: #f0fdf4;
+    color: #00482b;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.hub-title-text h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.hub-title-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* El número de vacantes como una tarjetita */
+.hub-stat-card {
+    background: #f8fafc;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.stat-label { font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 700; }
+.stat-number { font-size: 1.2rem; font-weight: 800; color: #00482b; }
+
+/* Distribución de Filtros en una sola fila */
+.search-filters-horizontal-hub {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.search-input-wrapper-hub {
+    flex: 2; /* Toma más espacio */
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-group-hub {
+    flex: 1; /* Toma menos espacio */
+    display: flex;
+    gap: 10px;
+}
+
+.filter-date-pill-hub {
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.filter-date-pill-hub input {
+    border: none;
+    outline: none;
+    font-size: 0.85rem;
+    width: 100%;
+}
+
+.btn-hub-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #475569;
+    transition: all 0.3s;
+}
+
+.btn-hub-toggle:hover { background: #f1f5f9; color: #00482b; }
+
+/* Botón de ocultar filtros (Flecha redonda) */
+.btn-hub-toggle-mini {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-hub-toggle-mini:hover {
+    background: #00482b;
+    color: white;
+    border-color: #00482b;
+    transform: scale(1.05);
+}
+
+.btn-hub-toggle-mini.is-collapsed {
+    transform: rotate(90px); /* Gira la flecha hacia abajo si prefieres */
+}
+
+/* Fila de filtros dinámica */
+.search-filters-horizontal-hub {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Grupo de fechas y limpiar */
+.date-group-hub {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Botón Limpiar Premium */
+.btn-clear-hub-premium {
+    background: #fff5f5; /* Fondo rojo muy claro */
+    border: 1px solid #feb2b2;
+    color: #c53030;
+    padding: 8px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 40px; /* Misma altura que los inputs */
+}
+
+.btn-clear-hub-premium:hover {
+    background: #c53030;
+    color: white;
+    border-color: #c53030;
+}
+
+/* Ajuste para que el input de búsqueda ocupe el resto del espacio */
+.search-input-wrapper-hub {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Contenedor que agrupa el contador y el botón */
+.hub-stats-control-wrapper {
+    display: flex;
+    align-items: center;
+    background: #f8fafc; /* Fondo gris muy claro */
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 6px; /* Espacio interno para que respiren */
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.hub-stats-control-wrapper:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* La tarjetita interna del número */
+.hub-stat-card-mini {
+    padding: 5px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1.5px solid #e2e8f0; /* Separador visual */
+}
+
+.stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.stat-number {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #00482b; /* Verde UdeC */
+    line-height: 1;
+}
+
+/* El botón de la flecha estilizado */
+.btn-toggle-filters-hub {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-toggle-filters-hub:hover {
+    background: #00482b;
+    color: white;
+}
+
+/* Animación de la flecha */
+.btn-toggle-filters-hub .icon-transition {
+    transition: transform 0.4s ease;
+    transform: rotate(90deg); /* Apunta hacia abajo cuando está abierto */
+}
+
+.btn-toggle-filters-hub.is-collapsed .icon-transition {
+    transform: rotate(0deg); /* Apunta a la derecha cuando está cerrado */
+}
+
+/* Bordes redondeados para el editor */
+.ql-toolbar.ql-snow {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.ql-container.ql-snow {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 16px;
+}
+
+/* Color de énfasis cuando el usuario selecciona algo (Verde UdeC) */
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke {
+    stroke: #006b3f !important;
+}
+
+/* Contenedor principal del tooltip para todos los botones y selectores */
+.ql-toolbar button, 
+.ql-toolbar .ql-picker {
+    position: relative;
+}
+
+/* El tooltip en sí */
+.ql-toolbar button:hover::after, 
+.ql-toolbar .ql-picker:hover::after {
+    content: attr(data-tooltip); /* Usaremos este truco para que sea más limpio */
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2d3748; /* Un gris oscuro más elegante */
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 999;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Definición de los textos según la clase de Quill */
+.ql-toolbar .ql-bold:hover::after { content: "Negrita"; }
+.ql-toolbar .ql-italic:hover::after { content: "Cursiva"; }
+.ql-toolbar .ql-underline:hover::after { content: "Subrayado"; }
+.ql-toolbar .ql-strike:hover::after { content: "Tachado"; }
+/* Tooltips para listas */
+.ql-toolbar .ql-list[value="ordered"]:hover::after { content: "Lista numerada"; }
+.ql-toolbar .ql-list[value="bullet"]:hover::after { content: "Viñetas / Puntos"; }
+.ql-toolbar .ql-clean:hover::after { content: "Borrar formato"; }
+
+/* Para los selectores (dropdowns) */
+.ql-toolbar .ql-header:hover::after { content: "Tamaño de título"; }
+.ql-toolbar .ql-font:hover::after { content: "Tipo de letra"; }
+.ql-toolbar .ql-color:hover::after { content: "Color de texto"; }
+.ql-toolbar .ql-background:hover::after { content: "Color de resaltado"; }
+.ql-toolbar .ql-align:hover::after { content: "Alineación"; }
+
+.btn-guia-editor {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-guia-editor:hover {
+    background: #006b3f; /* Verde UdeC al pasar el mouse */
+    color: white;
+    border-color: #006b3f;
+    box-shadow: 0 2px 4px rgba(0, 107, 63, 0.2);
+}
+
+/* Blindaje para el contenido dentro del editor de Quill */
+.ql-editor {
+    word-wrap: break-word;      /* Rompe palabras largas */
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-align: left;           /* Fuerza alineación a la izquierda por defecto */
+}
+
+/* Evita que el scroll horizontal aparezca y rompa el layout */
+.ql-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* Corrige el espacio exagerado entre palabras */
+.ql-editor p {
+    margin-bottom: 10px;
+    text-align: left !important; /* Evita el efecto de la imagen anterior */
+}
+
+/* Fuerza la alineación en cualquier elemento del editor */
+.ql-editor .ql-align-center {
+    text-align: center !important;
+}
+
+.ql-editor .ql-align-right {
+    text-align: right !important;
+}
+
+.ql-editor .ql-align-justify {
+    text-align: justify !important;
+}
+
+.ql-editor .ql-align-left {
+    text-align: left !important;
+}
+
+/* Blindaje extra para párrafos normales que se resisten */
+.ql-editor p {
+    display: block; /* Asegura que el párrafo ocupe todo el ancho para poder alinearse */
+    width: 100%;
 }

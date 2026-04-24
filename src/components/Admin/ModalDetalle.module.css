@@ -1,0 +1,298 @@
+/* Contenedor de fondo con desenfoque */
+.udec_det_overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75); /* El color oscuro que usas en usuarios */
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 40px; /* 👈 Aumenta esto de 20px a 40px para forzar el espacio fuera */
+}
+
+/* Tarjeta principal horizontal */
+.udec_det_cardHorizontal {
+    background: white;
+    width: 90%; /* 👈 Cambia 100% por 90% para que siempre haya aire a los lados */
+    max-width: 850px; /* 👈 Este es el tamaño ideal para que se vea como el de Usuarios */
+    height: 600px; /* O usa max-height: 90vh */
+    display: flex;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: udec_det_slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Lateral Izquierdo (Verde Institucional UdeC) */
+.udec_det_sidebar {
+    width: 35%; /* 👈 Proporción equilibrada */
+    background: #00482b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: white;
+    text-align: center;
+}
+
+.udec_det_avatarCircle {
+    width: 130px;
+    height: 130px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 4px solid #a28945; /* Dorado UdeC */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.udec_det_sideText h3 {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.udec_det_sideText span {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    display: block;
+    margin-top: 5px;
+}
+
+.udec_det_badge {
+    margin-top: 15px;
+    background: #a28945; /* Dorado Institucional */
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Columna Derecha */
+.udec_det_mainContent {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    width: 65%; /* 👈 Proporción equilibrada */
+    background: white;
+    overflow: hidden;
+}
+
+.udec_det_headerActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f0f2f5;
+    padding-bottom: 15px;
+}
+
+.udec_det_headerActions h3 {
+    color: #1a202c;
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 700;
+}
+
+.udec_det_closeBtn {
+    background: #f0f2f5;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.udec_det_closeBtn:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    transform: rotate(90deg);
+}
+
+/* Scroll y Rejilla */
+.udec_det_scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 15px;
+}
+
+/* Estilo para los Inputs en modo edición */
+.udec_det_input {
+    width: 100%;
+    background: #fff;
+    padding: 11px 15px;
+    border-radius: 12px;
+    color: #2d3748;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 2px solid #e2e8f0;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.udec_det_input:focus {
+    border-color: #00482b;
+    background: #f0fff4;
+    box-shadow: 0 0 0 3px rgba(0, 72, 43, 0.1);
+}
+
+.udec_det_sectionTitle {
+    color: #00482b;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.5px;
+}
+
+.udec_det_dataGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.udec_det_field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.udec_det_field label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #718096;
+    text-transform: uppercase;
+    padding-left: 5px;
+}
+
+.udec_det_field p {
+    background: #f8fafc;
+    padding: 12px 15px;
+    border-radius: 12px;
+    color: #2d3748;
+    margin: 0;
+    font-weight: 500;
+    border: 1px solid #edf2f7;
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+}
+
+.udec_det_full {
+    grid-column: span 2;
+}
+
+/* --- BOTONES Y ACCIONES (IGUAL A USUARIOS) --- */
+
+.udec_det_footerActions {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #edf2f7;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.udec_det_editGroup {
+    display: flex;
+    gap: 12px;
+}
+
+/* Botón Editar (Verde) */
+.udec_det_btnEdit {
+    background: #00482b;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.udec_det_btnEdit:hover {
+    background: #00301d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.2);
+}
+
+/* Botón Guardar (Dorado/Amarillo) */
+.udec_det_btnSave {
+    background: #a28945;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.udec_det_btnSave:hover {
+    background: #867139;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(162, 137, 69, 0.3);
+}
+
+/* Botón Cancelar/Cerrar (Gris) */
+.udec_det_btnCancel {
+    background: #edf2f7;
+    color: #4a5568;
+    padding: 12px 25px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.udec_det_btnCancel:hover {
+    background: #e2e8f0;
+    color: #2d3748;
+}
+
+/* Animación */
+@keyframes modalScale {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Scrollbar Personalizado */
+.udec_det_scrollArea::-webkit-scrollbar {
+    width: 6px;
+}
+
+.udec_det_scrollArea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.udec_det_scrollArea::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+}
+
+.udec_det_scrollArea::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}

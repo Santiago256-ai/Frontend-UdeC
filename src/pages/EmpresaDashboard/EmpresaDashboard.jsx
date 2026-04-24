@@ -6,15 +6,12 @@ import logoGrande from '../../assets/Logo2.png';
 import logoPequeño from '../../assets/Logo3.png';
 import ListaPostulacionesTable from "../../components/ListaPostulacionesTable";
 import TotalPostulaciones from "./TotalPostulaciones"; // Ajusta la ruta si es necesario
-
-
 import { 
     LogOut, MessageSquare, Briefcase, PlusCircle, 
     Building2, Users, Edit3, Trash2, Eye, MapPin, 
     FileText, CheckCircle, XCircle, Clock, ArrowLeft, BarChart3,
     Search, ChevronRight, Home, Bell, ClipboardList, User, Calendar, AlertTriangle
 } from 'lucide-react';
-
 import "./EmpresaDashboard.css"; 
 import ChatSidebar from "../../components/ChatSidebar"; 
 import ChatWidget from "../../components/ChatWidget";
@@ -22,6 +19,37 @@ import VerCV from "../../components/verCV";
 import PerfilEmpresa from "../../components/PerfilEmpresa";
 import EmpresaMetricas from './EmpresaMetricas';
 import { toast } from 'react-toastify';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+import Quill from 'quill';
+
+const Parchment = Quill.import('parchment');
+const AlignStyle = Quill.import('attributors/class/align');
+Quill.register(AlignStyle, true);
+
+const SizeStyle = Quill.import('attributors/style/size');
+Quill.register(SizeStyle, true);
+
+const modules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    [{ 'font': [] }], 
+    ['bold', 'italic', 'underline', 'strike'], 
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'align': [] }],
+    // Aquí ya NO está 'image' ni 'link'
+    ['clean'] 
+  ],
+};
+
+// ✅ Versión corregida
+const formats = [
+  'header', 'font', 'bold', 'italic', 'underline', 'strike',
+  'color', 'background', 
+  'list',    // 👈 'list' engloba tanto a 'ordered' como a 'bullet'
+  'align'
+];
 
 export default function EmpresaDashboard() {
     const location = useLocation();
@@ -35,6 +63,36 @@ const [showProfileMenu, setShowProfileMenu] = useState(false); // 👈 Nuevo est
 const [confirmarEliminar, setConfirmarEliminar] = useState({ visible: false, vacanteId: null, titulo: "" });
 const [vacanteAnimadaId, setVacanteAnimadaId] = useState(null);
 const conteoReferencia = React.useRef({});
+
+const insertarPlantilla = (tipo) => {
+    let textoAInsertar = "";
+
+    switch (tipo) {
+        case 'requisitos':
+            textoAInsertar = "<p><strong>✅ Requisitos:</strong></p><ul><li>Formación: </li><li>Experiencia: </li></ul>";
+            break;
+        case 'funciones':
+            textoAInsertar = "<p><strong>📝 Funciones Principales:</strong></p><ul><li></li><li></li></ul>";
+            break;
+        case 'responsabilidades':
+            textoAInsertar = "<p><strong>⚠️ Responsabilidades Críticas:</strong></p><ul><li>¿Manejo de personal?: Si/No</li><li>¿Manejo de dinero?: Si/No</li></ul>";
+            break;
+        case 'habilidades':
+            textoAInsertar = "<p><strong>🌟 Habilidades Deseadas:</strong></p><ul><li></li></ul>";
+            break;
+        default:
+            break;
+    }
+
+    // Concatenamos al final de lo que ya existe
+    if (activeTab === 'creacion') {
+        setNuevaVacante(prev => ({ ...prev, descripcion: (prev.descripcion || "") + textoAInsertar }));
+    } else {
+        setEditandoVacante(prev => ({ ...prev, descripcion: (prev.descripcion || "") + textoAInsertar }));
+    }
+    
+    toast.info("Bloque añadido al final de la descripción");
+};
     
     const PIPELINE_STAGES = {
     PENDIENTE: { label: 'pendiente', color: '#64748b', bg: '#f1f5f9' },    // Gris
@@ -258,50 +316,79 @@ const checkNewPostulaciones = useCallback(async () => {
         setIsModalOpen(true);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault(); 
-        try {
-            const vacanteData = { 
-    ...nuevaVacante, 
-    empresaId: empresa.id,
-    // Esto es clave para que la base de datos no reciba un string vacío
-    limitePostulantes: nuevaVacante.limitePostulantes ? parseInt(nuevaVacante.limitePostulantes) : null 
+const handleSubmit = async (e) => {
+    e.preventDefault(); 
+    try {
+        // 1. Limpiamos la descripción de atajos que no fueron llenados
+        const descripcionLimpia = limpiarContenidoVacio(nuevaVacante.descripcion);
+
+        const vacanteData = { 
+            ...nuevaVacante, 
+            // 2. Usamos la descripción ya filtrada
+            descripcion: descripcionLimpia,
+            empresaId: empresa.id,
+            // Esto es clave para que la base de datos no reciba un string vacío
+            limitePostulantes: nuevaVacante.limitePostulantes ? parseInt(nuevaVacante.limitePostulantes) : null 
+        };
+
+        // 3. Enviamos los datos limpios a la API
+        await API.post(`/vacantes`, vacanteData);
+        
+        toast.success("¡Oferta publicada exitosamente!");
+
+        // 4. Limpiamos el formulario
+        setNuevaVacante({ 
+            titulo: "", 
+            descripcion: "", 
+            ubicacion: "", 
+            tipo: "", 
+            modalidad: "", 
+            salario: "", 
+            tipoSalario: "", 
+            jornada: "", 
+            horario: "", 
+            fechaCierre: "", 
+            limitePostulantes: "", 
+            mostrarOtroContrato: false,
+            mostrarOtraJornada: false,
+            mostrarOtroSalario: false
+        });
+
+        cargarVacantes();
+        setActiveTab("gestion");
+        
+    } catch (err) { 
+        console.error("Error al publicar:", err);
+        toast.error("Error al publicar la vacante"); 
+    }
 };
-            await API.post(`/vacantes`, vacanteData);
-            toast.success("¡Oferta publicada exitosamente!");
-            setNuevaVacante({ 
-    titulo: "", descripcion: "", ubicacion: "", tipo: "", modalidad: "", 
-    salario: "", tipoSalario: "", jornada: "", horario: "", // <--- Limpiar nuevos
-    fechaCierre: "", limitePostulantes: "" , mostrarOtroContrato: false,
-        mostrarOtraJornada: false,
-        mostrarOtroSalario: false
-});
-            cargarVacantes();
-            setActiveTab("gestion");
-        } catch (err) { 
-            toast.error("Error al publicar la vacante"); 
-        }
-    };
 
     const handleUpdate = async (e) => {
     e.preventDefault();
     try {
+        // 1. Limpiamos los atajos vacíos antes de actualizar
+        const descripcionLimpia = limpiarContenidoVacio(editandoVacante.descripcion);
+
         const vacanteData = {
             ...editandoVacante,
+            // 2. Sobrescribimos la descripción con la versión filtrada
+            descripcion: descripcionLimpia,
             limitePostulantes: editandoVacante.limitePostulantes ? parseInt(editandoVacante.limitePostulantes) : null
         };
 
+        // 3. Enviamos la actualización a la API
         await API.put(`/vacantes/${editandoVacante.id}`, vacanteData);
         
         toast.success("¡Vacante actualizada correctamente!");
         
-        // Limpiar estado y volver a la pestaña de gestión
+        // 4. Limpieza de estados y navegación
         setEditandoVacante(null);
         cargarVacantes(); // Recargar la lista para ver los cambios
         setActiveTab("gestion");
         window.scrollTo(0, 0);
+
     } catch (err) {
-        console.error(err);
+        console.error("Error al actualizar:", err);
         toast.error("Error al actualizar la vacante");
     }
 };
@@ -526,272 +613,257 @@ const vacantesFiltradas = vacantes.filter((v) => {
 
     if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
 
-    return (
-       // ... aquí empieza tu HTML (JSX)
-        <div className={`dashboard-layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-            
-            <nav className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
-                <div className="sidebar-top">
-                    <div className="logo-section">
-                        <div className="platform-logo-container">
-                            {isSidebarCollapsed ? (
-                                <img src={logoPequeño} alt="Icono" className="logo-icon-collapsed fade-in" />
-                            ) : (
-                                <img src={logoGrande} alt="Empres 360 Pro" className="logo-full-expanded fade-in" />
-                            )}
-                        </div>
-                    </div>
-                    <div className="sidebar-menu">
-    <button 
-        className={`menu-item ${activeTab === 'gestion' ? 'active' : ''}`} 
-        onClick={() => verificarSalida('gestion')} // 👈 Cambiado
-    >
-        <Home size={18}/> <span>PANEL DE GESTIÓN</span>
-    </button>
-    
-    <button 
-        className={`menu-item ${activeTab === 'creacion' ? 'active' : ''}`} 
-        onClick={() => verificarSalida('creacion')} // 👈 Cambiado
-    >
-        <PlusCircle size={18}/> <span>PUBLICAR VACANTE</span>
-    </button>
-    
-    <button 
-        className={`menu-item ${activeTab === 'metricas' ? 'active' : ''}`} 
-        onClick={() => verificarSalida('metricas')} // 👈 Cambiado
-    >
-        <BarChart3 size={18}/> <span>MÉTRICAS Y REPORTES</span>
-    </button>
-    
-    <button 
-        className={`menu-item ${activeTab === 'mensajes' ? 'active' : ''}`} 
-        onClick={() => verificarSalida('mensajes')} // 👈 Cambiado
-    >
-        <MessageSquare size={18}/> <span>MENSAJES / CHAT</span>
-    </button>
-    <button 
-        className={`menu-item ${activeTab === 'total_postulaciones' ? 'active' : ''}`} 
-        onClick={() => verificarSalida('total_postulaciones')}
-    >
-        <ClipboardList size={18}/> <span>LISTADO POSTULADOS</span>
-    </button>
-</div>
-                </div>
+    const limpiarContenidoVacio = (html) => {
+    if (!html) return "";
 
-                <div className="sidebar-footer">
-                    <button className="collapse-btn-footer" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
-                        <div className="btn-content">
-                            <ChevronRight size={20} className={`icon-transition ${isSidebarCollapsed ? "" : "rotate-180"}`} />
-                            <span>{isSidebarCollapsed ? "ABRIR MENÚ" : "CONTRAER MENÚ"}</span>
-                        </div>
-                    </button>
-                    <div className="menu-item logout-item" onClick={() => setShowLogoutModal(true)}>
-                        <LogOut size={20} className="sidebar-icon" />
-                        {!isSidebarCollapsed && <span className="menu-label">CERRAR SESIÓN</span>}
-                    </div>
-                </div>
-            </nav>
+    // Creamos un documento temporal para manipular el HTML fácilmente
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
 
-            <div className="glass-container">
-                <header className="main-header-container">
-                    <div className="header-top-bar">
-                        <div className="bar-green"></div>
-                        <div className="bar-orange"></div>
-                    </div>
-                    <div className="header-content">
-                        <div className="header-left"><div className="udec-brand"><img src={logoUdec} alt="Logo UdeC" className="header-logo-img" /></div></div>
-                        
-                        <div className="header-right">
-    {/* Contenedor relativo para que el menú flote justo debajo */}
-    <div className="user-profile-info" style={{ position: 'relative' }}>
-        <div className="user-details">
-            <span className="user-full-name-empresa">
-                {empresa?.nombres || empresa?.nombre || "Cargando..."}
-            </span>
-            <span className="user-career">Empresa Aliada</span>
-        </div>
+    // Buscamos todos los ítems de lista (li) que es donde están nuestras guías
+    const items = tempDiv.querySelectorAll("li");
+
+    items.forEach(li => {
+        const texto = li.innerText.trim();
         
-        {/* Al darle clic, abrimos/cerramos el mini menú */}
-        <div 
-            className="user-avatar-initials" 
-            style={{ backgroundColor: '#006b3f', cursor: 'pointer' }}
-            onClick={(e) => {
-                e.stopPropagation(); // Evita que otros clics cierren el menú de inmediato
-                setShowProfileMenu(!showProfileMenu);
-            }}
-        >
-            <span>{obtenerIniciales(empresa?.nombres || empresa?.nombre)}</span>
-        </div>
+        // REGLA: Si termina en ":" o está vacío, eliminamos el item
+        // Ejemplo: "Formación:" -> se elimina. "Formación: Bachiller" -> se queda.
+        if (texto.endsWith(":") || texto === "" || texto.endsWith(": ")) {
+            li.remove();
+        }
+    });
 
-        {/* --- ESTE ES EL MENÚ QUE APARECE AL DAR CLIC AL AVATAR --- */}
-        {showProfileMenu && (
-            <div className="profile-dropdown-container fade-in">
-                <button className="dropdown-item" onClick={() => {
-                    setActiveTab("perfil"); // Cambia el contenido central
-                    setShowProfileMenu(false); // Cierra el mini menú
-                }}>
-                    <User size={16} /> Ver Perfil
-                </button>
-                <div className="dropdown-divider"></div>
-                <button className="dropdown-item logout" onClick={handleLogout}>
-                    <LogOut size={16} /> Cerrar Sesión
-                </button>
+    // También limpiamos grupos de listas (ul/ol) que hayan quedado totalmente vacíos
+    const listas = tempDiv.querySelectorAll("ul, ol");
+    listas.forEach(lista => {
+        if (lista.innerText.trim() === "") {
+            // Si la lista no tiene nada, también quitamos el título que está antes (p o strong)
+            let anterior = lista.previousElementSibling;
+            if (anterior && (anterior.tagName === "P" || anterior.tagName === "STRONG")) {
+                anterior.remove();
+            }
+            lista.remove();
+        }
+    });
+
+    return tempDiv.innerHTML;
+};
+
+return (
+    <div className="dashboard-layout">
+        {/* SIDEBAR LIMPIO SIN BOTÓN DE CERRAR SESIÓN */}
+        <nav 
+            className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}
+            onMouseEnter={() => setIsSidebarCollapsed(false)}
+            onMouseLeave={() => setIsSidebarCollapsed(true)}
+        >
+            <div className="sidebar-top">
+                <div className="sidebar-menu">
+                    <button className={`menu-item ${activeTab === 'gestion' ? 'active' : ''}`} onClick={() => verificarSalida('gestion')}>
+                        <Home size={22}/> <span>PANEL DE GESTIÓN</span>
+                    </button>
+                    <button className={`menu-item ${activeTab === 'creacion' ? 'active' : ''}`} onClick={() => verificarSalida('creacion')}>
+                        <PlusCircle size={22}/> <span>PUBLICAR VACANTE</span>
+                    </button>
+                    <button className={`menu-item ${activeTab === 'metricas' ? 'active' : ''}`} onClick={() => verificarSalida('metricas')}>
+                        <BarChart3 size={22}/> <span>MÉTRICAS Y REPORTES</span>
+                    </button>
+                    <button className={`menu-item ${activeTab === 'mensajes' ? 'active' : ''}`} onClick={() => verificarSalida('mensajes')}>
+                        <MessageSquare size={22}/> <span>MENSAJES / CHAT</span>
+                    </button>
+                    <button className={`menu-item ${activeTab === 'total_postulaciones' ? 'active' : ''}`} onClick={() => verificarSalida('total_postulaciones')}>
+                        <ClipboardList size={22}/> <span>LISTADO POSTULADOS</span>
+                    </button>
+                </div>
             </div>
-        )}
-    </div>
-</div>
+            {/* Se eliminó el sidebar-footer de aquí */}
+        </nav>
+
+   <div className="glass-container">
+    <header className="main-header-container">
+        <div className="header-top-bar">
+            <div className="bar-green"></div>
+            <div className="bar-orange"></div>
+        </div>
+        <div className="header-content">
+            {/* Lado Izquierdo: Ambos logos con divisoria */}
+            <div className="header-left-brands">
+                <img src={logoGrande} alt="Empres 360 Pro" className="header-brand-logo" />
+                <div className="brand-divider"></div>
+                <img src={logoUdec} alt="UdeC" className="header-udec-logo" />
+            </div>
+
+            {/* El centro queda vacío para que respire el diseño */}
+            <div className="header-center"></div>
+
+            <div className="header-right">
+                <div className="user-profile-info" style={{ position: 'relative' }}>
+                    <div className="user-details">
+                        <span className="user-full-name-empresa">
+                            {empresa?.nombres || empresa?.nombre || "Cargando..."}
+                        </span>
+                        <span className="user-career">Empresa Aliada</span>
                     </div>
-                </header>
+
+                    <div
+                        className="user-avatar-initials"
+                        style={{ backgroundColor: '#006b3f', cursor: 'pointer' }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowProfileMenu(!showProfileMenu);
+                        }}
+                    >
+                        <span>{obtenerIniciales(empresa?.nombres || empresa?.nombre)}</span>
+                    </div>
+
+                    {showProfileMenu && (
+                        <div className="profile-dropdown-container fade-in">
+                            <button className="dropdown-item" onClick={() => {
+                                setActiveTab("perfil");
+                                setShowProfileMenu(false);
+                            }}>
+                                <User size={16} /> Ver Perfil
+                            </button>
+                            <div className="dropdown-divider"></div>
+                            {/* Lógica unificada: abre el modal de confirmación */}
+                            <button className="dropdown-item logout" onClick={() => {
+                                setShowLogoutModal(true);
+                                setShowProfileMenu(false);
+                            }}>
+                                <LogOut size={16} /> Cerrar Sesión
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    </header>
 
                 <main className="content-inner">
                     {/* VISTA GESTIÓN */}
-                    {activeTab === 'gestion' && (
-                        <div className="vacantes-view-container fade-in">
-                            <section className="vacantes-list-panel">
-{/* 📦 CONTENEDOR ELEGANTE DE CABECERA COLAPSABLE */}
-<div className="vacantes-tools-header">
-    {/* Encabezado que siempre queda visible */}
-    <div className="section-title-container" style={{ borderBottom: showFilters ? '1px solid #f1f5f9' : 'none', marginBottom: showFilters ? '18px' : '0' }}>
-        <div className="title-icon-wrapper">
-            <Briefcase size={22} className="title-icon" />
-        </div>
-        <div style={{ flex: 1 }}>
-            <h2>
-                MIS VACANTES 
-                <span className="vacantes-count-badge">{vacantesFiltradas.length}</span>
-            </h2>
+                   {/* VISTA GESTIÓN REFORMADA (GRID COMPLETO) */}
+{activeTab === 'gestion' && (
+    <div className="vacantes-grid-wrapper fade-in">
+        
+        {/* Cabecera de filtros centrada y ancha */}
+<header className="vacantes-header-container-premium">
+    <div className="vacantes-top-bar-hub">
+        <div className="hub-left">
+            <div className="hub-icon-wrapper">
+                <Briefcase size={26} />
+            </div>
+            <div className="hub-title-text">
+                <h2>Mis Vacantes Activas</h2>
+                <p>Gestiona y supervisa el estado de tus ofertas publicadas</p>
+            </div>
         </div>
 
-        {/* 🏹 BOTÓN DE LA FLECHITA (Colapsar/Expandir) */}
+<div className="hub-right">
+    {/* Contenedor unificado de Estadísticas y Acción */}
+    <div className="hub-stats-control-wrapper">
+        <div className="hub-stat-card-mini">
+            <span className="stat-label">Total Ofertas</span>
+            <span className="stat-number">{vacantesFiltradas.length}</span>
+        </div>
+        
+        {/* La flechita ahora es parte del conjunto */}
         <button 
-            className={`btn-toggle-filters ${!showFilters ? 'is-collapsed' : ''}`}
+            className={`btn-toggle-filters-hub ${!showFilters ? 'is-collapsed' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
-            title={showFilters ? "Ocultar búsqueda" : "Mostrar búsqueda"}
+            title={showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
         >
-            <ChevronRight size={20} />
+            <ChevronRight size={20} className="icon-transition" />
         </button>
     </div>
+</div>
+    </div>
 
-    {/* Contenedor animado de los filtros */}
     <div className={`filters-collapsible-content ${!showFilters ? 'collapsed' : ''}`}>
-        <div className="search-filters-stack">
-            {/* Fila 1: Búsqueda por texto */}
-            <div className="search-input-inner">
-                <Search size={16} className="search-inner-icon" />
+        <div className="search-filters-horizontal-hub">
+            <div className="search-input-wrapper-hub">
+                <Search size={18} className="search-icon-hub" />
                 <input 
                     type="text" 
-                    placeholder="Buscar por título de vacante..." 
+                    className="search-input-field-premium"
+                    placeholder="Buscar por título, palabra clave o ubicación..." 
                     value={searchTerm} 
                     onChange={(e) => setSearchTerm(e.target.value)} 
                 />
             </div>
             
-            {/* Fila 2: Rango de fechas + Botón Limpiar */}
-            <div className="date-range-container">
-                <div className="filter-date-item">
-                    <Calendar size={14} className="filter-icon" />
-                    <span className="date-label">Desde:</span>
-                    <input 
-                        type="date" 
-                        className="date-input-field" 
-                        value={fechaDesde}
-                        onChange={(e) => setFechaDesde(e.target.value)}
-                    />
+            <div className="date-group-hub">
+                <div className="filter-date-pill-hub">
+                    <Calendar size={16} />
+                    <span>Desde:</span>
+                    <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} />
                 </div>
 
-                <div className="filter-date-item">
-                    <Calendar size={14} className="filter-icon" />
-                    <span className="date-label">Hasta:</span>
-                    <input 
-                        type="date" 
-                        className="date-input-field" 
-                        value={fechaHasta}
-                        onChange={(e) => setFechaHasta(e.target.value)}
-                    />
+                <div className="filter-date-pill-hub">
+                    <Calendar size={16} />
+                    <span>Hasta:</span>
+                    <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} />
                 </div>
 
-                {/* Botón Limpiar estilizado */}
-                <button 
-                    className="btn-clear-filters" 
-                    title="Limpiar filtros"
-                    onClick={limpiarFiltros}
-                >
+                {/* 🧹 BOTÓN LIMPIAR: Integrado como una cápsula más */}
+                <button className="btn-clear-hub-premium" onClick={limpiarFiltros} title="Limpiar búsqueda">
                     <XCircle size={18} />
                     <span>Limpiar</span>
                 </button>
             </div>
         </div>
     </div>
-</div>
-
-                                <div className="scrollable-cards">
-    {/* 🟢 CAMBIO: Usamos vacantesFiltradas en lugar de vacantes */}
-{vacantesFiltradas.length > 0 ? (
-    vacantesFiltradas.map((v) => {
-        // Verificamos si esta vacante específica es la que debe animarse
+</header>
+        {/* --- REJILLA DE VACANTES --- */}
+<div className="vacantes-main-grid">
+    {vacantesFiltradas.map((v) => {
         const esNueva = vacanteAnimadaId === v.id;
-
         return (
-            <div 
-                key={v.id} 
-                className={`vacante-card-item 
-                    ${vacanteSeleccionadaId === v.id ? 'active' : ''} 
-                    ${esNueva ? 'pulse-new-notification' : ''}`} // 👈 Clase de animación
-                onClick={() => handleVerPostulaciones(v.id)}
-                style={{ position: 'relative' }}
-            >
-                {/* 🔔 INDICADOR FLOTANTE DE NUEVA POSTULACIÓN */}
+            <div key={v.id} className={`vacante-card-grid-item ${esNueva ? 'pulse-new-notification' : ''}`} onClick={() => handleVerPostulaciones(v.id)}>
+                
+                {/* Indicador de Nueva Postulación */}
                 {esNueva && (
-                    <div className="new-postulation-badge fade-in">
-                        <Bell size={10} />
-                        <span>¡NUEVA!</span>
+                    <div className="new-postulation-badge-floating fade-in">
+                        <Bell size={10} /> <span>¡NUEVA!</span>
                     </div>
                 )}
 
-                <div className="card-main-info">
-                    <h4 style={{ 
-                        fontWeight: '700', 
-                        marginBottom: '8px', 
-                        color: '#1e293b',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px'
-                    }}>
-                        <Briefcase size={18} style={{ color: esNueva ? '#006b3f' : '#006b3f' }} /> 
-                        <span>{v.titulo}</span>
-                    </h4>
-
-                    <div className="card-location-row">
-                        <span className="location-chip">
-                            <MapPin size={14} style={{ color: '#3b82f6' }} />
-                            {v.ubicacion}
-                        </span>
-                        <span className="vertical-separator">|</span>
-                        <span className="modalidad-chip">
-                            {v.modalidad === 'Presencial' && <Building2 size={14} style={{ color: '#6366f1' }} />}
-                            {v.modalidad === 'Remoto' && <Home size={14} style={{ color: '#f59e0b' }} />}
-                            {v.modalidad === 'Híbrido' && <Users size={14} style={{ color: '#10b981' }} />}
-                            {v.modalidad}
-                        </span>
+                <div className="card-grid-top">
+                    {/* Contador de postulados con estilo de cápsula */}
+                    <div className="postulantes-pill">
+                        <Users size={14} className="icon-postulantes" />
+                        <span>{v._count?.postulaciones || 0} postulados</span>
                     </div>
-
-                    <div className="card-meta-tags">
-                        <span className={`badge-slots ${esNueva ? 'highlight-count' : ''}`}>
-                            <Users size={12} /> 
-                            {v.postulaciones?.length || v._count?.postulaciones || 0} postulantes
-                        </span>
+                </div>
+                
+                <div className="card-grid-body">
+                    <div className="title-section-grid">
+                        <div className="briefcase-icon-container">
+                            <Briefcase size={18} />
+                        </div>
+                        <h3 className="vacante-titulo-grid">{v.titulo}</h3>
+                    </div>
+                    
+                    <div className="details-grid-row">
+                        <div className="detail-item-grid location">
+                            <MapPin size={14} />
+                            <span>{v.ubicacion}</span>
+                        </div>
+                        <div className="detail-item-grid modality">
+                            <Clock size={14} />
+                            <span>{v.modalidad}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="card-actions-row">
+                <div className="card-grid-footer">
                     <button 
-                        className="btn-action-edit" 
+                        className="btn-action-edit-grid" 
                         onClick={(e) => { e.stopPropagation(); handlePrepararEdicion(v); }}
                     >
                         <Edit3 size={14} /> <span>Editar</span>
                     </button>
                     <button 
-                        className="btn-action-delete" 
+                        className="btn-action-delete-grid" 
                         onClick={(e) => { e.stopPropagation(); handleEliminarVacante(v.id, v.titulo); }}
                     >
                         <Trash2 size={14} /> <span>Eliminar</span>
@@ -799,116 +871,38 @@ const vacantesFiltradas = vacantes.filter((v) => {
                 </div>
             </div>
         );
-    })
-) : (
-    <div className="empty-search-results">
-        <Search size={32} style={{ opacity: 0.3 }} />
-        <p>No se encontraron vacantes con los filtros seleccionados.</p>
+    })}
+</div>
+
+        {/* --- MODAL DE GESTIÓN DE CANDIDATOS --- */}
+        {vacanteSeleccionadaId && (
+            <div className="modal-overlay fade-in" onClick={() => setVacanteSeleccionadaId(null)}>
+                <div className="gestion-modal-content" onClick={(e) => e.stopPropagation()}>
+                    <header className="modal-gestion-header">
+                        <h2>{vacanteActual?.titulo}</h2>
+                        <button className="btn-close-modal" onClick={() => setVacanteSeleccionadaId(null)}>
+                            <XCircle size={24} />
+                        </button>
+                    </header>
+                    <div className="modal-gestion-body">
+                        {postulaciones.length > 0 ? (
+                            <ListaPostulacionesTable 
+                                postulaciones={postulaciones}
+                                stages={PIPELINE_STAGES}
+                                onCambiarEstado={handleCambiarEstado}
+                                onVerPerfil={handleVerPerfil}
+                                onDescargarDirecto={handleDescargaDirecta}
+                                onAbrirChat={(p) => { setChatPostulante(p); setIsChatOpen(true); }}
+                            />
+                        ) : (
+                            <div className="empty-state-modal">Aún no hay candidatos postulados.</div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        )}
     </div>
 )}
-</div>
-                            </section>
-
-                          <aside className="vacante-detail-panel">
-  {vacanteSeleccionadaId ? (
-    /* 1. SECCIÓN: CUANDO SÍ HAY UNA VACANTE SELECCIONADA */
-    <div className="detail-content-wrapper fade-in">
-      
-      {/* CABECERA INSTITUCIONAL SÓLIDA (Siempre visible al seleccionar vacante) */}
-      <div className="vacante-header-card-solid-container">
-        <div className="header-icon-section">
-          <div className="icon-pills-wrapper">
-            <Users size={24} className="pills-icon" />
-          </div>
-        </div>
-
-        <div className="header-text-section">
-          <span className="selection-process-label">PROCESO DE SELECCIÓN</span>
-          <h2 className="vacante-title-main">
-            {vacanteActual?.titulo}
-          </h2>
-        </div>
-
-        <div className="header-stats-section">
-          <div className="header-stats-quick-mini" title="Total de postulados">
-            <span className="stat-value-mini">{postulaciones.length}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* VALIDACIÓN INTERNA: ¿Tiene postulantes la vacante seleccionada? */}
-      {postulaciones.length > 0 ? (
-        <ListaPostulacionesTable 
-          postulaciones={postulaciones}
-          stages={PIPELINE_STAGES}
-          onCambiarEstado={handleCambiarEstado}
-          onVerPerfil={handleVerPerfil}
-          onDescargarDirecto={handleDescargaDirecta}
-          onAbrirChat={(p) => { setChatPostulante(p); setIsChatOpen(true); }}
-        />
-      ) : (
-        /* CASO: VACANTE SELECCIONADA PERO SIN POSTULANTES */
-        <div className="empty-state-container fade-in">
-          <div className="empty-state-illustration">
-            <div className="icon-bg-circle">
-              <Users size={48} className="empty-icon" />
-            </div>
-            <div className="empty-state-decorations">
-              <span className="dot dot-1"></span>
-              <span className="dot dot-2"></span>
-              <span className="dot dot-3"></span>
-            </div>
-          </div>
-          
-          <div className="empty-state-text">
-            <h3>Búsqueda en curso</h3>
-            <p>
-              Actualmente no hay candidatos postulados a esta vacante. 
-              Las nuevas postulaciones aparecerán aquí automáticamente.
-            </p>
-          </div>
-
-          <div className="empty-state-badge">
-    <Search size={14} className="searching-icon-anim" />
-    <span>Oferta activa y esperando candidatos</span>
-</div>
-        </div>
-      )}
-    </div>
-  ) : (
-    /* 2. SECCIÓN: ESTADO INICIAL (Cuando el usuario acaba de entrar al Dashboard) */
-    <div className="no-selection-state fade-in">
-      <div className="welcome-illustration">
-        <div className="icon-circle-main">
-          <Briefcase size={48} strokeWidth={1.5} />
-        </div>
-        <div className="pulse-ring"></div>
-      </div>
-      
-      <div className="welcome-text-content">
-        <h3>Gestión de Candidatos</h3>
-        <p>
-          Selecciona una vacante de la izquierda para ver el flujo de selección.
-        </p>
-      </div>
-      
-      <div className="welcome-footer-hint">
-        <div className="hint-item">
-          <Users size={16} />
-          <span>Revisa nuevas postulaciones</span>
-        </div>
-        <div className="hint-separator"></div>
-        <div className="hint-item">
-          <CheckCircle size={16} />
-          <span>Gestiona el proceso de selección</span>
-        </div>
-      </div>
-    </div>
-  )}
-</aside>
- 
-                        </div>
-                    )}
 
                     {/* VISTA MÉTRICAS */}
                     {activeTab === "metricas" && <div className="full-view fade-in"><EmpresaMetricas empresaId={empresa?.id} /></div>}
@@ -984,16 +978,39 @@ const vacantesFiltradas = vacantes.filter((v) => {
                                 placeholder="Ej: Desarrollador Web Junior" 
                             />
                         </div>
-                        <div className="form-group full">
-                            <label>Descripción del Cargo *</label>
-                            <textarea 
-                                style={{ height: '345px', resize: 'none' }} // Ajustado para alinear con la derecha
-                                required 
-                                value={nuevaVacante.descripcion} 
-                                onChange={(e) => setNuevaVacante({ ...nuevaVacante, descripcion: e.target.value })} 
-                                placeholder="Responsabilidades, requisitos, beneficios..." 
-                            />
-                        </div>
+<div className="form-group full">
+    <label>Descripción del Cargo *</label>
+    
+    {/* BARRA DE GUÍA RÁPIDA */}
+    <div style={{ marginBottom: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '13px', color: '#64748b', alignSelf: 'center', marginRight: '5px' }}>
+            <Edit3 size={14} style={{ verticalAlign: 'middle' }} /> Insertar guía:
+        </span>
+        <button type="button" onClick={() => insertarPlantilla('requisitos')} className="btn-guia-editor">Requisitos</button>
+        <button type="button" onClick={() => insertarPlantilla('funciones')} className="btn-guia-editor">Funciones</button>
+        <button type="button" onClick={() => insertarPlantilla('habilidades')} className="btn-guia-editor">Habilidades</button>
+        <button type="button" onClick={() => insertarPlantilla('responsabilidades')} className="btn-guia-editor">Responsabilidades Críticas</button>
+    </div>
+
+<div className="editor-wrapper" style={{ 
+    background: '#fff', 
+    borderRadius: '8px', 
+    color: '#333', 
+    width: '100%', 
+    maxWidth: '100%', // 👈 Clave para que no se estire
+    overflow: 'hidden' // 👈 Corta cualquier intento de salirse
+}}>
+<ReactQuill 
+    theme="snow"
+    value={nuevaVacante.descripcion || ""} // 👈 CAMBIADO: Debe ser nuevaVacante
+    onChange={(content) => setNuevaVacante({ ...nuevaVacante, descripcion: content })} // 👈 CAMBIADO: setNuevaVacante
+    modules={modules}
+    formats={formats}
+    placeholder="Escribe la descripción aquí..."
+    style={{ height: '300px', marginBottom: '50px' }}
+/>
+</div>
+</div>
                     </div>
 
                     {/* COLUMNA DERECHA: Detalles Técnicos (En rejilla de 2 columnas internas) */}
@@ -1270,11 +1287,32 @@ const vacantesFiltradas = vacantes.filter((v) => {
                             <input type="text" required value={editandoVacante.titulo} 
                                 onChange={(e) => setEditandoVacante({ ...editandoVacante, titulo: e.target.value })} />
                         </div>
-                        <div className="form-group full">
-                            <label>Descripción del Cargo *</label>
-                            <textarea style={{ height: '345px', resize: 'none' }} required value={editandoVacante.descripcion} 
-                                onChange={(e) => setEditandoVacante({ ...editandoVacante, descripcion: e.target.value })} />
-                        </div>
+<div className="form-group full">
+    <label>Descripción del Cargo *</label>
+    
+    {/* BARRA DE GUÍA PARA EDICIÓN */}
+    <div style={{ marginBottom: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '13px', color: '#64748b', alignSelf: 'center', marginRight: '5px' }}>
+             Insertar guía:
+        </span>
+        <button type="button" onClick={() => insertarPlantilla('requisitos')} className="btn-guia-editor">Requisitos</button>
+        <button type="button" onClick={() => insertarPlantilla('funciones')} className="btn-guia-editor">Funciones</button>
+        <button type="button" onClick={() => insertarPlantilla('habilidades')} className="btn-guia-editor">Habilidades</button>
+        <button type="button" onClick={() => insertarPlantilla('responsabilidades')} className="btn-guia-editor">Responsabilidades Críticas</button>
+    </div>
+
+    <div className="editor-wrapper" style={{ background: '#fff', borderRadius: '8px', color: '#333' }}>
+        <ReactQuill 
+            theme="snow"
+            // Vinculamos al estado de edición
+            value={editandoVacante.descripcion || ""} 
+            onChange={(content) => setEditandoVacante({ ...editandoVacante, descripcion: content })}
+            modules={modules}
+            formats={formats}
+            style={{ height: '300px', marginBottom: '50px' }}
+        />
+    </div>
+</div>
                     </div>
 
                     {/* COLUMNA DERECHA: Detalles Técnicos (Espejo de Creación) */}

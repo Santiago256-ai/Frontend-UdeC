@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'; // 👈 CAMBIO AQUÍ: Importación directa
 import styles from './ItemUsuarios.module.css';
+import ModalConfirmacion from './ModalConfirmacion'; // 👈 Importa el componente
 
 const Icon = ({ name }) => <i className={`fa-solid fa-${name}`}></i>;
 
@@ -14,6 +15,7 @@ const Icon = ({ name }) => <i className={`fa-solid fa-${name}`}></i>;
 const ModalPerfil = ({ usuario, onClose, onUpdate, API_URL }) => {
     const [editando, setEditando] = useState(false);
     const [datosEditados, setDatosEditados] = useState(usuario ? { ...usuario } : {});
+
 
     if (!usuario) return null;
 
@@ -150,6 +152,8 @@ const ItemUsuarios = ({ API_URL }) => {
 const [filtroPrograma, setFiltroPrograma] = useState("");
 const [filtroEstado, setFiltroEstado] = useState("");
 const [filtroFecha, setFiltroFecha] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false); // 👈 Controla visibilidad
+const [usuarioParaEliminar, setUsuarioParaEliminar] = useState(null); // 👈 Guarda datos temporales
 
     const cargarUsuarios = async () => {
         try {
@@ -243,17 +247,32 @@ const toggleEstado = async (usuario) => {
     }
 };
 
-    const handleEliminar = async (id, nombre) => {
-        if (window.confirm(`¿Estás seguro de eliminar a ${nombre}? Esta acción borrará su perfil permanentemente.`)) {
-            try {
-                await axios.delete(`${API_URL}/usuarios/${id}`);
-                setUsuarios(usuarios.filter(u => u.id !== id));
-                toast.success("Usuario eliminado correctamente");
-            } catch (error) {
-                toast.error("Error al intentar eliminar el usuario");
-            }
-        }
-    };
+// 1. Esta función se activa al hacer clic en el botón de basura
+// Antes probablemente tenías solo u.nombres
+const handleEliminarClick = (id, nombres, apellidos) => {
+    // Concatenamos nombres y apellidos para el nombre completo
+    const nombreCompleto = `${nombres} ${apellidos}`;
+    setUsuarioParaEliminar({ id, nombre: nombreCompleto });
+    setIsModalOpen(true);
+};
+
+// 2. Esta función se activa cuando el usuario pulsa "Sí, eliminar" en el modal elegante
+const ejecutarEliminacion = async () => {
+    if (!usuarioParaEliminar) return;
+
+    try {
+        await axios.delete(`${API_URL}/usuarios/${usuarioParaEliminar.id}`);
+        setUsuarios(usuarios.filter(u => u.id !== usuarioParaEliminar.id));
+        toast.success(`El perfil de "${usuarioParaEliminar.nombre}" ha sido eliminado correctamente`);
+    } catch (error) {
+        console.error("Error al eliminar:", error);
+        toast.error("No se pudo eliminar el usuario");
+    } finally {
+        // Cerramos y limpiamos siempre
+        setIsModalOpen(false);
+        setUsuarioParaEliminar(null);
+    }
+};
 
 const usuariosFiltrados = usuarios.filter(u => {
     const busquedaLimpia = busqueda.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -310,7 +329,7 @@ return (
         {/* Encabezado Superior */}
         <div className={styles.header}>
             <div>
-                <h2 className={styles.title}>Gestión de Egresados / Estudiantes</h2>
+                <h2 className={styles.title}>Gestión de Egresados</h2>
                 <p className={styles.subtitle}>Total registrados: {usuarios.length}</p>
             </div>
             
@@ -439,13 +458,14 @@ return (
                                     >
                                         <Icon name="user-tie" />
                                     </button>
-                                    <button 
-                                        className={styles.deleteBtn} 
-                                        onClick={() => handleEliminar(u.id, u.nombres)}
-                                        title="Eliminar"
-                                    >
-                                        <Icon name="trash-can" />
-                                    </button>
+                                   <button 
+    className={styles.deleteBtn} 
+    // Pasamos u.id, u.nombres y u.apellidos
+    onClick={() => handleEliminarClick(u.id, u.nombres, u.apellidos)}
+    title="Eliminar"
+>
+    <Icon name="trash-can" />
+</button>
                                 </td>
                             </tr>
                         ))
@@ -462,6 +482,15 @@ return (
                 </tbody>
             </table>
         </div>
+        <ModalConfirmacion 
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setUsuarioParaEliminar(null);
+                }}
+                onConfirm={ejecutarEliminacion}
+                nombreEmpresa={usuarioParaEliminar?.nombre || ""} 
+            />
     </div>
 );
 };
