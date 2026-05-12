@@ -1,0 +1,479 @@
+:root {
+    --trash-primary: #006b3f;
+    --trash-danger: #ef4444;
+    --trash-warning: #f59e0b;
+    --trash-bg-light: #f8fafc;
+    --trash-border: #e2e8f0;
+}
+
+.trash-page-container {
+    padding: 2rem;
+    height: 100%;
+    background-color: var(--trash-bg-light);
+}
+
+.trash-header {
+    margin-bottom: 2rem;
+}
+
+.trash-title-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.trash-icon-main {
+    color: var(--trash-danger);
+    background: #fee2e2;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.trash-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.trash-card-premium {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid var(--trash-border);
+}
+
+.trash-custom-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.trash-custom-table th {
+    background: #f1f5f9;
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.85rem;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.td-titulo strong {
+    display: block;
+    color: #1e293b;
+}
+
+.td-titulo span {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.badge-count {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+}
+
+.td-actions {
+    display: flex;
+    align-items: center;      /* 👈 Esto los centra verticalmente */
+    justify-content: center;   /* 👈 Esto los centra horizontalmente */
+    gap: 12px;
+    height: 100%;             /* Asegura que tome el alto de la fila */
+    min-height: 80px;         /* Altura mínima para alinearse con el texto de la izquierda */
+    padding-top: 10px;        /* 👈 Si aún los ves un poco arriba, ajusta este valor */
+    border: none !important;
+}
+
+.trash-custom-table td:last-child {
+    vertical-align: middle;   /* Refuerzo de alineación de tabla */
+}
+/* Botones con transiciones elegantes */
+.btn-trash-view, .btn-trash-restore, .btn-trash-hard {
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-trash-view { background: #f1f5f9; color: #475569; }
+.btn-trash-restore { background: #dcfce7; color: #166534; }
+.btn-trash-hard { background: #fee2e2; color: #991b1b; }
+
+.btn-trash-restore:hover { transform: translateY(-2px); background: #22c55e; color: white; }
+
+/* Panel Lateral */
+.trash-detail-panel {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--trash-border);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-placeholder {
+    margin: auto;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.postulado-mini-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.p-nombre { font-weight: 600; margin-bottom: 2px; }
+.p-meta { font-size: 0.75rem; color: #64748b; }
+
+.btn-close-detail {
+    margin-top: auto;
+    padding: 10px;
+    border: 1px solid var(--trash-border);
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Badge de Fecha (Rectángulo elegante) */
+.trash-date-badge-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #f1f5f9; /* Gris pizarra muy claro */
+    color: #475569;            /* Texto profesional */
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    min-width: 110px;
+    justify-content: center;
+}
+
+/* Badge de Postulados (Simétrico al de fecha) */
+.trash-postulados-badge-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #e0f2fe; /* Azul muy claro */
+    color: #0369a1;            /* Azul corporativo */
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #bae6fd;
+    font-size: 0.85rem;
+    font-weight: 600;
+    min-width: 60px;
+    justify-content: center;
+}
+
+/* Iconos dentro de los badges */
+.trash-date-badge-premium svg, 
+.trash-postulados-badge-premium svg {
+    opacity: 0.7;
+}
+
+/* Ajuste de la tabla */
+.trash-custom-table th {
+    text-align: center;
+    padding: 15px;
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.trash-custom-table td {
+    padding: 16px 12px;
+    vertical-align: middle;
+    border: none; /* Eliminamos el borde individual para que no se mueva */
+}
+
+.vacante-info-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vacante-info-main strong {
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* Estilo para la fecha de creación debajo del título */
+.fecha-creacion-text {
+    font-size: 0.8rem;
+    color: #64748b; /* Gris suave */
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+/* Opcional: Un pequeño punto decorativo si quieres separar datos a futuro */
+.fecha-creacion-text::before {
+    content: "•";
+    margin-right: 6px;
+    color: #006b3f; /* Verde UdeC para el detalle */
+    font-weight: bold;
+}
+
+/* --- CONTENEDOR TOTAL --- */
+.trash-full-width-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- ESTADOS DE LA FILA --- */
+
+.row-main.is-expanded {
+    background-color: #f1f5f9;
+}
+
+/* --- FILA EXPANDIBLE --- */
+.row-detail-expanded {
+    background-color: #fcfcfc;
+}
+
+.expanded-content-wrapper {
+    padding: 20px 40px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.expanded-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    color: #1e293b;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #006b3f;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px #dcfce7;
+}
+
+/* --- GRID DE POSTULADOS EN ACORDEÓN --- */
+.postulados-grid-desplegable {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.postulado-card-horizontal {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.p-avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: #006b3f;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.p-name {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #334155;
+}
+
+.p-tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+/* Colores de etiquetas */
+/* 🟡 PENDIENTE (Ya lo tienes) */
+.p-tag.pendiente { 
+    background: #fef3c7; 
+    color: #92400e; 
+    border: 1px solid #fcd34d;
+}
+
+/* 🔵 REVISIÓN CV / REVISIÓN */
+.p-tag.revision, .p-tag.revision-cv { 
+    background: #e0f2fe; 
+    color: #0369a1; 
+    border: 1px solid #bae6fd;
+}
+
+/* 🟣 ENTREVISTA */
+.p-tag.entrevista { 
+    background: #f5f3ff; 
+    color: #5b21b6; 
+    border: 1px solid #ddd6fe;
+}
+
+/* 🟠 PRUEBA */
+.p-tag.prueba { 
+    background: #fff7ed; 
+    color: #9a3412; 
+    border: 1px solid #ffedd5;
+}
+
+/* 🟢 FINALISTA / CONTRATADO */
+.p-tag.finalista, .p-tag.contratado { 
+    background: #ecfdf5; 
+    color: #065f46; 
+    border: 1px solid #d1fae5;
+}
+
+/* 🔴 RECHAZADO / DESCARTADO */
+.p-tag.rechazado, .p-tag.descartado { 
+    background: #fef2f2; 
+    color: #991b1b; 
+    border: 1px solid #fee2e2;
+}
+
+.p-contact {
+    margin-left: auto;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+}
+
+/* Esto aplica el cursor de puntero a toda la fila */
+.row-main {
+    cursor: pointer;
+    border-bottom: 1px solid var(--trash-border); /* La línea ahora es una sola para toda la fila */
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* También es buena práctica resaltar la fila al pasar el mouse 
+   para que el usuario sepa qué está seleccionando */
+.row-main:hover {
+    background-color: #f8fafc !important;
+}
+/* Si quieres que los botones de acción mantengan su propia interacción 
+   pero que el resto de la fila también sea clickeable */
+.td-actions button {
+    cursor: pointer;
+}
+
+.trash-custom-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.btn-trash-view.active-view {
+    background-color: #006b3f; /* Verde UdeC */
+    color: white;
+}
+
+/* Modal de Eliminación Definitiva */
+.hard-delete-modal {
+    border-top: 6px solid #ef4444; /* Línea superior roja de alerta */
+}
+
+.delete-icon-animated-critical {
+    background: #fef2f2;
+    padding: 15px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.hard-delete-warning-box {
+    background: #fff5f5;
+    border: 1px solid #fee2e2;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.hard-delete-warning-box p {
+    color: #1e293b;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.warning-list {
+    margin: 0;
+    padding-left: 20px;
+    color: #b91c1c;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.warning-list li {
+    margin-bottom: 5px;
+}
+
+/* Botón de destrucción final */
+.btn-hard-delete-danger {
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: white !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+}
+
+.btn-hard-delete-danger:hover {
+    background-color: #dc2626 !important;
+    transform: scale(1.02);
+}
+
+/* Estilo base del botón de borrado definitivo (por si no lo tienes) */
+.btn-trash-hard {
+    background-color: #fee2e2; /* Rojo muy tenue */
+    color: #991b1b;            /* Rojo oscuro */
+    border: 1px solid #fecaca;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transición suave */
+}
+
+/* 🔴 HOVER PREMIUM PARA BORRADO DEFINITIVO */
+.btn-trash-hard:hover {
+    background-color: #ef4444 !important; /* Rojo vibrante */
+    color: #ffffff !important;            /* Icono blanco para contraste */
+    border-color: #dc2626;
+    transform: translateY(-2px);          /* Efecto de elevación */
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); /* Sombra roja sutil */
+}
+
+/* Efecto cuando se hace clic (Active) */
+.btn-trash-hard:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}

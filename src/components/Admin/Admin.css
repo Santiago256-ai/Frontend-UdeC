@@ -285,3 +285,216 @@
 
 .action-btn:hover { color: var(--udec-green-primary); }
 .action-btn.delete-btn:hover { color: var(--danger-color); }
+
+/* =========================================
+   HEADER Y AVATAR
+========================================= */
+.admin-main-header-container {
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.header-top-bar {
+    display: flex;
+    width: 100%;
+    
+}
+
+.admin-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    padding: 0 30px;
+    height: 100%;
+}
+
+.admin-header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.admin-brand-logo { height: 58px; width: auto; transition: all 0.3s ease; cursor: pointer;}
+.admin-brand-divider { width: 2px; height: 38px; background: #e2e8f0; opacity: 0.8;
+    margin-left: -35px;}
+.admin-udec-logo { height: 48px; width: auto; }
+
+
+.admin-brand-logo:hover {
+transform: scale(1.05); 
+}
+
+.admin-header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.admin-role-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+/* AVATAR REDONDO */
+.admin-avatar-container {
+    position: relative;
+}
+
+.admin-avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #00482b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.admin-avatar-circle:hover {
+    transform: scale(1.05);
+}
+
+/* MENÚ DESPLEGABLE (Cerrar Sesión) */
+.admin-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    min-width: 180px;
+}
+
+.admin-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.admin-logout-btn {
+    color: #ef4444;
+}
+
+.admin-logout-btn:hover {
+    background: #fef2f2;
+}
+
+
+/* =========================================
+   SIDEBAR (CORRECCIÓN DEL DISEÑO ROTO)
+========================================= */
+.admin-glass-sidebar {
+    position: fixed;
+    left: 15px;
+    top: 100px;
+    width: 55px; /* Inicia delgado */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 18px;
+    z-index: 9999;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.admin-glass-sidebar:hover {
+    width: 230px !important; /* Se ancha al pasar el cursor */
+}
+
+.admin-sidebar-menu {
+    padding: 8px 0;
+}
+
+.admin-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    margin: 4px auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-menu-item:hover {
+    padding-left: 20px; /* Empuja el contenido internamente */
+    background: rgba(0, 72, 43, 0.05); /* Fondo verde muy sutil */
+    color: #00482b; /* Cambia el color del texto/icono al verde institucional */
+    transform: translateX(8px);
+}
+
+.admin-glass-sidebar:hover .admin-menu-item:hover {
+    width: calc(100% - 12px); /* Ajustamos el ancho para que el movimiento no lo saque del borde */
+    transform: translateX(6px); /* Un movimiento un poco más corto para que sea elegante */
+}
+
+.admin-glass-sidebar:hover .admin-menu-item {
+    justify-content: flex-start;
+    padding-left: 16px;
+    width: calc(100% - 16px) !important;
+    transform: translateX(4px);
+}
+
+.admin-menu-item span {
+    display: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin-left: 12px;
+    white-space: nowrap;
+}
+
+.admin-glass-sidebar:hover .admin-menu-item span {
+    display: block;
+}
+
+.admin-menu-item.active {
+    background: #00482b;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.15);
+}
+
+.admin-menu-item:hover:not(.active) {
+    background: rgba(0, 72, 43, 0.05);
+    color: #00482b;
+}
+
+/* =========================================
+   CONTENEDOR PRINCIPAL
+========================================= */
+.admin-main-container {
+    padding-left: 80px; /* Evita que el sidebar pise el contenido */
+    padding-top: 20px;
+    padding-right: 20px;
+}
+
+.admin-content-panel {
+    max-width: 1400px;
+    margin: 0 auto;
+}

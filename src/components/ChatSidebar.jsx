@@ -18,7 +18,7 @@ const formatSidebarDate = (dateStr) => {
     });
 };
 
-const ChatSidebar = ({ empresaId }) => {
+const ChatSidebar = ({ empresaId, chatData }) => {
     const [listaChats, setListaChats] = useState([]); 
     const [chatSeleccionado, setChatSeleccionado] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -29,6 +29,64 @@ const ChatSidebar = ({ empresaId }) => {
     const scrollRef = useRef(null);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
 
+    useEffect(() => {
+    // Solo actuamos si hay chatData (venimos de notificación) y hay chats cargados
+    if (chatData?.usuarioId && chatData?.vacanteId && listaChats.length > 0) {
+        
+        console.log("Intentando auto-seleccionar chat para:", chatData);
+
+        const chatEncontrado = listaChats.find(c => 
+            // Comparamos vacante e ID de usuario (usando == por si uno es string y otro número)
+            c.vacanteId == chatData.vacanteId && 
+            (c.usuarioId == chatData.usuarioId || c.usuario?.id == chatData.usuarioId)
+        );
+
+        if (chatEncontrado) {
+            // Solo lo seleccionamos si no es el que ya está abierto
+            if (chatSeleccionado?.usuarioId !== chatEncontrado.usuarioId || 
+                chatSeleccionado?.vacanteId !== chatEncontrado.vacanteId) {
+                
+                console.log("Chat encontrado! Abriendo conversación con:", chatEncontrado.usuario?.nombre);
+                seleccionarChat(chatEncontrado);
+            }
+        } else {
+            console.warn("No se encontró el chat en la lista actual.");
+        }
+    }
+}, [chatData, listaChats]); // Importante que dependa de ambos
+
+    // =======================================================
+    // 🌟 MAGIA 2: SCROLL Y ANIMACIÓN COLOR NARANJA
+    // =======================================================
+useEffect(() => {
+    // 🌟 Si hay un mensajeId para resaltar y los mensajes ya están cargados
+    if (chatData?.mensajeId && messages.length > 0) {
+        
+        // Usamos un pequeño delay (300ms) para asegurar que el DOM esté listo
+        const scrollTimer = setTimeout(() => {
+            const mensajeElemento = document.getElementById(`mensaje-${chatData.mensajeId}`);
+            
+            if (mensajeElemento) {
+                console.log("🚀 Resaltando mensaje:", chatData.mensajeId);
+
+                // 1. Centramos el mensaje en la pantalla con scroll suave
+                mensajeElemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // 2. Encendemos la luz naranja
+                mensajeElemento.classList.add('resaltado-naranja');
+
+                // 3. ⏱️ Apagamos la luz después de 3.5 segundos
+                const removeTimer = setTimeout(() => {
+                    mensajeElemento.classList.remove('resaltado-naranja');
+                }, 3500);
+
+                return () => clearTimeout(removeTimer);
+            }
+        }, 300);
+
+        return () => clearTimeout(scrollTimer);
+    }
+}, [messages.length, chatData?.mensajeId]); // 👈 Escuchamos cambios en la cantidad de mensajes e ID // Se dispara cuando cargan los mensajes
     // 1. CARGAR LISTA DE CHATS
 // ASÍ DEBE QUEDAR TU PUNTO 1 (CARGAR LISTA DE CHATS):
 useEffect(() => {
@@ -300,49 +358,63 @@ const seleccionarChat = async (chat) => {
 </header>
 
                     {/* CUERPO DE MENSAJES (ZONA CON SCROLL) */}
+                    {/* CUERPO DE MENSAJES (ZONA CON SCROLL) */}
                     <div className="messages-body" ref={scrollRef}>
-    {messages.map((m, index) => {
-        const fechaActual = new Date(m.fechaEnvio).toDateString();
-        const fechaAnterior = index > 0 
-            ? new Date(messages[index - 1].fechaEnvio).toDateString() 
-            : null;
-        const mostrarSeparador = fechaActual !== fechaAnterior;
+                        {messages.map((m, index) => {
+                            const fechaActual = new Date(m.fechaEnvio).toDateString();
+                            const fechaAnterior = index > 0 
+                                ? new Date(messages[index - 1].fechaEnvio).toDateString() 
+                                : null;
+                            const mostrarSeparador = fechaActual !== fechaAnterior;
 
-        // --- NUEVA LÓGICA DE AGRUPACIÓN ---
-        const esMismoEmisor = index > 0 && messages[index - 1].senderType === m.senderType && !mostrarSeparador;
-        // ----------------------------------
+                            // --- LÓGICA DE AGRUPACIÓN ---
+                            const esMismoEmisor = index > 0 && messages[index - 1].senderType === m.senderType && !mostrarSeparador;
 
-        return (
-            <React.Fragment key={m.id}>
-                {mostrarSeparador && (
-                    <div className="u-sidebar-date-container">
-                        <div className="u-sidebar-date-bubble">
-                            {formatSidebarDate(m.fechaEnvio)}
-                        </div>
-                    </div>
-                )}
-                
-                {/* Añadimos la clase condicional 'same-sender' */}
-                <div className={`message-bubble ${m.senderType === 'EMPRESA' ? 'empresa' : 'estudiante'} ${esMismoEmisor ? 'same-sender' : ''}`}>
-                    <div className="bubble-content">
-                        <p style={{ margin: 0 }}>{m.contenido}</p>
-                        <span className="msg-time">
-                            {new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                    </div>
-                </div>
-            </React.Fragment>
-        );
-    })}
+                            return (
+                                <React.Fragment key={m.id}>
+                                    {/* 1. Separador de fecha */}
+                                    {mostrarSeparador && (
+                                        <div className="u-sidebar-date-container">
+                                            <div className="u-sidebar-date-bubble">
+                                                {formatSidebarDate(m.fechaEnvio)}
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* 2. Burbuja de mensaje con ID para animación naranja */}
+                                        {/* 2. Burbuja de mensaje - El ID va en el contenido interno para el efecto Glow */}
+<div className={`message-bubble ${
+    m.senderType === 'EMPRESA' ? 'empresa' : 'estudiante'
+} ${esMismoEmisor ? 'same-sender' : ''}`}>
     
-    {/* Banner de chat bloqueado (si existe) */}
-    {!isChatEnabled && (
-        <div className="u-sidebar-status-banner-floating">
-            <MessageSquareOff size={16} style={{ marginRight: '8px' }} />
-            El chat ha sido desactivado para esta vacante.
-        </div>
-    )}
+    <div 
+        id={`mensaje-${m.id}`} // 👈 MOVIDO AQUÍ: Ahora el resaltado solo afectará al globito
+        className="bubble-content"
+    >
+        <p style={{ margin: 0 }}>{m.contenido}</p>
+        <span className="msg-time">
+            {new Date(m.fechaEnvio).toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            })}
+        </span>
+    </div>
+
 </div>
+                                </React.Fragment>
+                            );
+                        })}
+
+                        {/* Banner de chat bloqueado (dentro del scroll o justo al final) */}
+                        {!isChatEnabled && (
+                            <div className="u-sidebar-status-banner-floating">
+                                <MessageSquareOff size={16} style={{ marginRight: '8px' }} />
+                                El chat ha sido desactivado para esta vacante.
+                            </div>
+                        )}
+                        
+                        <div style={{ height: '10px' }} />
+                    </div>
 
                     {/* FOOTER: INPUT Y BOTÓN */}
                     <footer className="u-sidebar-footer-container"> 
@@ -367,18 +439,16 @@ const seleccionarChat = async (chat) => {
                 </>
             ) : (
                 <div className="no-chat-selected">
-        {/* Este contenedor es el que tiene la sombra y genera las olas */}
-        <div className="icon-container">
-            {/* El icono central que vibra */}
-            <MessageSquare size={48} strokeWidth={1} />
-        </div>
-        <h3>Bandeja de Entrada</h3>
-        <p>Selecciona un candidato para gestionar la comunicación.</p>
-    </div>
-)}
+                    <div className="icon-container">
+                        <MessageSquare size={48} strokeWidth={1} />
+                    </div>
+                    <h3>Bandeja de Entrada</h3>
+                    <p>Selecciona un candidato para gestionar la comunicación.</p>
+                </div>
+            )}
         </main>
     </div>
-);
+  );
 };
 
 export default ChatSidebar;

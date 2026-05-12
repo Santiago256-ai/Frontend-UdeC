@@ -108,12 +108,14 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 0; /* Más compacto */
+    padding: 10px 0;
     margin: 4px auto;
-    width: 42px; /* Reducido para que quepa bien en los 55px */
+    width: 42px;
     height: 42px;
     border-radius: 12px;
     transition: all 0.2s ease;
+    /* 🌟 Tu línea mágica que debe estar sí o sí */
+    overflow: visible !important; 
 }
 .menu-item:hover { color: white; background: rgba(255, 255, 255, 0.1); }
 .menu-item.active {
@@ -200,10 +202,10 @@ html, body {
 
 .main-header-container {
     width: 100%;
-    position: sticky;
+    position: relative;
     top: 0;
     margin-top: 0 !important; /* 👈 Asegura que no haya margen superior */
-    z-index: 1100;
+    z-index: 10;
     background: white;
 }
 
@@ -428,14 +430,22 @@ html, body {
 .badge-deadline { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
 /* 7. MODAL OVERLAY (Logout y otros) */
+/* El Header debe estar por debajo del Modal */
+.main-header-container {
+    position: relative; /* o sticky/fixed */
+    z-index: 10; /* Un valor bajo */
+}
+
+/* El Overlay del Modal DEBE ser el rey de la pantalla */
 .modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  display: flex; justify-content: center; align-items: center;
-  z-index: 1000;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6); /* Oscurece el fondo */
+    backdrop-filter: blur(4px);    /* El efecto elegante de admin */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999 !important; /* Valor muy alto para tapar TODO */
 }
 
 .logout-modal {
@@ -1868,11 +1878,12 @@ html, body {
     100% { transform: translate(0); }
 }
 
-.vacantes-main-grid {
+/* Usamos el "escudo protector" que creamos antes */
+.dashboard-empresa-container .vacantes-main-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 25px;
-    padding: 20px 0;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); /* Tarjetas anchas */
+    gap: 20px;
+    padding: 20px;
 }
 
 .vacante-card-grid-item {
@@ -2137,6 +2148,7 @@ html, body {
     width: 100%;
     box-sizing: border-box; 
     animation: slideDown 0.5s ease-out;
+    overflow: visible !important;
 }
 
 @keyframes slideDown {
@@ -2200,8 +2212,10 @@ html, body {
     display: flex;
     gap: 15px;
     align-items: center;
-    padding-top: 15px;
+    padding-top: 20px;
     border-top: 1px solid #f1f5f9;
+    overflow: visible !important;
+    position: relative;
 }
 
 .search-input-wrapper-hub {
@@ -2282,13 +2296,7 @@ html, body {
 }
 
 /* Fila de filtros dinámica */
-.search-filters-horizontal-hub {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    padding-top: 20px;
-    border-top: 1px solid #f1f5f9;
-}
+
 
 /* Grupo de fechas y limpiar */
 .date-group-hub {
@@ -2522,4 +2530,464 @@ html, body {
 .ql-editor p {
     display: block; /* Asegura que el párrafo ocupe todo el ancho para poder alinearse */
     width: 100%;
+}
+
+/* ============================================================
+   CABECERA DEL MODAL PREMIUM
+   ============================================================ */
+.modal-gestion-header-premium {
+    background: linear-gradient(135deg, #00482b 0%, #006b3f 100%);
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Brillo decorativo en la esquina superior derecha */
+.header-bg-glow {
+    position: absolute;
+    top: -50px;
+    right: -20px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.header-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 1; /* Para que quede por encima del brillo */
+}
+
+/* Cajita translúcida para el icono */
+.header-icon-box {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 14px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.header-text-info h2 {
+    margin: 0 0 8px 0;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Píldoras (Badges) informativas debajo del título */
+.header-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.header-badges span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.badge-active {
+    background-color: #dcfce7;
+    color: #166534;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.badge-info {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Botón de cerrar animado */
+.btn-close-modal-premium {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.btn-close-modal-premium:hover {
+    background: #ef4444; /* Rojo al pasar el cursor */
+    border-color: #ef4444;
+    transform: rotate(90deg) scale(1.05); /* Da una pequeña vuelta al pasar el mouse */
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+}
+
+/* 1. CONTENEDOR PRINCIPAL: Degradado Verde UdeC y Glassmorphism */
+.dashboard-empresa-container .pro-vacante-card {
+    background: linear-gradient(135deg, rgba(0, 72, 43, 0.08) 0%, rgba(0, 72, 43, 0.03) 100%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(0, 72, 43, 0.15);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: visible !important;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    margin-top: 15px;
+    position: relative;
+}
+
+.dashboard-empresa-container .pro-vacante-card:hover {
+    transform: translateY(-6px);
+    background: linear-gradient(135deg, rgba(0, 72, 43, 0.12) 0%, rgba(0, 72, 43, 0.06) 100%);
+    border-color: rgba(0, 72, 43, 0.35);
+    box-shadow: 0 20px 45px rgba(0, 72, 43, 0.12);
+}
+
+/* 2. CABECERA: Icono y Título */
+.pro-card-header-full {
+    padding: 24px 24px 12px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.pro-icon-container {
+    background: rgba(0, 72, 43, 0.1);
+    color: #00482b;
+    min-width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 72, 43, 0.1);
+}
+
+.pro-vacante-title {
+    margin: 0;
+    flex: 1;
+    font-size: 19px;
+    font-weight: 800;
+    color: #00482b;
+    letter-spacing: -0.5px;
+}
+
+/* 3. BADGE DE POSTULADOS: Verde UdeC Sólido */
+.pro-postulantes-badge-mini {
+    background: #006b3f;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(0, 107, 63, 0.25);
+}
+
+/* 4. META DATOS: Recuperamos las cápsulas grises elegantes */
+.pro-card-meta-row {
+    padding: 0 24px 24px 24px; /* Espaciado interno */
+    display: flex;
+    gap: 12px;
+}
+
+.meta-pill-simple {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+    background: rgba(226, 232, 240, 0.5); /* Gris traslúcido */
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    border: 1px solid rgba(203, 213, 225, 0.3);
+}
+
+/* 5. FOOTER DE ACCIONES: Con colores fijos */
+.pro-card-actions-footer {
+    display: flex;
+    margin-top: auto;
+    border-top: 1px solid rgba(0, 72, 43, 0.08);
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.pro-btn-footer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pro-btn-footer.edit {
+    color: #f59e0b; /* 🟠 Naranja Fijo */
+    border-right: 1px solid rgba(0, 72, 43, 0.08);
+}
+
+.pro-btn-footer.delete {
+    color: #ef4444; /* 🔴 Rojo Fijo */
+}
+
+/* Efectos al pasar el mouse por los botones */
+.pro-btn-footer.edit:hover {
+    background: rgba(245, 158, 11, 0.1);
+    transform: scale(1.02);
+}
+
+.pro-btn-footer.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.02);
+}
+
+.pro-postulantes-badge-mini:hover {
+    transform: scale(1.05);
+    background: #00482b; /* Un verde un poco más oscuro al tocarlo */
+    transition: all 0.2s ease;
+}
+
+/* Animaciones de parpadeo */
+@keyframes blink-red-card {
+  0% { border-color: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+  50% { border-color: transparent; box-shadow: 0 0 0px transparent; }
+  100% { border-color: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+}
+
+@keyframes blink-orange-card {
+  0% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+  50% { border-color: transparent; box-shadow: 0 0 0px transparent; }
+  100% { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+}
+
+/* Clases aplicadas a la tarjeta */
+.blink-expired {
+  border: 2px solid #ef4444 !important;
+  animation: blink-red-card 2s infinite !important;
+}
+
+.blink-full {
+  border: 2px solid #f59e0b !important;
+  animation: blink-orange-card 2s infinite !important;
+}
+
+/* Estilos para los Badges flotantes */
+.badge-alert-blink {
+    position: absolute;
+    top: -10px; /* Lo subimos para que sobresalga del borde */
+    right: -5px; /* Lo sacamos un poco hacia la derecha para el efecto visual */
+    padding: 5px 12px;
+    border-radius: 6px; /* Bordes menos redondeados le dan un look más corporativo */
+    font-size: 10px;
+    font-weight: 900;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 100; /* Asegura que esté por encima de todo */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Efecto de sombra para el parpadeo (más suave) */
+.alert-red { 
+    background-color: #ef4444; 
+    border: 1px solid #b91c1c;
+}
+
+.alert-orange { 
+    background-color: #f59e0b; 
+    border: 1px solid #b45309;
+}
+
+/* Badge de Nueva Postulación */
+.badge-new-postulacion {
+    background: linear-gradient(135deg, #006b3f 0%, #00a361 100%);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 800;
+    position: absolute;
+    top: 10px;
+    left: 50px; /* Ajusta según tu icono de maletín */
+    box-shadow: 0 0 10px rgba(0, 107, 63, 0.5);
+    animation: pulse-green 2s infinite;
+    z-index: 5;
+    letter-spacing: 0.5px;
+}
+
+@keyframes pulse-green {
+    0% { transform: scale(1); box-shadow: 0 0 0px rgba(0, 107, 63, 0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 107, 63, 0.4); }
+    100% { transform: scale(1); box-shadow: 0 0 0px rgba(0, 107, 63, 0.7); }
+}
+
+/* Forzar diseño elegante a todos los tipos de Toast */
+.Toastify__toast {
+    border-radius: 12px !important;
+    font-family: 'Inter', sans-serif !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Específicamente para el toast.info que se ve azul */
+.Toastify__toast--info {
+    background-color: #1e293b !important; /* Un gris muy oscuro casi negro (elegante) */
+    color: white !important;
+}
+
+/* Si prefieres que el INFO sea del color verde UdeC como el resto */
+/* .Toastify__toast--info {
+    background-color: #00482b !important; 
+} 
+*/
+
+.Toastify__toast-body {
+    font-weight: 600 !important;
+    font-size: 14px !important;
+}
+
+.Toastify__close-button {
+    color: white !important;
+    opacity: 0.7;
+}
+
+.Toastify__toast-icon {
+    width: 22px;
+}
+
+/* Contenedor para posicionar el badge */
+.icon-with-badge {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* No le pongas width/height fijo aquí para que no recorte */
+}
+
+/* El punto naranja dinámico */
+/* EL PUNTO NARANJA (Ajustado a tus 42px de botón) */
+.notification-dot-orange {
+    position: absolute;
+    /* 🌟 Coordenadas respecto a los 22px del icon-wrapper */
+    top: -3px;
+    right: -3px;
+    width: 9px;
+    height: 9px;
+    background-color: #ea580c; /* Naranja UdeC */
+    border: 2px solid #ffffff; /* Borde blanco para que resalte */
+    border-radius: 50%;
+    z-index: 100;
+    animation: latidoPuntoEmpresa 2s infinite;
+}
+
+/* 2. REGLA MAESTRA: Evita que el sidebar recorte el punto cuando está cerrado */
+.sidebar.collapsed .menu-item {
+    overflow: visible !important;
+}
+
+/* 3. Asegura que el contenedor del icono no recorte el brillo */
+.sidebar.collapsed .menu-item div {
+    overflow: visible !important;
+}
+
+/* 4. Animación de latido (basada en tu referencia) */
+@keyframes latidoPuntoEmpresa {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(234, 88, 12, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
+}
+
+.icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 🌟 IMPORTANTE: Debe medir lo mismo que el icono Lucide (22px) */
+    width: 22px;
+    height: 22px;
+    /* Aseguramos que nada lo recorte */
+    overflow: visible !important;
+}
+
+/* Badge para vacante desactivada */
+.alert-gray {
+    background-color: #475569 !important; /* Slate 600 */
+    box-shadow: 0 0 10px rgba(71, 85, 105, 0.5);
+}
+
+/* Animación de borde para desactivada */
+.blink-disabled {
+    border: 2px solid #94a3b8 !important;
+    background: rgba(241, 245, 249, 0.5) !important; /* Fondo más opaco */
+}
+
+/* Opcional: Opacidad en el contenido si está desactivada */
+.pro-vacante-card.blink-disabled .pro-vacante-title,
+.pro-vacante-card.blink-disabled .pro-card-meta-row {
+    opacity: 0.6;
+}
+
+/* Estilo del botón toggle */
+.pro-btn-footer.toggle-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.pro-btn-footer.toggle-status:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.status-item-hover:hover {
+   background-color: #f1f5f9;
+}
+
+.btn-filter-status-hub.active {
+    border-color: #006b3f !important;
+    color: #006b3f !important;
+    background: #f0fdf4 !important;
+}
+
+.status-popover {
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }

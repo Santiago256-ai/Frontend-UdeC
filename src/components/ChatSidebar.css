@@ -17,7 +17,7 @@
 
 .mensajes-container {
     display: flex;
-    height: calc(100vh - 120px); /* Ajusta según tu header */
+    height: calc(100vh - 160px); /* Ajusta según tu header */
     background: var(--u-chat-bg-white);
     margin: 20px;
     border-radius: var(--u-chat-radius-lg);
@@ -467,6 +467,7 @@
     position: relative;
     box-shadow: var(--u-chat-shadow-sm);
     line-height: 1.4; /* Mejora la lectura del texto */
+    transition: all 0.5s ease-in-out;
 }
 
 .empresa .bubble-content {
@@ -859,4 +860,14 @@
 @keyframes badgePop {
     0% { transform: scale(0); }
     100% { transform: scale(1); }
+}
+
+/* EFECTO FLASH NARANJA PARA NOTIFICACIONES */
+.resaltado-naranja {
+    border: 2px solid #f97316 !important;
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.6) !important;
+    transform: scale(1.05); /* Un pequeño salto de tamaño para llamar la atención */
+    background-color: #ffffff !important; 
+    transition: all 0.5s ease-in-out; /* 👈 Esto hace que el desvanecimiento sea suave */
+    z-index: 10;
 }

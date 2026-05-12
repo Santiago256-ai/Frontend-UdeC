@@ -17,6 +17,15 @@
     cursor: pointer;
 }
 
+.cv-modal-hidden {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    visibility: hidden;
+    pointer-events: none; /* Asegura que no bloquee clics accidentales */
+    z-index: -1; /* Lo envía al fondo de todo mientras se genera */
+}
+
 .cv-preview-container {
     background: white;
     width: 210mm; 

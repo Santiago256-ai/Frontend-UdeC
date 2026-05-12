@@ -59,17 +59,18 @@ export default function Mensajeria({ activeChat, usuario }) {
 useEffect(() => {
     if (chatBodyRef.current && mensajes.length > 0) {
         const container = chatBodyRef.current;
-        
-        // Calculamos si el usuario está "casi al final" (margen de 100px)
         const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
 
-        // Bajamos el scroll solo si es la primera carga del chat O si el usuario ya estaba abajo
-        if (isInitialLoad || isAtBottom) {
+        // EL CAMBIO: Solo bajamos al fondo si NO hay un mensaje resaltado pendiente
+        if ((isInitialLoad || isAtBottom) && !activeChat?.resaltarMensajeId) {
             container.scrollTop = container.scrollHeight;
             setIsInitialLoad(false); 
+        } else if (activeChat?.resaltarMensajeId) {
+            // Si hay un mensaje para resaltar, quitamos el initialLoad para no estorbar
+            setIsInitialLoad(false);
         }
     }
-}, [mensajes, isInitialLoad]);
+}, [mensajes, isInitialLoad, activeChat?.resaltarMensajeId]);
 
     const handleEnviar = async (e) => {
         e.preventDefault();

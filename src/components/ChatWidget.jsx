@@ -143,9 +143,9 @@ useEffect(() => {
                     </div>
                     <div className="text-container">
                         <h4>{nombrePostulante}</h4>
-                        <span className={`status-dot ${isChatEnabled ? 'online' : 'offline'}`}>
-                            {isChatEnabled ? 'Chat Activo' : 'Cerrado'}
-                        </span>
+<span className={`status-dot ${isChatEnabled ? 'online' : 'offline'}`}>
+    {isChatEnabled ? 'Chat Activo' : 'Cerrado'}
+</span>
                     </div>
                 </div>
                 <div className="header-buttons">

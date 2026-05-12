@@ -43,9 +43,11 @@ import InicioEgresados from '../../components/InicioEgresados';
 import NotificacionesEgresado from '../../components/NotificacionesEgresado';
 import 'react-quill-new/dist/quill.snow.css'; // Esto asegura que las clases de Quill funcionen
 import Quill from 'quill';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import VerPerfilEmpresa from './VerPerfilEmpresa';
+import EgresadosVerEmpresas from '../../components/EgresadosVerEmpresas';
 
-// Esto es vital: le dice a Quill que use CLASES (ql-align-center) 
-// en lugar de estilos en línea, para que el CSS de arriba las detecte.
 const AlignStyle = Quill.import('attributors/class/align');
 Quill.register(AlignStyle, true);
 
@@ -61,6 +63,8 @@ export default function VacantesDashboard() {
     // ... otros estados
 const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 const [resaltarPostulacionId, setResaltarPostulacionId] = useState(null);
+const [empresaSeleccionadaId, setEmpresaSeleccionadaId] = useState(null);
+const [vistaPreviaEmpresa, setVistaPreviaEmpresa] = useState('vacantes');
 
     // 1. ESTADOS
     const [usuario, setUsuario] = useState(() => {
@@ -79,6 +83,7 @@ const [resaltarPostulacionId, setResaltarPostulacionId] = useState(null);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     // Agrega esto junto a tus otros estados (como el de usuario o vacantes)
 const [showLogoutModal, setShowLogoutModal] = useState(false);
+const [tieneNotifNuevas, setTieneNotifNuevas] = useState(false);
 
     // 2. EFECTOS
     useEffect(() => {
@@ -121,6 +126,25 @@ useEffect(() => {
         }
     };
 }, [vistaActiva]);
+
+// Efecto para verificar si hay notificaciones sin leer para el punto naranja
+useEffect(() => {
+    const verificarNuevas = async () => {
+        if (!usuario?.id) return;
+        try {
+            const res = await API.get(`/notificaciones/egresado/${usuario.id}`);
+            // Si hay al menos una notificación con vista === false, activamos el punto
+            const nuevas = res.data.some(n => !n.vista);
+            setTieneNotifNuevas(nuevas);
+        } catch (error) {
+            console.error("Error al verificar notificaciones", error);
+        }
+    };
+
+    verificarNuevas();
+    const interval = setInterval(verificarNuevas, 20000); // Verifica cada 20 segundos
+    return () => clearInterval(interval);
+}, [usuario?.id]);
 
 const fetchVacantes = async () => {
     try {
@@ -238,22 +262,35 @@ const obtenerEstiloCupos = (cupos) => {
     setVistaActiva('mensajes');                
 };
 
-    const handlePostulacion = async () => {
+const handlePostulacion = async () => {
     if (!selectedVacante) return;
     
     try {
         const res = await API.post(`/estudiantes/${selectedVacante.id}/postular`);
-        alert(res.data.message);
         
-        // 1. Refrescamos la lista de vacantes (esto la quitará de la izquierda)
+        toast.success(res.data.message || '¡Postulación exitosa!', {
+            position: "bottom-right", // 👈 Aseguramos la posición aquí también
+            icon: <CheckCircle size={20} color="white" />,
+            style: { 
+                background: '#00482b', // Verde UdeC
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600'
+            }
+        });
+        
         await fetchVacantes(); 
-        
-        // 2. LA CLAVE: Limpiamos la vacante seleccionada para que el panel 
-        // de la derecha vuelva al estado inicial (el de "Selecciona una vacante")
         setSelectedVacante(null); 
 
     } catch (err) {
-        alert(err.response?.data?.error || "Error al postularse");
+        const errorMsg = err.response?.data?.error || "Error al postularse";
+        toast.error(errorMsg, {
+            position: "bottom-right", // 👈 Y aquí también para los errores
+            style: { 
+                borderRadius: '12px',
+                fontSize: '14px'
+            }
+        });
     }
 };
 
@@ -275,6 +312,15 @@ const obtenerEstiloCupos = (cupos) => {
 
     // --- AGREGA ESTO ANTES DE dataFiltrada ---
 const navegarAVista = (config) => {
+    // Determinamos el nombre de la vista (si es un objeto o un string)
+    const nombreVista = typeof config === 'object' ? config.vista : config;
+
+    // --- NUEVO: LIMPIEZA DEL PUNTO NARANJA ---
+    // Si la vista a la que vamos es notificaciones, quitamos el aviso visual
+    if (nombreVista === 'notificaciones') {
+        setTieneNotifNuevas(false);
+    }
+
     if (typeof config === 'object') {
         setVistaActiva(config.vista);
 
@@ -292,7 +338,6 @@ const navegarAVista = (config) => {
 
         // 2. Lógica para POSTULACIONES (Sombra naranja en la tarjeta)
         if (config.postulacionData) {
-            // Guardamos el ID en el estado que declaraste al principio
             setResaltarPostulacionId(config.postulacionData.postulacionId);
         }
 
@@ -317,7 +362,7 @@ const yaPostulado = selectedVacante?.postulaciones?.some(p => p.egresadoId === u
 };
 
 return (
-    <div className="dashboard-layout">
+    <div className="dashboard-layout dashboard-egresados-container">
         {/* SIDEBAR: Diseño Expandible y Sutil */}
         <nav 
             className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}
@@ -338,13 +383,30 @@ return (
                         <Briefcase size={20}/> <span>VACANTES DISPONIBLES</span>
                     </button>
 
+                    <button className={`menu-item ${vistaActiva === 'ver-empresas' ? 'active' : ''}`} onClick={() => navegarAVista('ver-empresas')}>
+    <Building2 size={20}/> <span>EMPRESAS ALIADAS</span>
+</button>
+
                     <button className={`menu-item ${vistaActiva === 'crear-cv' ? 'active' : ''}`} onClick={() => navegarAVista('crear-cv')}>
                         <PlusCircle size={20}/> <span>MI HOJA DE VIDA</span>
                     </button>
 
-                    <button className={`menu-item ${vistaActiva === 'notificaciones' ? 'active' : ''}`} onClick={() => navegarAVista('notificaciones')}>
-                        <Bell size={20}/> <span>NOTIFICACIONES</span>
-                    </button>
+                    <button 
+    className={`menu-item ${vistaActiva === 'notificaciones' ? 'active' : ''}`} 
+    onClick={() => navegarAVista('notificaciones')}
+>
+    {/* Envolvemos el icono en un div relativo para anclar el punto */}
+    <div style={{ position: 'relative', display: 'flex' }}>
+        <Bell size={20}/> 
+        
+        {tieneNotifNuevas && (
+            <div className="nav-punto-naranja"></div> 
+        )}
+    </div>
+    
+    {/* Este span sigue siendo tu Tooltip, ¡intacto! */}
+    <span>NOTIFICACIONES</span>
+</button>
 
                     <button className={`menu-item ${vistaActiva === 'mensajes' ? 'active' : ''}`} onClick={() => { setChatActivo(null); navegarAVista('mensajes'); }}>
                         <MessageSquare size={20}/> <span>MENSAJES / CHAT</span>
@@ -475,7 +537,29 @@ return (
 }}>
     <div className="detail-group" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
         <Building2 size={14} />
-        <span>{v.empresa?.nombre || 'Empresa Aliada'}</span>
+        <span 
+            // 🟢 Le damos estilo de "enlace clickeable"
+            style={{ 
+                cursor: 'pointer', 
+                textDecoration: 'underline', 
+                color: '#00482b', 
+                fontWeight: '700',
+                transition: 'color 0.2s'
+            }}
+            // 🟢 Efecto hover sutil
+            onMouseOver={(e) => e.currentTarget.style.color = '#00b368'}
+            onMouseOut={(e) => e.currentTarget.style.color = '#00482b'}
+            
+            // 🟢 La función que nos lleva a la empresa y detiene el modal
+            onClick={(e) => {
+                e.stopPropagation(); // 👈 El truco maestro para no abrir el modal de vacante
+                setVistaPreviaEmpresa('vacantes'); // Guardamos de dónde venimos
+                setEmpresaSeleccionadaId(v.empresaId || v.empresa?.id);
+                setVistaActiva('ver-perfil-empresa');
+            }}
+        >
+            {v.empresa?.nombre || 'Empresa Aliada'}
+        </span>
     </div>
     <span style={{ opacity: 0.3 }}>•</span>
     <div className="detail-group" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -563,16 +647,36 @@ return (
     </div>
 );
         })
-    ) : (
-                <div className="empty-grid-state">
-                    <Search size={60} color="#cbd5e0" strokeWidth={1} />
-                    <h3>No hay vacantes disponibles</h3>
-                    <p>Por el momento no tenemos nuevas ofertas. Intenta actualizar la lista.</p>
-                    <button className="btn-refresh-grid" onClick={fetchVacantes}>Actualizar lista</button>
-                </div>
-            )}
+) : (
+    /* DISEÑO ÚNICO PARA CUANDO NO HAY VACANTES */
+    <div className="evd-empty-state-container fade-in">
+        <div className="evd-visual-wrapper">
+            <div className="evd-glass-circle">
+                <div className="evd-scanner-line"></div>
+                <Search size={80} className="evd-icon-search" />
+            </div>
+            <div className="evd-floating-dots">
+                <span></span><span></span><span></span>
+            </div>
         </div>
 
+        <div className="evd-text-content">
+            <h3 className="evd-main-title">No se encontraron vacantes</h3>
+            <p className="evd-description">
+                Nuestro radar no ha detectado nuevas ofertas en este momento. 
+                Vuelve a intentarlo o actualiza la lista para ver cambios recientes.
+            </p>
+            
+            <button className="evd-refresh-button" onClick={fetchVacantes}>
+                <Clock size={18} className="evd-button-icon" />
+                <span>ACTUALIZAR RADAR DE EMPLEO</span>
+            </button>
+        </div>
+    </div>
+)}
+        </div>
+</div>
+)}
         {/* 3. MODAL DE DETALLES (Mantiene todo tu diseño original pero centrado) */}
         {selectedVacante && (
             <div className="vdp-modal-overlay fade-in" onClick={() => setSelectedVacante(null)}>
@@ -584,11 +688,40 @@ return (
 
                     <div className="detail-content-wrapper">
                         <div className="detail-header-info">
-                            <h3 style={{fontSize: '26px', fontWeight: '800', color: '#1a202c', marginBottom: '20px', letterSpacing: '-0.5px'}}>
-                                {selectedVacante.titulo}
-                            </h3>
-                            
-                            {/* Tu Rejilla de Fichas Técnicas original */}
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+        <h3 style={{fontSize: '26px', fontWeight: '800', color: '#1a202c', letterSpacing: '-0.5px', margin: 0}}>
+            {selectedVacante.titulo}
+        </h3>
+        
+        {/* NUEVO BOTÓN: Ver Perfil de Empresa */}
+        <button 
+            onClick={(e) => {
+                e.stopPropagation(); 
+                setVistaPreviaEmpresa('vacantes'); 
+                setEmpresaSeleccionadaId(selectedVacante.empresaId || selectedVacante.empresa?.id);
+                setVistaActiva('ver-perfil-empresa');
+                setSelectedVacante(null); 
+            }}
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(0, 72, 43, 0.1)',
+                color: '#00482b',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontSize: '14px'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0, 72, 43, 0.2)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(0, 72, 43, 0.1)'}
+        >
+            <Building2 size={16} /> Ver Perfil de Empresa
+        </button>
+    </div>
                             {/* Rejilla de Fichas Técnicas dentro del Modal */}
 <div className="detail-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '25px' }}>
     
@@ -679,12 +812,34 @@ return (
                 </div>
             </div>
         )}
+
+                    {vistaActiva === 'crear-cv' && <div className="full-view"><CrearCV isInline={true} setVistaActiva={setVistaActiva} /></div>}
+
+{/* NUEVA VISTA: Perfil de la Empresa */}
+{vistaActiva === 'ver-perfil-empresa' && empresaSeleccionadaId && (
+    <div className="full-view">
+        <VerPerfilEmpresa 
+            empresaId={empresaSeleccionadaId} 
+            onVolver={() => setVistaActiva(vistaPreviaEmpresa)} 
+            onAbrirVacante={(vacante) => setSelectedVacante(vacante)}
+        />
     </div>
 )}
 
-                    {vistaActiva === 'crear-cv' && <div className="full-view"><CrearCV isInline={true} setVistaActiva={setVistaActiva} /></div>}
-                    
-    {vistaActiva === 'ver-perfil' && (
+{/* 🟢 NUEVA VISTA: DIRECTORIO DE EMPRESAS */}
+{vistaActiva === 'ver-empresas' && (
+    <div className="full-view">
+        <EgresadosVerEmpresas 
+            onVerPerfil={(id) => {
+                setVistaPreviaEmpresa('ver-empresas'); // Guardamos memoria
+                setEmpresaSeleccionadaId(id);
+                setVistaActiva('ver-perfil-empresa');
+            }} 
+        />
+    </div>
+)}
+
+{vistaActiva === 'ver-perfil' && (
         <div className="vdp-full-screen-view">
             <PerfilEgresado />
         </div>
@@ -711,9 +866,21 @@ return (
                 onConfirm={handleLogout} 
                 onCancel={() => setShowLogoutConfirm(false)} 
             />
+            <ToastContainer 
+    position="bottom-right" // 👈 Esto lo envía a la esquina inferior derecha
+    autoClose={3000}
+    hideProgressBar={false}
+    newestOnTop={false}
+    closeOnClick
+    rtl={false}
+    pauseOnFocusLoss
+    draggable
+    pauseOnHover
+    theme="colored"
+/>
 
             {showLogoutModal && (
-    <div className="modal-overlay">
+    <div className="modal-overlay" style={{ zIndex: 10001 }}>
         <div className="logout-modal">
             <div className="modal-icon">
                 <LogOut size={40} />

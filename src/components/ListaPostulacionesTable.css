@@ -1,11 +1,9 @@
 /* ListaPostulacionesTable.css - DISEÑO PROFESIONAL CON ESPACIADO OPTIMIZADO */
 
 .postulaciones-table-container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-    overflow-x: auto;
-    border: 1px solid #edf2f7;
+    padding: 10px 32px 32px 32px; /* Esto despega todo de los bordes del modal */
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .postulaciones-table {
@@ -832,4 +830,414 @@
         bottom: 85px !important;
         height: 70vh !important;
     }
+}
+
+/* Botón de cierre superior (el que envuelve la X) */
+.btn-close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px; /* Un poco cuadrado redondeado se ve más moderno */
+    background: rgba(255, 255, 255, 0.15); /* Efecto cristal sobre el verde */
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* La X debe ser blanca para resaltar en el verde */
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Efecto al pasar el cursor */
+.btn-close-modal:hover {
+    background: #ef4444; /* Rojo vibrante al querer cerrar */
+    border-color: #ef4444;
+    transform: rotate(90deg) scale(1.1); /* Giro elegante y crece un poco */
+    color: white;
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Efecto al hacer clic */
+.btn-close-modal:active {
+    transform: scale(0.9) rotate(90deg);
+}
+
+/* ============================================================
+   ESTADO VACÍO PRO (EMPTY STATE)
+   ============================================================ */
+
+.empty-state-pro-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px 20px 20px; /* Menos padding arriba */
+    text-align: center;
+    margin-top: 0; /* Quitamos el margen superior */
+}
+
+.modal-gestion-body {
+    padding: 20px 0;
+    
+    /* 👇 Agrega estas dos líneas 👇 */
+    overflow-y: auto; /* Si el contenido no cabe, aparece una barra de scroll */
+    max-height: calc(100vh - 160px); /* Asegura que el cuerpo no se salga de la pantalla */
+}
+
+.modal-gestion-body::-webkit-scrollbar {
+    width: 8px;
+}
+.modal-gestion-body::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+.empty-state-visual-wrapper {
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- Composición Gráfica con Movimiento --- */
+
+.search-graphics-composition {
+    position: relative;
+    width: 120px;  /* Antes 150px */
+    height: 120px; /* Antes 150px */
+    margin-bottom: 20px; /* Antes 30px */
+}
+
+/* La Lupa */
+.pro-magnifying-glass {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #00482b 0%, #006b3f 100%); /* Gradiente UdeC */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(0, 72, 43, 0.25);
+    z-index: 10;
+    animation: floatingGlass 4s ease-in-out infinite; /* Animación de flotado */
+}
+
+.glass-icon-svg {
+    color: #ffffff;
+    opacity: 0.85;
+}
+
+/* Elementos de Datos (Puntos y Líneas) */
+.data-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #006b3f;
+    opacity: 0.2;
+    z-index: 5;
+}
+
+.dot-1 { top: 15px; left: 15px; animation: dataDotPulse 3s ease-in-out infinite 0s; }
+.dot-2 { bottom: 20px; right: 10px; animation: dataDotPulse 3s ease-in-out infinite 1s; }
+.dot-3 { top: 50%; right: 15px; animation: dataDotPulse 3s ease-in-out infinite 2s; }
+
+.data-line {
+    position: absolute;
+    height: 2px;
+    background-color: #00482b;
+    opacity: 0.15;
+    z-index: 5;
+    border-radius: 1px;
+}
+
+.line-1 { top: 40px; left: 110px; width: 35px; transform: rotate(-30deg); animation: dataLineFloat 5s ease-in-out infinite; }
+.line-2 { bottom: 60px; left: -10px; width: 45px; transform: rotate(15deg); animation: dataLineFloat 5s ease-in-out infinite -2.5s; }
+
+/* --- Títulos y Textos --- */
+
+.empty-state-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+.empty-state-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    padding-bottom: 10px; /* Evita que el borde lo corte */
+    font-weight: 400;
+}
+
+/* --- Botón de Acción --- */
+
+.btn-empty-state-action {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #00482b;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-empty-state-action:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   ANIMACIONES CSS AVANZADAS
+   ============================================================ */
+
+/* Animación de Flotado para la Lupa */
+@keyframes floatingGlass {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg); }
+    50% { transform: translate(-50%, -50%) translateY(-10px) rotate(2deg); }
+}
+
+/* Pulsación para los puntos de datos */
+@keyframes dataDotPulse {
+    0%, 100% { opacity: 0.1; transform: scale(0.9); }
+    50% { opacity: 0.3; transform: scale(1.1); }
+}
+
+/* Flotado lateral sutil para las líneas de datos */
+@keyframes dataLineFloat {
+    0%, 100% { transform: translateX(0px) rotate(-30deg); }
+    50% { transform: translateX(5px) rotate(-28deg); }
+}
+
+/* Para la línea 2 que tiene un ángulo diferente */
+.line-2 { animation: dataLineFloat2 5s ease-in-out infinite -2.5s; }
+@keyframes dataLineFloat2 {
+    0%, 100% { transform: translateX(0px) rotate(15deg); }
+    50% { transform: translateX(-5px) rotate(17deg); }
+}
+
+.table-controls-header-pro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 15px; /* Antes era 30px, lo bajamos a la mitad */
+}
+
+.controls-row-main {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
+
+.pro-search-box, .pro-filter-box {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.pro-search-box {
+    flex: 2; /* Ocupa más espacio */
+}
+
+.pro-filter-box {
+    flex: 1; /* Ocupa menos espacio */
+}
+
+/* Efecto PRO: Cuando haces clic dentro, se ilumina verde */
+.pro-search-box:focus-within, 
+.pro-filter-box:focus-within {
+    border-color: #006b3f; /* Verde UdeC */
+    box-shadow: 0 0 0 4px rgba(0, 107, 63, 0.1);
+    transform: translateY(-1px); /* Se levanta un milímetro */
+}
+
+/* Iconos dentro de los inputs */
+.control-icon {
+    color: #94a3b8;
+    min-width: 18px;
+    transition: color 0.3s ease;
+}
+
+.pro-search-box:focus-within .control-icon, 
+.pro-filter-box:focus-within .control-icon {
+    color: #006b3f; /* El icono también se pone verde al hacer clic */
+}
+
+/* Textos de los inputs */
+.pro-input-field, .pro-select-field {
+    border: none;
+    background: transparent;
+    outline: none;
+    margin-left: 12px;
+    width: 100%;
+    font-size: 14px;
+    color: #1e293b;
+}
+
+.pro-input-field::placeholder {
+    color: #94a3b8;
+}
+
+.pro-select-field {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Fila del selector de fechas */
+.date-picker-row-pro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f0fdf4;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px dashed #22c55e;
+}
+
+.date-picker-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.date-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #00482b;
+}
+
+.date-separator {
+    font-size: 13px;
+    color: #006b3f;
+}
+
+.pro-date-input {
+    border: 1px solid #dcfce7;
+    background: white;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.pro-date-input:focus {
+    border-color: #006b3f;
+}
+
+.btn-clear-dates-pro {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-clear-dates-pro:hover {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* ============================================================
+   ESTADO DESHABILITADO PARA CONTROLES
+   ============================================================ */
+.pro-search-box.is-disabled, 
+.pro-filter-box.is-disabled {
+    background-color: #f8fafc;
+    border-color: #f1f5f9;
+    opacity: 0.6;
+    box-shadow: none;
+    /* 1. Agregamos el cursor de prohibido aquí */
+    cursor: not-allowed; 
+    /* ELIMINAMOS pointer-events: none; para que el mouse sí detecte la caja */
+}
+
+/* 2. Forzamos a que el cursor prohibido aplique a los íconos y textos de adentro */
+.pro-search-box.is-disabled *, 
+.pro-filter-box.is-disabled * {
+    cursor: not-allowed !important;
+}
+
+.pro-search-box.is-disabled .control-icon,
+.pro-filter-box.is-disabled .control-icon {
+    color: #cbd5e1;
+}
+
+.pro-input-field:disabled, 
+.pro-select-field:disabled {
+    color: #94a3b8;
+    background-color: transparent; /* Evita que el navegador ponga un fondo gris feo por defecto */
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* =======================================================
+   EFECTO DE RESALTADO UNIFICADO Y FLUIDO
+   ======================================================= */
+/* 1. Definimos la animación clave (Keyframes) para el pulso elegante */
+@keyframes pulse-notificacion-nueva {
+    0% {
+        background-color: rgba(249, 115, 22, 0.02);
+    }
+    50% {
+        background-color: rgba(249, 115, 22, 0.18); /* El punto máximo del destello naranja */
+    }
+    100% {
+        background-color: rgba(249, 115, 22, 0.02);
+    }
+}
+
+/* 2. Aplicamos la animación con un scope estricto al contenedor de esta tabla */
+.postulaciones-table-container .postulaciones-table .fila-resaltada-naranja td {
+    /* La animación dura 1.2 segundos y se repite infinitamente mientras tenga la clase (los 4 segundos de React) */
+    animation: pulse-notificacion-nueva 1.2s ease-in-out infinite !important;
+}
+
+/* 3. Mantenemos el indicador lateral izquierdo para mayor claridad visual */
+.postulaciones-table-container .postulaciones-table .fila-resaltada-naranja td:first-child {
+    position: relative;
+}
+
+.postulaciones-table-container .postulaciones-table .fila-resaltada-naranja td:first-child::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background-color: #ea580c; /* Naranja fuerte para la barra lateral */
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
 }

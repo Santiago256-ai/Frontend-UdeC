@@ -72,7 +72,8 @@ export default function RegistrarCompany() {
         companyName: '', email: '', phones: '', contactName: '', nit: '', modalidad: '',
         address: '', department: '', city: '', otherCity: '',
         companyType: '', otherCompanyType: '', // 👈 Agrégala aquí
-        economicSector: [], foundationYear: '', employees: '',
+        economicSector: [], otroSector: '', // 👈 Agrégalo aquí
+    foundationYear: '', employees: '',
         annualRevenue: '', totalAssets: '', equity: '',
         distributionChannels: [], otroCanalDistribucion: '', mainClients: '',
         password: '', confirmPassword: '',
@@ -103,7 +104,7 @@ const toggleMenu = (menuName) => {
 };
     const [currentStep, setCurrentStep] = useState(1);
     const [errors, setErrors] = useState({});
-    const [otroSector, setOtroSector] = useState('');
+    const [touched, setTouched] = useState({});
     const [isEconomicDropdownOpen, setIsEconomicDropdownOpen] = useState(false);
     const [isChannelsDropdownOpen, setIsChannelsDropdownOpen] = useState(false);
     const [statusModal, setStatusModal] = useState({ show: false, type: '', message: '' });
@@ -160,37 +161,85 @@ const closeStatusModal = (targetStep = null) => {
     }
 };
 
-    const handleChange = (e) => {
+const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let finalValue = type === 'checkbox' ? checked : value;
 
-    // 🟢 Lógica especial para el teléfono
     if (name === 'phones') {
-        // Solo permite números (elimina todo lo que no sea dígito)
-        const onlyNums = value.replace(/[^0-9]/g, '');
-        
-        // No permite escribir más de 10 caracteres
-        if (onlyNums.length > 10) return;
-
-        setFormData(prev => ({ ...prev, [name]: onlyNums }));
-    } else {
-        // Lógica normal para los demás campos
-        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        finalValue = value.replace(/[^0-9]/g, '');
+        if (finalValue.length > 10) return;
     }
 
-    setErrors(prev => ({ ...prev, [name]: '' }));
+    setFormData(prev => {
+        const newData = { ...prev, [name]: finalValue };
+        // Si el usuario ya pasó por este campo, validamos mientras escribe
+        if (touched[name]) {
+            setErrors(prevErrors => ({ ...prevErrors, [name]: validateField(name, finalValue, newData) }));
+        }
+        return newData;
+    });
+
+    if (!touched[name]) {
+        setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+};
+
+// 🟢 NUEVO: Función que se ejecuta al salir del recuadro
+const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const error = validateField(name, value, formData);
+    setErrors(prev => ({ ...prev, [name]: error }));
 };
 
     const handleMultiSelectChange = (fieldName, event) => {
-        const { value, checked } = event.target;
-        setFormData(prev => {
-            const currentArray = prev[fieldName];
-            const newArray = checked ? [...currentArray, value] : currentArray.filter(item => item !== value);
-            if (!checked && value === 'Otro') setOtroSector('');
-            if (!checked && value === 'Otro Canal') setFormData(p => ({...p, otroCanalDistribucion: ''}));
-            if (newArray.length > 0) setErrors(p => ({ ...p, [fieldName]: '' }));
-            return { ...prev, [fieldName]: newArray };
-        });
-    };
+    const { value, checked } = event.target;
+    setFormData(prev => {
+        const currentArray = prev[fieldName];
+        const newArray = checked ? [...currentArray, value] : currentArray.filter(item => item !== value);
+        
+        // 🟢 CORREGIDO: Ahora usamos setFormData en lugar de setOtroSector
+        if (!checked && value === 'Otro') setFormData(p => ({...p, otroSector: ''}));
+        if (!checked && value === 'Otro Canal') setFormData(p => ({...p, otroCanalDistribucion: ''}));
+        
+        if (newArray.length > 0) setErrors(p => ({ ...p, [fieldName]: '' }));
+        return { ...prev, [fieldName]: newArray };
+    });
+};
+
+    const validateField = (name, value, currentData) => {
+    const emailRegex = /\S+@\S+\.\S+/;
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+={}[\]:;\"'<>,.?/\\|~`]).{8,}$/;
+
+    switch (name) {
+        case 'companyName': return !value.trim() ? 'Nombre requerido' : '';
+        case 'email': return (!value.trim() || !emailRegex.test(value)) ? 'Correo inválido' : '';
+        case 'phones': return (!value.trim() || value.length !== 10) ? 'Debe tener exactamente 10 dígitos' : '';
+        case 'contactName': return !value.trim() ? 'Nombre de contacto requerido' : '';
+        case 'password': return (!value || !passwordRegex.test(value)) ? 'Contraseña débil' : '';
+        case 'confirmPassword': return value !== currentData.password ? 'Las contraseñas no coinciden' : '';
+        case 'address': return !value.trim() ? 'Dirección requerida' : '';
+        // Puedes agregar más 'cases' aquí si quieres validación en tiempo real para otros campos de texto
+        // --- Paso 2 ---
+        case 'department': return !value ? 'Requerido' : '';
+        case 'city': return !value ? 'Requerido' : '';
+        case 'otherCity': return (currentData.city === 'Otra Ciudad' || currentData.city === 'Otra Ciudad...') && !value.trim() ? 'Escriba el nombre de la ciudad' : '';
+        
+        // --- Paso 3 ---
+        case 'companyType': return !value ? 'Requerido' : '';
+        case 'otherCompanyType': return currentData.companyType === 'otra' && !value.trim() ? 'Especifique el tipo' : '';
+        case 'otroSector': return currentData.economicSector.includes('Otro') && !value.trim() ? 'Especifique el sector' : '';
+        case 'foundationYear': return !value ? 'Requerido' : '';
+        case 'employees': return !value ? 'Requerido' : '';
+        
+        // --- Paso 4 ---
+        case 'annualRevenue': return !value ? 'Requerido' : '';
+        case 'distributionChannels': return value.length === 0 ? 'Seleccione al menos uno' : '';
+        case 'otroCanalDistribucion': return currentData.distributionChannels.includes('Otro Canal') && !value.trim() ? 'Especifique el canal' : '';
+        case 'mainClients': return !value.trim() ? 'Requerido' : '';
+        default: return '';
+    }
+};
 
 // 🟢 1. Función para validar errores (se dispara al dar clic en Siguiente)
     const validateStep = (step) => {
@@ -229,6 +278,7 @@ const closeStatusModal = (targetStep = null) => {
             if (formData.economicSector.length === 0) stepErrors.economicSector = 'Seleccione al menos uno';
             if (!formData.foundationYear) stepErrors.foundationYear = 'Requerido';
             if (!formData.employees) stepErrors.employees = 'Requerido';
+            if (formData.economicSector.includes('Otro') && !formData.otroSector?.trim()) stepErrors.otroSector = 'Especifique el sector';
         }
         if (step === 4) {
     if (!formData.annualRevenue) stepErrors.annualRevenue = 'Requerido';
@@ -259,9 +309,9 @@ const closeStatusModal = (targetStep = null) => {
     return !formData.address.trim() || !formData.department || !formData.city || isOtherCityInvalid;
 }
         if (currentStep === 3) {
-            // Si es 'otra', también validamos que haya escrito cuál
             const otherTypeValid = formData.companyType === 'otra' ? !!formData.otherCompanyType?.trim() : true;
-            return !formData.companyType || formData.economicSector.length === 0 || !otherTypeValid;
+const otherSectorValid = formData.economicSector.includes('Otro') ? !!formData.otroSector?.trim() : true; // 👈 NUEVO
+return !formData.companyType || formData.economicSector.length === 0 || !otherTypeValid || !otherSectorValid; // 👈 ACTUALIZADO
         }
         if (currentStep === 4) {
     // Si incluye 'Otro Canal', verificamos que el texto no esté vacío
@@ -292,8 +342,8 @@ const closeStatusModal = (targetStep = null) => {
     
     // 1. Procesar Sector Económico (reemplazar 'Otro' por el texto escrito)
     let finalEconomicSector = formData.economicSector.includes('Otro') 
-        ? [...formData.economicSector.filter(s => s !== 'Otro'), otroSector.trim()]
-        : formData.economicSector;
+    ? [...formData.economicSector.filter(s => s !== 'Otro'), formData.otroSector.trim()]
+    : formData.economicSector;
 
     // 2. Procesar Canales de Distribución
     let finalDistributionChannels = formData.distributionChannels.includes('Otro Canal')
@@ -322,6 +372,7 @@ const closeStatusModal = (targetStep = null) => {
     delete finalFormData.otroCanalDistribucion;
     delete finalFormData.otherCompanyType; // 👈 Ya lo movimos a companyType arriba
     delete finalFormData.confirmacionFinal;
+    delete finalFormData.otroSector;
 
     try {
     const response = await API.post("/empresas", finalFormData);
@@ -359,11 +410,27 @@ const ciudadesFiltradas = formData.department
     
     const progressPercentage = ((currentStep - 1) / 5) * 100;
 
+    const renderValidationMessage = (fieldName) => {
+    if (!touched[fieldName]) return null;
+    
+    if (errors[fieldName]) {
+        // Llama a styles.errorMessage
+        return <span className={styles.errorMessage}>❌ {errors[fieldName]}</span>;
+    }
+    
+    if (formData[fieldName] !== '' && formData[fieldName] !== false && formData[fieldName]?.length !== 0) {
+        // Llama a styles.successMessage
+        return <span className={styles.successMessage}>✅ Correcto</span>;
+    }
+    
+    return null;
+};
+
     return (
         <div className={styles.companyContainer}>
             <div className={styles.companyCard}>
                 
-                {/* --- NUEVO ENCABEZADO TIPO EGRESADOS --- */}
+                
                 <div className={styles.headerTopWhite}>
                     <img src="/Logo.png" alt="Empresa Logo" className={styles.logoImg} />
                     <div className={styles.headerDivider}></div>
@@ -374,9 +441,7 @@ const ciudadesFiltradas = formData.department
                     <h1 className={styles.formTitle}>Registro Empresarial</h1>
                     <p className={styles.formSubtitle}>Conecta con talento preparado y lleva tu empresa al siguiente nivel.</p>
                 </div>
-                {/* ---------------------------------------- */}
 
-                {/* --- CONTENEDOR DEL FORMULARIO (Para los márgenes) --- */}
                 <div className={styles.formContent}>
                     
         <div 
@@ -392,12 +457,12 @@ const ciudadesFiltradas = formData.department
                 ${currentStep > s ? styles.completed : ''}
             `}
         >
-            {/* 🟢 CAMBIO AQUÍ: Condicional para el contenido del círculo */}
+            
             <div className={styles.stepNumber}>
                 {currentStep > s ? (
-                    <span className={styles.checkIcon}>✓</span> // Si está completado, muestra el Check
+                    <span className={styles.checkIcon}>✓</span> 
                 ) : (
-                    s // Si no, muestra el Número
+                    s 
                 )}
             </div>
         </div>
@@ -405,7 +470,7 @@ const ciudadesFiltradas = formData.department
 </div>
 
                     <form onSubmit={handleSubmit} className={styles.companyForm}>
-                        {/* AQUÍ SIGUE TU CÓDIGO NORMAL DEL PASO 1... */}
+                        
                         {currentStep === 1 && (
                             <div className={styles.formStep}>
                                 <h2 className={styles.stepTitle}>Datos de Acceso y Contacto</h2>
@@ -413,45 +478,62 @@ const ciudadesFiltradas = formData.department
                             
                             <div className={styles.formRow}>
                                 <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Nombre Empresa *</label>
-                                    <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} className={`${styles.formInput} ${errors.companyName ? styles.inputError : ''}`} />
-                                    {errors.companyName && <span className={styles.errorMessage}>{errors.companyName}</span>}
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Correo Electrónico *</label>
-                                    <input 
-    type="email" 
-    name="email" 
-    value={formData.email} 
-    onChange={handleChange} 
-    className={`
-        ${styles.formInput} 
-        ${errors.email ? styles.inputError : ''} 
-        ${highlightError ? styles.inputHighlight : ''} 
-    `} 
-/>
-                                    {errors.email && <span className={styles.errorMessage}>{errors.email}</span>}
-                                </div>
+    <label className={styles.formLabel}>Nombre Empresa *</label>
+    <input 
+        type="text" 
+        name="companyName" 
+        value={formData.companyName} 
+        onChange={handleChange} 
+        onBlur={handleBlur}
+        className={`${styles.formInput} ${errors.companyName && touched.companyName ? styles.inputError : ''}`} 
+    />
+    {renderValidationMessage('companyName')}
+</div>
+
+<div className={styles.formGroup}>
+    <label className={styles.formLabel}>Correo Electrónico *</label>
+    <input 
+        type="email" 
+        name="email" 
+        value={formData.email} 
+        onChange={handleChange} 
+        onBlur={handleBlur} 
+        className={`
+            ${styles.formInput} 
+            ${errors.email && touched.email ? styles.inputError : ''} 
+            ${highlightError ? styles.inputHighlight : ''} 
+        `} 
+    />
+    {renderValidationMessage('email')}
+</div>
                             </div>
 
                             <div className={styles.formRow}>
                                 <div className={styles.formGroup}>
     <label className={styles.formLabel}>Teléfono de Contacto *</label>
     <input 
-        type="tel" // 🟢 Cambiado a 'tel'
+        type="tel" 
         name="phones" 
         value={formData.phones} 
         onChange={handleChange} 
+        onBlur={handleBlur} /* 👈 NUEVO */
         placeholder="Ej: 3156789032"
-        className={`${styles.formInput} ${errors.phones ? styles.inputError : ''}`} 
+        className={`${styles.formInput} ${errors.phones && touched.phones ? styles.inputError : ''}`} 
     />
-    {errors.phones && <span className={styles.errorMessage}>{errors.phones}</span>}
+    {renderValidationMessage('phones')}
 </div>
                                 <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Nombre del Contacto *</label>
-                                    <input type="text" name="contactName" value={formData.contactName} onChange={handleChange} className={`${styles.formInput} ${errors.contactName ? styles.inputError : ''}`} />
-                                    {errors.contactName && <span className={styles.errorMessage}>{errors.contactName}</span>}
-                                </div>
+    <label className={styles.formLabel}>Nombre del Contacto *</label>
+    <input 
+        type="text" 
+        name="contactName" 
+        value={formData.contactName} 
+        onChange={handleChange} 
+        onBlur={handleBlur} /* 👈 NUEVO */
+        className={`${styles.formInput} ${errors.contactName && touched.contactName ? styles.inputError : ''}`} 
+    />
+    {renderValidationMessage('contactName')}
+</div>
                             </div>
 
                             <div className={styles.formRow}>
@@ -496,18 +578,21 @@ const ciudadesFiltradas = formData.department
                     key={item.v} 
                     className={styles.dropdownOption} 
                     onMouseDown={(e) => {
-                        e.preventDefault(); // 🟢 Evita que el menú se cierre antes de capturar el dato
-                        setFormData({ ...formData, modalidad: item.v });
-                        toggleMenu('modalidad');
-                        setErrors(prev => ({ ...prev, modalidad: '' }));
-                    }}
+    e.preventDefault(); 
+    setFormData({ ...formData, modalidad: item.v });
+    toggleMenu('modalidad');
+    
+    // 🟢 NUEVO: Simulamos que el campo fue tocado y quitamos el error
+    setTouched(prev => ({ ...prev, modalidad: true }));
+    setErrors(prev => ({ ...prev, modalidad: '' }));
+}}
                 >
                     {item.l}
                 </div>
             ))}
         </div>
     )}
-    {errors.modalidad && <span className={styles.errorMessage}>{errors.modalidad}</span>}
+    {renderValidationMessage('modalidad')}
 </div>
 </div>
 
@@ -519,24 +604,18 @@ const ciudadesFiltradas = formData.department
                 {/* 🟢 CONTENEDOR PARA EL OJITO */}
                 <div className={styles.passwordWrapper}>
                     <input 
-                        /* 🟢 Tipo dinámico: 'text' o 'password' */
-                        type={showPassword ? "text" : "password"} 
-                        name="password" 
-                        value={formData.password} 
-                        onChange={handleChange} 
-                        className={`${styles.formInput} ${errors.password ? styles.inputError : ''}`} 
-                    />
-                    
-                    {/* 🟢 BOTÓN DEL OJITO */}
-                    <button 
-                        type="button" 
-                        onClick={() => setShowPassword(!showPassword)} 
-                        className={styles.togglePasswordBtn}
-                    >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                </div>
-                {errors.password && <span className={styles.errorMessage}>{errors.password}</span>}
+    type={showPassword ? "text" : "password"} 
+    name="password" 
+    value={formData.password} 
+    onChange={handleChange} 
+    onBlur={handleBlur} /* 👈 NUEVO */
+    className={`${styles.formInput} ${errors.password && touched.password ? styles.inputError : ''}`} 
+/>
+<button type="button" onClick={() => setShowPassword(!showPassword)} className={styles.togglePasswordBtn}>
+    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+</button>
+</div>
+{renderValidationMessage('password')}
             </div>
 
             {/* --- Campo Confirmar Contraseña (Lo mismo) --- */}
@@ -545,21 +624,18 @@ const ciudadesFiltradas = formData.department
                 
                 <div className={styles.passwordWrapper}>
                     <input 
-                        type={showConfirmPassword ? "text" : "password"} 
-                        name="confirmPassword" 
-                        value={formData.confirmPassword} 
-                        onChange={handleChange} 
-                        className={`${styles.formInput} ${errors.confirmPassword ? styles.inputError : ''}`} 
-                    />
-                    <button 
-                        type="button" 
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
-                        className={styles.togglePasswordBtn}
-                    >
-                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                </div>
-                {errors.confirmPassword && <span className={styles.errorMessage}>{errors.confirmPassword}</span>}
+    type={showConfirmPassword ? "text" : "password"} 
+    name="confirmPassword" 
+    value={formData.confirmPassword} 
+    onChange={handleChange} 
+    onBlur={handleBlur} /* 👈 NUEVO */
+    className={`${styles.formInput} ${errors.confirmPassword && touched.confirmPassword ? styles.inputError : ''}`} 
+/>
+<button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className={styles.togglePasswordBtn}>
+    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+</button>
+</div>
+{renderValidationMessage('confirmPassword')}
             </div>
         </div>
     </div>
@@ -571,135 +647,132 @@ const ciudadesFiltradas = formData.department
         
         {/* --- DIRECCIÓN --- */}
         <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Dirección Principal *</label>
-            <input 
-                type="text" 
-                name="address" 
-                value={formData.address} 
-                onChange={handleChange} 
-                className={`${styles.formInput} ${errors.address ? styles.inputError : ''}`} 
-            />
-            {errors.address && <span className={styles.errorMessage}>{errors.address}</span>}
-        </div>
+    <label className={styles.formLabel}>Dirección Principal *</label>
+    <input 
+        type="text" 
+        name="address" 
+        value={formData.address} 
+        onChange={handleChange} 
+        onBlur={handleBlur} /* 👈 NUEVO */
+        className={`${styles.formInput} ${errors.address && touched.address ? styles.inputError : ''}`} 
+    />
+    {renderValidationMessage('address')}
+</div>
 
         <div className={styles.formRow}>
             {/* --- BUSCADOR DE DEPARTAMENTO --- */}
             <div className={styles.formGroup} style={{ position: 'relative' }}>
-                <label className={styles.formLabel}>Departamento *</label>
-                <input 
-                    type="text"
-                    placeholder="Escriba para buscar..."
-                    // Prioriza lo que el usuario escribe, si no, muestra lo guardado
-                    value={showDeptOpts ? searchTermDept : (formData.department || searchTermDept)}
-                    onChange={(e) => {
-                        setSearchTermDept(e.target.value);
-                        setShowDeptOpts(true);
-                    }}
-                    onFocus={() => {
-                        setSearchTermDept(''); // Limpia búsqueda para mostrar todos al dar foco
-                        setShowDeptOpts(true);
-                    }}
-                    className={`${styles.formInput} ${errors.department ? styles.inputError : ''}`}
-                />
-                
-                {showDeptOpts && (
-                    <div className={styles.customSelectDropdown} style={{ display: 'block', maxHeight: '200px', overflowY: 'auto', zIndex: 100 }}>
-                        {departamentosFiltrados.length > 0 ? (
-                            departamentosFiltrados.map(d => (
-                                <div 
-                                    key={d} 
-                                    className={styles.dropdownOption}
-                                    // 🟢 onMouseDown evita que el onBlur del input cierre el menú antes del clic
-                                    onMouseDown={(e) => {
-    e.preventDefault(); 
-    setFormData(prev => ({ ...prev, department: d, city: '', otherCity: '' }));
-    setSearchTermDept(d);
-    setSearchTermCity('');
+    <label className={styles.formLabel}>Departamento *</label>
+    <input 
+        type="text"
+        placeholder="Escriba para buscar..."
+        value={showDeptOpts ? searchTermDept : (formData.department || searchTermDept)}
+        onChange={(e) => {
+            setSearchTermDept(e.target.value);
+            setShowDeptOpts(true);
+        }}
+        onFocus={() => {
+            setSearchTermDept(''); 
+            setShowDeptOpts(true);
+        }}
+        className={`${styles.formInput} ${errors.department && touched.department ? styles.inputError : ''}`}
+    />
     
-    // 1. Cerramos departamento
-    setShowDeptOpts(false);
-
-    // 2. Usamos un pequeño retraso para abrir Ciudad y darle el foco
-    setTimeout(() => {
-        setShowCityOpts(true); // Abre el menú
-        cityInputRef.current?.focus(); // Pone el cursor allí
-    }, 100); 
-
-    setErrors(prev => ({ ...prev, department: '' }));
-}}
-                                >
-                                    {d}
-                                </div>
-                            ))
-                        ) : (
-                            <div className={styles.dropdownOption} style={{ color: '#999', cursor: 'default' }}>No se encontraron resultados</div>
-                        )}
+    {showDeptOpts && (
+        <div className={styles.customSelectDropdown} style={{ display: 'block', maxHeight: '200px', overflowY: 'auto', zIndex: 100 }}>
+            {departamentosFiltrados.length > 0 ? (
+                departamentosFiltrados.map(d => (
+                    <div 
+                        key={d} 
+                        className={styles.dropdownOption}
+                        onMouseDown={(e) => {
+                            e.preventDefault(); 
+                            setFormData(prev => ({ ...prev, department: d, city: '', otherCity: '' }));
+                            setSearchTermDept(d);
+                            setSearchTermCity('');
+                            setShowDeptOpts(false);
+                            setTouched(prev => ({ ...prev, department: true })); 
+                            setTimeout(() => {
+                                setShowCityOpts(true); 
+                                cityInputRef.current?.focus(); 
+                            }, 100); 
+                            setErrors(prev => ({ ...prev, department: '' }));
+                        }}
+                    >
+                        {d}
                     </div>
-                )}
-                {errors.department && <span className={styles.errorMessage}>{errors.department}</span>}
-            </div>
+                ))
+            ) : (
+                <div className={styles.dropdownOption} style={{ color: '#999', cursor: 'default' }}>No se encontraron resultados</div>
+            )}
+        </div>
+    )}
+    {renderValidationMessage('department')}
+</div>
 
             {/* --- BUSCADOR DE CIUDAD --- */}
             <div className={styles.formGroup} style={{ position: 'relative' }}>
-                <label className={styles.formLabel}>Ciudad *</label>
-                <input 
-                ref={cityInputRef}
-                    type="text"
-                    placeholder={formData.department ? "Escriba para buscar..." : "Primero elija departamento"}
-                    value={showCityOpts ? searchTermCity : (formData.city || searchTermCity)}
-                    disabled={!formData.department}
-                    onChange={(e) => {
-                        setSearchTermCity(e.target.value);
-                        setShowCityOpts(true);
-                    }}
-                    onFocus={() => {
-                        setSearchTermCity('');
-                        setShowCityOpts(true);
-                    }}
-                    className={`${styles.formInput} ${errors.city ? styles.inputError : ''}`}
-                />
-                
-                {showCityOpts && formData.department && (
-                    <div className={styles.customSelectDropdown} style={{ display: 'block', maxHeight: '200px', overflowY: 'auto', zIndex: 100 }}>
-                        {ciudadesFiltradas.length > 0 ? (
-                            ciudadesFiltradas.map(c => (
-                                <div 
-                                    key={c} 
-                                    className={styles.dropdownOption}
-                                    onMouseDown={(e) => {
-                                        e.preventDefault();
-                                        setFormData(prev => ({ ...prev, city: c }));
-                                        setSearchTermCity(c);
-                                        setShowCityOpts(false);
-                                        setErrors(prev => ({ ...prev, city: '' }));
-                                    }}
-                                >
-                                    {c}
-                                </div>
-                            ))
-                        ) : (
-                            <div className={styles.dropdownOption} style={{ color: '#999', cursor: 'default' }}>No se encontraron resultados</div>
-                        )}
+    <label className={styles.formLabel}>Ciudad *</label>
+    <input 
+        ref={cityInputRef}
+        type="text"
+        placeholder={formData.department ? "Escriba para buscar..." : "Primero elija departamento"}
+        value={showCityOpts ? searchTermCity : (formData.city || searchTermCity)}
+        disabled={!formData.department}
+        onChange={(e) => {
+            setSearchTermCity(e.target.value);
+            setShowCityOpts(true);
+        }}
+        onFocus={() => {
+            setSearchTermCity('');
+            setShowCityOpts(true);
+        }}
+        className={`${styles.formInput} ${errors.city && touched.city ? styles.inputError : ''}`}
+    />
+    
+    {showCityOpts && formData.department && (
+        <div className={styles.customSelectDropdown} style={{ display: 'block', maxHeight: '200px', overflowY: 'auto', zIndex: 100 }}>
+            {ciudadesFiltradas.length > 0 ? (
+                ciudadesFiltradas.map(c => (
+                    <div 
+                        key={c} 
+                        className={styles.dropdownOption}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            setFormData(prev => ({ ...prev, city: c }));
+                            setSearchTermCity(c);
+                            setShowCityOpts(false);
+                            setTouched(prev => ({ ...prev, city: true })); 
+                            setErrors(prev => ({ ...prev, city: '' }));
+                        }}
+                    >
+                        {c}
                     </div>
-                )}
-                {errors.city && <span className={styles.errorMessage}>{errors.city}</span>}
-            </div>
+                ))
+            ) : (
+                <div className={styles.dropdownOption} style={{ color: '#999', cursor: 'default' }}>No se encontraron resultados</div>
+            )}
+        </div>
+    )}
+    {renderValidationMessage('city')}
+</div>
         </div>
 
         {/* --- CAMPO MANUAL PARA "OTRA CIUDAD" --- */}
         {(formData.city === 'Otra Ciudad' || formData.city === 'Otra Ciudad...') && (
             <div style={{ marginTop: '10px' }}>
-                <label className={styles.formLabel}>¿Cuál ciudad? *</label>
-                <input 
-                    type="text" 
-                    name="otherCity" 
-                    value={formData.otherCity || ''} 
-                    onChange={handleChange} 
-                    className={`${styles.formInput} ${errors.otherCity ? styles.inputError : ''}`}
-                    placeholder="Nombre de la ciudad manual..."
-                />
-                {errors.otherCity && <span className={styles.errorMessage}>{errors.otherCity}</span>}
-            </div>
+    <label className={styles.formLabel}>¿Cuál ciudad? *</label>
+    <input 
+        type="text" 
+        name="otherCity" 
+        value={formData.otherCity || ''} 
+        onChange={handleChange} 
+        onBlur={handleBlur} /* 👈 NUEVO */
+        className={`${styles.formInput} ${errors.otherCity && touched.otherCity ? styles.inputError : ''}`}
+        placeholder="Nombre de la ciudad manual..."
+    />
+    {renderValidationMessage('otherCity')}
+</div>
         )}
     </div>
 )}
@@ -711,10 +784,11 @@ const ciudadesFiltradas = formData.department
             {/* --- TIPO DE EMPRESA --- */}
             <div className={styles.formGroup} style={{ position: 'relative' }}>
                 <label className={styles.formLabel}>Tipo de Empresa *</label>
-                <div 
-                    className={`${styles.customSelectHeader} ${errors.companyType ? styles.inputError : ''}`} 
-                    onClick={() => toggleMenu('companyType')}
-                >
+                {/* 👇 ACTUALIZA EL HEADER */}
+<div 
+    className={`${styles.customSelectHeader} ${errors.companyType && touched.companyType ? styles.inputError : ''}`} 
+    onClick={() => toggleMenu('companyType')}
+>
                     {formData.companyType ? (
                         formData.companyType === 'sas' ? 'S.A.S' : 
                         formData.companyType === 'sa' ? 'S.A' : 
@@ -727,41 +801,47 @@ const ciudadesFiltradas = formData.department
                     <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
                         {['sas', 'sa', 'ltda', 'pn', 'otra'].map(opcion => (
                             <div key={opcion} className={styles.dropdownOption} onMouseDown={(e) => {
-                                e.preventDefault(); // 🟢 Evita errores de clic
-                                setFormData({...formData, companyType: opcion});
-                                toggleMenu('companyType');
-                                setErrors(prev => ({ ...prev, companyType: '' }));
-                            }}>
+    e.preventDefault(); 
+    setFormData({...formData, companyType: opcion});
+    toggleMenu('companyType');
+    setTouched(prev => ({ ...prev, companyType: true })); /* 👈 NUEVO */
+    setErrors(prev => ({ ...prev, companyType: '' }));
+}}>
                                 {opcion === 'sas' ? 'S.A.S' : opcion === 'sa' ? 'S.A' : opcion === 'ltda' ? 'Limitada' : opcion === 'pn' ? 'Persona Natural' : 'Otra'}
                             </div>
                         ))}
                     </div>
                 )}
-                {errors.companyType && <span className={styles.errorMessage}>{errors.companyType}</span>}
+                {renderValidationMessage('companyType')}
 
                 {formData.companyType === 'otra' && (
                     <div style={{ marginTop: '10px' }}>
-                        <label className={styles.formLabel}>¿Cuál tipo de empresa? *</label>
-                        <input 
-                            type="text" 
-                            name="otherCompanyType" 
-                            value={formData.otherCompanyType || ''} 
-                            onChange={handleChange} 
-                            className={`${styles.formInput} ${errors.otherCompanyType ? styles.inputError : ''}`}
-                            placeholder="Escriba el tipo de empresa..."
-                        />
-                        {errors.otherCompanyType && <span className={styles.errorMessage}>{errors.otherCompanyType}</span>}
-                    </div>
+    <label className={styles.formLabel}>¿Cuál tipo de empresa? *</label>
+    <input 
+        type="text" 
+        name="otherCompanyType" 
+        value={formData.otherCompanyType || ''} 
+        onChange={handleChange} 
+        onBlur={handleBlur} /* 👈 NUEVO */
+        className={`${styles.formInput} ${errors.otherCompanyType && touched.otherCompanyType ? styles.inputError : ''}`}
+        placeholder="Escriba el tipo de empresa..."
+    />
+    {renderValidationMessage('otherCompanyType')}
+</div>
                 )}
             </div>
 
             {/* --- SECTOR ECONÓMICO --- */}
             <div className={styles.formGroup} ref={economicRef} style={{ position: 'relative' }}>
                 <label className={styles.formLabel}>Sector Económico *</label>
-                <div 
-                    className={`${styles.customSelectHeader} ${errors.economicSector ? styles.inputError : ''}`} 
-                    onClick={() => setIsEconomicDropdownOpen(!isEconomicDropdownOpen)}
-                >
+                {/* 👇 ACTUALIZA EL HEADER Y EL ONCLICK */}
+<div 
+    className={`${styles.customSelectHeader} ${errors.economicSector && touched.economicSector ? styles.inputError : ''}`} 
+    onClick={() => {
+        setIsEconomicDropdownOpen(!isEconomicDropdownOpen);
+        setTouched(prev => ({ ...prev, economicSector: true })); /* 👈 NUEVO */
+    }}
+>
                     {formData.economicSector.length > 0 ? formData.economicSector.join(', ') : 'Seleccione...'}
                 </div>
                 {isEconomicDropdownOpen && (
@@ -780,72 +860,77 @@ const ciudadesFiltradas = formData.department
                     </div>
                 )}
                 {formData.economicSector.includes('Otro') && (
-                    <div style={{marginTop: '10px'}}>
-                        <label className={styles.formLabel}>¿Cuál otro sector? *</label>
-                        <input 
-                            type="text" 
-                            value={otroSector} 
-                            onChange={(e) => setOtroSector(e.target.value)} 
-                            className={styles.formInput} 
-                            placeholder="Escriba su sector..."
-                        />
-                    </div>
-                )}
-                {errors.economicSector && <span className={styles.errorMessage}>{errors.economicSector}</span>}
+    <div style={{marginTop: '10px'}}>
+        <label className={styles.formLabel}>¿Cuál otro sector? *</label>
+        <input 
+            type="text" 
+            name="otroSector" 
+            value={formData.otroSector} 
+            onChange={handleChange} 
+            onBlur={handleBlur}
+            className={`${styles.formInput} ${errors.otroSector && touched.otroSector ? styles.inputError : ''}`} 
+            placeholder="Escriba su sector..."
+        />
+        {renderValidationMessage('otroSector')}
+    </div>
+)}
+                {renderValidationMessage('economicSector')}
             </div>
         </div>
 
         <div className={styles.formRow}>
-            {/* --- AÑO DE FUNDACIÓN --- */}
-            <div className={styles.formGroup} style={{ position: 'relative' }}>
-                <label className={styles.formLabel}>Año de Fundación *</label>
-                <div 
-                    className={`${styles.customSelectHeader} ${errors.foundationYear ? styles.inputError : ''}`} 
-                    onClick={() => toggleMenu('foundationYear')}
-                >
-                    {formData.foundationYear || 'Seleccione...'}
-                </div>
-                {openMenus.foundationYear && (
-                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
-                        {Array.from({length: 50}, (_, i) => new Date().getFullYear() - i).map(year => (
-                            <div key={year} className={styles.dropdownOption} onMouseDown={(e) => {
-                                e.preventDefault();
-                                setFormData({...formData, foundationYear: year.toString()});
-                                toggleMenu('foundationYear');
-                                setErrors(prev => ({ ...prev, foundationYear: '' }));
-                            }}>{year}</div>
-                        ))}
-                    </div>
-                )}
-                {errors.foundationYear && <span className={styles.errorMessage}>{errors.foundationYear}</span>}
-            </div>
-
-            {/* --- EMPLEADOS --- */}
-            <div className={styles.formGroup} style={{ position: 'relative' }}>
-                <label className={styles.formLabel}>Empleados *</label>
-                <div 
-                    className={`${styles.customSelectHeader} ${errors.employees ? styles.inputError : ''}`} 
-                    onClick={() => toggleMenu('employees')}
-                >
-                    {formData.employees ? (formData.employees === '501+' ? 'Más de 500' : formData.employees) : 'Seleccione...'}
-                </div>
-                {openMenus.employees && (
-                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
-                        {['1-10', '11-50', '51-200', '201-500', '501+'].map(val => (
-                            <div key={val} className={styles.dropdownOption} onMouseDown={(e) => {
-                                e.preventDefault();
-                                setFormData({...formData, employees: val});
-                                toggleMenu('employees');
-                                setErrors(prev => ({ ...prev, employees: '' }));
-                            }}>
-                                {val === '501+' ? 'Más de 500' : val}
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {errors.employees && <span className={styles.errorMessage}>{errors.employees}</span>}
-            </div>
+    {/* --- AÑO DE FUNDACIÓN --- */}
+    <div className={styles.formGroup} style={{ position: 'relative' }}>
+        <label className={styles.formLabel}>Año de Fundación *</label>
+        <div 
+            className={`${styles.customSelectHeader} ${errors.foundationYear && touched.foundationYear ? styles.inputError : ''}`} 
+            onClick={() => toggleMenu('foundationYear')}
+        >
+            {formData.foundationYear || 'Seleccione...'}
         </div>
+        {openMenus.foundationYear && (
+            <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+                {Array.from({length: 50}, (_, i) => new Date().getFullYear() - i).map(year => (
+                    <div key={year} className={styles.dropdownOption} onMouseDown={(e) => {
+                        e.preventDefault();
+                        setFormData({...formData, foundationYear: year.toString()});
+                        toggleMenu('foundationYear');
+                        setTouched(prev => ({ ...prev, foundationYear: true }));
+                        setErrors(prev => ({ ...prev, foundationYear: '' }));
+                    }}>{year}</div>
+                ))}
+            </div>
+        )}
+        {renderValidationMessage('foundationYear')}
+    </div>
+
+    {/* --- EMPLEADOS --- */}
+    <div className={styles.formGroup} style={{ position: 'relative' }}>
+        <label className={styles.formLabel}>Empleados *</label>
+        <div 
+            className={`${styles.customSelectHeader} ${errors.employees && touched.employees ? styles.inputError : ''}`} 
+            onClick={() => toggleMenu('employees')}
+        >
+            {formData.employees ? (formData.employees === '501+' ? 'Más de 500' : formData.employees) : 'Seleccione...'}
+        </div>
+        {openMenus.employees && (
+            <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+                {['1-10', '11-50', '51-200', '201-500', '501+'].map(val => (
+                    <div key={val} className={styles.dropdownOption} onMouseDown={(e) => {
+                        e.preventDefault();
+                        setFormData({...formData, employees: val});
+                        toggleMenu('employees');
+                        setTouched(prev => ({ ...prev, employees: true }));
+                        setErrors(prev => ({ ...prev, employees: '' }));
+                    }}>
+                        {val === '501+' ? 'Más de 500' : val}
+                    </div>
+                ))}
+            </div>
+        )}
+        {renderValidationMessage('employees')}
+    </div>
+</div>
     </div>
 )}
 
@@ -854,44 +939,50 @@ const ciudadesFiltradas = formData.department
         <h2 className={styles.stepTitle}>Información Financiera</h2>
         <div className={styles.formRow}>
             {/* --- RANGO DE INGRESOS --- */}
-            <div className={styles.formGroup} style={{ position: 'relative' }}>
-                <label className={styles.formLabel}>Rango de Ingresos *</label>
-                <div 
-                    className={`${styles.customSelectHeader} ${errors.annualRevenue ? styles.inputError : ''}`} 
-                    onClick={() => toggleMenu('annualRevenue')}
-                >
-                    {formData.annualRevenue ? (
-                        formData.annualRevenue === '0-100' ? '0 - 100 Millones' :
-                        formData.annualRevenue === '100-500' ? '100 - 500 Millones' :
-                        formData.annualRevenue === '500+' ? 'Más de 500 Millones' : formData.annualRevenue
-                    ) : 'Seleccione...'}
-                </div>
-                {openMenus.annualRevenue && (
-                    <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
-                        {[
-                            {v: '0-100', l: '0 - 100 Millones'},
-                            {v: '100-500', l: '100 - 500 Millones'},
-                            {v: '500+', l: 'Más de 500 Millones'}
-                        ].map(item => (
-                            <div key={item.v} className={styles.dropdownOption} onMouseDown={(e) => {
-                                e.preventDefault();
-                                setFormData({...formData, annualRevenue: item.v});
-                                toggleMenu('annualRevenue');
-                                setErrors(prev => ({ ...prev, annualRevenue: '' }));
-                            }}>{item.l}</div>
-                        ))}
-                    </div>
-                )}
-                {errors.annualRevenue && <span className={styles.errorMessage}>{errors.annualRevenue}</span>}
-            </div>
+            {/* --- RANGO DE INGRESOS --- */}
+            {/* --- RANGO DE INGRESOS --- */}
+<div className={styles.formGroup} style={{ position: 'relative' }}>
+    <label className={styles.formLabel}>Rango de Ingresos *</label>
+    <div 
+        className={`${styles.customSelectHeader} ${errors.annualRevenue && touched.annualRevenue ? styles.inputError : ''}`} 
+        onClick={() => toggleMenu('annualRevenue')}
+    >
+        {formData.annualRevenue ? (
+            formData.annualRevenue === '0-100' ? '0 - 100 Millones' :
+            formData.annualRevenue === '100-500' ? '100 - 500 Millones' :
+            formData.annualRevenue === '500+' ? 'Más de 500 Millones' : formData.annualRevenue
+        ) : 'Seleccione...'}
+    </div>
+    {openMenus.annualRevenue && (
+        <div className={styles.customSelectDropdown} style={{ display: 'block', zIndex: 101 }}>
+            {[
+                {v: '0-100', l: '0 - 100 Millones'},
+                {v: '100-500', l: '100 - 500 Millones'},
+                {v: '500+', l: 'Más de 500 Millones'}
+            ].map(item => (
+                <div key={item.v} className={styles.dropdownOption} onMouseDown={(e) => {
+                    e.preventDefault();
+                    setFormData({...formData, annualRevenue: item.v});
+                    toggleMenu('annualRevenue');
+                    setTouched(prev => ({ ...prev, annualRevenue: true }));
+                    setErrors(prev => ({ ...prev, annualRevenue: '' }));
+                }}>{item.l}</div>
+            ))}
+        </div>
+    )}
+    {renderValidationMessage('annualRevenue')}
+</div>
 
             {/* --- CANALES DE DISTRIBUCIÓN --- */}
             <div className={styles.formGroup} ref={channelsRef} style={{ position: 'relative' }}>
                 <label className={styles.formLabel}>Canales de Distribución *</label>
                 <div 
-                    className={`${styles.customSelectHeader} ${errors.distributionChannels ? styles.inputError : ''}`} 
-                    onClick={() => setIsChannelsDropdownOpen(!isChannelsDropdownOpen)}
-                >
+    className={`${styles.customSelectHeader} ${errors.distributionChannels && touched.distributionChannels ? styles.inputError : ''}`} 
+    onClick={() => {
+        setIsChannelsDropdownOpen(!isChannelsDropdownOpen);
+        setTouched(prev => ({ ...prev, distributionChannels: true })); 
+    }}
+>
                     {formData.distributionChannels.length > 0 ? formData.distributionChannels.join(', ') : 'Seleccione...'}
                 </div>
                 
@@ -912,34 +1003,36 @@ const ciudadesFiltradas = formData.department
                 )}
                 {formData.distributionChannels.includes('Otro Canal') && (
                     <div style={{ marginTop: '10px' }}>
-                        <label className={styles.formLabel}>¿Cuál otro canal? *</label>
-                        <input 
-                            type="text" 
-                            name="otroCanalDistribucion" 
-                            value={formData.otroCanalDistribucion} 
-                            onChange={handleChange} 
-                            className={`${styles.formInput} ${errors.otroCanalDistribucion ? styles.inputError : ''}`}
-                            placeholder="Escriba el canal..."
-                        />
-                        {errors.otroCanalDistribucion && <span className={styles.errorMessage}>{errors.otroCanalDistribucion}</span>}
-                    </div>
+    <label className={styles.formLabel}>¿Cuál otro canal? *</label>
+    <input 
+        type="text" 
+        name="otroCanalDistribucion" 
+        value={formData.otroCanalDistribucion} 
+        onChange={handleChange} 
+        onBlur={handleBlur} 
+        className={`${styles.formInput} ${errors.otroCanalDistribucion && touched.otroCanalDistribucion ? styles.inputError : ''}`}
+        placeholder="Escriba el canal..."
+    />
+    {renderValidationMessage('otroCanalDistribucion')}
+</div>
                 )}
-                {errors.distributionChannels && <span className={styles.errorMessage}>{errors.distributionChannels}</span>}
+                {renderValidationMessage('distributionChannels')}
             </div>
         </div>
 
         <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Principales Clientes *</label>
-            <textarea 
-                name="mainClients" 
-                value={formData.mainClients} 
-                onChange={handleChange} 
-                className={`${styles.formInput} ${errors.mainClients ? styles.inputError : ''}`} 
-                rows="3" 
-                placeholder="Describa sus principales clientes..."
-            />
-            {errors.mainClients && <span className={styles.errorMessage}>{errors.mainClients}</span>}
-        </div>
+    <label className={styles.formLabel}>Principales Clientes *</label>
+    <textarea 
+        name="mainClients" 
+        value={formData.mainClients} 
+        onChange={handleChange} 
+        onBlur={handleBlur} 
+        className={`${styles.formInput} ${errors.mainClients && touched.mainClients ? styles.inputError : ''}`} 
+        rows="3" 
+        placeholder="Describa sus principales clientes..."
+    />
+    {renderValidationMessage('mainClients')}
+</div>
     </div>
 )}
 
@@ -1011,7 +1104,7 @@ const ciudadesFiltradas = formData.department
     <div className={styles.formStep}>
         <h2 className={styles.stepTitle}>Confirmación Final</h2>
         
-        {/* 🟢 NUEVO: Contenedor Wrapper para el resumen y el ícono */}
+        
         <div className={styles.resumenWrap}>
     <div className={styles.resumenContainer}>
         <p><strong>Empresa:</strong> {formData.companyName}</p>
@@ -1026,13 +1119,12 @@ const ciudadesFiltradas = formData.department
         </p>
     </div>
 
-            {/* 🟢 NUEVO: Contenedor para el ícono de Check */}
-            {/* --- Contenedor para el ícono de Check --- */}
+            
 {/* --- Contenedor para el ícono de Check --- */}
 <div className={styles.finalCheckIcon}>
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
-            /* 🟢 Solo aplicamos la animación si el checkbox está marcado */
+            
             className={formData.confirmacionFinal ? styles.checkPath : ''} 
             d="M8.5 12.5L10.5 14.5L15.5 9.5" 
             stroke="currentColor" 
@@ -1060,7 +1152,7 @@ const ciudadesFiltradas = formData.department
     </div>
 )}
 
-                    {/* Controles de Navegación */}
+                   
                     <div className={styles.formNavigation}>
     {currentStep === 1 ? (
         <button type="button" onClick={() => navigate('/')} className={`${styles.udecButton} ${styles.btnSecondary}`}>Regresar</button>
@@ -1072,7 +1164,7 @@ const ciudadesFiltradas = formData.department
         <button 
             type="button" 
             onClick={handleNext} 
-            /* 🟢 Si faltan datos, el botón se ve desactivado y no tiene eventos de mouse */
+            
             className={`${styles.udecButton} ${styles.btnPrimary} ${isStepIncomplete() ? styles.btnDisabled : ''}`}
             disabled={isStepIncomplete()} 
         >
@@ -1091,7 +1183,7 @@ const ciudadesFiltradas = formData.department
 
                 </form>
                 </div>
-{/* 🟢 MODAL DE ESTADO (Fuera del flujo del formulario para evitar conflictos de z-index) */}
+
             {statusModal.show && (
     <div className={styles.modalOverlay}>
         <div className={`${styles.statusModal} ${statusModal.type === 'success' ? styles.modalSuccess : styles.modalError}`}>
@@ -1104,7 +1196,7 @@ const ciudadesFiltradas = formData.department
             <p className={styles.modalText}>{statusModal.message}</p>
             
             <div className={styles.modalActions}>
-    {/* 🟢 Solo aparece si hay un error y un paso al cual volver */}
+  
     {statusModal.type === 'error' && (
         <button 
             type="button" 
@@ -1127,7 +1219,7 @@ const ciudadesFiltradas = formData.department
     </div>
 )}
 
-                {/* 🟢 AGREGA ESTO AQUÍ: Footer idéntico a Egresados */}
+               
                 <div className={styles.udecRegisterFooter}>
                     <p>
                         ¿Ya tienes una cuenta? 

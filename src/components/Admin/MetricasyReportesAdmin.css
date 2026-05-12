@@ -1,0 +1,513 @@
+/* ==========================================================================
+   MÉTRICAS Y REPORTES - EMPRES360 PRO (SCOPE ESTRICTO)
+   ========================================================================== 
+*/
+
+.admin-metrics-scope {
+  /* Variables de Color (Paleta UdeC & Neutros Premium) */
+  --adm-bg-color: #f8fafc;
+  --adm-text-main: #1e293b;
+  --adm-text-muted: #64748b;
+  
+  /* Glassmorphism Variables */
+  --adm-glass-bg: rgba(255, 255, 255, 0.65);
+  --adm-glass-border: rgba(255, 255, 255, 0.8);
+  --adm-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  --adm-hover-shadow: 0 12px 40px rgba(0, 72, 43, 0.08); /* Sutil brillo verde UdeC */
+  --adm-hover-bg: rgba(255, 255, 255, 0.9);
+  
+  /* Estados */
+  --adm-trend-pos: #16a34a;
+  --adm-trend-neg: #dc2626;
+  --adm-primary: #00482b; /* Verde UdeC */
+  --adm-accent: #f7931e;  /* Naranja UdeC */
+
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--adm-text-main);
+}
+
+/* =========================================
+   ANIMACIONES (KEYFRAMES)
+   ========================================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-soft {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* =========================================
+   HEADER Y CONTROLES
+   ========================================= */
+.admin-metrics-scope .adm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.admin-metrics-scope .adm-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem 0;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.admin-metrics-scope .adm-subtitle {
+  font-size: 1.05rem;
+  color: var(--adm-text-muted);
+  margin: 0;
+}
+
+.admin-metrics-scope .adm-refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--adm-primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+
+.admin-metrics-scope .adm-refresh-btn:hover {
+  background: var(--adm-primary);
+  color: white;
+  border-color: var(--adm-primary);
+  box-shadow: 0 8px 20px rgba(0, 72, 43, 0.2);
+  transform: translateY(-2px);
+}
+
+.admin-metrics-scope .adm-refresh-btn:active {
+  transform: translateY(0);
+}
+
+/* =========================================
+   TARJETAS BASE (GLASSMORPHISM)
+   ========================================= */
+.admin-metrics-scope .adm-glass-card {
+  background: var(--adm-glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--adm-glass-border);
+  border-radius: 20px;
+  box-shadow: var(--adm-shadow);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1.75rem;
+  opacity: 0; /* Inicia invisible para la animación */
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.admin-metrics-scope .adm-glass-card:hover {
+  box-shadow: var(--adm-hover-shadow);
+  transform: translateY(-4px);
+  background: var(--adm-hover-bg);
+}
+
+/* Retrasos en la animación para efecto cascada */
+.admin-metrics-scope .adm-kpi-card:nth-child(1) { animation-delay: 0.1s; }
+.admin-metrics-scope .adm-kpi-card:nth-child(2) { animation-delay: 0.2s; }
+.admin-metrics-scope .adm-kpi-card:nth-child(3) { animation-delay: 0.3s; }
+.admin-metrics-scope .adm-kpi-card:nth-child(4) { animation-delay: 0.4s; }
+
+.admin-metrics-scope .adm-chart-container:nth-child(1) { animation-delay: 0.5s; }
+.admin-metrics-scope .adm-list-widget { animation-delay: 0.6s; }
+.admin-metrics-scope .adm-chart-container:nth-child(3) { animation-delay: 0.7s; }
+.admin-metrics-scope .adm-chart-container:nth-child(4) { animation-delay: 0.8s; }
+.admin-metrics-scope .adm-chart-container:nth-child(5) { animation-delay: 0.9s; }
+.admin-metrics-scope .adm-chart-container:nth-child(6) { animation-delay: 1s; }
+
+/* =========================================
+   KPI GRID (Tarjetas Superiores)
+   ========================================= */
+.admin-metrics-scope .adm-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.admin-metrics-scope .adm-kpi-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brillo decorativo sutil en las tarjetas KPI */
+.admin-metrics-scope .adm-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--adm-accent);
+  border-radius: 4px 0 0 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.admin-metrics-scope .adm-kpi-card:hover::before {
+  opacity: 1;
+}
+
+.admin-metrics-scope .adm-kpi-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--adm-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
+}
+
+.admin-metrics-scope .adm-kpi-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.admin-metrics-scope .adm-kpi-trend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  width: fit-content;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.admin-metrics-scope .adm-kpi-trend.positive {
+  background: #dcfce7;
+  color: var(--adm-trend-pos);
+}
+
+.admin-metrics-scope .adm-kpi-trend.negative {
+  background: #fee2e2;
+  color: var(--adm-trend-neg);
+}
+
+/* =========================================
+   GRID COMPLEJO DE GRÁFICOS
+   ========================================= */
+.admin-metrics-scope .complex-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.admin-metrics-scope .span-2 { grid-column: span 2; }
+.admin-metrics-scope .span-3 { grid-column: span 3; }
+
+.admin-metrics-scope .adm-chart-container,
+.admin-metrics-scope .adm-list-widget {
+  display: flex;
+  flex-direction: column;
+  height: 420px; /* Altura ideal para Recharts */
+}
+
+.admin-metrics-scope .adm-chart-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-metrics-scope .adm-chart-wrapper {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/* =========================================
+   WIDGET DE RANKING (Empresas Recientes)
+   ========================================= */
+.admin-metrics-scope .adm-ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  overflow-y: auto;
+  padding-right: 5px; /* Espacio para scrollbar */
+}
+
+/* Estilizar la barra de scroll del widget */
+.admin-metrics-scope .adm-ranking-list::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-metrics-scope .adm-ranking-list::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}
+
+.admin-metrics-scope .adm-ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(248, 250, 252, 0.6);
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  transition: all 0.3s ease;
+}
+
+.admin-metrics-scope .adm-ranking-item:hover {
+  transform: translateX(6px);
+  background: white;
+  border-color: var(--adm-accent);
+  box-shadow: 0 4px 12px rgba(247, 147, 30, 0.1);
+}
+
+.admin-metrics-scope .adm-ranking-avatar {
+  background: #f1f5f9;
+  color: var(--adm-primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  transition: transform 0.3s;
+}
+
+.admin-metrics-scope .adm-ranking-item:hover .adm-ranking-avatar {
+  transform: scale(1.1) rotate(5deg);
+  background: #e6f0eb;
+}
+
+.admin-metrics-scope .adm-ranking-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-metrics-scope .adm-ranking-info span {
+  font-size: 0.8rem;
+  color: var(--adm-text-muted);
+  font-weight: 500;
+}
+
+.admin-metrics-scope .adm-ranking-badge {
+  margin-left: auto;
+  font-size: 0.7rem;
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =========================================
+   ESTADOS DE CARGA Y ERROR
+   ========================================= */
+.admin-metrics-scope .adm-metrics-loading, 
+.admin-metrics-scope .adm-metrics-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  color: #64748b;
+  text-align: center;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.admin-metrics-scope .adm-metrics-loading p,
+.admin-metrics-scope .adm-metrics-error p {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 1.5rem;
+}
+
+.admin-metrics-scope .spinner {
+  animation: rotate 2s linear infinite;
+  color: var(--adm-primary);
+}
+
+/* Customizaciones internas de Recharts */
+.admin-metrics-scope .recharts-cartesian-axis-tick-value {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* =========================================
+   RESPONSIVIDAD (MEDIA QUERIES)
+   ========================================= */
+@media (max-width: 1200px) {
+  .admin-metrics-scope .complex-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-metrics-scope .span-3 { 
+    grid-column: span 2; 
+  }
+}
+
+@media (max-width: 992px) {
+  .admin-metrics-scope .adm-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .admin-metrics-scope .adm-refresh-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-metrics-scope {
+    padding: 1rem;
+  }
+
+  .admin-metrics-scope .complex-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-metrics-scope .span-2,
+  .admin-metrics-scope .span-3 { 
+    grid-column: span 1; 
+  }
+
+  .admin-metrics-scope .adm-chart-container,
+  .admin-metrics-scope .adm-list-widget {
+    height: 350px;
+  }
+}
+
+/* =========================================
+   BOTONES DE EXPORTACIÓN
+   ========================================= */
+.admin-metrics-scope .adm-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-metrics-scope .adm-btn-excel,
+.admin-metrics-scope .adm-btn-pdf {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: white;
+}
+
+/* Estilo botón Excel (Verde vibrante) */
+.admin-metrics-scope .adm-btn-excel {
+  background: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.admin-metrics-scope .adm-btn-excel:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+}
+
+/* Estilo botón PDF (Rojo/Naranja Institucional) */
+.admin-metrics-scope .adm-btn-pdf {
+  background: var(--adm-accent); /* El naranja de la UdeC */
+  box-shadow: 0 4px 12px rgba(247, 147, 30, 0.2);
+}
+
+.admin-metrics-scope .adm-btn-pdf:hover:not(:disabled) {
+  background: #d97706;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(247, 147, 30, 0.3);
+}
+
+.admin-metrics-scope .adm-btn-pdf:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Ajuste al botón de refrescar para que no rompa la armonía */
+.admin-metrics-scope .adm-refresh-btn {
+  padding: 10px 12px;
+}
+
+@media (max-width: 768px) {
+  .admin-metrics-scope .adm-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .admin-metrics-scope .adm-btn-excel,
+  .admin-metrics-scope .adm-btn-pdf,
+  .admin-metrics-scope .adm-refresh-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* =========================================
+   MODO EXPORTACIÓN A PDF (ESTILOS FORZADOS)
+   ========================================= */
+.pdf-export-mode {
+  height: auto !important;
+  overflow: visible !important;
+  background: #ffffff !important;
+}
+
+.pdf-export-mode * {
+  animation: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.pdf-export-mode .adm-glass-card {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+/* Ocultamos los botones en el PDF */
+.pdf-export-mode .adm-header-actions {
+  display: none !important;
+}

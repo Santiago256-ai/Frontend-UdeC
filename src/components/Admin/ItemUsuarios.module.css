@@ -588,31 +588,31 @@
 }
 
 /* ==========================================================================
-   NUEVA BARRA DE FILTROS Y BÚSQUEDA (Actualizado)
+   NUEVA BARRA DE FILTROS Y BÚSQUEDA (Optimizada para 14 pulgadas)
    ========================================================================== */
 
 .filterBar {
     display: flex;
-    gap: 12px;
+    gap: 10px; /* 👈 Reducimos ligeramente el hueco entre elementos */
     margin-bottom: 25px;
     align-items: center;
-    flex-wrap: wrap; /* Permite que en pantallas pequeñas no se amontone */
+    flex-wrap: wrap; 
 }
 
-/* Buscador Principal: Recuperamos el diseño de caja gris */
+/* Buscador Principal */
 .searchBoxMain {
     display: flex;
     align-items: center;
-    background: #f4f7f6; /* El gris suave de tu diseño original */
+    background: #f4f7f6;
     padding: 10px 15px;
     border-radius: 8px;
     border: 1px solid #e0e0e0;
-    flex: 1; /* Esto hace que el buscador crezca y ocupe el espacio disponible */
-    min-width: 250px; /* Para que no se encoja demasiado */
+    flex: 1; /* 👈 Obliga al buscador a acoplarse al espacio sobrante */
+    min-width: 160px; /* 👈 Le permitimos encogerse más que antes */
 }
 
 .searchBoxMain i {
-    color: #006837; /* Verde UdeC */
+    color: #006837; 
     margin-right: 10px;
 }
 
@@ -625,8 +625,8 @@
     color: #333;
 }
 
-/* Selectores y Fecha: Estilo sutil y limpio */
-.filterSelect, .filterDate {
+/* Selectores: La magia para que no empujen los calendarios */
+.filterSelect {
     padding: 9px 12px;
     border-radius: 8px;
     border: 1px solid #e0e0e0;
@@ -636,52 +636,66 @@
     outline: none;
     cursor: pointer;
     transition: all 0.3s ease;
+    max-width: 175px; /* 👈 LÍMITE DE ANCHO: Obliga a "Facultades" a no ser tan largo */
+    text-overflow: ellipsis; /* Añade "..." si el texto es muy largo */
+    overflow: hidden;
+    white-space: nowrap;
 }
 
-/* Al pasar el mouse por los filtros, se iluminan en verde UdeC */
+/* Inputs de Fecha */
+.filterDate {
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    font-size: 0.85rem;
+    color: #475569;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 137px; /* 👈 Ancho fijo y compacto para las fechas */
+}
+
+/* 🟢 NUEVO: Separar el icono del calendario del texto */
+.filterDate::-webkit-calendar-picker-indicator {
+    margin-left: 12px; /* 👈 Esto crea el espacio exacto entre "aaaa" y el icono */
+    cursor: pointer;
+}
+
 .filterSelect:hover, .filterDate:hover {
     border-color: #006837;
 }
 
-/* Contenedor de la fecha para que el texto "Desde:" se vea profesional */
+/* Contenedor de la fecha ("Desde" y "Hasta") */
 .dateFilterContainer {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px; /* 👈 Reducimos separación interna */
+}
+
+.dateGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 0.85rem;
     color: #64748b;
     font-weight: 600;
-}
-
-/* Texto de la fecha de registro debajo del nombre del egresado */
-.registrationDate {
-    font-size: 0.75rem !important;
-    color: #94a3b8 !important; /* Gris suave para que no compita con el nombre */
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 3px;
-    font-weight: 500;
-}
-
-.registrationDate i {
-    font-size: 0.7rem;
 }
 
 /* Botón de limpiar filtros */
 .btnClearFilters {
     background: none;
     border: none;
-    color: #dc3545; /* Rojo sutil para indicar acción de borrar */
+    color: #dc3545; 
     font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
-    text-decoration: none;
     padding: 5px 10px;
     transition: 0.3s;
     display: flex;
     align-items: center;
     gap: 5px;
+    white-space: nowrap; /* 👈 Evita que el botón se parta en dos líneas */
 }
 
 .btnClearFilters:hover {

@@ -72,7 +72,7 @@
 .sidebar.collapsed span {
     opacity: 0;
     visibility: hidden;
-    display: none; /* Esto quita el espacio del texto */
+    display: none;
 }
 
 /* Evita que el texto intente ajustarse en varias líneas mientras se cierra */
@@ -80,7 +80,6 @@
     white-space: nowrap; 
     overflow: hidden;
 }
-
 /* 5. Centrar iconos */
 .sidebar.collapsed .menu-item,
 .sidebar.collapsed .btn-content {
@@ -654,7 +653,7 @@
 
 /* 2. Reducir el espacio de los items del menú */
 .sidebar.collapsed .menu-item {
-    padding: 12px 0; /* Items más compactos */
+    overflow: visible !important; /* Para que el punto pueda "asomarse" */
 }
 
 /* 3. Ajustes específicos para el Footer (Contraer y Cerrar Sesión) */
@@ -760,6 +759,8 @@
     flex-direction: column;
     background: white;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: relative;
+    z-index: 1000 !important;
 }
 
 /* FRANJA DE COLORES SUPERIOR */
@@ -1078,7 +1079,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 1001;
 }
 
 /* Caja del Modal */
@@ -1317,7 +1318,7 @@
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     border: 1px solid #edf2f7;
-    z-index: 1000;
+    z-index: 9999 !important;
     padding: 8px 0;
     animation: fadeInDown 0.2s ease-out;
 }
@@ -1635,7 +1636,8 @@
     padding: 20px;
 }
 
-.vacante-card-compact {
+.dashboard-egresados-container .vacante-card-compact {
+    cursor: pointer;
     /* Degradado sutil con el verde UdeC */
     background: linear-gradient(135deg, rgba(0, 72, 43, 0.08) 0%, rgba(0, 72, 43, 0.02) 100%);
     backdrop-filter: blur(12px);
@@ -2274,3 +2276,236 @@
 .ql-editor-view h1 { font-size: 24px !important; font-weight: 800; color: #00482b; }
 .ql-editor-view h2 { font-size: 20px !important; font-weight: 700; color: #00482b; }
 .ql-editor-view h3 { font-size: 18px !important; font-weight: 600; color: #00482b; }
+
+/* --- ESTADO VACÍO EXCLUSIVO (evd) --- */
+
+.evd-empty-state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 450px;
+    width: 100%;
+    padding: 60px 20px;
+    background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+}
+
+.evd-visual-wrapper {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.evd-glass-circle {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 72, 43, 0.1);
+    overflow: hidden;
+}
+
+.evd-icon-search {
+    color: #00482b; /* Verde UdeC */
+    z-index: 2;
+    animation: evd-float 4s ease-in-out infinite;
+}
+
+/* Línea de escaneo láser sutil */
+.evd-scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, transparent, #ff8c00, transparent); /* Naranja UdeC */
+    opacity: 0.6;
+    animation: evd-scan 3s linear infinite;
+    z-index: 3;
+}
+
+/* Animación de puntos flotantes laterales */
+.evd-floating-dots {
+    position: absolute;
+    width: 220px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.evd-floating-dots span {
+    width: 8px;
+    height: 8px;
+    background: #00482b;
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: evd-dots-fade 2s infinite;
+}
+
+.evd-floating-dots span:nth-child(2) { animation-delay: 0.4s; }
+.evd-floating-dots span:nth-child(3) { animation-delay: 0.8s; }
+
+.evd-text-content {
+    text-align: center;
+    max-width: 450px;
+}
+
+.evd-main-title {
+    color: #1e293b;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+.evd-description {
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.evd-refresh-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #00482b;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 20px rgba(0, 72, 43, 0.2);
+}
+
+.evd-refresh-button:hover {
+    background: #006b3f;
+    transform: translateY(-2px);
+    box-shadow: 0 15px 25px rgba(0, 72, 43, 0.3);
+}
+
+.evd-refresh-button:active {
+    transform: translateY(0);
+}
+
+/* --- KEYFRAMES ÚNICOS --- */
+
+@keyframes evd-scan {
+    0% { top: -10%; }
+    100% { top: 110%; }
+}
+
+@keyframes evd-float {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+@keyframes evd-dots-fade {
+    0%, 100% { opacity: 0.1; transform: scale(0.8); }
+    50% { opacity: 0.4; transform: scale(1.2); }
+}
+
+/* Personalización de Toasts para que coincidan con Empres360 */
+.Toastify__toast--success {
+    background-color: #00482b !important; /* Verde UdeC */
+    border-radius: 12px !important;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+}
+
+.Toastify__toast--error {
+    background-color: #dc2626 !important; /* Rojo profesional */
+    border-radius: 12px !important;
+}
+
+.Toastify__close-button {
+    color: white;
+    opacity: 0.8;
+}
+
+.Toastify__toast-container--bottom-right {
+    bottom: 25px !important;
+    right: 25px !important;
+}
+
+.Toastify__toast {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Contenedor base del icono */
+.menu-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;  /* Ancho del icono */
+    height: 20px; /* Alto del icono */
+    margin: 0 auto; /* Lo centra en el sidebar colapsado */
+}
+
+/* El punto naranja */
+.notification-dot {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    
+    position: absolute;
+    /* Ajustamos las coordenadas para que nazca desde la esquina del icono */
+    top: -4px; 
+    right: -4px;
+    
+    width: 10px;
+    height: 10px;
+    background-color: #f39200;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 5px rgba(243, 146, 0, 0.6);
+    z-index: 999;
+}
+
+/* Forzar visibilidad en Sidebar Colapsado */
+.sidebar.collapsed .menu-icon-wrapper {
+    margin: 0 auto;           /* Centra el icono cuando el menú es una tira delgada */
+}
+
+/* Si tu CSS oculta los iconos por error, asegúrate de que esto no pase */
+.sidebar.collapsed .menu-icon-wrapper .notification-dot {
+    display: block !important; 
+}
+
+/* EL PUNTO NARANJA (INMUNE AL TOOLTIP) */
+.nav-punto-naranja {
+    position: absolute;
+    top: -2px;    /* Sube un poquito respecto a la campana */
+    right: -2px;  /* Se mueve a la derecha de la campana */
+    width: 9px;
+    height: 9px;
+    background-color: #f39200; /* Naranja institucional */
+    border-radius: 50%;
+    border: 2px solid #ffffff; /* Borde blanco para separarlo de la campana */
+    z-index: 10;
+}
+
+/* Efecto de latido opcional para que se vea más vivo */
+.nav-punto-naranja {
+    animation: latidoPunto 2s infinite;
+}
+
+@keyframes latidoPunto {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 146, 0, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(243, 146, 0, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 146, 0, 0); }
+}

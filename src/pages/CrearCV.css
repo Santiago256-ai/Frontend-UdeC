@@ -597,3 +597,9 @@
     margin: 0 0 10px 0;
     line-height: 1.1;
 }
+
+.btn-add-more:disabled, .btn-remove-text:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}

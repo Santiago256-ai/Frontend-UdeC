@@ -154,6 +154,7 @@ const [filtroEstado, setFiltroEstado] = useState("");
 const [filtroFecha, setFiltroFecha] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false); // 👈 Controla visibilidad
 const [usuarioParaEliminar, setUsuarioParaEliminar] = useState(null); // 👈 Guarda datos temporales
+const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
 
     const cargarUsuarios = async () => {
         try {
@@ -278,18 +279,18 @@ const usuariosFiltrados = usuarios.filter(u => {
     const busquedaLimpia = busqueda.trim().toLowerCase().replace(/\s+/g, ' ');
     const nombreCompleto = `${u.nombres} ${u.apellidos}`.toLowerCase().replace(/\s+/g, ' ');
     
-    // Coincidencia de búsqueda manual
+    // Coincidencias...
     const matchBusqueda = nombreCompleto.includes(busquedaLimpia) || u.correo.toLowerCase().includes(busquedaLimpia);
-    
-    // Coincidencia de filtros dropdown
     const matchFacultad = filtroFacultad === "" || u.facultad === filtroFacultad;
     const matchPrograma = filtroPrograma === "" || u.programa === filtroPrograma;
     const matchEstado = filtroEstado === "" || u.estado === filtroEstado;
     
-    // Filtro por fecha (compara solo la parte YYYY-MM-DD)
-    const matchFecha = filtroFecha === "" || (u.createdAt && u.createdAt.split('T')[0] === filtroFecha);
+    // 🟢 NUEVA LÓGICA DE RANGOS DE FECHAS
+    const fechaRegistro = u.createdAt ? u.createdAt.split('T')[0] : null;
+    const matchFechaDesde = filtroFecha === "" || (fechaRegistro && fechaRegistro >= filtroFecha);
+    const matchFechaHasta = filtroFechaHasta === "" || (fechaRegistro && fechaRegistro <= filtroFechaHasta);
 
-    return matchBusqueda && matchFacultad && matchPrograma && matchEstado && matchFecha;
+    return matchBusqueda && matchFacultad && matchPrograma && matchEstado && matchFechaDesde && matchFechaHasta;
 });
 
     if (loading) return (
@@ -381,24 +382,38 @@ return (
             </select>
 
             {/* Filtro por Fecha de Registro */}
+{/* 📅 Rango de Fechas (Desde y Hasta) */}
             <div className={styles.dateFilterContainer}>
-                <label>Desde:</label>
-                <input 
-                    type="date" 
-                    value={filtroFecha} 
-                    onChange={(e) => setFiltroFecha(e.target.value)} 
-                    className={styles.filterDate}
-                />
+                <div className={styles.dateGroup}>
+                    <label>Desde:</label>
+                    <input 
+                        type="date" 
+                        value={filtroFecha} 
+                        onChange={(e) => setFiltroFecha(e.target.value)} 
+                        className={styles.filterDate}
+                    />
+                </div>
+                <div className={styles.dateGroup}>
+                    <label>Hasta:</label>
+                    <input 
+                        type="date" 
+                        value={filtroFechaHasta} 
+                        onChange={(e) => setFiltroFechaHasta(e.target.value)} 
+                        className={styles.filterDate}
+                    />
+                </div>
             </div>
             
-            {/* Botón para limpiar filtros (solo aparece si hay algo activo) */}
-            {(filtroFacultad || filtroEstado || filtroFecha || busqueda) && (
+            {/* Botón para limpiar filtros */}
+            {(filtroFacultad || filtroPrograma || filtroEstado || filtroFecha || filtroFechaHasta || busqueda) && (
                 <button 
                     className={styles.btnClearFilters} 
                     onClick={() => {
                         setFiltroFacultad(""); 
+                        setFiltroPrograma("");
                         setFiltroEstado(""); 
                         setFiltroFecha(""); 
+                        setFiltroFechaHasta(""); // 👈 Limpiamos el nuevo filtro
                         setBusqueda("");
                     }}
                 >

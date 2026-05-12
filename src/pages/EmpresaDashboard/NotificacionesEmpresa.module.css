@@ -1,0 +1,128 @@
+.neContainer {
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+    animation: neFadeIn 0.5s ease;
+}
+
+.neHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.neTitleGroup {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.neBellIcon { color: #006b3f; }
+
+.neTitleGroup h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 0;
+}
+
+.neTitleGroup p {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.neCountBadge {
+    background: #f0fdf4;
+    color: #166534;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid #bbf7d0;
+}
+
+.neList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.neItem {
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.neItem:hover {
+    transform: translateX(5px);
+    border-color: #006b3f;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.neUnread {
+    background: #f8fafc;
+    border-left: 4px solid #006b3f;
+}
+
+.neIconBox {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.neIconPostu { color: #0ea5e9; background: #f0f9ff; padding: 8px; border-radius: 8px; box-sizing: content-box; }
+.neIconMsg { color: #8b5cf6; background: #f5f3ff; padding: 8px; border-radius: 8px; box-sizing: content-box; }
+
+.neContent { flex: 1; }
+
+.neText {
+    margin: 0 0 5px 0;
+    color: #334155;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.neTime {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.neAction {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.neDot {
+    width: 10px;
+    height: 10px;
+    background: #ef4444;
+    border-radius: 50%;
+}
+
+.neChevron { color: #cbd5e1; }
+
+.neEmpty {
+    text-align: center;
+    padding: 100px 0;
+    color: #94a3b8;
+}
+
+@keyframes neFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

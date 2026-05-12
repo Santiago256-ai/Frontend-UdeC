@@ -164,9 +164,22 @@ React.useEffect(() => {
                         </div>
 
                         <div className={styles.modalDescription}>
-                            <h3>Descripción de la vacante:</h3>
-                            <p style={{ whiteSpace: 'pre-line' }}>{vacanteSeleccionada.descripcion}</p>
-                        </div>
+    <h3>Descripción de la vacante:</h3>
+    
+    {/* CAMBIO CLAVE: Usamos dangerouslySetInnerHTML para procesar el HTML del editor */}
+    <div 
+        className="ql-editor-view" // Clase para los estilos que ya creamos en el CSS global/dashboard
+        style={{ 
+            fontSize: '15px', 
+            lineHeight: '1.8', 
+            color: '#475569',
+            marginTop: '10px' 
+        }}
+        dangerouslySetInnerHTML={{ 
+            __html: vacanteSeleccionada.descripcion || "Sin descripción disponible." 
+        }} 
+    />
+</div>
 
                         <div className={styles.modalFooter}>
                             <div className={styles.postulacionInfo}>

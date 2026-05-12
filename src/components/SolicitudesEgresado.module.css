@@ -309,3 +309,36 @@
     50% { transform: scale(1.01); box-shadow: 0 0 30px rgba(243, 146, 0, 0.8); }
     100% { transform: scale(1); }
 }
+
+/* Estilos para renderizar el contenido rico dentro del modal de solicitudes */
+.modalDescription :global(.ql-editor-view) {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.modalDescription :global(.ql-editor-view ul), 
+.modalDescription :global(.ql-editor-view ol) {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.modalDescription :global(.ql-editor-view li) {
+    margin-bottom: 8px;
+    list-style: disc; /* Asegura que se vean los puntos */
+}
+
+.modalDescription :global(.ql-editor-view strong) {
+    color: #1a202c;
+    font-weight: 700;
+}
+
+/* Alineaciones */
+.modalDescription :global(.ql-align-center) {
+    text-align: center !important;
+    display: block;
+}
+
+.modalDescription :global(.ql-align-justify) {
+    text-align: justify !important;
+    display: block;
+}

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react'; // 👈 Agregué useEffect aquí
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api'; 
-// 🟢 IMPORTANTE: Importamos como CSS Module
 import styles from './RegistrarEgresado.module.css'; 
 
 const programasPorFacultad = {
@@ -47,14 +46,10 @@ const ErrorModal = ({ isOpen, onClose, message }) => {
       <div className={styles.modalContent}>
         <div className={styles.modalIcon}>✕</div>
         <h2 className={styles.modalTitle}>Hubo un inconveniente</h2>
-        
-        {/* 🟢 NUEVO: Usamos la clase modalMessageJustify */}
         <p className={`${styles.modalMessage} ${styles.modalMessageJustify}`}>
           {message}
         </p>
-        
         <div className={styles.modalActions}>
-          {/* 🔴 Botón 'Verificar Datos' ELIMINADO */}
           <button onClick={onClose} className={styles.btnCerrar}>Cerrar</button>
         </div>
       </div>
@@ -80,8 +75,9 @@ const SuccessModal = ({ isOpen, onClose, message }) => {
 
 export default function RegistrarEgresado() {
   const navigate = useNavigate();
-const [showErrorModal, setShowErrorModal] = useState(false);
-const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
   const [formData, setFormData] = useState({
     nombres: '',
     apellidos: '',
@@ -94,19 +90,18 @@ const [showSuccessModal, setShowSuccessModal] = useState(false);
   });
 
   const [errors, setErrors] = useState({});
+  // 🟢 NUEVO: Estado para saber si el usuario ya pasó por el recuadro
+  const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
-  // Estado para controlar qué menú está abierto
   const [openMenus, setOpenMenus] = useState({
     facultad: false,
     programa: false
   });
 
-  // 🟢 Hook para cerrar menús al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Importante: Verifica que la clase coincida con tu CSS
       if (!event.target.closest(`.${styles['form-group']}`)) {
         setOpenMenus({ facultad: false, programa: false });
       }
@@ -115,7 +110,6 @@ const [showSuccessModal, setShowSuccessModal] = useState(false);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   
-  // Función para alternar la visibilidad de los menús
   const toggleMenu = (menu) => {
     setOpenMenus(prev => ({
       facultad: menu === 'facultad' ? !prev.facultad : false,
@@ -123,7 +117,25 @@ const [showSuccessModal, setShowSuccessModal] = useState(false);
     }));
   };
 
+  const validatePasswordStrength = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+~`|}{[\]:;"'<,>.?/])[A-Za-z\d!@#$%^&*()_+~`|}{[\]:;"'<,>.?/]{8,}$/;
+    return passwordRegex.test(password);
+  };
 
+  // 🟢 NUEVO: Función centralizada para validar un solo campo a la vez
+  const validateField = (name, value, currentData) => {
+    switch (name) {
+      case 'nombres': return !value.trim() ? 'Nombres requeridos' : '';
+      case 'apellidos': return !value.trim() ? 'Apellidos requeridos' : '';
+      case 'facultad': return !value ? 'Debe seleccionar una facultad' : '';
+      case 'programa': return !value ? 'Debe seleccionar un programa' : '';
+      case 'celular': return !value.trim() ? 'Celular requerido' : '';
+      case 'correo': return !value.trim() || !/\S+@\S+\.\S+/.test(value) ? 'Correo inválido' : '';
+      case 'contraseña': return !value || !validatePasswordStrength(value) ? 'Contraseña débil (8+ carac, Mayús, Núm, Especial (ej: #, $, @))' : '';
+      case 'confirmarContraseña': return value !== currentData.contraseña ? 'Las contraseñas no coinciden' : '';
+      default: return '';
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -136,107 +148,97 @@ const [showSuccessModal, setShowSuccessModal] = useState(false);
     setFormData(prev => {
       const newData = { ...prev, [name]: value };
       if (name === 'facultad') newData.programa = '';
+      
+      // Si el campo ya fue tocado, lo validamos mientras escribe
+      if (touched[name]) {
+        setErrors(prevErrors => ({ ...prevErrors, [name]: validateField(name, value, newData) }));
+      }
       return newData;
     });
-
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
   };
 
-  const validatePasswordStrength = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+~`|}{[\]:;"'<,>.?/])[A-Za-z\d!@#$%^&*()_+~`|}{[\]:;"'<,>.?/]{8,}$/;
-    return passwordRegex.test(password);
+  // 🟢 NUEVO: Función que se ejecuta cuando el usuario pasa al siguiente recuadro
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const error = validateField(name, value, formData);
+    setErrors(prev => ({ ...prev, [name]: error }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.nombres.trim()) newErrors.nombres = 'Nombres requeridos';
-    if (!formData.apellidos.trim()) newErrors.apellidos = 'Apellidos requeridos';
-    if (!formData.facultad) newErrors.facultad = 'Debe seleccionar una facultad';
-    if (!formData.programa) newErrors.programa = 'Debe seleccionar un programa';
-    if (!formData.celular.trim()) newErrors.celular = 'Celular requerido';
-    if (!formData.correo.trim() || !/\S+@\S+\.\S+/.test(formData.correo)) newErrors.correo = 'Correo inválido';
-    if (!formData.contraseña || !validatePasswordStrength(formData.contraseña)) {
-      newErrors.contraseña = 'Contraseña débil (8+ carac, Mayús, Núm, Especial)';
-    }
-    if (formData.contraseña !== formData.confirmarContraseña) {
-      newErrors.confirmarContraseña = 'Las contraseñas no coinciden';
-    }
+    const fields = Object.keys(formData);
+    
+    // Marcamos todos como tocados al intentar enviar
+    const allTouched = fields.reduce((acc, field) => ({...acc, [field]: true}), {});
+    setTouched(allTouched);
+
+    fields.forEach(field => {
+      const error = validateField(field, formData[field], formData);
+      if (error) newErrors[field] = error;
+    });
+
     return newErrors;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const newErrors = validateForm();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newErrors = validateForm();
 
-  if (Object.keys(newErrors).length === 0) {
-    setErrors({});
-    setLoading(true);
-    
-    const dataToSend = { 
-      nombres: formData.nombres,
-      apellidos: formData.apellidos,
-      correo: formData.correo,
-      password: formData.contraseña,
-      facultad: formData.facultad,
-      programa: formData.programa,
-      celular: formData.celular
-    };
+    if (Object.keys(newErrors).length === 0) {
+      setErrors({});
+      setLoading(true);
+      
+      const dataToSend = { 
+        nombres: formData.nombres,
+        apellidos: formData.apellidos,
+        correo: formData.correo,
+        password: formData.contraseña,
+        facultad: formData.facultad,
+        programa: formData.programa,
+        celular: formData.celular
+      };
 
-    try {
-      // 1. Intentamos el registro
-      await API.post("/auth/register", dataToSend); 
-      
-      // 🟢 ÉXITO: En lugar de alert, activamos el SuccessModal
-      setShowSuccessModal(true); 
-      
-      // Nota: No navegamos aquí directamente, dejamos que el usuario 
-      // vea el mensaje y navegue al darle clic en "Ir al Inicio" (handleSuccessClose)
-      
-    } catch (error) {
-      // 🔴 ERROR: Activamos el ErrorModal
-      setShowErrorModal(true); 
-      console.error("Error en el registro:", error.response?.data);
-      
-    } finally {
-      setLoading(false);
+      try {
+        await API.post("/auth/register", dataToSend); 
+        setShowSuccessModal(true); 
+      } catch (error) {
+        setShowErrorModal(true); 
+        console.error("Error en el registro:", error.response?.data);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setErrors(newErrors);
     }
-  } else {
-    // Si hay errores de validación local (campos vacíos, etc.)
-    setErrors(newErrors);
-  }
-};
+  };
 
-// 🟢 Esta función es la que vinculamos al botón del SuccessModal
-const handleSuccessClose = () => {
-  setShowSuccessModal(false);
-  navigate('/'); // Redirigimos al Login solo después de que el usuario cierre el aviso
-};
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    navigate('/'); 
+  };
 
-  // --- Lógica para habilitar/deshabilitar botón ---
-const isFormValid = () => {
-  // 1. Verificamos que los campos requeridos tengan contenido
-  const requiredFields = [
-    formData.nombres, 
-    formData.apellidos, 
-    formData.facultad, 
-    formData.programa, 
-    formData.correo, 
-    formData.celular, 
-    formData.contraseña, 
-    formData.confirmarContraseña
-  ];
+  const isFormValid = () => {
+    const requiredFields = Object.values(formData);
+    const allFilled = requiredFields.every(field => field.trim() !== '');
+    const noErrors = Object.values(errors).every(error => error === '');
+    return allFilled && noErrors;
+  };
 
-  const allFilled = requiredFields.every(field => field.trim() !== '');
-
-  // 2. Verificamos que no existan mensajes de error y que las contraseñas coincidan
-  const noErrors = Object.values(errors).every(error => error === '');
-  const passwordsMatch = formData.contraseña === formData.confirmarContraseña;
-  const passwordStrong = validatePasswordStrength(formData.contraseña);
-
-  return allFilled && noErrors && passwordsMatch && passwordStrong;
-};
+  // 🟢 NUEVO: Renderizador de mensajes debajo de cada recuadro
+  const renderValidationMessage = (fieldName) => {
+    if (!touched[fieldName]) return null;
+    
+    if (errors[fieldName]) {
+      return <span className={styles['error-message']}>❌ {errors[fieldName]}</span>;
+    }
+    
+    if (formData[fieldName] !== '') {
+      return <span className={styles['success-message']}>✅ Correcto</span>;
+    }
+    
+    return null;
+  };
 
   return (
     <div className={styles['udec-register-container']}>
@@ -263,104 +265,144 @@ const isFormValid = () => {
           <div className={styles['form-row']}>
             <div className={`${styles['form-group']} ${styles['half-width']}`}>
               <label>Nombre</label>
-              <input type="text" name="nombres" value={formData.nombres} onChange={handleChange} placeholder="Ingrese sus nombres completos" className={errors.nombres ? styles.error : ''} disabled={loading} />
-              {errors.nombres && <span className={styles['error-message']}>{errors.nombres}</span>}
+              <input 
+                type="text" 
+                name="nombres" 
+                value={formData.nombres} 
+                onChange={handleChange} 
+                onBlur={handleBlur} /* 🟢 NUEVO */
+                placeholder="Ingrese sus nombres completos" 
+                className={errors.nombres && touched.nombres ? styles.error : ''} 
+                disabled={loading} 
+              />
+              {renderValidationMessage('nombres')}
             </div>
             <div className={`${styles['form-group']} ${styles['half-width']}`}>
               <label>Apellidos</label>
-              <input type="text" name="apellidos" value={formData.apellidos} onChange={handleChange} placeholder="Ingrese sus apellidos completos" className={errors.apellidos ? styles.error : ''} disabled={loading} />
-              {errors.apellidos && <span className={styles['error-message']}>{errors.apellidos}</span>}
+              <input 
+                type="text" 
+                name="apellidos" 
+                value={formData.apellidos} 
+                onChange={handleChange} 
+                onBlur={handleBlur} /* 🟢 NUEVO */
+                placeholder="Ingrese sus apellidos completos" 
+                className={errors.apellidos && touched.apellidos ? styles.error : ''} 
+                disabled={loading} 
+              />
+              {renderValidationMessage('apellidos')}
             </div>
           </div>
 
           <div className={styles['form-row']}>
-  {/* --- SELECTOR DE FACULTAD --- */}
-  <div className={`${styles['form-group']} ${styles['half-width']}`} style={{ position: 'relative' }}>
-    <label>Facultad</label>
-    <div 
-      className={`${styles.customSelectHeader} ${errors.facultad ? styles.error : ''}`} 
-      onClick={() => toggleMenu('facultad')}
-    >
-      {formData.facultad ? (
-        <span style={{ color: '#333', textTransform: 'capitalize' }}>
-          {formData.facultad.toLowerCase()}
-        </span>
-      ) : (
-        <span style={{ color: '#999' }}>Seleccione su facultad...</span>
-      )}
-      <span className={styles.selectArrow}>▾</span>
-    </div>
+            {/* --- SELECTOR DE FACULTAD --- */}
+            <div className={`${styles['form-group']} ${styles['half-width']}`} style={{ position: 'relative' }}>
+              <label>Facultad</label>
+              <div 
+                className={`${styles.customSelectHeader} ${errors.facultad && touched.facultad ? styles.error : ''}`} 
+                onClick={() => toggleMenu('facultad')}
+              >
+                {formData.facultad ? (
+                  <span style={{ color: '#333', textTransform: 'capitalize' }}>
+                    {formData.facultad.toLowerCase()}
+                  </span>
+                ) : (
+                  <span style={{ color: '#999' }}>Seleccione su facultad...</span>
+                )}
+                <span className={styles.selectArrow}>▾</span>
+              </div>
 
-    {openMenus.facultad && (
-      <div className={styles.customSelectDropdown}>
-        {Object.keys(programasPorFacultad).map((fac) => (
-          <div 
-            key={fac} 
-            className={styles.dropdownOption} 
-            onMouseDown={(e) => {
-              e.preventDefault();
-              setFormData(prev => ({ ...prev, facultad: fac, programa: '' }));
-              toggleMenu('facultad');
-              setErrors(prev => ({ ...prev, facultad: '' }));
-            }}
-          >
-            {fac.charAt(0) + fac.slice(1).toLowerCase()}
+              {openMenus.facultad && (
+                <div className={styles.customSelectDropdown}>
+                  {Object.keys(programasPorFacultad).map((fac) => (
+                    <div 
+                      key={fac} 
+                      className={styles.dropdownOption} 
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setFormData(prev => ({ ...prev, facultad: fac, programa: '' }));
+                        toggleMenu('facultad');
+                        // 🟢 Simulamos el "blur" y validamos
+                        setTouched(prev => ({ ...prev, facultad: true, programa: false }));
+                        setErrors(prev => ({ ...prev, facultad: '', programa: validateField('programa', '', formData) }));
+                      }}
+                    >
+                      {fac.charAt(0) + fac.slice(1).toLowerCase()}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {renderValidationMessage('facultad')}
+            </div>
+
+            {/* --- SELECTOR DE PROGRAMA --- */}
+            <div className={`${styles['form-group']} ${styles['half-width']}`} style={{ position: 'relative' }}>
+              <label>Programa Académico</label>
+              <div 
+                className={`${styles.customSelectHeader} ${!formData.facultad ? styles.disabledSelect : ''} ${errors.programa && touched.programa ? styles.error : ''}`} 
+                onClick={() => formData.facultad && toggleMenu('programa')}
+              >
+                {formData.programa ? (
+                  <span style={{ color: '#333' }}>{formData.programa}</span>
+                ) : (
+                  <span style={{ color: '#999' }}>
+                    {formData.facultad ? "Seleccione su programa..." : "Primero elija facultad"}
+                  </span>
+                )}
+                <span className={styles.selectArrow}>▾</span>
+              </div>
+
+              {openMenus.programa && formData.facultad && (
+                <div className={styles.customSelectDropdown}>
+                  {programasPorFacultad[formData.facultad]?.map((prog) => (
+                    <div 
+                      key={prog} 
+                      className={styles.dropdownOption} 
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setFormData(prev => ({ ...prev, programa: prog }));
+                        toggleMenu('programa');
+                        // 🟢 Simulamos el "blur" y validamos
+                        setTouched(prev => ({ ...prev, programa: true }));
+                        setErrors(prev => ({ ...prev, programa: '' }));
+                      }}
+                    >
+                      {prog}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {renderValidationMessage('programa')}
+            </div>
           </div>
-        ))}
-      </div>
-    )}
-    {errors.facultad && <span className={styles['error-message']}>{errors.facultad}</span>}
-  </div>
-
-  {/* --- SELECTOR DE PROGRAMA --- */}
-  <div className={`${styles['form-group']} ${styles['half-width']}`} style={{ position: 'relative' }}>
-    <label>Programa Académico</label>
-    <div 
-      className={`${styles.customSelectHeader} ${!formData.facultad ? styles.disabledSelect : ''} ${errors.programa ? styles.error : ''}`} 
-      onClick={() => formData.facultad && toggleMenu('programa')}
-    >
-      {formData.programa ? (
-        <span style={{ color: '#333' }}>{formData.programa}</span>
-      ) : (
-        <span style={{ color: '#999' }}>
-          {formData.facultad ? "Seleccione su programa..." : "Primero elija facultad"}
-        </span>
-      )}
-      <span className={styles.selectArrow}>▾</span>
-    </div>
-
-    {openMenus.programa && formData.facultad && (
-      <div className={styles.customSelectDropdown}>
-        {programasPorFacultad[formData.facultad]?.map((prog) => (
-          <div 
-            key={prog} 
-            className={styles.dropdownOption} 
-            onMouseDown={(e) => {
-              e.preventDefault();
-              setFormData(prev => ({ ...prev, programa: prog }));
-              toggleMenu('programa');
-              setErrors(prev => ({ ...prev, programa: '' }));
-            }}
-          >
-            {prog}
-          </div>
-        ))}
-      </div>
-    )}
-    {errors.programa && <span className={styles['error-message']}>{errors.programa}</span>}
-  </div>
-</div>
 
           <div className={styles['form-row']}>
             <div className={`${styles['form-group']} ${styles['half-width']}`}>
               <label>Correo Institucional <span className={styles['info-icon']} title="Su correo será el mismo con el que iniciará sesión">i</span></label>
-              <input type="email" name="correo" value={formData.correo} onChange={handleChange} placeholder="ejemplo@ucundinamarca.edu.co" className={errors.correo ? styles.error : ''} disabled={loading} />
-              {errors.correo && <span className={styles['error-message']}>{errors.correo}</span>}
+              <input 
+                type="email" 
+                name="correo" 
+                value={formData.correo} 
+                onChange={handleChange} 
+                onBlur={handleBlur} /* 🟢 NUEVO */
+                placeholder="ejemplo@ucundinamarca.edu.co" 
+                className={errors.correo && touched.correo ? styles.error : ''} 
+                disabled={loading} 
+              />
+              {renderValidationMessage('correo')}
             </div>
             <div className={`${styles['form-group']} ${styles['half-width']}`}>
               <label>Número de Celular</label>
-              <input type="tel" name="celular" value={formData.celular} onChange={handleChange} placeholder="Celular..." className={errors.celular ? styles.error : ''} disabled={loading} />
-              {errors.celular && <span className={styles['error-message']}>{errors.celular}</span>}
+              <input 
+                type="tel" 
+                name="celular" 
+                value={formData.celular} 
+                onChange={handleChange} 
+                onBlur={handleBlur} /* 🟢 NUEVO */
+                placeholder="Celular..." 
+                className={errors.celular && touched.celular ? styles.error : ''} 
+                disabled={loading} 
+              />
+              {renderValidationMessage('celular')}
             </div>
           </div>
 
@@ -373,8 +415,9 @@ const isFormValid = () => {
                   name="contraseña" 
                   value={formData.contraseña} 
                   onChange={handleChange} 
+                  onBlur={handleBlur} /* 🟢 NUEVO */
                   placeholder="Mín. 8 caracteres..." 
-                  className={errors.contraseña ? styles.error : ''} 
+                  className={errors.contraseña && touched.contraseña ? styles.error : ''} 
                   disabled={loading} 
                 />
                 <button 
@@ -396,7 +439,7 @@ const isFormValid = () => {
                   )}
                 </button>
               </div>
-              {errors.contraseña && <span className={styles['error-message']}>{errors.contraseña}</span>}
+              {renderValidationMessage('contraseña')}
             </div>
 
             <div className={`${styles['form-group']} ${styles['half-width']}`}>
@@ -407,8 +450,9 @@ const isFormValid = () => {
                   name="confirmarContraseña" 
                   value={formData.confirmarContraseña} 
                   onChange={handleChange} 
+                  onBlur={handleBlur} /* 🟢 NUEVO */
                   placeholder="Repita su contraseña" 
-                  className={errors.confirmarContraseña ? styles.error : ''} 
+                  className={errors.confirmarContraseña && touched.confirmarContraseña ? styles.error : ''} 
                   disabled={loading} 
                 />
                 <button 
@@ -430,7 +474,7 @@ const isFormValid = () => {
                   )}
                 </button>
               </div>
-              {errors.confirmarContraseña && <span className={styles['error-message']}>{errors.confirmarContraseña}</span>}
+              {renderValidationMessage('confirmarContraseña')}
             </div>
           </div>
 
@@ -440,17 +484,16 @@ const isFormValid = () => {
               Regresar
             </button>
             <button 
-  type="submit" 
-  /* 🟢 Se deshabilita si el formulario no es válido o si está cargando */
-  disabled={loading || !isFormValid()} 
-  className={`
-    ${styles['udec-button']} 
-    ${styles['primary-button']} 
-    ${(!isFormValid() || loading) ? styles.disabledButton : ''}
-  `}
->
-  {loading ? 'Procesando...' : 'Crear Perfil'}
-</button>
+              type="submit" 
+              disabled={loading || !isFormValid()} 
+              className={`
+                ${styles['udec-button']} 
+                ${styles['primary-button']} 
+                ${(!isFormValid() || loading) ? styles.disabledButton : ''}
+              `}
+            >
+              {loading ? 'Procesando...' : 'Crear Perfil'}
+            </button>
           </div>
         </form>
 
@@ -458,14 +501,13 @@ const isFormValid = () => {
           <p>¿Ya tienes una cuenta? <a href="/" onClick={(e) => {e.preventDefault(); navigate('/')}} className={styles['login-link']}>Iniciar Sesión</a></p>
         </div>
       </div>
-      {/* 🟢 AQUÍ EXACTAMENTE DEBES PEGAR EL MODAL 🟢 */}
+      
       <ErrorModal 
         isOpen={showErrorModal} 
         onClose={() => setShowErrorModal(false)} 
         message="No se pudo completar el registro. Es posible que el correo electrónico o Cédula ya se encuentren registrados en nuestra base de datos."
       />
 
-      {/* 🟢 NUEVO: Modal de Éxito */}
       <SuccessModal 
         isOpen={showSuccessModal} 
         onClose={handleSuccessClose} 

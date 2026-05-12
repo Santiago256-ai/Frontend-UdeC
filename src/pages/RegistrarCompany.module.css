@@ -975,3 +975,23 @@
         stroke-dashoffset: 0;
     }
 }
+
+/* Agrega o reemplaza estas clases en tu RegistrarEgresado.module.css */
+
+.errorMessage {
+  color: #dc3545; /* Rojo sutil */
+  font-size: 0.80rem; /* Letra más pequeña */
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.successMessage {
+  color: #198754; /* Verde sutil */
+  font-size: 0.85rem; /* Letra más pequeña, igual al error */
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

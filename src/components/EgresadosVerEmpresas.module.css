@@ -1,0 +1,211 @@
+/* EgresadosVerEmpresas.module.css */
+
+.eveContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.eveLoader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Cabecera */
+.eveHeaderFixed {
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto 20px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+}
+
+.eveHeaderInfo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.eveIconWrapper {
+    background: rgba(0, 72, 43, 0.1);
+    color: #00482b;
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eveHeaderInfo h2 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+}
+
+.eveHeaderInfo p {
+    margin: 4px 0 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.eveSearchBox {
+    position: relative;
+    width: 100%;
+}
+
+.eveSearchIcon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.eveSearchBox input {
+    width: 100%;
+    padding: 12px 15px 12px 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s;
+    background: #f8fafc;
+}
+
+.eveSearchBox input:focus {
+    background: white;
+    border-color: #00482b;
+    box-shadow: 0 0 0 3px rgba(0, 72, 43, 0.1);
+}
+
+/* Feed Scrolleable */
+.eveFeedLayout {
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 40px;
+}
+
+/* Tarjetas (Estilo Post) */
+.eveFeedCard {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.eveFeedCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border-color: #e2e8f0;
+}
+
+.eveCardHeader {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.eveAvatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #00482b;
+    font-weight: 800;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+}
+
+.eveTitleGroup h3 {
+    margin: 0 0 2px 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.eveSector {
+    color: #0ea5e9;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.eveTagsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.eveTag {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #f8fafc;
+    color: #475569;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #f1f5f9;
+}
+
+.eveCardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px dashed #e2e8f0;
+    color: #00482b;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.eveCardFooter svg {
+    transition: transform 0.2s;
+}
+
+.eveFeedCard:hover .eveCardFooter svg {
+    transform: translateX(4px);
+}
+
+.eveEmptyState {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.eveEmptyState h3 {
+    margin: 10px 0 5px 0;
+    color: #475569;
+}

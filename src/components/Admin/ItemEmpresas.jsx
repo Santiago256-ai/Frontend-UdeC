@@ -327,21 +327,23 @@ const exportarPDF = () => {
                                         </button>
                                     </div>
                                 </td>
-                                <td className={styles.actions}>
-                                    <button 
-                                        className={styles.viewBtn} 
-                                        title="Ver detalles"
-                                        onClick={() => handleVerDetalles(e)}
-                                    >
-                                        <Icon name="eye" />
-                                    </button>
-                                    <button 
-                                        className={styles.deleteBtn} 
-                                        onClick={() => handleEliminar(e.id, e.nombre)}
-                                        title="Eliminar Empresa"
-                                    >
-                                        <Icon name="trash-can" />
-                                    </button>
+                                <td>
+                                    <div className={styles.actions}>
+                                        <button 
+                                            className={styles.viewBtn} 
+                                            title="Ver detalles"
+                                            onClick={() => handleVerDetalles(e)}
+                                        >
+                                            <Icon name="eye" />
+                                        </button>
+                                        <button 
+                                            className={styles.deleteBtn} 
+                                            onClick={() => handleEliminar(e.id, e.nombre)}
+                                            title="Eliminar Empresa"
+                                        >
+                                            <Icon name="trash-can" />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))
@@ -360,13 +362,15 @@ const exportarPDF = () => {
         </div>
 
         {/* 1. 🟢 MODAL DE DETALLES (Esencial agregarlo aquí) */}
-        <ModalDetalleEmpresa 
+<ModalDetalleEmpresa 
             isOpen={isModalDetalleOpen}
             onClose={() => {
                 setIsModalDetalleOpen(false);
                 setEmpresaSeleccionada(null);
             }}
             empresa={empresaSeleccionada}
+            API_URL={API_URL}        
+            onUpdate={cargarEmpresas} 
         />
 
         {/* 2. 🔴 MODAL DE ELIMINACIÓN */}
