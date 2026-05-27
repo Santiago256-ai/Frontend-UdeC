@@ -2509,3 +2509,81 @@
     70% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(243, 146, 0, 0); }
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 146, 0, 0); }
 }
+
+/* --- MODAL CAMBIOS SIN GUARDAR (Efecto Glassmorphism) --- */
+.modal-glass-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-glass-content {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 72, 43, 0.15);
+    border-radius: 12px;
+    padding: 28px;
+    max-width: 420px;
+    text-align: center;
+    animation: scale-up 0.3s ease-out;
+}
+
+.modal-glass-content h3 {
+    color: #00482b;
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.modal-glass-content p {
+    color: #4a5568;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.modal-glass-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.btn-glass-volver {
+    background: #00482b;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-glass-volver:hover {
+    background: #003620;
+}
+
+.btn-glass-salir {
+    background: transparent;
+    color: #e53e3e;
+    border: 1px solid #e53e3e;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-glass-salir:hover {
+    background: rgba(229, 62, 62, 0.1);
+}

@@ -84,6 +84,8 @@ const [vistaPreviaEmpresa, setVistaPreviaEmpresa] = useState('vacantes');
     // Agrega esto junto a tus otros estados (como el de usuario o vacantes)
 const [showLogoutModal, setShowLogoutModal] = useState(false);
 const [tieneNotifNuevas, setTieneNotifNuevas] = useState(false);
+const [hayCambiosCV, setHayCambiosCV] = useState(false);
+const [modalAlerta, setModalAlerta] = useState({ mostrar: false, destino: null });
 
     // 2. EFECTOS
     useEffect(() => {
@@ -311,12 +313,18 @@ const handlePostulacion = async () => {
     };
 
     // --- AGREGA ESTO ANTES DE dataFiltrada ---
-const navegarAVista = (config) => {
+const navegarAVista = (config, ignorarCambios = false) => {
     // Determinamos el nombre de la vista (si es un objeto o un string)
     const nombreVista = typeof config === 'object' ? config.vista : config;
 
+    // 👈 2. LÓGICA DE INTERCEPCIÓN AQUÍ
+    // Si NO estamos ignorando los cambios, estamos en CV, hay cambios, y queremos ir a otra parte... bloqueamos.
+    if (!ignorarCambios && hayCambiosCV && vistaActiva === 'crear-cv' && nombreVista !== 'crear-cv') {
+        setModalAlerta({ mostrar: true, destino: config });
+        return; // Detenemos la ejecución para que no navegue
+    }
+
     // --- NUEVO: LIMPIEZA DEL PUNTO NARANJA ---
-    // Si la vista a la que vamos es notificaciones, quitamos el aviso visual
     if (nombreVista === 'notificaciones') {
         setTieneNotifNuevas(false);
     }
@@ -359,6 +367,19 @@ const yaPostulado = selectedVacante?.postulaciones?.some(p => p.egresadoId === u
     const inicialNombre = nombres.trim()[0] || "";
     const inicialApellido = apellidos ? apellidos.trim()[0] : "";
     return (inicialNombre + inicialApellido).toUpperCase();
+};
+
+const formatearSalarioVisual = (valor) => {
+    if (!valor) return 'A convenir';
+    
+    // 1. Quitamos cualquier punto, coma o letra que venga de la BD
+    const numeroLimpio = valor.toString().replace(/\D/g, "");
+    
+    // 2. Si no quedó ningún número (ej. escribieron "A convenir" manualmente), devolvemos el texto original
+    if (!numeroLimpio) return valor; 
+    
+    // 3. Volvemos a formatear con los puntos de mil exactos
+    return numeroLimpio.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
 return (
@@ -583,13 +604,11 @@ return (
     marginTop: '12px',
     flexWrap: 'nowrap' 
 }}>
-    {/* 1. SALARIO */}
- <div className="badge-salary" title="Salario mensual ofrecido">
+{/* 1. SALARIO */}
+<div className="badge-salary" title="Salario mensual ofrecido">
     <DollarSign size={12} strokeWidth={2.5} />
     <span style={{ fontWeight: '700' }}>
-        {v.salario && !isNaN(parseFloat(v.salario)) 
-            ? parseFloat(v.salario).toLocaleString('es-CO') 
-            : 'A convenir'}
+        {v.salario ? formatearSalarioVisual(v.salario) : 'A convenir'}
     </span>
 </div>
 
@@ -755,9 +774,11 @@ return (
     </span>
     
     <span className="meta-tag-badge badge-slots">
-        <DollarSign size={14} /> 
-        <b>SALARIO:</b> {selectedVacante.tipoSalario === 'A convenir' ? 'A convenir' : `$${parseFloat(selectedVacante.salario).toLocaleString('es-CO')}`}
-    </span>
+    <DollarSign size={14} /> 
+    <b>SALARIO:</b> {selectedVacante.tipoSalario === 'A convenir' || !selectedVacante.salario 
+        ? 'A convenir' 
+        : `$ ${formatearSalarioVisual(selectedVacante.salario)}`}
+</span>
     
     <span className="meta-tag-badge badge-published">
         <Clock size={14} /> <b>Jornada:</b> {selectedVacante.jornada || 'No definida'}
@@ -813,7 +834,15 @@ return (
             </div>
         )}
 
-                    {vistaActiva === 'crear-cv' && <div className="full-view"><CrearCV isInline={true} setVistaActiva={setVistaActiva} /></div>}
+                    {vistaActiva === 'crear-cv' && (
+    <div className="full-view">
+        <CrearCV 
+            isInline={true} 
+            setVistaActiva={setVistaActiva} 
+            setHayCambios={setHayCambiosCV} // 👈 3. PROP AÑADIDA
+        />
+    </div>
+)}
 
 {/* NUEVA VISTA: Perfil de la Empresa */}
 {vistaActiva === 'ver-perfil-empresa' && empresaSeleccionadaId && (
@@ -898,6 +927,34 @@ return (
         </div>
     </div>
 )}
+{modalAlerta.mostrar && (
+                <div className="modal-glass-overlay">
+                    <div className="modal-glass-content">
+                        <h3>Cambios sin guardar</h3>
+                        <p>Tienes modificaciones en tu Hoja de Vida que no han sido guardadas. Si cambias de sección ahora, perderás tu progreso.</p>
+                        <div className="modal-glass-actions">
+                            <button 
+                                className="btn-glass-volver" 
+                                onClick={() => setModalAlerta({ mostrar: false, destino: null })}
+                            >
+                                Quedarme aquí
+                            </button>
+                            <button 
+    className="btn-glass-salir" 
+    onClick={() => {
+        setHayCambiosCV(false); // Limpiamos la alerta
+        setModalAlerta({ mostrar: false, destino: null }); // Cerramos el modal
+        
+        // 👈 3. Le pasamos 'true' como segundo parámetro para forzar la salida
+        navegarAVista(modalAlerta.destino, true); 
+    }}
+>
+    Salir sin guardar
+</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

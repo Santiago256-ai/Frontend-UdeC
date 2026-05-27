@@ -842,6 +842,15 @@ useEffect(() => {
         return tempDiv.innerHTML;
     };
 const hayFiltrosActivos = searchTerm !== "" || fechaDesde !== "" || fechaHasta !== "" || estadosSeleccionados.length > 0;
+// Función para formatear el salario con puntos (formato Colombia)
+const formatearMoneda = (valor) => {
+    if (!valor) return "";
+    // 1. Quitamos todo lo que no sea número
+    const soloNumeros = valor.toString().replace(/\D/g, "");
+    // 2. Agregamos el punto cada 3 dígitos
+    return soloNumeros.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
     // ✅ LA MAGIA OCURRE AQUÍ: Ponemos el validador de carga DESPUÉS de todos los Hooks y funciones.
     if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
 
@@ -1255,16 +1264,18 @@ const hayFiltrosActivos = searchTerm !== "" || fechaDesde !== "" || fechaHasta !
 
             {/* ... resto del contenido de la tarjeta ... */}
             <div className="pro-card-header-full">
-                <div className="pro-icon-container">
-                    <Briefcase size={20} />
-                </div>
-                <h3 className="pro-vacante-title">{v.titulo}</h3>
-                
-                <div className="pro-postulantes-badge-mini">
-                    <Users size={14} />
-                    <span>{postuladosActuales}</span>
-                </div>
-            </div>
+    <div className="pro-icon-container">
+        <Briefcase size={20} />
+    </div>
+    <h3 className="pro-vacante-title">{v.titulo}</h3>
+    
+    <div className="pro-postulantes-badge-mini" title={`Postulaciones: ${postuladosActuales} de ${limite}`}>
+        <Users size={14} />
+        <span style={{ fontWeight: '700' }}>
+            {postuladosActuales} / {limite > 0 ? limite : "∞"}
+        </span>
+    </div>
+</div>
 
             <div className="pro-card-meta-row">
                 <span className="meta-pill-simple"><MapPin size={14} /> {v.ubicacion}</span>
@@ -1577,7 +1588,14 @@ const hayFiltrosActivos = searchTerm !== "" || fechaDesde !== "" || fechaHasta !
                                 <label>Salario (Opcional)</label>
                                 <div className="input-with-icon">
                                     <span style={{paddingLeft: '10px'}}>$</span>
-                                    <input type="text" name="salario" placeholder="2.500.000" value={nuevaVacante.salario} onChange={(e) => setNuevaVacante({ ...nuevaVacante, salario: e.target.value })} onBlur={handleVacanteBlur} />
+                                 <input 
+    type="text" 
+    name="salario" 
+    placeholder="2.500.000" 
+    value={nuevaVacante.salario} 
+    onChange={(e) => setNuevaVacante({ ...nuevaVacante, salario: formatearMoneda(e.target.value) })} 
+    onBlur={handleVacanteBlur} 
+/>
                                 </div>
                             </div>
 
@@ -1852,7 +1870,13 @@ const hayFiltrosActivos = searchTerm !== "" || fechaDesde !== "" || fechaHasta !
                                 <label>Monto</label>
                                 <div className="input-with-icon">
                                     <span style={{paddingLeft: '10px'}}>$</span>
-                                    <input type="text" name="salario" value={editandoVacante.salario} onChange={(e) => setEditandoVacante({ ...editandoVacante, salario: e.target.value })} onBlur={handleVacanteBlur} />
+                                 <input 
+    type="text" 
+    name="salario" 
+    value={editandoVacante.salario} 
+    onChange={(e) => setEditandoVacante({ ...editandoVacante, salario: formatearMoneda(e.target.value) })} 
+    onBlur={handleVacanteBlur} 
+/>
                                 </div>
                             </div>
 

@@ -477,3 +477,138 @@
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
+
+/* Checkbox personalizado */
+.custom-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #ef4444; /* Color rojo o el de tu marca */
+}
+
+/* Barra de acciones masivas */
+.bulk-actions-bar {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.bulk-text {
+    color: #991b1b;
+    font-size: 0.95rem;
+}
+
+.bulk-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-bulk-cancel {
+    background: transparent;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-bulk-cancel:hover {
+    background-color: #fee2e2;
+}
+
+.btn-bulk-delete {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-bulk-delete:hover {
+    background-color: #dc2626;
+}
+
+/* --- ESTADO VACÍO PREMIUM --- */
+
+/* Contenedor principal de la celda */
+.trash-empty-premium {
+    text-align: center;
+    padding: 80px 20px !important;
+    background-color: #f8fafc; /* Un gris muy sutil y elegante */
+    border-bottom: none !important;
+}
+
+/* Contenedor del contenido con animación de entrada */
+.empty-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUpIn 0.6s ease-out forwards;
+}
+
+/* Círculo de fondo para el ícono */
+.empty-icon-wrapper {
+    background: white;
+    padding: 24px;
+    border-radius: 50%;
+    /* Cambiamos el gris por el verde institucional */
+    color: #005E2F; 
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    border: 2px solid #005E2F;
+}
+
+/* Animación de flotación suave para el ícono */
+.floating-icon {
+    animation: floatIcon 3.5s ease-in-out infinite;
+}
+
+/* Textos pulidos */
+.empty-state-content h3 {
+    margin: 0 0 8px 0;
+    color: #334155;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.empty-state-content p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.95rem;
+    max-width: 300px;
+    line-height: 1.5;
+}
+
+/* --- KEYFRAMES (Animaciones) --- */
+
+@keyframes floatIcon {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes fadeUpIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(15px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}

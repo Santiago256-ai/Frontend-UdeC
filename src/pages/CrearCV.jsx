@@ -1,15 +1,103 @@
 import React, { useState, useEffect } from 'react';
 import { 
     Save, Eye, ArrowLeft, Phone, Mail, MapPin, Plus, Trash2, 
-    Users, Briefcase, GraduationCap, User, BrainCircuit, Globe 
+    Users, Briefcase, GraduationCap, User, BrainCircuit, Globe, CheckCircle, XCircle
 } from 'lucide-react';
 import API from "../services/api";
 import './CrearCV.css';
 
-export default function CrearCV({ isInline, setVistaActiva }) {
+export default function CrearCV({ isInline, setVistaActiva, setHayCambios }) {
     const [isPreview, setIsPreview] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [originalData, setOriginalData] = useState(null);
+    const [modalNotificacion, setModalNotificacion] = useState({ mostrar: false, tipo: '', mensaje: '' });
+
+    const renderModalNotificacion = () => {
+        if (!modalNotificacion.mostrar) return null;
+        
+        const esExito = modalNotificacion.tipo === 'exito';
+        
+        return (
+            <div className="modal-glass-overlay" style={{ zIndex: 10005 }}>
+                <div className="modal-glass-content scale-up" style={{ padding: '35px 25px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+                        {esExito ? (
+                            <CheckCircle size={60} color="#00b368" strokeWidth={1.5} />
+                        ) : (
+                            <XCircle size={60} color="#e53e3e" strokeWidth={1.5} />
+                        )}
+                    </div>
+                    
+                    <h3 style={{ color: esExito ? '#00482b' : '#e53e3e', marginTop: 0, fontSize: '22px', textAlign: 'center' }}>
+                        {esExito ? '¡Excelente!' : 'Ha ocurrido un error'}
+                    </h3>
+                    
+                    <p style={{ fontSize: '15px', color: '#4a5568', margin: '15px 0 25px 0', textAlign: 'center' }}>
+                        {modalNotificacion.mensaje}
+                    </p>
+                    
+                    {/* Renderizado condicional de botones */}
+                    {esExito ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <button 
+                                className="btn-primary" 
+                                onClick={() => {
+                                    setModalNotificacion({ mostrar: false, tipo: '', mensaje: '' });
+                                    // Cambia 'vacantes' por el nombre exacto de la vista en tu Dashboard
+                                    if (setVistaActiva) setVistaActiva('vacantes'); 
+                                }}
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '12px', 
+                                    background: '#00482b',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Ir a Vacantes Disponibles
+                            </button>
+                            <button 
+                                className="btn-secondary" 
+                                onClick={() => setModalNotificacion({ mostrar: false, tipo: '', mensaje: '' })}
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '12px', 
+                                    background: 'transparent',
+                                    color: '#00482b',
+                                    border: '1px solid #00482b',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Continuar Editando Hoja de Vida
+                            </button>
+                        </div>
+                    ) : (
+                        <button 
+                            className="btn-primary" 
+                            onClick={() => setModalNotificacion({ mostrar: false, tipo: '', mensaje: '' })}
+                            style={{ 
+                                width: '100%', 
+                                padding: '12px', 
+                                background: '#e53e3e',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            Aceptar
+                        </button>
+                    )}
+                </div>
+            </div>
+        );
+    };
 
     // Obtener el usuario logueado del localStorage
     const usuarioLogueado = JSON.parse(localStorage.getItem('usuario'));
@@ -170,50 +258,76 @@ const formatearMesAno = (fechaISO, actualmente) => {
     };
 
     // --- LOGICA DE GUARDADO ---
+// --- LOGICA DE GUARDADO ---
     const handleGuardar = async () => {
-    if (!usuarioLogueado?.id) {
-        alert("Error: Usuario no identificado.");
-        return;
-    }
+        if (!usuarioLogueado?.id) {
+            setModalNotificacion({ mostrar: true, tipo: 'error', mensaje: 'Error: Usuario no identificado.' });
+            return;
+        }
 
-    setIsLoading(true);
-    try {
-        // 🛑 FILTRO DE SEGURIDAD: Solo enviamos lo que tiene contenido real
-const dataParaEnviar = {
-    ...cvData,
-    experiencia: cvData.experiencia.filter(e => e.cargo.trim() !== ""),
-    educacion: cvData.educacion.filter(e => e.titulo.trim() !== ""),
-    referencias: cvData.referencias.filter(r => r.nombre.trim() !== ""),
-    aptitudes: cvData.aptitudes.filter(a => a.aptitud.trim() !== ""),
-    idiomas: cvData.idiomas.filter(i => i.idioma.trim() !== ""),
-    habilidades: cvData.habilidades.filter(h => h.nombre.trim() !== ""), // 👈 Añade esta línea
-};
+        setIsLoading(true);
+        try {
+            const dataParaEnviar = {
+                ...cvData,
+                experiencia: cvData.experiencia.filter(e => e.cargo.trim() !== ""),
+                educacion: cvData.educacion.filter(e => e.titulo.trim() !== ""),
+                referencias: cvData.referencias.filter(r => r.nombre.trim() !== ""),
+                aptitudes: cvData.aptitudes.filter(a => a.aptitud.trim() !== ""),
+                idiomas: cvData.idiomas.filter(i => i.idioma.trim() !== ""),
+                habilidades: cvData.habilidades.filter(h => h.nombre.trim() !== ""), 
+            };
 
-        // Ahora limpiamos los IDs (como hablamos antes)
-        const limpiar = (arr) => arr.map(({ id, perfilId, perfilCVId, ...resto }) => resto);
-        
-const finalData = {
-    ...dataParaEnviar,
-    experiencia: limpiar(dataParaEnviar.experiencia),
-    educacion: limpiar(dataParaEnviar.educacion),
-    referencias: limpiar(dataParaEnviar.referencias),
-    aptitudes: limpiar(dataParaEnviar.aptitudes),
-    idiomas: limpiar(dataParaEnviar.idiomas),
-    habilidades: limpiar(dataParaEnviar.habilidades), // 👈 Añade esta línea
-};
+            const limpiar = (arr) => arr.map(({ id, perfilId, perfilCVId, ...resto }) => resto);
+            
+            const finalData = {
+                ...dataParaEnviar,
+                experiencia: limpiar(dataParaEnviar.experiencia),
+                educacion: limpiar(dataParaEnviar.educacion),
+                referencias: limpiar(dataParaEnviar.referencias),
+                aptitudes: limpiar(dataParaEnviar.aptitudes),
+                idiomas: limpiar(dataParaEnviar.idiomas),
+                habilidades: limpiar(dataParaEnviar.habilidades), 
+            };
 
-        await API.post(`/cvs/${usuarioLogueado.id}`, finalData);
-        alert("¡Hoja de vida guardada exitosamente!");
-        setOriginalData(cvData);
-    } catch (error) {
-        console.error("Error al guardar CV:", error);
-        alert("Hubo un error al guardar la hoja de vida.");
-    } finally {
-        setIsLoading(false);
-    }
-};
+            await API.post(`/cvs/${usuarioLogueado.id}`, finalData);
+            
+            // 👈 REEMPLAZO DEL ALERT DE ÉXITO
+            setOriginalData(cvData);
+            setModalNotificacion({ mostrar: true, tipo: 'exito', mensaje: 'Tu hoja de vida ha sido actualizada y guardada correctamente en el sistema.' });
+            
+        } catch (error) {
+            console.error("Error al guardar CV:", error);
+            // 👈 REEMPLAZO DEL ALERT DE ERROR
+            setModalNotificacion({ mostrar: true, tipo: 'error', mensaje: 'Hubo un problema de conexión. Por favor, intenta guardar nuevamente.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
 const hayCambios = JSON.stringify(cvData) !== JSON.stringify(originalData);
+// 🛑 1. Evitar que el usuario cierre la pestaña o el navegador por accidente
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (hayCambios) {
+                e.preventDefault();
+                e.returnValue = ''; // Requerido por la mayoría de los navegadores modernos
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [hayCambios]);
+
+    // 🛑 2. Comunicar al Layout/Dashboard principal que hay cambios sin guardar
+    useEffect(() => {
+        if (setHayCambios) {
+            setHayCambios(hayCambios);
+        }
+        // Limpiamos el estado si el componente se desmonta por alguna razón
+        return () => {
+            if (setHayCambios) setHayCambios(false);
+        };
+    }, [hayCambios, setHayCambios]);
     // --- VISTA DE PREVISUALIZACIÓN ---
     if (isPreview) {
         return (
@@ -471,6 +585,7 @@ const hayCambios = JSON.stringify(cvData) !== JSON.stringify(originalData);
                         </main>
                     </div>
                 </div>
+                {renderModalNotificacion()}
             </div>
         );
     }
@@ -900,6 +1015,7 @@ const hayCambios = JSON.stringify(cvData) !== JSON.stringify(originalData);
 </button>
                 </div>
             </div>
+            {renderModalNotificacion()}
         </div>
     );
 }

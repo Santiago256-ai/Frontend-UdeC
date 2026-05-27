@@ -14,8 +14,16 @@ export default function VacantesEliminadas({ empresaId }) {
     const [postuladosEnDetalle, setPostuladosEnDetalle] = useState([]);
     const [loadingDetalle, setLoadingDetalle] = useState(false);
     
-    // Estado para el nuevo modal de advertencia crítica
-    const [confirmarHardDelete, setConfirmarHardDelete] = useState({ visible: false, id: null, titulo: "" });
+    // Estado para controlar los checkboxes
+    const [seleccionadas, setSeleccionadas] = useState([]);
+    
+    // Estado para el modal de advertencia crítica (soporta una o varias)
+    const [confirmarHardDelete, setConfirmarHardDelete] = useState({ 
+        visible: false, 
+        ids: [], 
+        titulo: "",
+        esMasivo: false 
+    });
 
     // 1. Cargar vacantes eliminadas
     const cargarEliminadas = useCallback(async () => {
@@ -67,26 +75,70 @@ export default function VacantesEliminadas({ empresaId }) {
         }
     };
 
-    // 4. Lógica del Nuevo Modal de Eliminación Definitiva
+    // 4. Lógica de Checkboxes
+    const toggleSelectRow = (e, id) => {
+        e.stopPropagation(); 
+        setSeleccionadas(prev => 
+            prev.includes(id) 
+                ? prev.filter(item => item !== id) 
+                : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = (e) => {
+        if (e.target.checked) {
+            const todosLosIds = eliminadas.map(v => v.id);
+            setSeleccionadas(todosLosIds);
+        } else {
+            setSeleccionadas([]);
+        }
+    };
+
+    // 5. Lógica del Modal de Eliminación Definitiva
     const prepararEliminacionDefinitiva = (e, vacante) => {
         e.stopPropagation();
         setConfirmarHardDelete({
             visible: true,
-            id: vacante.id,
-            titulo: vacante.titulo
+            ids: [vacante.id],
+            titulo: vacante.titulo,
+            esMasivo: false
+        });
+    };
+
+    const prepararEliminacionMasiva = () => {
+        setConfirmarHardDelete({
+            visible: true,
+            ids: seleccionadas,
+            titulo: `${seleccionadas.length} vacantes seleccionadas`,
+            esMasivo: true
         });
     };
 
     const ejecutarHardDelete = async () => {
         try {
-            await API.delete(`/vacantes/${confirmarHardDelete.id}/definitivo`);
-            toast.success("Vacante eliminada permanentemente");
-            cargarEliminadas();
-            if (detalleVacanteId === confirmarHardDelete.id) setDetalleVacanteId(null);
+            // Ejecutamos todas las peticiones de eliminación en paralelo
+            await Promise.all(
+                confirmarHardDelete.ids.map(id => 
+                    API.delete(`/vacantes/${id}/definitivo`)
+                )
+            );
+            
+            toast.success(confirmarHardDelete.esMasivo 
+                ? "Vacantes eliminadas permanentemente" 
+                : "Vacante eliminada permanentemente"
+            );
+            
+            setSeleccionadas([]); // Limpiamos selección
+            cargarEliminadas(); // Recargamos tabla
+            
+            // Si la vacante que estaba expandida se eliminó, la cerramos
+            if (confirmarHardDelete.ids.includes(detalleVacanteId)) {
+                setDetalleVacanteId(null);
+            }
         } catch (err) {
-            toast.error("Error al eliminar definitivamente");
+            toast.error("Error al eliminar las vacantes");
         } finally {
-            setConfirmarHardDelete({ visible: false, id: null, titulo: "" });
+            setConfirmarHardDelete({ visible: false, ids: [], titulo: "", esMasivo: false });
         }
     };
 
@@ -104,11 +156,38 @@ export default function VacantesEliminadas({ empresaId }) {
                 </div>
             </header>
 
+            {/* BARRA DE ACCIONES MASIVAS */}
+            {seleccionadas.length > 0 && (
+                <div className="bulk-actions-bar fade-in">
+                    <span className="bulk-text">
+                        <strong>{seleccionadas.length}</strong> vacante(s) seleccionada(s)
+                    </span>
+                    <div className="bulk-buttons">
+                        <button className="btn-bulk-cancel" onClick={() => setSeleccionadas([])}>
+                            Cancelar
+                        </button>
+                        <button className="btn-bulk-delete" onClick={prepararEliminacionMasiva}>
+                            <Trash2 size={16} /> Eliminar selección
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="trash-full-width-container">
                 <div className="trash-card-premium">
                     <table className="trash-custom-table">
                         <thead>
                             <tr>
+                                <th style={{ width: '40px', textAlign: 'center' }}>
+                                    {eliminadas.length > 0 && (
+    <input 
+        type="checkbox" 
+        className="custom-checkbox"
+        onChange={toggleSelectAll}
+        checked={seleccionadas.length === eliminadas.length}
+    />
+)}
+                                </th>
                                 <th>VACANTE</th>
                                 <th style={{ textAlign: 'center' }}>ELIMINACIÓN</th>
                                 <th style={{ textAlign: 'center' }}>POSTULADOS</th>
@@ -117,19 +196,33 @@ export default function VacantesEliminadas({ empresaId }) {
                         </thead>
                         <tbody>
                             {eliminadas.length === 0 ? (
-                                <tr>
-                                    <td colSpan="4" className="trash-empty">
-                                        <FileSearch size={48} style={{ opacity: 0.2, marginBottom: '10px' }} />
-                                        <p>No hay vacantes en la papelera</p>
-                                    </td>
-                                </tr>
-                            ) : (
+    <tr>
+        <td colSpan="5" className="trash-empty-premium">
+            <div className="empty-state-content">
+                <div className="empty-icon-wrapper">
+                    {/* Puedes usar Trash2, FileSearch o Archive. Aquí uso FileSearch */}
+                    <FileSearch size={48} className="floating-icon" strokeWidth={1.5} />
+                </div>
+                <h3>Papelera Limpia</h3>
+                <p>Actualmente no hay vacantes eliminadas en el historial.</p>
+            </div>
+        </td>
+    </tr>
+) : (
                                 eliminadas.map((v) => (
                                     <React.Fragment key={v.id}>
                                         <tr 
                                             className={`row-main ${detalleVacanteId === v.id ? 'is-expanded' : ''}`}
                                             onClick={() => toggleDetalle(v)}
                                         >
+                                            <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                                                <input 
+                                                    type="checkbox" 
+                                                    className="custom-checkbox"
+                                                    checked={seleccionadas.includes(v.id)}
+                                                    onChange={(e) => toggleSelectRow(e, v.id)}
+                                                />
+                                            </td>
                                             <td className="td-titulo">
                                                 <div className="vacante-info-main">
                                                     <strong>{v.titulo}</strong>
@@ -171,7 +264,8 @@ export default function VacantesEliminadas({ empresaId }) {
 
                                         {detalleVacanteId === v.id && (
                                             <tr className="row-detail-expanded">
-                                                <td colSpan="4">
+                                                {/* Cambiamos colSpan a 5 */}
+                                                <td colSpan="5">
                                                     <div className="expanded-content-wrapper fade-in">
                                                         <div className="expanded-header">
                                                             <div className="status-dot"></div>
@@ -187,17 +281,15 @@ export default function VacantesEliminadas({ empresaId }) {
                                                                             {p.egresado?.nombres?.charAt(0)}{p.egresado?.apellidos?.charAt(0)}
                                                                         </div>
                                                                         <div className="p-info-main">
-    <p className="p-name">{p.egresado?.nombres} {p.egresado?.apellidos}</p>
-    
-    {/* Esta versión normaliza el texto para que coincida con tus clases de CSS */}
-    <span className={`p-tag ${p.estado?.toLowerCase()
-        .normalize("NFD")               // Separa la letra de la tilde
-        .replace(/[\u0300-\u036f]/g, "") // Elimina la tilde
-        .replace(/\s+/g, '-')            // Cambia espacios por guiones
-    }`}>
-        {p.estado}
-    </span>
-</div>
+                                                                            <p className="p-name">{p.egresado?.nombres} {p.egresado?.apellidos}</p>
+                                                                            <span className={`p-tag ${p.estado?.toLowerCase()
+                                                                                .normalize("NFD")               
+                                                                                .replace(/[\u0300-\u036f]/g, "") 
+                                                                                .replace(/\s+/g, '-')            
+                                                                            }`}>
+                                                                                {p.estado}
+                                                                            </span>
+                                                                        </div>
                                                                         <div className="p-contact"><User size={14} /></div>
                                                                     </div>
                                                                 ))
@@ -230,8 +322,11 @@ export default function VacantesEliminadas({ empresaId }) {
                         <h3 style={{ color: '#991b1b', textAlign: 'center' }}>¿Eliminar permanentemente?</h3>
                         <div className="hard-delete-warning-box">
                             <p style={{ textAlign: 'center' }}>
-                                Estás a punto de borrar definitivamente la vacante: <br />
-                                <strong>"{confirmarHardDelete.titulo}"</strong>
+                                {confirmarHardDelete.esMasivo 
+                                    ? `Estás a punto de borrar definitivamente las ${confirmarHardDelete.ids.length} vacantes seleccionadas.` 
+                                    : `Estás a punto de borrar definitivamente la vacante: `
+                                }
+                                {!confirmarHardDelete.esMasivo && <><br /><strong>"{confirmarHardDelete.titulo}"</strong></>}
                             </p>
                             <ul className="warning-list">
                                 <li>Se borrarán todas las postulaciones asociadas.</li>
@@ -240,7 +335,7 @@ export default function VacantesEliminadas({ empresaId }) {
                             </ul>
                         </div>
                         <div className="modal-actions">
-                            <button className="btn-cancel" onClick={() => setConfirmarHardDelete({ visible: false, id: null, titulo: "" })}>
+                            <button className="btn-cancel" onClick={() => setConfirmarHardDelete({ visible: false, ids: [], titulo: "", esMasivo: false })}>
                                 No, mantener registro
                             </button>
                             <button className="btn-confirm btn-hard-delete-danger" onClick={ejecutarHardDelete}>
