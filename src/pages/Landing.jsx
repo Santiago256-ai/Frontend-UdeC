@@ -233,7 +233,7 @@ const handleRequestReset = async (e) => {
       className="udec-green-btn register-big-btn"
       onClick={() => navigate('/registro-egresado')} // Redirección a Estudiante
     >
-      SOY EGRESADO
+      SOY GRADUADO
     </button>
     
     <button 

@@ -256,7 +256,7 @@ export default function RegistrarEgresado() {
           </div>
 
           <div className={styles['header-bottom-green']}>
-            <h1 className={styles['register-title']}>Registro de Egresados</h1>
+            <h1 className={styles['register-title']}>Registro de Graduados</h1>
             <p className={styles['register-subtitle']}>Impulsa tu carrera profesional conectando hoy mismo con las mejores ofertas laborales.</p>
           </div>
         </div>

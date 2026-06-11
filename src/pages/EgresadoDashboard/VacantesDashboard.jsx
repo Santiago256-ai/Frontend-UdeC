@@ -88,6 +88,26 @@ const [hayCambiosCV, setHayCambiosCV] = useState(false);
 const [modalAlerta, setModalAlerta] = useState({ mostrar: false, destino: null });
 
     // 2. EFECTOS
+
+    // 🟢 NUEVO: Efecto para atrapar el ID desde el correo, abrir "Mis Solicitudes" y limpiar la URL
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const idPostulacionResaltar = queryParams.get('resaltar');
+
+        if (idPostulacionResaltar) {
+            console.log("🔥 Pista detectada desde el correo. Redirigiendo a solicitudes ID:", idPostulacionResaltar);
+            
+            // 1. Cambiamos la vista a Mis Solicitudes
+            setVistaActiva('solicitudes');
+            
+            // 2. Encendemos el borde naranja
+            setResaltarPostulacionId(parseInt(idPostulacionResaltar));
+
+            // 3. Limpiamos la URL silenciosamente para que quede elegante
+            navigate('/vacantes-dashboard', { replace: true });
+        }
+    }, [location.search, navigate]); // <-- Agregamos navigate a las dependencias
+
     useEffect(() => {
         if (!usuario || !usuario.id) {
             navigate('/'); // Cámbialo a '/' para que si falla el login, vuelvan a la Landing profesional
@@ -455,7 +475,7 @@ return (
                         <div className="user-profile-info" style={{ position: 'relative' }}>
                             <div className="user-details">
                                 <span className="user-full-name">{usuario?.nombres} {usuario?.apellidos}</span>
-                                <span className="user-career">Egresado - {usuario?.programa || "UdeC"}</span>
+                                <span className="user-career">Graduado - {usuario?.programa || "UdeC"}</span>
                             </div>
                             <div className="vdp-avatar-container">
                                 <div className="user-avatar-initials" onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
