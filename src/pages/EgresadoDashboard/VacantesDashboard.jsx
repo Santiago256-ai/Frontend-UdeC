@@ -105,9 +105,12 @@ const [modalAlerta, setModalAlerta] = useState({ mostrar: false, destino: null }
         } 
         // Caso B: Si viene de un correo de un mensaje nuevo de chat
         else if (chatVacanteId) {
+            // 🚨 SOLUCIÓN: Si las vacantes aún no han cargado de la BD, detenemos la ejecución 
+            // y esperamos al siguiente renderizado (cuando ya existan).
+            if (vacantes.length === 0) return; 
+
             console.log("💬 Pista de chat detectada. Abriendo bandeja de mensajería para vacante ID:", chatVacanteId);
             
-            // Buscamos si la vacante ya está en memoria para rescatar sus datos legibles
             const vComp = vacantes.find(v => v.id === parseInt(chatVacanteId));
             
             setChatActivo({
@@ -115,13 +118,10 @@ const [modalAlerta, setModalAlerta] = useState({ mostrar: false, destino: null }
                 empresaId: vComp?.empresaId || null,
                 titulo: vComp?.titulo || "Vacante",
                 nombreEmpresa: vComp?.empresa?.nombre || "Empresa Aliada",
-                resaltarMensajeId: chatMensajeId ? parseInt(chatMensajeId) : null // Para focalizar el texto si lo deseas
+                resaltarMensajeId: chatMensajeId ? parseInt(chatMensajeId) : null
             });
             
-            // Movemos la interfaz a la sección de Chats
             setVistaActiva('mensajes');
-            
-            // Limpiamos la URL para mantener el diseño impecable
             navigate('/vacantes-dashboard', { replace: true });
         }
     }, [location.search, navigate, vacantes]); // Añadimos 'vacantes' para asegurar el match relacional
