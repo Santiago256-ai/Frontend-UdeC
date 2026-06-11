@@ -87,26 +87,44 @@ const [tieneNotifNuevas, setTieneNotifNuevas] = useState(false);
 const [hayCambiosCV, setHayCambiosCV] = useState(false);
 const [modalAlerta, setModalAlerta] = useState({ mostrar: false, destino: null });
 
-    // 2. EFECTOS
+// 2. EFECTOS
 
-    // 🟢 NUEVO: Efecto para atrapar el ID desde el correo, abrir "Mis Solicitudes" y limpiar la URL
+    // 🟢 ACTUALIZADO: Capturador universal desde correos (Postulaciones o Mensajes) con limpieza de URL
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const idPostulacionResaltar = queryParams.get('resaltar');
+        const chatVacanteId = queryParams.get('chatVacanteId');
+        const chatMensajeId = queryParams.get('chatMensajeId');
 
+        // Caso A: Si viene de un correo de cambio de estado
         if (idPostulacionResaltar) {
             console.log("🔥 Pista detectada desde el correo. Redirigiendo a solicitudes ID:", idPostulacionResaltar);
-            
-            // 1. Cambiamos la vista a Mis Solicitudes
             setVistaActiva('solicitudes');
-            
-            // 2. Encendemos el borde naranja
             setResaltarPostulacionId(parseInt(idPostulacionResaltar));
-
-            // 3. Limpiamos la URL silenciosamente para que quede elegante
+            navigate('/vacantes-dashboard', { replace: true });
+        } 
+        // Caso B: Si viene de un correo de un mensaje nuevo de chat
+        else if (chatVacanteId) {
+            console.log("💬 Pista de chat detectada. Abriendo bandeja de mensajería para vacante ID:", chatVacanteId);
+            
+            // Buscamos si la vacante ya está en memoria para rescatar sus datos legibles
+            const vComp = vacantes.find(v => v.id === parseInt(chatVacanteId));
+            
+            setChatActivo({
+                vacanteId: parseInt(chatVacanteId),
+                empresaId: vComp?.empresaId || null,
+                titulo: vComp?.titulo || "Vacante",
+                nombreEmpresa: vComp?.empresa?.nombre || "Empresa Aliada",
+                resaltarMensajeId: chatMensajeId ? parseInt(chatMensajeId) : null // Para focalizar el texto si lo deseas
+            });
+            
+            // Movemos la interfaz a la sección de Chats
+            setVistaActiva('mensajes');
+            
+            // Limpiamos la URL para mantener el diseño impecable
             navigate('/vacantes-dashboard', { replace: true });
         }
-    }, [location.search, navigate]); // <-- Agregamos navigate a las dependencias
+    }, [location.search, navigate, vacantes]); // Añadimos 'vacantes' para asegurar el match relacional
 
     useEffect(() => {
         if (!usuario || !usuario.id) {
