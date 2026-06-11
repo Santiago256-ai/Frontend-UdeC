@@ -5,7 +5,7 @@ import './Estilo-Chat-Vacantes.css';
 
 export default function Mensajeria({ activeChat, usuario }) {
     const [conversaciones, setConversaciones] = useState([]);
-    const [seleccionado, setSeleccionado] = useState(null); 
+    const [seleccionado, setSeleccionado] = useState(null); // Empezamos en null
     const [mensajes, setMensajes] = useState([]);
     const [nuevoMsg, setNuevoMsg] = useState("");
     const [isChatActivo, setIsChatActivo] = useState(true);
@@ -13,26 +13,6 @@ export default function Mensajeria({ activeChat, usuario }) {
     const chatBodyRef = useRef(null);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     
-    // 🟢 NUEVO: Función para marcar los mensajes como leídos y quitar el punto rojo
-    const marcarComoLeido = async (conv) => {
-        if (!usuario?.id || !conv?.empresaId || !conv?.vacanteId) return;
-        try {
-            await API.put('/mensajeria/leer-mensajes-egresado', {
-                egresadoId: parseInt(usuario.id),
-                empresaId: parseInt(conv.empresaId),
-                vacanteId: parseInt(conv.vacanteId)
-            });
-            
-            // Actualizamos la lista local para que el punto rojo desaparezca al instante
-            setConversaciones(prev => prev.map(c => 
-                (c.vacanteId === conv.vacanteId && c.empresaId === conv.empresaId) 
-                ? { ...c, leido: true } 
-                : c
-            ));
-        } catch (error) {
-            console.error("Error al marcar como leído:", error);
-        }
-    };
 
     // 1. Cargar conversaciones
     const fetchConversaciones = useCallback(async () => {
@@ -41,21 +21,9 @@ export default function Mensajeria({ activeChat, usuario }) {
             const res = await API.get(`/mensajeria/mis-chats/egresado/${usuario.id}`);
             setConversaciones(res.data);
             
-            // Auto-seleccionar si viene de una vacante específica (ej. desde el correo)
+            // Solo auto-seleccionar si viene de una vacante específica (activeChat)
             if (activeChat && !seleccionado) {
-                // Buscamos si el chat existe en la lista para pasarle todos los datos completos
-                const chatCoincidente = res.data.find(c => c.vacanteId === activeChat.vacanteId);
-                
-                if (chatCoincidente) {
-                    setSeleccionado(chatCoincidente);
-                    // Si entramos directo desde el correo y hay pendientes, los marcamos como leídos
-                    if (chatCoincidente.ultimoMsgSenderType === 'EMPRESA' && !chatCoincidente.leido) {
-                        marcarComoLeido(chatCoincidente);
-                    }
-                } else {
-                    // Si es un chat totalmente nuevo, usamos los datos básicos
-                    setSeleccionado(activeChat);
-                }
+                setSeleccionado(activeChat);
             }
         } catch (err) { 
             console.error("Error al cargar conversaciones:", err); 
@@ -85,22 +53,24 @@ export default function Mensajeria({ activeChat, usuario }) {
     }, [seleccionado, cargarMensajes]);
 
     useEffect(() => {
-        setIsInitialLoad(true);
-    }, [seleccionado]);
+    setIsInitialLoad(true);
+}, [seleccionado]);
 
-    useEffect(() => {
-        if (chatBodyRef.current && mensajes.length > 0) {
-            const container = chatBodyRef.current;
-            const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+useEffect(() => {
+    if (chatBodyRef.current && mensajes.length > 0) {
+        const container = chatBodyRef.current;
+        const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
 
-            if ((isInitialLoad || isAtBottom) && !activeChat?.resaltarMensajeId) {
-                container.scrollTop = container.scrollHeight;
-                setIsInitialLoad(false); 
-            } else if (activeChat?.resaltarMensajeId) {
-                setIsInitialLoad(false);
-            }
+        // EL CAMBIO: Solo bajamos al fondo si NO hay un mensaje resaltado pendiente
+        if ((isInitialLoad || isAtBottom) && !activeChat?.resaltarMensajeId) {
+            container.scrollTop = container.scrollHeight;
+            setIsInitialLoad(false); 
+        } else if (activeChat?.resaltarMensajeId) {
+            // Si hay un mensaje para resaltar, quitamos el initialLoad para no estorbar
+            setIsInitialLoad(false);
         }
-    }, [mensajes, isInitialLoad, activeChat?.resaltarMensajeId]);
+    }
+}, [mensajes, isInitialLoad, activeChat?.resaltarMensajeId]);
 
     const handleEnviar = async (e) => {
         e.preventDefault();
@@ -128,44 +98,49 @@ export default function Mensajeria({ activeChat, usuario }) {
     );
 
     const formatearFechaDivisor = (fechaStr) => {
-        const fecha = new Date(fechaStr);
-        const hoy = new Date();
-        const ayer = new Date();
-        ayer.setDate(hoy.getDate() - 1);
+    const fecha = new Date(fechaStr);
+    const hoy = new Date();
+    const ayer = new Date();
+    ayer.setDate(hoy.getDate() - 1);
 
-        if (fecha.toDateString() === hoy.toDateString()) return "Hoy";
-        if (fecha.toDateString() === ayer.toDateString()) return "Ayer";
-        
-        return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-    };
+    if (fecha.toDateString() === hoy.toDateString()) return "Hoy";
+    if (fecha.toDateString() === ayer.toDateString()) return "Ayer";
+    
+    return fecha.toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' });
+};
 
-    // --- EFECTO DE RESALTADO PARA NOTIFICACIONES ---
-    useEffect(() => {
-        if (activeChat?.resaltarMensajeId && mensajes.length > 0) {
-            let intentos = 0;
-            const maxIntentos = 10; 
+// --- NUEVO: EFECTO DE RESALTADO PARA NOTIFICACIONES ---
+useEffect(() => {
+    // Si activeChat trae un ID de mensaje y ya hay mensajes cargados
+    if (activeChat?.resaltarMensajeId && mensajes.length > 0) {
+        let intentos = 0;
+        const maxIntentos = 10; // Reintentar durante 5 segundos
 
-            const buscarYResaltar = () => {
-                const idBuscado = `msg-${activeChat.resaltarMensajeId}`;
-                const elemento = document.getElementById(idBuscado);
+        const buscarYResaltar = () => {
+            const idBuscado = `msg-${activeChat.resaltarMensajeId}`;
+            const elemento = document.getElementById(idBuscado);
 
-                if (elemento) {
-                    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    elemento.classList.add('udec-msg-highlight');
-                    
-                    setTimeout(() => {
-                        elemento.classList.remove('udec-msg-highlight');
-                        activeChat.resaltarMensajeId = null; 
-                    }, 4000);
-                } else if (intentos < maxIntentos) {
-                    intentos++;
-                    setTimeout(buscarYResaltar, 500); 
-                }
-            };
+            if (elemento) {
+                // 1. Llevar la vista al mensaje
+                elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // 2. Aplicar la clase de animación
+                elemento.classList.add('udec-msg-highlight');
+                
+                // 3. Limpiar después de unos segundos
+                setTimeout(() => {
+                    elemento.classList.remove('udec-msg-highlight');
+                    activeChat.resaltarMensajeId = null; // Evitar que se repita innecesariamente
+                }, 4000);
+            } else if (intentos < maxIntentos) {
+                intentos++;
+                setTimeout(buscarYResaltar, 500); // Reintentar si el DOM no está listo
+            }
+        };
 
-            buscarYResaltar();
-        }
-    }, [activeChat?.resaltarMensajeId, mensajes]);
+        buscarYResaltar();
+    }
+}, [activeChat?.resaltarMensajeId, mensajes]);
 
     return (
         <div className="udec-chat-main-wrapper fade-in">
@@ -185,93 +160,98 @@ export default function Mensajeria({ activeChat, usuario }) {
                 </div>
 
                 <div className="udec-chat-list">
-                    {filtradas.length > 0 ? (
-                        filtradas.map((conv) => {
-                            const tienePendientes = conv.ultimoMsgSenderType === 'EMPRESA' && conv.leido === false;
+  {filtradas.length > 0 ? (
+    filtradas.map((conv) => {
+      // 1. DEFINIMOS LA LÓGICA DE PENDIENTES
+      // Usamos los nombres exactos que vienen del Backend: ultimoMsgSenderType y leido
+      const tienePendientes = conv.ultimoMsgSenderType === 'EMPRESA' && conv.leido === false;
 
-                            return (
-                                <div 
-                                    key={`${conv.vacanteId}-${conv.empresaId}`}
-                                    className={`udec-chat-item ${seleccionado?.vacanteId === conv.vacanteId ? 'active' : ''} ${tienePendientes ? 'udec-pending' : ''}`}
-                                    onClick={() => {
-                                        setSeleccionado(conv);
-                                        // Ahora esta función ya existe y quitará el punto rojo
-                                        if (conv.ultimoMsgSenderType === 'EMPRESA' && !conv.leido) {
-                                            marcarComoLeido(conv); 
-                                        }
-                                    }}
-                                >
-                                    <div className="udec-chat-avatar">
-                                        {conv.nombreEmpresa?.charAt(0)}
-                                        {tienePendientes && <span className="udec-unread-dot"></span>}
-                                    </div>
-                                    
-                                    <div className="udec-chat-info-preview">
-                                        <span>{conv.tituloVacante}</span>
-                                        <strong>{conv.nombreEmpresa}</strong>
-                                        <p className={`udec-chat-last-msg ${tienePendientes ? 'pending-text' : ''}`}>
-                                            {conv.ultimoMensaje || "Sin mensajes aún"}
-                                        </p>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <div className="no-results-chat">
-                            <p>{searchTerm ? "Sin resultados" : "No tienes chats activos"}</p>
-                        </div>
-                    )}
-                </div>
+      return (
+        <div 
+          key={`${conv.vacanteId}-${conv.empresaId}`}
+          // 2. APLICAMOS LA CLASE udec-pending SI TIENE PENDIENTES
+          className={`udec-chat-item ${seleccionado?.vacanteId === conv.vacanteId ? 'active' : ''} ${tienePendientes ? 'udec-pending' : ''}`}
+          onClick={() => {
+            setSeleccionado(conv);
+            if (conv.ultimoMsgSenderType === 'EMPRESA' && !conv.leido) {
+            marcarComoLeido(conv); // <--- Llamamos a la función aquí
+        }
+          }}
+        >
+          <div className="udec-chat-avatar">
+            {conv.nombreEmpresa?.charAt(0)}
+            {/* 3. MOSTRAMOS EL PUNTO ROJO SI HAY PENDIENTES */}
+            {tienePendientes && <span className="udec-unread-dot"></span>}
+          </div>
+          
+          <div className="udec-chat-info-preview">
+            <span>{conv.tituloVacante}</span>
+            <strong>{conv.nombreEmpresa}</strong>
+            {/* 4. PONEMOS EL TEXTO EN NEGRITA SI ES PENDIENTE */}
+            <p className={`udec-chat-last-msg ${tienePendientes ? 'pending-text' : ''}`}>
+              {conv.ultimoMensaje || "Sin mensajes aún"}
+            </p>
+          </div>
+        </div>
+      );
+    })
+  ) : (
+    <div className="no-results-chat">
+      <p>{searchTerm ? "Sin resultados" : "No tienes chats activos"}</p>
+    </div>
+  )}
+</div>
             </aside>
 
             {/* --- PANEL DE CONVERSACIÓN --- */}
             <main className="udec-chat-window">
-                {seleccionado ? (
-                    <>
-                        <header className="udec-chat-window-header">
-                            <div className="udec-chat-header-info">
-                                <div className="udec-chat-avatar" style={{width: '40px', height: '40px'}}>
-                                    {seleccionado.nombreEmpresa?.charAt(0)}
-                                </div>
-                                <div>
-                                    <h4 style={{margin: 0, fontSize: '1rem'}}>{seleccionado.nombreEmpresa}</h4>
-                                    <small style={{color: '#64748b'}}>{seleccionado.tituloVacante}</small>
-                                </div>
-                            </div>
-                            <div className={`udec-chat-status-indicator ${isChatActivo ? 'online' : 'locked'}`}>
-                                {isChatActivo ? "● Chat Abierto" : <><Lock size={12}/> Finalizado</>}
-                            </div>
-                        </header>
+    {seleccionado ? (
+        <>
+            <header className="udec-chat-window-header">
+                <div className="udec-chat-header-info">
+                    <div className="udec-chat-avatar" style={{width: '40px', height: '40px'}}>
+                        {seleccionado.nombreEmpresa?.charAt(0)}
+                    </div>
+                    <div>
+                        <h4 style={{margin: 0, fontSize: '1rem'}}>{seleccionado.nombreEmpresa}</h4>
+                        <small style={{color: '#64748b'}}>{seleccionado.tituloVacante}</small>
+                    </div>
+                </div>
+                <div className={`udec-chat-status-indicator ${isChatActivo ? 'online' : 'locked'}`}>
+                    {isChatActivo ? "● Chat Abierto" : <><Lock size={12}/> Finalizado</>}
+                </div>
+            </header>
 
-                        <div className="udec-chat-messages-container" ref={chatBodyRef}>
-                            {mensajes.map((m, index) => {
-                                const fechaActual = new Date(m.fechaEnvio).toDateString();
-                                const fechaAnterior = index > 0 ? new Date(mensajes[index - 1].fechaEnvio).toDateString() : null;
-                                const mostrarDivisor = fechaActual !== fechaAnterior;
+            <div className="udec-chat-messages-container" ref={chatBodyRef}>
+                {mensajes.map((m, index) => {
+                    const fechaActual = new Date(m.fechaEnvio).toDateString();
+                    const fechaAnterior = index > 0 ? new Date(mensajes[index - 1].fechaEnvio).toDateString() : null;
+                    const mostrarDivisor = fechaActual !== fechaAnterior;
 
-                                return (
-                                    <div key={m.id} style={{ display: 'contents' }}>
-                                        {mostrarDivisor && (
-                                            <div className="udec-chat-date-divider">
-                                                <span>{formatearFechaDivisor(m.fechaEnvio)}</span>
-                                            </div>
-                                        )}
-                                        
-                                        <div 
-                                            id={`msg-${m.id}`} 
-                                            className={`udec-msg-wrapper ${m.senderType === 'USUARIO' ? 'own' : 'other'}`}
-                                        >
-                                            <div className="udec-msg-bubble">
-                                                {m.contenido}
-                                            </div>
-                                            <span className="udec-msg-time">
-                                                {new Date(m.fechaEnvio).toLocaleTimeString('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                    return (
+                        <div key={m.id} style={{ display: 'contents' }}>
+                            {mostrarDivisor && (
+                                <div className="udec-chat-date-divider">
+                                    <span>{formatearFechaDivisor(m.fechaEnvio)}</span>
+                                </div>
+                            )}
+                            
+                            {/* AQUÍ ESTÁ EL CAMBIO: Agregamos id={`msg-${m.id}`} */}
+                            <div 
+                                id={`msg-${m.id}`} 
+                                className={`udec-msg-wrapper ${m.senderType === 'USUARIO' ? 'own' : 'other'}`}
+                            >
+                                <div className="udec-msg-bubble">
+                                    {m.contenido}
+                                </div>
+                                <span className="udec-msg-time">
+                                    {new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
                         </div>
+                    );
+                })}
+            </div>
 
                         <footer className="udec-chat-footer">
                             <form onSubmit={handleEnviar} className="udec-chat-input-form">
