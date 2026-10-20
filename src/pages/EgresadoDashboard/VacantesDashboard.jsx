@@ -1,36 +1,29 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import API from '../../services/api'; 
 import logoUdec from '../../assets/UdeC2.png';
-import logoGrande from '../../assets/Logo2.png'; 
-import logoPequeño from '../../assets/Logo3.png';
+import logoGrande from '../../assets/Logo2.png';
 
-// Fusionamos todos los iconos en un solo bloque de lucide-react
-import { 
-    LogOut, 
-    MessageSquare, 
-    Briefcase, 
-    Building2, 
-    PlusCircle, 
-    Search, 
-    ArrowLeft,
-    Calendar, 
-    Users,
-    ChevronRight,
+import {
+    LogOut,
+    MessageSquare,
+    Briefcase,
+    Building2,
+    PlusCircle,
     Home,
     Bell,
     ClipboardList,
     Clock,
-    MapPin, 
-    FileText, 
-    Globe, 
-    DollarSign,
-    AlertTriangle,
     User,
-    UserCircle,
-    Settings,
-    XCircle, // 👈 ¡AGREGA ESTE AQUÍ!
-    CheckCircle
+    XCircle,
+    CheckCircle,
+    Search,
+    ChevronUp,
+    ChevronDown,
+    SlidersHorizontal,
+    Eye,
+    Send,
+    ArrowUpRight
 } from 'lucide-react';
 
 import Mensajeria from '../../components/Chat-Vacantes'; 
@@ -55,9 +48,45 @@ Quill.register(AlignStyle, true);
 const SizeStyle = Quill.import('attributors/style/size');
 Quill.register(SizeStyle, true);
 
+/* --- Tabla de Vacantes: rangos de salario y estilo de badges de modalidad ---
+   Solo tokens de marca (verde / dorado / gris institucional), en distintas
+   saturaciones — sin colores nuevos fuera de la paleta del manual. */
+const RANGOS_SALARIO = [
+    { id: '0-2', label: '$0 – $2.000.000', min: 0, max: 2000000 },
+    { id: '2-4', label: '$2.000.000 – $4.000.000', min: 2000000, max: 4000000 },
+    { id: '4-6', label: '$4.000.000 – $6.000.000', min: 4000000, max: 6000000 },
+    { id: '6+', label: '$6.000.000 o más', min: 6000000, max: Infinity },
+];
+
+const ESTILO_MODALIDAD = {
+    Presencial: { bg: 'rgba(0, 123, 62, .10)', text: 'var(--udec-green-strong)', dot: 'var(--udec-green)' },
+    'Híbrido': { bg: 'var(--udec-gold-bg)', text: 'var(--udec-gold-ink)', dot: 'var(--udec-gold)' },
+    Remoto: { bg: 'rgba(77, 77, 77, .08)', text: '#4D4D4D', dot: '#4D4D4D' },
+    __default: { bg: 'rgba(77, 77, 77, .08)', text: '#4D4D4D', dot: '#4D4D4D' },
+};
+
+const parseSalarioNumero = (valor) => {
+    if (!valor) return null;
+    const limpio = valor.toString().replace(/\D/g, '');
+    return limpio ? parseInt(limpio, 10) : null;
+};
+
+/* Navegación principal — Rumbo B "Sello en Marcha".
+   `countKey` = clave del objeto `counts`: el sello de lacre pasa a ser un badge
+   numérico que se muestra siempre que el conteo sea > 0 (esté o no activo el tab)
+   y se "estampa" (exn-stamp) cuando el número aumenta. `countNoun` alimenta el
+   aria-label ("Vacantes, 3 disponibles"). */
+const NAV_ITEMS = [
+    { vista: 'inicio',         label: 'Inicio',       Icon: Home },
+    { vista: 'solicitudes',    label: 'Solicitudes',  Icon: ClipboardList, countKey: 'solicitudes',    countNoun: 'en proceso' },
+    { vista: 'vacantes',       label: 'Vacantes',     Icon: Briefcase,     countKey: 'vacantes',       countNoun: 'disponibles' },
+    { vista: 'ver-empresas',   label: 'Empresas',     Icon: Building2 },
+    { vista: 'crear-cv',       label: 'Hoja de Vida', Icon: PlusCircle },
+    { vista: 'notificaciones', label: 'Avisos',       Icon: Bell,          countKey: 'notificaciones', countNoun: 'sin leer' },
+    { vista: 'mensajes',       label: 'Mensajes',     Icon: MessageSquare, countKey: 'mensajes',       countNoun: 'sin leer' },
+];
 
 export default function VacantesDashboard() {
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     // ... otros estados
@@ -78,14 +107,122 @@ const [vistaPreviaEmpresa, setVistaPreviaEmpresa] = useState('vacantes');
     const [selectedVacante, setSelectedVacante] = useState(null);
     const [chatActivo, setChatActivo] = useState(null); 
     const [loading, setLoading] = useState(true);
+    const [postulandoId, setPostulandoId] = useState(null); // id de la vacante con envío en curso
+    const [originRect, setOriginRect] = useState(null);   // caja de la fila que abre el modal (continuidad)
     const [searchTerm, setSearchTerm] = useState("");
+    // --- Tabla de Vacantes: filtros y orden ---
+    const [filtroUbicacion, setFiltroUbicacion] = useState("");
+    const [filtroSalario, setFiltroSalario] = useState("");
+    const [filtroModalidades, setFiltroModalidades] = useState([]);
+    const [modalidadAbierta, setModalidadAbierta] = useState(false);
+    const modalidadRef = useRef(null);
+    const [orden, setOrden] = useState({ campo: null, dir: 'asc' });
+    const [filtrosMovilAbiertos, setFiltrosMovilAbiertos] = useState(false);
+    const filtrosSheetRef = useRef(null);
     const [vistaActiva, setVistaActiva] = useState('vacantes'); 
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     // Agrega esto junto a tus otros estados (como el de usuario o vacantes)
 const [showLogoutModal, setShowLogoutModal] = useState(false);
-const [tieneNotifNuevas, setTieneNotifNuevas] = useState(false);
+const [notifCount, setNotifCount] = useState(0);
 const [hayCambiosCV, setHayCambiosCV] = useState(false);
 const [modalAlerta, setModalAlerta] = useState({ mostrar: false, destino: null });
+
+// --- Navegación superior "Sello en Marcha": indicador deslizante + geometría ---
+const navRowRef = useRef(null);
+const tabRefs = useRef({});
+const userMenuRef = useRef(null);
+const [gliderStyle, setGliderStyle] = useState({ opacity: 0 });
+
+// El destino de nav resaltado: 'ver-perfil-empresa' cuelga de "Empresas"; 'ver-perfil' no resalta ninguno.
+const navVista = NAV_ITEMS.some(i => i.vista === vistaActiva)
+    ? vistaActiva
+    : (vistaActiva === 'ver-perfil-empresa' ? 'ver-empresas' : null);
+
+const posicionarGlider = useCallback(() => {
+    const row = navRowRef.current;
+    const el = navVista ? tabRefs.current[navVista] : null;
+    if (!row || !el) { setGliderStyle(s => ({ ...s, opacity: 0 })); return; }
+    const rr = row.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    setGliderStyle({
+        opacity: 1,
+        width: `${er.width}px`,
+        transform: `translateX(${er.left - rr.left + row.scrollLeft}px)`,
+    });
+}, [navVista]);
+
+useLayoutEffect(() => { posicionarGlider(); }, [posicionarGlider, vistaActiva]);
+
+useEffect(() => {
+    posicionarGlider();
+    const row = navRowRef.current;
+    const ro = new ResizeObserver(() => posicionarGlider());
+    if (row) ro.observe(row);
+    window.addEventListener('resize', posicionarGlider);
+    if (row) row.addEventListener('scroll', posicionarGlider, { passive: true });
+    let cancelado = false;
+    if (document.fonts?.ready) document.fonts.ready.then(() => { if (!cancelado) posicionarGlider(); });
+    return () => {
+        cancelado = true;
+        ro.disconnect();
+        window.removeEventListener('resize', posicionarGlider);
+        if (row) row.removeEventListener('scroll', posicionarGlider);
+    };
+}, [posicionarGlider]);
+
+// Mantener la pestaña activa a la vista cuando la fila hace scroll horizontal (tablet/estrecho)
+useEffect(() => {
+    const el = navVista ? tabRefs.current[navVista] : null;
+    if (el?.scrollIntoView) el.scrollIntoView({ inline: 'center', block: 'nearest' });
+}, [navVista]);
+
+// Cerrar el menú del avatar al hacer clic fuera
+useEffect(() => {
+    if (!showProfileDropdown) return;
+    const fuera = (e) => {
+        if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setShowProfileDropdown(false);
+    };
+    document.addEventListener('mousedown', fuera);
+    return () => document.removeEventListener('mousedown', fuera);
+}, [showProfileDropdown]);
+
+// --- Conteos para los badges numéricos de la barra de navegación ---
+// Vacantes disponibles = mismo criterio que "Ofertas encontradas" (sin el filtro de búsqueda).
+const vacantesDisponibles = Array.isArray(vacantes)
+    ? vacantes.filter(v => v.estado === 'ABIERTA' && !v.postulaciones?.some(p => p.egresadoId === usuario?.id)).length
+    : 0;
+// Mis Solicitudes = mismo criterio que SolicitudesEgresado (postulaciones del egresado).
+const misSolicitudesCount = Array.isArray(vacantes)
+    ? vacantes.filter(v => v.postulaciones?.some(p => p.egresadoId === usuario?.id)).length
+    : 0;
+// Mensajes sin leer = folios cuyo último mensaje lo mandó la empresa y no está leído.
+const mensajesSinLeer = Array.isArray(chatsRecientes)
+    ? chatsRecientes.filter(c => c.ultimoMsgSenderType === 'EMPRESA' && c.leido === false).length
+    : 0;
+const navCounts = {
+    solicitudes: misSolicitudesCount,
+    vacantes: vacantesDisponibles,
+    notificaciones: notifCount,
+    mensajes: mensajesSinLeer,
+};
+
+// El badge se "estampa" (exn-stamp) sólo cuando el número AUMENTA, no al bajar ni al activar el tab.
+const prevNavCountsRef = useRef({});
+const [badgeBump, setBadgeBump] = useState({});
+useEffect(() => {
+    const prev = prevNavCountsRef.current;
+    const cur = { solicitudes: misSolicitudesCount, vacantes: vacantesDisponibles, notificaciones: notifCount, mensajes: mensajesSinLeer };
+    const subieron = {};
+    let alguno = false;
+    for (const k of Object.keys(cur)) {
+        if (typeof prev[k] === 'number' && cur[k] > prev[k]) { subieron[k] = true; alguno = true; }
+    }
+    prevNavCountsRef.current = cur;
+    if (!alguno) return;
+    setBadgeBump(subieron);
+    const t = setTimeout(() => setBadgeBump({}), 450);
+    return () => clearTimeout(t);
+}, [misSolicitudesCount, vacantesDisponibles, notifCount, mensajesSinLeer]);
 
 // 2. EFECTOS
 
@@ -167,15 +304,13 @@ useEffect(() => {
     };
 }, [vistaActiva]);
 
-// Efecto para verificar si hay notificaciones sin leer para el punto naranja
+// Conteo de notificaciones sin leer — alimenta el badge numérico de "Avisos"
 useEffect(() => {
     const verificarNuevas = async () => {
         if (!usuario?.id) return;
         try {
             const res = await API.get(`/notificaciones/egresado/${usuario.id}`);
-            // Si hay al menos una notificación con vista === false, activamos el punto
-            const nuevas = res.data.some(n => !n.vista);
-            setTieneNotifNuevas(nuevas);
+            setNotifCount(Array.isArray(res.data) ? res.data.filter(n => !n.vista).length : 0);
         } catch (error) {
             console.error("Error al verificar notificaciones", error);
         }
@@ -226,20 +361,163 @@ const fetchVacantes = async () => {
         let intervalo;
         if (vistaActiva === 'mensajes' && usuario?.id) {
             fetchChats();
-            intervalo = setInterval(() => fetchChats(), 8000); 
+            intervalo = setInterval(() => fetchChats(), 8000);
         }
         return () => clearInterval(intervalo);
     }, [vistaActiva, usuario, fetchChats]);
 
+    // Poll ligero de chats siempre activo — mantiene fresco el badge de "Mensajes" fuera de esa vista.
     useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth <= 1024) setIsSidebarCollapsed(true);
-            else setIsSidebarCollapsed(false);
+        if (!usuario?.id) return;
+        fetchChats();
+        const iv = setInterval(fetchChats, 20000);
+        return () => clearInterval(iv);
+    }, [usuario?.id, fetchChats]);
+
+    // --- ACCESIBILIDAD DEL MODAL DE DETALLE ---
+    // Bloqueo de scroll del body, cierre con Esc, foco atrapado y devolución de foco.
+    const modalRef = useRef(null);
+    const triggerFocusRef = useRef(null); // elemento que abrió el modal
+
+    useEffect(() => {
+        if (!selectedVacante) return;
+
+        triggerFocusRef.current = document.activeElement;
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        // Foco inicial dentro del modal
+        const focusablesSelector =
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        const node = modalRef.current;
+        const first = node?.querySelector(focusablesSelector);
+        first?.focus();
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                cerrarVacanteRef.current();
+                return;
+            }
+            if (e.key === 'Tab' && node) {
+                const items = Array.from(node.querySelectorAll(focusablesSelector))
+                    .filter((el) => !el.disabled && el.offsetParent !== null);
+                if (items.length === 0) return;
+                const firstEl = items[0];
+                const lastEl = items[items.length - 1];
+                if (e.shiftKey && document.activeElement === firstEl) {
+                    e.preventDefault();
+                    lastEl.focus();
+                } else if (!e.shiftKey && document.activeElement === lastEl) {
+                    e.preventDefault();
+                    firstEl.focus();
+                }
+            }
         };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = prevOverflow;
+            // Devuelve el foco a la tarjeta que abrió el modal
+            if (triggerFocusRef.current instanceof HTMLElement) {
+                triggerFocusRef.current.focus();
+            }
+        };
+    }, [selectedVacante]);
+
+    // --- ACCESIBILIDAD DEL PANEL DE FILTROS (móvil) ---
+    useEffect(() => {
+        if (!filtrosMovilAbiertos) return;
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const primero = filtrosSheetRef.current?.querySelector('select, button, input');
+        primero?.focus();
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') setFiltrosMovilAbiertos(false);
+        };
+        document.addEventListener('keydown', onKeyDown);
+        return () => {
+            document.removeEventListener('keydown', onKeyDown);
+            document.body.style.overflow = prevOverflow;
+        };
+    }, [filtrosMovilAbiertos]);
+
+    // --- DROPDOWN DE MODALIDAD (clic fuera / Esc cierra) ---
+    useEffect(() => {
+        if (!modalidadAbierta) return;
+        const onPointerDown = (e) => {
+            if (modalidadRef.current && !modalidadRef.current.contains(e.target)) {
+                setModalidadAbierta(false);
+            }
+        };
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') setModalidadAbierta(false);
+        };
+        document.addEventListener('mousedown', onPointerDown);
+        document.addEventListener('keydown', onKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', onPointerDown);
+            document.removeEventListener('keydown', onKeyDown);
+        };
+    }, [modalidadAbierta]);
+
+    // --- CONTINUIDAD TARJETA → MODAL (FLIP desde la caja real de la tarjeta) ---
+    const prefiereMenosMovimiento = () =>
+        typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    useLayoutEffect(() => {
+        if (!selectedVacante) return;
+        const panel = modalRef.current;
+        if (!panel) return;
+        const overlay = panel.parentElement;
+
+        if (prefiereMenosMovimiento() || !originRect) {
+            panel.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' });
+            overlay?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' });
+            return;
+        }
+
+        const dest = panel.getBoundingClientRect();
+        const dx = (originRect.left + originRect.width / 2) - (dest.left + dest.width / 2);
+        const dy = (originRect.top + originRect.height / 2) - (dest.top + dest.height / 2);
+        const sx = Math.max(originRect.width / dest.width, 0.1);
+        const sy = Math.max(originRect.height / dest.height, 0.1);
+
+        overlay?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: 'ease-out' });
+        panel.animate?.(
+            [
+                { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, opacity: 0.35, borderRadius: '14px' },
+                { transform: 'none', opacity: 1, borderRadius: '4px' },
+            ],
+            { duration: 420, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
+        );
+    }, [selectedVacante, originRect]);
+
+    // Abre el modal guardando la caja de la tarjeta de origen
+    const abrirVacante = (vacante, evento) => {
+        const rect = evento?.currentTarget?.getBoundingClientRect?.();
+        setOriginRect(rect || null);
+        setSelectedVacante(vacante);
+    };
+
+    // Cierra el modal con una salida corta (o inmediata si se pide menos movimiento)
+    const cerrarVacanteRef = useRef(() => {});
+    const cerrarVacante = () => {
+        const panel = modalRef.current;
+        if (!panel || prefiereMenosMovimiento() || !panel.animate) {
+            setSelectedVacante(null);
+            return;
+        }
+        const salida = panel.animate(
+            [{ transform: 'none', opacity: 1 }, { transform: 'scale(0.97)', opacity: 0 }],
+            { duration: 150, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
+        );
+        salida.onfinish = () => setSelectedVacante(null);
+        salida.oncancel = () => setSelectedVacante(null);
+    };
+    cerrarVacanteRef.current = cerrarVacante;
 
     // 3. UTILIDADES Y HANDLERS
     const formatDate = (dateString) => {
@@ -271,20 +549,6 @@ const fetchVacantes = async () => {
     return diferenciaDias >= 0 && diferenciaDias <= 2;
 };
 
-    // Función para determinar el estilo y texto de los cupos
-const obtenerEstiloCupos = (cupos) => {
-    const n = parseInt(cupos);
-    if (isNaN(n)) return { clase: '', texto: '' }; // Manejo de error
-
-    if (n <= 2) {
-        return { clase: 'cupos-critico', texto: '¡Alerta!' }; // Rojo + Icono parpadeante
-    } else if (n === 3) {
-        return { clase: 'cupos-warning', texto: '¡Pocos!' }; // Amarillo/Naranja
-    }
-    // Para 4 o más, no hay texto extra ni color especial
-    return { clase: '', texto: '' }; 
-};
-
     const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
@@ -302,53 +566,126 @@ const obtenerEstiloCupos = (cupos) => {
     setVistaActiva('mensajes');                
 };
 
-const handlePostulacion = async () => {
-    if (!selectedVacante) return;
-    
+// `vacanteParam` permite postular directamente desde una fila de la tabla
+// sin pasar por el modal; por defecto usa la vacante abierta en el modal.
+const handlePostulacion = async (vacanteParam) => {
+    const vacante = vacanteParam && vacanteParam.id ? vacanteParam : selectedVacante;
+    if (!vacante || postulandoId) return; // evita doble envío
+
+    setPostulandoId(vacante.id);
     try {
-        const res = await API.post(`/estudiantes/${selectedVacante.id}/postular`);
-        
+        const res = await API.post(`/estudiantes/${vacante.id}/postular`);
+
         toast.success(res.data.message || '¡Postulación exitosa!', {
             position: "bottom-right", // 👈 Aseguramos la posición aquí también
             icon: <CheckCircle size={20} color="white" />,
-            style: { 
-                background: '#00482b', // Verde UdeC
+            style: {
+                background: 'var(--udec-green-strong)', // Verde UdeC (Pantone 3537 C)
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: '600'
             }
         });
-        
-        await fetchVacantes(); 
-        setSelectedVacante(null); 
+
+        await fetchVacantes();
+        if (selectedVacante?.id === vacante.id) setSelectedVacante(null);
 
     } catch (err) {
         const errorMsg = err.response?.data?.error || "Error al postularse";
         toast.error(errorMsg, {
             position: "bottom-right", // 👈 Y aquí también para los errores
-            style: { 
+            style: {
                 borderRadius: '12px',
                 fontSize: '14px'
             }
         });
+    } finally {
+        setPostulandoId(null);
     }
 };
 
     const getFilteredData = () => {
     const term = searchTerm.toLowerCase();
     if (vistaActiva === 'vacantes') {
-        return vacantes.filter(v => 
-            (v.titulo.toLowerCase().includes(term) || v.empresa?.nombre.toLowerCase().includes(term)) 
+        let lista = vacantes.filter(v =>
+            (v.titulo.toLowerCase().includes(term) || (v.empresa?.nombre || '').toLowerCase().includes(term))
             && v.estado === "ABIERTA"
-            // NUEVA LÓGICA: Solo mostrar si el usuario NO está en la lista de postulaciones
+            // Solo mostrar si el usuario NO está en la lista de postulaciones
             && !v.postulaciones?.some(p => p.egresadoId === usuario?.id)
         );
+
+        if (filtroUbicacion) lista = lista.filter(v => v.ubicacion === filtroUbicacion);
+        if (filtroModalidades.length) lista = lista.filter(v => filtroModalidades.includes(v.modalidad));
+        if (filtroSalario) {
+            const rango = RANGOS_SALARIO.find(r => r.id === filtroSalario);
+            lista = lista.filter(v => {
+                const monto = parseSalarioNumero(v.salario);
+                // "A convenir" (sin monto) no cae en ningún rango concreto
+                return monto !== null && monto >= rango.min && monto < rango.max;
+            });
+        }
+
+        if (orden.campo) {
+            lista = [...lista].sort((a, b) => {
+                let va, vb;
+                if (orden.campo === 'salario') {
+                    va = parseSalarioNumero(a.salario) ?? -1;
+                    vb = parseSalarioNumero(b.salario) ?? -1;
+                } else {
+                    va = a.fechaCierre ? new Date(a.fechaCierre).getTime() : Infinity;
+                    vb = b.fechaCierre ? new Date(b.fechaCierre).getTime() : Infinity;
+                }
+                return orden.dir === 'asc' ? va - vb : vb - va;
+            });
+        }
+
+        return lista;
     }
-        return Array.isArray(chatsRecientes) ? chatsRecientes.filter(c => 
+        return Array.isArray(chatsRecientes) ? chatsRecientes.filter(c =>
             (c.nombreEmpresa || "").toLowerCase().includes(term) ||
             (c.tituloVacante || "").toLowerCase().includes(term)
         ) : [];
     };
+
+    // Total de vacantes elegibles (abiertas, sin postular) sin los filtros del usuario —
+    // para mostrar "X de Y" cuando hay filtros activos.
+    const totalVacantesBase = vacantes.filter(v =>
+        v.estado === "ABIERTA" && !v.postulaciones?.some(p => p.egresadoId === usuario?.id)
+    ).length;
+
+    const hayFiltrosActivos = Boolean(
+        searchTerm || filtroUbicacion || filtroSalario || filtroModalidades.length
+    );
+
+    const limpiarFiltros = () => {
+        setSearchTerm('');
+        setFiltroUbicacion('');
+        setFiltroSalario('');
+        setFiltroModalidades([]);
+    };
+
+    const alternarOrden = (campo) => {
+        setOrden((prev) =>
+            prev.campo === campo
+                ? { campo, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
+                : { campo, dir: 'asc' }
+        );
+    };
+
+    const ubicacionesDisponibles = useMemo(
+        () => Array.from(new Set(vacantes.map(v => v.ubicacion).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es')),
+        [vacantes]
+    );
+
+    // Las 3 modalidades institucionales siempre están disponibles como filtro,
+    // haya o no ahora mismo una vacante de ese tipo (que el filtro no muestre
+    // "Híbrido" solo porque ninguna vacante actual lo usa sería confuso).
+    const modalidadesDisponibles = useMemo(() => {
+        const ordenCanonico = ['Presencial', 'Híbrido', 'Remoto'];
+        const presentes = new Set(vacantes.map(v => v.modalidad).filter(Boolean));
+        const otras = Array.from(presentes).filter(m => !ordenCanonico.includes(m)).sort((a, b) => a.localeCompare(b, 'es'));
+        return [...ordenCanonico, ...otras];
+    }, [vacantes]);
 
     // --- AGREGA ESTO ANTES DE dataFiltrada ---
 const navegarAVista = (config, ignorarCambios = false) => {
@@ -362,9 +699,9 @@ const navegarAVista = (config, ignorarCambios = false) => {
         return; // Detenemos la ejecución para que no navegue
     }
 
-    // --- NUEVO: LIMPIEZA DEL PUNTO NARANJA ---
+    // Al entrar a Avisos se marcan como leídas server-side; limpiamos el badge de forma optimista.
     if (nombreVista === 'notificaciones') {
-        setTieneNotifNuevas(false);
+        setNotifCount(0);
     }
 
     if (typeof config === 'object') {
@@ -397,7 +734,21 @@ const navegarAVista = (config, ignorarCambios = false) => {
 // En tu VacantesDashboard.js
 const yaPostulado = selectedVacante?.postulaciones?.some(p => p.egresadoId === usuario?.id);
 
-    if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
+    // La vista de Vacantes tiene su propio esqueleto de carga; el resto usa el spinner global.
+    if (loading && vistaActiva !== 'vacantes') return <div className="loading-screen"><div className="spinner"></div></div>;
+
+    // Inicial de la entidad para el sello de lacre
+    const inicialEmpresa = (nombre) => (nombre?.trim?.()?.[0] || '·').toUpperCase();
+
+    // Cupos disponibles y estado de una vacante
+    const analizarVacante = (v) => {
+        const cupos = v.limitePostulantes ? (v.limitePostulantes - (v._count?.postulaciones || 0)) : null;
+        return {
+            cupos,
+            urgente: esFechaCercana(v.fechaCierre),
+            critico: cupos !== null && cupos <= 2,
+        };
+    };
 
     const obtenerIniciales = (nombres, apellidos) => {
     if (!nombres) return "U";
@@ -422,98 +773,92 @@ const formatearSalarioVisual = (valor) => {
 
 return (
     <div className="dashboard-layout dashboard-egresados-container">
-        {/* SIDEBAR: Diseño Expandible y Sutil */}
-        <nav 
-            className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}
-            onMouseEnter={() => setIsSidebarCollapsed(false)}
-            onMouseLeave={() => setIsSidebarCollapsed(true)}
-        >
-            <div className="sidebar-top">
-                <div className="sidebar-menu">
-                    <button className={`menu-item ${vistaActiva === 'inicio' ? 'active' : ''}`} onClick={() => navegarAVista('inicio')}>
-                        <Home size={20}/> <span>INICIO</span>
-                    </button>
-
-                    <button className={`menu-item ${vistaActiva === 'solicitudes' ? 'active' : ''}`} onClick={() => navegarAVista('solicitudes')}>
-                        <ClipboardList size={20}/> <span>MIS SOLICITUDES</span>
-                    </button>
-
-                    <button className={`menu-item ${vistaActiva === 'vacantes' ? 'active' : ''}`} onClick={() => navegarAVista('vacantes')}>
-                        <Briefcase size={20}/> <span>VACANTES DISPONIBLES</span>
-                    </button>
-
-                    <button className={`menu-item ${vistaActiva === 'ver-empresas' ? 'active' : ''}`} onClick={() => navegarAVista('ver-empresas')}>
-    <Building2 size={20}/> <span>EMPRESAS ALIADAS</span>
-</button>
-
-                    <button className={`menu-item ${vistaActiva === 'crear-cv' ? 'active' : ''}`} onClick={() => navegarAVista('crear-cv')}>
-                        <PlusCircle size={20}/> <span>MI HOJA DE VIDA</span>
-                    </button>
-
-                    <button 
-    className={`menu-item ${vistaActiva === 'notificaciones' ? 'active' : ''}`} 
-    onClick={() => navegarAVista('notificaciones')}
->
-    {/* Envolvemos el icono en un div relativo para anclar el punto */}
-    <div style={{ position: 'relative', display: 'flex' }}>
-        <Bell size={20}/> 
-        
-        {tieneNotifNuevas && (
-            <div className="nav-punto-naranja"></div> 
-        )}
-    </div>
-    
-    {/* Este span sigue siendo tu Tooltip, ¡intacto! */}
-    <span>NOTIFICACIONES</span>
-</button>
-
-                    <button className={`menu-item ${vistaActiva === 'mensajes' ? 'active' : ''}`} onClick={() => { setChatActivo(null); navegarAVista('mensajes'); }}>
-                        <MessageSquare size={20}/> <span>MENSAJES / CHAT</span>
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        {/* CONTENEDOR PRINCIPAL */}
         <div className="glass-container">
-            <header className="main-header-container">
-                <div className="header-top-bar">
-                    <div className="bar-green"></div>
-                    <div className="bar-orange"></div>
+            {/* NAVEGACIÓN PRINCIPAL — Rumbo B "Sello en Marcha" */}
+            <header className="ex-nav" data-egresado-nav>
+                <div className="ex-nav-edge" aria-hidden="true">
+                    <span className="ex-edge-green" />
+                    <span className="ex-edge-gold" />
                 </div>
-                <div className="header-content">
-                    {/* Logos integrados UdeC + Empres360 */}
-                    <div className="header-left-brands">
-                        <img src={logoGrande} alt="Empres 360 Pro" className="header-brand-logo" />
-                        <div className="brand-divider"></div>
-                        <img src={logoUdec} alt="UdeC" className="header-udec-logo" />
+
+                {/* Fila 1 — identidad */}
+                <div className="ex-nav-identity">
+                    <div className="ex-brand">
+                        <img src={logoGrande} alt="Empres 360 Pro" className="ex-brand-logo" />
+                        <span className="ex-brand-div" aria-hidden="true" />
+                        <img src={logoUdec} alt="Universidad de Cundinamarca" className="ex-brand-udec" />
                     </div>
 
-                    <div className="header-right">
-                        <div className="user-profile-info" style={{ position: 'relative' }}>
-                            <div className="user-details">
-                                <span className="user-full-name">{usuario?.nombres} {usuario?.apellidos}</span>
-                                <span className="user-career">Graduado - {usuario?.programa || "UdeC"}</span>
-                            </div>
-                            <div className="vdp-avatar-container">
-                                <div className="user-avatar-initials" onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
-                                    {usuario?.foto ? <img src={usuario.foto} alt="Avatar" /> : <span>{obtenerIniciales(usuario?.nombres, usuario?.apellidos)}</span>}
-                                </div>
-                                {showProfileDropdown && (
-                                    <div className="vdp-dropdown-menu fade-in">
-                                        <button className="vdp-dropdown-item" onClick={() => { setVistaActiva('ver-perfil'); setShowProfileDropdown(false); }}>
-                                            <User size={18} /> <span>Ver Perfil</span>
-                                        </button>
-                                        <div className="dropdown-divider"></div>
-                                        <button className="vdp-dropdown-item vdp-logout" onClick={() => setShowLogoutModal(true)}>
-                                            <LogOut size={16} /> Cerrar Sesión
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                    <div className="ex-user" ref={userMenuRef}>
+                        <div className="ex-user-txt">
+                            <span className="ex-user-name">{usuario?.nombres} {usuario?.apellidos}</span>
+                            <span className="ex-user-role">Graduado · {usuario?.programa || "UdeC"}</span>
                         </div>
+                        <button
+                            type="button"
+                            className="ex-user-avatar"
+                            aria-haspopup="menu"
+                            aria-expanded={showProfileDropdown}
+                            aria-label="Abrir menú de perfil"
+                            onClick={() => setShowProfileDropdown(v => !v)}
+                        >
+                            {usuario?.foto
+                                ? <img src={usuario.foto} alt="" />
+                                : <span>{obtenerIniciales(usuario?.nombres, usuario?.apellidos)}</span>}
+                        </button>
+                        {showProfileDropdown && (
+                            <div className="ex-user-menu fade-in" role="menu">
+                                <button type="button" role="menuitem" className="ex-user-menu-item" onClick={() => { setVistaActiva('ver-perfil'); setShowProfileDropdown(false); }}>
+                                    <User size={17} /> <span>Ver perfil</span>
+                                </button>
+                                <span className="ex-user-menu-div" role="separator" />
+                                <button type="button" role="menuitem" className="ex-user-menu-item is-logout" onClick={() => { setShowProfileDropdown(false); setShowLogoutModal(true); }}>
+                                    <LogOut size={16} /> <span>Cerrar sesión</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
+
+                {/* Fila 2 — pestañas del expediente */}
+                <nav className="ex-nav-row" aria-label="Navegación principal del portal" ref={navRowRef}>
+                    <span className="ex-glider" aria-hidden="true" style={gliderStyle} />
+                    <ul className="ex-tablist">
+                        {NAV_ITEMS.map((item) => {
+                            const activo = navVista === item.vista;
+                            const TabIcon = item.Icon;
+                            const conteo = item.countKey ? (navCounts[item.countKey] || 0) : 0;
+                            return (
+                                <li key={item.vista}>
+                                    <button
+                                        type="button"
+                                        className={`ex-tab${activo ? ' is-active' : ''}`}
+                                        aria-current={activo ? 'page' : undefined}
+                                        aria-label={conteo > 0 ? `${item.label}, ${conteo} ${item.countNoun}` : item.label}
+                                        ref={el => { tabRefs.current[item.vista] = el; }}
+                                        onClick={() => {
+                                            if (item.vista === 'mensajes') setChatActivo(null);
+                                            navegarAVista(item.vista);
+                                        }}
+                                    >
+                                        <span className="ex-tab-icon">
+                                            <TabIcon size={17} strokeWidth={2} aria-hidden="true" />
+                                        </span>
+                                        <span className="ex-tab-label">{item.label}</span>
+                                        {conteo > 0 && (
+                                            <span
+                                                className={`ex-tab-seal${badgeBump[item.countKey] ? ' is-bumped' : ''}`}
+                                                aria-hidden="true"
+                                            >
+                                                {conteo > 99 ? '99+' : conteo}
+                                            </span>
+                                        )}
+                                    </button>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </nav>
             </header>
 
                 <main className="content-inner">
@@ -542,7 +887,7 @@ return (
 )}
                 {vistaActiva === 'vacantes' && (
     <div className="vacantes-grid-wrapper fade-in">
-        
+
         {/* 1. CABECERA ESTILO HUB (Toda la pantalla) */}
         <header className="vacantes-grid-header">
             <div className="hub-left">
@@ -557,320 +902,460 @@ return (
             <div className="hub-right">
                 <div className="hub-stat-card">
                     <span className="stat-label">Ofertas encontradas</span>
-                    <span className="stat-number">{dataFiltrada.length}</span>
+                    <span className="stat-number">
+                        {hayFiltrosActivos ? `${dataFiltrada.length} de ${totalVacantesBase}` : dataFiltrada.length}
+                    </span>
                 </div>
             </div>
         </header>
 
-        {/* 2. REJILLA DE TARJETAS (Grid Layout - Ocupa todo el ancho) */}
-<div className="vacantes-main-grid">
-    {dataFiltrada.length > 0 ? (
-        dataFiltrada.map((v) => {
-            const cuposDisponibles = v.limitePostulantes ? (v.limitePostulantes - (v._count?.postulaciones || 0)) : null;
-            const esUrgente = esFechaCercana(v.fechaCierre);
-            const estiloCupos = obtenerEstiloCupos(cuposDisponibles);
+        {/* 2. BARRA DE FILTROS */}
+        <div className="tv-filtros">
+            <div className="tv-buscar">
+                <Search size={16} aria-hidden="true" />
+                <input
+                    type="text"
+                    placeholder="Buscar por cargo o empresa…"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    aria-label="Buscar vacante por cargo o empresa"
+                />
+            </div>
 
- return (
-    <div key={v.id} className="vacante-card-compact" onClick={() => setSelectedVacante(v)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '20px' }}>
-        <div className="card-content-left" style={{ flex: '1 1 auto', maxWidth: 'calc(100% - 70px)' }}>
-            
-            {/* 1. Encabezado: Icono con fondo y Título Verde UdeC */}
-            <div className="card-header-mini" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-                <div className="hub-icon-wrapper-mini" style={{ background: 'rgba(0, 72, 43, 0.1)', padding: '10px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Briefcase size={20} style={{ color: '#00482b' }} />
+            <div className="tv-filtros-controles">
+                <label className="tv-select">
+                    <span>Ubicación</span>
+                    <select value={filtroUbicacion} onChange={(e) => setFiltroUbicacion(e.target.value)} aria-label="Filtrar por ubicación">
+                        <option value="">Todas</option>
+                        {ubicacionesDisponibles.map((u) => (
+                            <option key={u} value={u}>{u}</option>
+                        ))}
+                    </select>
+                </label>
+
+                <label className="tv-select">
+                    <span>Salario</span>
+                    <select value={filtroSalario} onChange={(e) => setFiltroSalario(e.target.value)} aria-label="Filtrar por rango salarial">
+                        <option value="">Cualquiera</option>
+                        {RANGOS_SALARIO.map((r) => (
+                            <option key={r.id} value={r.id}>{r.label}</option>
+                        ))}
+                    </select>
+                </label>
+
+                <div className="tv-select tv-modalidad" ref={modalidadRef}>
+                    <span>Modalidad</span>
+                    <button
+                        type="button"
+                        className="tv-modalidad-btn"
+                        aria-haspopup="listbox"
+                        aria-expanded={modalidadAbierta}
+                        onClick={() => setModalidadAbierta((v) => !v)}
+                    >
+                        <span className="tv-modalidad-btn-texto">
+                            {filtroModalidades.length === 0
+                                ? 'Todas'
+                                : filtroModalidades.length === 1
+                                    ? filtroModalidades[0]
+                                    : `${filtroModalidades.length} seleccionadas`}
+                        </span>
+                        <ChevronDown size={14} aria-hidden="true" />
+                    </button>
+                    {modalidadAbierta && (
+                        <div className="tv-modalidad-panel" role="listbox" aria-multiselectable="true" aria-label="Modalidad">
+                            {modalidadesDisponibles.map((m) => {
+                                const activo = filtroModalidades.includes(m);
+                                return (
+                                    <label key={m} className="tv-modalidad-opcion">
+                                        <input
+                                            type="checkbox"
+                                            checked={activo}
+                                            onChange={() => setFiltroModalidades((prev) =>
+                                                activo ? prev.filter((x) => x !== m) : [...prev, m]
+                                            )}
+                                        />
+                                        {m}
+                                    </label>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
-                <h4 className="titulo-vacante" style={{ color: '#00482b', fontWeight: '800', margin: 0, fontSize: '1.15rem', letterSpacing: '-0.5px' }}>
-                    {v.titulo}
-                </h4>
+
+                {hayFiltrosActivos && (
+                    <button type="button" className="tv-limpiar" onClick={limpiarFiltros}>
+                        Limpiar filtros
+                    </button>
+                )}
             </div>
 
-            {/* 2. Info secundaria (Empresa, Ciudad, Publicación) - Limpia y sin fecha de cierre aquí */}
-<div className="card-details-row" style={{ 
-    display: 'flex', 
-    gap: '15px', 
-    marginBottom: '15px', 
-    color: '#64748b', 
-    fontSize: '0.85rem', // Lo bajé un pelín para dar más aire
-    alignItems: 'center',
-    whiteSpace: 'nowrap' // 👈 Evita que el texto se salte de línea
-}}>
-    <div className="detail-group" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-        <Building2 size={14} />
-        <span 
-            // 🟢 Le damos estilo de "enlace clickeable"
-            style={{ 
-                cursor: 'pointer', 
-                textDecoration: 'underline', 
-                color: '#00482b', 
-                fontWeight: '700',
-                transition: 'color 0.2s'
-            }}
-            // 🟢 Efecto hover sutil
-            onMouseOver={(e) => e.currentTarget.style.color = '#00b368'}
-            onMouseOut={(e) => e.currentTarget.style.color = '#00482b'}
-            
-            // 🟢 La función que nos lleva a la empresa y detiene el modal
-            onClick={(e) => {
-                e.stopPropagation(); // 👈 El truco maestro para no abrir el modal de vacante
-                setVistaPreviaEmpresa('vacantes'); // Guardamos de dónde venimos
-                setEmpresaSeleccionadaId(v.empresaId || v.empresa?.id);
-                setVistaActiva('ver-perfil-empresa');
-            }}
-        >
-            {v.empresa?.nombre || 'Empresa Aliada'}
-        </span>
-    </div>
-    <span style={{ opacity: 0.3 }}>•</span>
-    <div className="detail-group" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-        <MapPin size={14} />
-        <span>{v.ubicacion}</span>
-    </div>
-    <span style={{ opacity: 0.3 }}>•</span>
-    <div className="detail-group" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-        <Calendar size={14} />
-        <span>{formatDate(v.fechaCreacion)}</span>
-    </div>
-</div>
-
-            {/* 3. Fila de Badges UNIFICADA (Salario + Cierre + Cupos) */}
-{/* Fila de Badges con texto más pequeño y elegante */}
-{/* Fila de Badges con Tooltips (Titles) */}
-<div className="card-badges-row" style={{ 
-    display: 'flex', 
-    gap: '8px', 
-    alignItems: 'center', 
-    marginTop: '12px',
-    flexWrap: 'nowrap' 
-}}>
-{/* 1. SALARIO */}
-<div className="badge-salary" title="Salario mensual ofrecido">
-    <DollarSign size={12} strokeWidth={2.5} />
-    <span style={{ fontWeight: '700' }}>
-        {v.salario ? formatearSalarioVisual(v.salario) : 'A convenir'}
-    </span>
-</div>
-
-    {/* 2. FECHA DE CIERRE con Title dinámico */}
-{/* 2. FECHA DE CIERRE */}
-{v.fechaCierre && (
-    <div 
-        className={`badge-pill ${esFechaCercana(v.fechaCierre) ? 'fecha-alerta' : 'fecha-normal'}`} 
-        title={esFechaCercana(v.fechaCierre) ? "¡Cierra pronto esta vacante!" : "Fecha límite de postulación"}
-        style={{ 
-            padding: '4px 12px', 
-            fontSize: '0.75rem', 
-            cursor: 'help',
-            display: 'flex',      // 👈 Alinea icono y texto
-            alignItems: 'center', // 👈 Los centra verticalmente
-            gap: '8px'            // 👈 El espacio que necesitabas
-        }}
-    >
-        <Clock size={12} />
-        <span style={{ fontWeight: '700' }}>
-            Cierre: {formatDate(v.fechaCierre)}
-        </span>
-    </div>
-)}
-
-{/* 3. CUPOS */}
-{cuposDisponibles !== null && (
-    <div 
-        className={`badge-pill ${estiloCupos.clase}`} 
-        title={cuposDisponibles <= 3 ? "¡Quedan pocas vacantes!" : "Cupos disponibles para esta oferta"}
-        style={{ 
-            padding: '4px 12px', 
-            fontSize: '0.75rem', 
-            cursor: 'help',
-            display: 'flex',      // 👈 Alinea icono y texto
-            alignItems: 'center', // 👈 Los centra verticalmente
-            gap: '8px'            // 👈 El espacio que necesitabas
-        }}
-    >
-        <Users size={12} />
-        <span style={{ fontWeight: '700' }}>
-            {cuposDisponibles} {cuposDisponibles === 1 ? 'Vacante' : 'Vacantes'}
-        </span>
-    </div>
-)}
-</div>
-        </div>
-
-        {/* 4. Acción lateral con la flecha minimalista */}
-        <div className="card-action-right" style={{ flex: '0 0 50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="action-circle">
-                <ChevronRight size={22} strokeWidth={3} />
-            </div>
-        </div>
-    </div>
-);
-        })
-) : (
-    /* DISEÑO ÚNICO PARA CUANDO NO HAY VACANTES */
-    <div className="evd-empty-state-container fade-in">
-        <div className="evd-visual-wrapper">
-            <div className="evd-glass-circle">
-                <div className="evd-scanner-line"></div>
-                <Search size={80} className="evd-icon-search" />
-            </div>
-            <div className="evd-floating-dots">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-
-        <div className="evd-text-content">
-            <h3 className="evd-main-title">No se encontraron vacantes</h3>
-            <p className="evd-description">
-                Nuestro radar no ha detectado nuevas ofertas en este momento. 
-                Vuelve a intentarlo o actualiza la lista para ver cambios recientes.
-            </p>
-            
-            <button className="evd-refresh-button" onClick={fetchVacantes}>
-                <Clock size={18} className="evd-button-icon" />
-                <span>ACTUALIZAR RADAR DE EMPLEO</span>
+            <button
+                type="button"
+                className="tv-filtrar-movil"
+                onClick={() => setFiltrosMovilAbiertos(true)}
+            >
+                <SlidersHorizontal size={16} /> Filtrar
+                {hayFiltrosActivos && <span className="tv-filtrar-dot" aria-hidden="true" />}
             </button>
         </div>
-    </div>
-)}
-        </div>
-</div>
-)}
-        {/* 3. MODAL DE DETALLES (Mantiene todo tu diseño original pero centrado) */}
-        {selectedVacante && (
-            <div className="vdp-modal-overlay fade-in" onClick={() => setSelectedVacante(null)}>
-                <div className="vdp-modal-content scale-up" onClick={(e) => e.stopPropagation()}>
-                    
-                    <button className="vdp-btn-close" onClick={() => setSelectedVacante(null)}>
-                        <XCircle size={28} />
+
+        {/* 3. TABLA DE VACANTES (grid accesible con roles ARIA — se reordena por CSS en tablet/móvil) */}
+        <div className="tv-tabla-wrap" role="grid" aria-label="Vacantes disponibles" aria-rowcount={dataFiltrada.length}>
+          <div className="tv-tabla-scroll">
+            <div className="tv-row tv-head-row" role="row">
+                <div className="tv-cell tv-col-cargo" role="columnheader">Cargo</div>
+                <div className="tv-cell tv-col-empresa" role="columnheader">Empresa</div>
+                <div className="tv-cell tv-col-ubicacion" role="columnheader">Ubicación</div>
+                <div
+                    className="tv-cell tv-col-salario"
+                    role="columnheader"
+                    aria-sort={orden.campo === 'salario' ? (orden.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                >
+                    <button type="button" className="tv-th-btn" onClick={() => alternarOrden('salario')}>
+                        Salario
+                        {orden.campo === 'salario' && (orden.dir === 'asc' ? <ChevronUp size={13} /> : <ChevronDown size={13} />)}
                     </button>
+                </div>
+                <div className="tv-cell tv-col-modalidad" role="columnheader">Modalidad</div>
+                <div
+                    className="tv-cell tv-col-vigencia"
+                    role="columnheader"
+                    aria-sort={orden.campo === 'vigencia' ? (orden.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                >
+                    <button type="button" className="tv-th-btn" onClick={() => alternarOrden('vigencia')}>
+                        Vigencia
+                        {orden.campo === 'vigencia' && (orden.dir === 'asc' ? <ChevronUp size={13} /> : <ChevronDown size={13} />)}
+                    </button>
+                </div>
+                <div className="tv-cell tv-col-acciones" role="columnheader">
+                    <span className="tv-sr-only">Acciones</span>
+                </div>
+            </div>
 
-                    <div className="detail-content-wrapper">
-                        <div className="detail-header-info">
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-        <h3 style={{fontSize: '26px', fontWeight: '800', color: '#1a202c', letterSpacing: '-0.5px', margin: 0}}>
-            {selectedVacante.titulo}
-        </h3>
-        
-        {/* NUEVO BOTÓN: Ver Perfil de Empresa */}
-        <button 
-            onClick={(e) => {
-                e.stopPropagation(); 
-                setVistaPreviaEmpresa('vacantes'); 
-                setEmpresaSeleccionadaId(selectedVacante.empresaId || selectedVacante.empresa?.id);
-                setVistaActiva('ver-perfil-empresa');
-                setSelectedVacante(null); 
-            }}
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(0, 72, 43, 0.1)',
-                color: '#00482b',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                fontSize: '14px'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0, 72, 43, 0.2)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(0, 72, 43, 0.1)'}
-        >
-            <Building2 size={16} /> Ver Perfil de Empresa
-        </button>
-    </div>
-                            {/* Rejilla de Fichas Técnicas dentro del Modal */}
-<div className="detail-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '25px' }}>
-    
-    {/* CUPOS (Añadido aquí) */}
-{/* Reemplaza el bloque de CUPOS dentro del Modal por este */}
-{selectedVacante.limitePostulantes && (
-<span className={`meta-tag-badge ${obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).clase}`}>
-    <Users size={14} /> 
-    <b>Cupos:</b> {selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)} 
-    
-    {/* CAMBIO AQUÍ: Usamos span con clase específica */}
-    <span className="text-alerta-inner">
-        { (selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)) === 1 
-            ? '¡Última vacante!' 
-            : (obtenerEstiloCupos(selectedVacante.limitePostulantes - (selectedVacante._count?.postulaciones || 0)).texto) 
-        }
-    </span>
-</span>
-)}
+            <div role="rowgroup" className="tv-body">
+            {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="tv-row tv-row-skeleton" role="row" aria-hidden="true">
+                        <div className="tv-cell" role="gridcell"><span className="tv-sk tv-sk-title" /><span className="tv-sk tv-sk-line" /></div>
+                        <div className="tv-cell" role="gridcell"><span className="tv-sk tv-sk-line" /></div>
+                        <div className="tv-cell" role="gridcell"><span className="tv-sk tv-sk-line short" /></div>
+                        <div className="tv-cell" role="gridcell"><span className="tv-sk tv-sk-line short" /></div>
+                        <div className="tv-cell" role="gridcell"><span className="tv-sk tv-sk-badge" /></div>
+                        <div className="tv-cell" role="gridcell"><span className="tv-sk tv-sk-line short" /></div>
+                        <div className="tv-cell" role="gridcell"><span className="tv-sk tv-sk-line short" /></div>
+                    </div>
+                ))
+            ) : dataFiltrada.length > 0 ? (
+                dataFiltrada.map((v, idx) => {
+                    const { cupos, urgente, critico } = analizarVacante(v);
+                    const estiloModalidad = ESTILO_MODALIDAD[v.modalidad] || ESTILO_MODALIDAD.__default;
+                    const salarioTexto = v.salario ? `$ ${formatearSalarioVisual(v.salario)}` : 'A convenir';
+                    const vigenciaTexto = v.fechaCierre ? formatDate(v.fechaCierre) : 'Sin fecha límite';
 
-    <span className="meta-tag-badge badge-published">
-        <MapPin size={14} /> <b>Ubicación:</b> {selectedVacante.ubicacion}
-    </span>
-    
-    <span className="meta-tag-badge badge-published">
-        <FileText size={14} /> <b>Contrato:</b> {selectedVacante.tipo}
-    </span>
-    
-    <span className="meta-tag-badge badge-published">
-        <Globe size={14} /> <b>Modalidad:</b> {selectedVacante.modalidad}
-    </span>
-    
-    <span className="meta-tag-badge badge-slots">
-    <DollarSign size={14} /> 
-    <b>SALARIO:</b> {selectedVacante.tipoSalario === 'A convenir' || !selectedVacante.salario 
-        ? 'A convenir' 
-        : `$ ${formatearSalarioVisual(selectedVacante.salario)}`}
-</span>
-    
-    <span className="meta-tag-badge badge-published">
-        <Clock size={14} /> <b>Jornada:</b> {selectedVacante.jornada || 'No definida'}
-    </span>
-
-{/* Reemplaza el span de Cierre por este */}
-{selectedVacante.fechaCierre && (
-    <span className={`meta-tag-badge ${esFechaCercana(selectedVacante.fechaCierre) ? 'fecha-alerta' : 'badge-published'}`}>
-        <Clock size={14} /> 
-        <b>{esFechaCercana(selectedVacante.fechaCierre) ? '¡CIERRA PRONTO!:' : 'Cierre:'}</b> 
-        <span style={{ marginLeft: '4px' }}>{formatDate(selectedVacante.fechaCierre)}</span>
-    </span>
-)}
-
-    {/* HORARIO Y PUBLICACIÓN */}
-    <span className="meta-tag-badge badge-published">
-        <Calendar size={14} /> <b>Publicado:</b> {formatDate(selectedVacante.fechaCreacion)}
-    </span>
-    <span className="meta-tag-badge badge-published">
-        <Clock size={14} /> <b>Horario:</b> {selectedVacante.horario || 'Lunes a Viernes'}
-    </span>
-</div>
-                        </div>
-
-<div className="detail-body-text" style={{background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '30px', marginBottom: '20px'}}>
-    <strong style={{display: 'block', marginBottom: '12px', color: '#1e293b', fontSize: '17px'}}>
-        Descripción de la vacante:
-    </strong>
-
-    {/* Bloque de descripción optimizado */}
-    <div 
-        className="ql-editor-view" 
-        dangerouslySetInnerHTML={{ __html: selectedVacante.descripcion || "Sin descripción disponible." }} 
-    />
-</div>
-
-                        <div className="actions-footer" style={{marginTop: '10px', display: 'flex', gap: '15px'}}>
-                            {yaPostulado ? (
-                                <div className="already-applied-banner" style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#f0fdf4', color: '#166534', padding: '15px', borderRadius: '12px', border: '1px solid #bbf7d0', fontWeight: '600'}}>
-                                    <CheckCircle size={20} /> <span>Ya estás participando en este proceso</span>
+                    return (
+                        <div
+                            key={v.id}
+                            className="tv-row tv-fila"
+                            role="row"
+                            style={{ '--i': Math.min(idx, 14) }}
+                            tabIndex={0}
+                            aria-label={`Ver detalle de la vacante ${v.titulo} en ${v.empresa?.nombre || 'empresa aliada'}`}
+                            onClick={(e) => abrirVacante(v, e)}
+                            onKeyDown={(e) => {
+                                if (e.target !== e.currentTarget) return;
+                                if (e.key === 'Enter') abrirVacante(v, e);
+                            }}
+                        >
+                            <div className="tv-cell tv-col-cargo" role="gridcell">
+                                <Briefcase size={15} className="tv-icon-cargo" aria-hidden="true" />
+                                <div className="tv-cargo-textos">
+                                    <span className="tv-cargo-titulo">{v.titulo}</span>
+                                    {v.fechaCierre && (
+                                        <small className={`tv-cargo-vigencia-tablet${urgente ? ' is-urgent' : ''}`}>
+                                            {urgente ? 'Vence pronto · ' : 'Vigente hasta '}{vigenciaTexto}
+                                        </small>
+                                    )}
+                                    <span className="tv-empresa-movil">{v.empresa?.nombre || 'Empresa Aliada'}</span>
+                                    <div className="tv-meta-movil">
+                                        <span>{v.ubicacion}</span>
+                                        <span aria-hidden="true">·</span>
+                                        <span>{salarioTexto}</span>
+                                    </div>
+                                    <span
+                                        className="tv-badge tv-badge-mini"
+                                        style={{ '--tv-badge-bg': estiloModalidad.bg, '--tv-badge-text': estiloModalidad.text, '--tv-badge-dot': estiloModalidad.dot }}
+                                    >
+                                        <i aria-hidden="true" />{v.modalidad || 'No especificada'}
+                                    </span>
                                 </div>
-                            ) : (
-                                <button className="btn-apply-main" onClick={handlePostulacion} style={{flex: 1, padding: '16px', fontWeight: '700', fontSize: '15px'}}>
-                                    POSTULARME AHORA
+                            </div>
+
+                            <div className="tv-cell tv-col-empresa" role="gridcell">
+                                <button
+                                    type="button"
+                                    className="tv-empresa-link"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setVistaPreviaEmpresa('vacantes');
+                                        setEmpresaSeleccionadaId(v.empresaId || v.empresa?.id);
+                                        setVistaActiva('ver-perfil-empresa');
+                                    }}
+                                >
+                                    <span>{v.empresa?.nombre || 'Empresa Aliada'}</span>
+                                    <ArrowUpRight size={12} className="tv-empresa-icono" aria-hidden="true" />
                                 </button>
-                            )}
-                            <button className="btn-cv-secondary" onClick={() => setVistaActiva('crear-cv')} style={{padding: '16px', fontWeight: '600'}}>
-                                VER MI HOJA DE VIDA
-                            </button>
+                            </div>
+
+                            <div className="tv-cell tv-col-ubicacion" role="gridcell">{v.ubicacion}</div>
+
+                            <div className="tv-cell tv-col-salario" role="gridcell">{salarioTexto}</div>
+
+                            <div className="tv-cell tv-col-modalidad" role="gridcell">
+                                <span
+                                    className="tv-badge"
+                                    style={{ '--tv-badge-bg': estiloModalidad.bg, '--tv-badge-text': estiloModalidad.text, '--tv-badge-dot': estiloModalidad.dot }}
+                                >
+                                    <i aria-hidden="true" />{v.modalidad || 'No especificada'}
+                                </span>
+                            </div>
+
+                            <div className="tv-cell tv-col-vigencia" role="gridcell">
+                                <span className={urgente ? 'tv-vigencia-urgente' : ''}>
+                                    {v.fechaCierre ? vigenciaTexto : '—'}
+                                </span>
+                                {critico && (
+                                    <small className="tv-cupos-critico">
+                                        {cupos <= 0 ? 'Sin cupos' : `¡${cupos} ${cupos === 1 ? 'cupo' : 'cupos'}!`}
+                                    </small>
+                                )}
+                            </div>
+
+                            <div className="tv-cell tv-col-acciones" role="gridcell">
+                                <button
+                                    type="button"
+                                    className="tv-accion-icono tv-accion-ver"
+                                    aria-label="Ver detalle"
+                                    onClick={(e) => abrirVacante(v, e)}
+                                >
+                                    <Eye size={16} aria-hidden="true" />
+                                    <span className="tv-tooltip" role="tooltip">Ver detalle</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className="tv-accion-icono tv-accion-postular"
+                                    aria-label="Postular"
+                                    disabled={postulandoId === v.id}
+                                    aria-busy={postulandoId === v.id}
+                                    onClick={(e) => { e.stopPropagation(); handlePostulacion(v); }}
+                                >
+                                    {postulandoId === v.id ? <span className="exp-spinner" aria-hidden="true" /> : <Send size={15} aria-hidden="true" />}
+                                    <span className="tv-tooltip" role="tooltip">Postular</span>
+                                </button>
+                            </div>
                         </div>
+                    );
+                })
+            ) : null}
+            </div>
+          </div>
+
+            {!loading && dataFiltrada.length === 0 && (
+                <div className="sello-empty">
+                    <div className="doc" aria-hidden="true">
+                        <div className="lines"><span /><span /><span /><span /></div>
+                        <span className="wax">·</span>
+                    </div>
+                    {hayFiltrosActivos ? (
+                        <>
+                            <h3>No encontramos vacantes con estos filtros</h3>
+                            <p>Prueba ajustando la búsqueda, la ubicación, el salario o la modalidad.</p>
+                            <button type="button" className="s-refresh" onClick={limpiarFiltros}>
+                                Limpiar filtros
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <h3>No hay vacantes disponibles por ahora</h3>
+                            <p>Vuelve a intentarlo más tarde o actualiza el listado.</p>
+                            <button type="button" className="s-refresh" onClick={fetchVacantes}>
+                                <Clock size={16} /> <span>Actualizar listado</span>
+                            </button>
+                        </>
+                    )}
+                </div>
+            )}
+        </div>
+
+        {/* 4. FILTROS EN MÓVIL — bottom sheet */}
+        {filtrosMovilAbiertos && (
+            <div className="tv-sheet-overlay" onClick={() => setFiltrosMovilAbiertos(false)}>
+                <div
+                    className="tv-sheet"
+                    ref={filtrosSheetRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Filtrar vacantes"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="tv-sheet-handle" aria-hidden="true" />
+                    <h3>Filtrar vacantes</h3>
+
+                    <label className="tv-select tv-select-block">
+                        <span>Ubicación</span>
+                        <select value={filtroUbicacion} onChange={(e) => setFiltroUbicacion(e.target.value)}>
+                            <option value="">Todas</option>
+                            {ubicacionesDisponibles.map((u) => (
+                                <option key={u} value={u}>{u}</option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <label className="tv-select tv-select-block">
+                        <span>Salario</span>
+                        <select value={filtroSalario} onChange={(e) => setFiltroSalario(e.target.value)}>
+                            <option value="">Cualquiera</option>
+                            {RANGOS_SALARIO.map((r) => (
+                                <option key={r.id} value={r.id}>{r.label}</option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <span className="tv-sheet-label">Modalidad</span>
+                    <div className="tv-chips" role="group" aria-label="Filtrar por modalidad">
+                        {modalidadesDisponibles.map((m) => {
+                            const activo = filtroModalidades.includes(m);
+                            return (
+                                <button
+                                    type="button"
+                                    key={m}
+                                    className={`tv-chip${activo ? ' is-active' : ''}`}
+                                    aria-pressed={activo}
+                                    onClick={() => setFiltroModalidades((prev) =>
+                                        activo ? prev.filter((x) => x !== m) : [...prev, m]
+                                    )}
+                                >
+                                    {m}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="tv-sheet-actions">
+                        {hayFiltrosActivos && (
+                            <button type="button" className="tv-limpiar" onClick={limpiarFiltros}>
+                                Limpiar filtros
+                            </button>
+                        )}
+                        <button type="button" className="tv-sheet-aplicar" onClick={() => setFiltrosMovilAbiertos(false)}>
+                            Ver {dataFiltrada.length} {dataFiltrada.length === 1 ? 'resultado' : 'resultados'}
+                        </button>
                     </div>
                 </div>
             </div>
         )}
+    </div>
+)}
+        {/* 3. MODAL — la hoja que se abre (Rumbo B · "Sello") */}
+        {selectedVacante && (() => {
+            const { cupos, urgente, critico } = analizarVacante(selectedVacante);
+            const irAEmpresa = () => {
+                setVistaPreviaEmpresa('vacantes');
+                setEmpresaSeleccionadaId(selectedVacante.empresaId || selectedVacante.empresa?.id);
+                setVistaActiva('ver-perfil-empresa');
+                setSelectedVacante(null);
+            };
+            return (
+            <div className="sello-modal-overlay" onClick={cerrarVacante}>
+                <div
+                    className="sello-sheet"
+                    ref={modalRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="vdp-modal-title"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button className="s-close" onClick={cerrarVacante} aria-label="Cerrar el expediente de la vacante">
+                        <XCircle size={22} />
+                    </button>
+
+                    <div className="s-head">
+                        <span className="s-modal-tab">{selectedVacante.modalidad || 'Modalidad'}</span>
+                        <h3 id="vdp-modal-title" className="s-modal-title">{selectedVacante.titulo}</h3>
+                        <p className="s-modal-org">
+                            <button type="button" className="s-empresa" onClick={(e) => { e.stopPropagation(); irAEmpresa(); }}>
+                                {selectedVacante.empresa?.nombre || 'Empresa Aliada'}
+                            </button>
+                            {' · '}{selectedVacante.ubicacion}
+                        </p>
+                        <span className="s-modal-wax" aria-hidden="true">{inicialEmpresa(selectedVacante.empresa?.nombre)}</span>
+                    </div>
+
+                    <div className="s-body">
+                        <dl className="s-detail-grid">
+                            <div><dt>Salario</dt><dd>{selectedVacante.salario ? `$ ${formatearSalarioVisual(selectedVacante.salario)}` : 'A convenir'}</dd></div>
+                            <div><dt>Contrato</dt><dd>{selectedVacante.tipo || '—'}</dd></div>
+                            <div><dt>Jornada</dt><dd>{selectedVacante.jornada || '—'}</dd></div>
+                            <div><dt>Horario</dt><dd>{selectedVacante.horario || 'L–V'}</dd></div>
+                            {selectedVacante.fechaCierre && (
+                                <div>
+                                    <dt>{urgente ? 'Vence pronto' : 'Vigente hasta'}</dt>
+                                    <dd className={urgente ? 'is-urgent' : ''}>{formatDate(selectedVacante.fechaCierre)}</dd>
+                                </div>
+                            )}
+                            {cupos !== null && (
+                                <div>
+                                    <dt>Cupos</dt>
+                                    <dd className={critico ? 'is-critical' : ''}>
+                                        {cupos <= 0 ? 'Sin cupos' : `${cupos} ${cupos === 1 ? 'disponible' : 'disponibles'}`}
+                                    </dd>
+                                </div>
+                            )}
+                            <div><dt>Publicado</dt><dd>{formatDate(selectedVacante.fechaCreacion)}</dd></div>
+                        </dl>
+
+                        <p className="s-desc-label">Descripción de la vacante</p>
+                        <div className="s-desc">
+                            <div
+                                className="ql-editor-view"
+                                dangerouslySetInnerHTML={{ __html: selectedVacante.descripcion || 'Sin descripción disponible.' }}
+                            />
+                        </div>
+                    </div>
+
+                    <button type="button" className="s-ver-empresa" onClick={irAEmpresa}>
+                        <span className="mini-seal" aria-hidden="true">{inicialEmpresa(selectedVacante.empresa?.nombre)}</span>
+                        Ver perfil de la empresa
+                    </button>
+
+                    <div className="s-actions">
+                        {yaPostulado ? (
+                            <div className="s-applied">
+                                <CheckCircle size={18} /> <span>Ya estás participando en este proceso</span>
+                            </div>
+                        ) : (
+                            <button
+                                className="btn-radicar"
+                                onClick={() => handlePostulacion(selectedVacante)}
+                                disabled={postulandoId === selectedVacante.id}
+                                aria-busy={postulandoId === selectedVacante.id}
+                            >
+                                {postulandoId === selectedVacante.id ? (
+                                    <><span className="btn-apply-spinner" aria-hidden="true" />Radicando…</>
+                                ) : 'Radicar postulación'}
+                            </button>
+                        )}
+                        <button
+                            className="btn-cv-secondary"
+                            onClick={() => { setSelectedVacante(null); setVistaActiva('crear-cv'); }}
+                            style={{ padding: '15px 20px', flex: '1 1 200px' }}
+                        >
+                            Ver mi hoja de vida
+                        </button>
+                    </div>
+                </div>
+            </div>
+            );
+        })()}
 
                     {vistaActiva === 'crear-cv' && (
     <div className="full-view">
@@ -888,7 +1373,7 @@ return (
         <VerPerfilEmpresa 
             empresaId={empresaSeleccionadaId} 
             onVolver={() => setVistaActiva(vistaPreviaEmpresa)} 
-            onAbrirVacante={(vacante) => setSelectedVacante(vacante)}
+            onAbrirVacante={(vacante) => { setOriginRect(null); setSelectedVacante(vacante); }}
         />
     </div>
 )}
