@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Info, Target, Award, Eye as VisionIcon, Users } from 'lucide-react';
+import { Eye, EyeOff, Info } from 'lucide-react';
 import './Landing.css';
+import AcercaDeModal from './AcercaDeModal';
+import RecuperarModal from './RecuperarModal';
 
 // URLs de Imágenes:
 // Asegúrate de mover tus fotos a la carpeta /public/ con estos nombres
@@ -16,44 +18,12 @@ function Landing() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  // --- Agrega estos estados al inicio de tu componente Landing ---
+  // Modal "Recuperar contraseña" (RecuperarModal): el envío, la validación y el
+  // enfriamiento viven en el componente; aquí sólo se abre y se le devuelve el foco.
 const [showResetModal, setShowResetModal] = useState(false);
-const [emailRecuperacion, setEmailRecuperacion] = useState('');
-const [resetLoading, setResetLoading] = useState(false);
-const [resetMessage, setResetMessage] = useState({ texto: '', tipo: '' });
+const forgotLinkRef = useRef(null);
 const [showAboutModal, setShowAboutModal] = useState(false); // Estado para el "Acerca de"
-
-// --- Función para enviar el correo de recuperación ---
-const handleRequestReset = async (e) => {
-  e.preventDefault();
-  setResetLoading(true);
-  setResetMessage({ texto: '', tipo: '' });
-
-  try {
-    const response = await fetch('https://backend-ude-c.vercel.app/api/auth/request-password-reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo: emailRecuperacion }),
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      setResetMessage({ texto: "Enlace enviado. Revisa tu correo.", tipo: 'success' });
-      setTimeout(() => {
-        setShowResetModal(false);
-        setEmailRecuperacion('');
-        setResetMessage({ texto: '', tipo: '' });
-      }, 3000);
-    } else {
-      setResetMessage({ texto: data.message || "Error al enviar el correo.", tipo: 'error' });
-    }
-  } catch (error) {
-    setResetMessage({ texto: "Error de conexión con el servidor.", tipo: 'error' });
-  } finally {
-    setResetLoading(false);
-  }
-};
+const infoTriggerRef = useRef(null);
 
   // ESTA ES LA FUNCIÓN DONDE VA EL CÓDIGO
   const handleLogin = async (e) => {
@@ -118,10 +88,26 @@ const handleRequestReset = async (e) => {
         <div className="navbar-logo">
           <img src={logoUrl} alt="Portal de Empleo UDEC" />
         </div>
-        <div className="navbar-secondary-logo">
-    <img src={logoSecundarioUrl} alt="Logo Institucional" className="secondary-logo-img" />
-  </div>
+        <div className="navbar-right-group">
+          <div className="navbar-secondary-logo">
+            <img src={logoSecundarioUrl} alt="Logo Institucional" className="secondary-logo-img" />
+          </div>
+          <button
+            type="button"
+            ref={infoTriggerRef}
+            className="info-trigger-btn"
+            onClick={() => setShowAboutModal(true)}
+            aria-label="Acerca de Empres360 PRO"
+          >
+            <span className="info-trigger-visual">
+              <Info size={15} strokeWidth={2.4} />
+            </span>
+          </button>
+        </div>
       </header>
+
+      {/* --- DOBLE VITRINA: panel de hero + panel de acciones comparten el alto disponible --- */}
+      <div className="vitrina-udec">
 
       {/* --- SECCIÓN HERO --- */}
       <section className="hero-udec">
@@ -132,7 +118,7 @@ const handleRequestReset = async (e) => {
           <div className="hero-green-overlay"></div>
         </div>
 
-        {/* Lado Derecho (Negocios Puros) */}
+        {/* Lado Derecho (Negocios Puros) — oculto en Doble Vitrina (≥900px), visible en el apilado actual */}
         <div className="hero-half right-side">
           <img src={negociosImgUrl} alt="Negocios" className="hero-img" />
         </div>
@@ -205,9 +191,10 @@ const handleRequestReset = async (e) => {
               
               {/* Busca la sección del formulario de login */}
 <div className="login-form-extras">
-  <a 
-  href="#olvidaste" 
-  className="forgot-password-link" 
+  <a
+  href="#olvidaste"
+  ref={forgotLinkRef}
+  className="forgot-password-link"
   onClick={(e) => { e.preventDefault(); setShowResetModal(true); }}
 >
   ¿Olvidaste tu contraseña?
@@ -244,132 +231,31 @@ const handleRequestReset = async (e) => {
     </button>
   </div>
 </div>
-          
+
         </div>
       </section>
 
-      {/* --- FOOTER (Verde Oscuro) --- */}
-      <footer className="footer-dark-green">
-        <div className="footer-logo-and-info">
-          <img src={logoUrl} alt="UDEC" className="footer-logo-small" />
-          <div className="footer-info-text">
-            <p>© 2026 Todos los derechos reservados.</p>
-            {/* Texto clickable en azul profesional */}
-            <p>
-              Desarrollado por{" "}
-              <span 
-                className="e360-clickable-brand" 
-                onClick={() => setShowAboutModal(true)}
-              >
-                Empres360 PRO.
-              </span>
-            </p>
-            <p>Universidad de Cundinamarca.</p>
-          </div>
-        </div>
-      </footer>
+      </div>
+      {/* --- fin Doble Vitrina --- */}
+      {/* Créditos y copyright ya no viven en un footer fijo: se accede a ellos
+          desde el ícono ⓘ del navbar, que abre el modal "Acerca de" de abajo. */}
 
       {/* --- MODAL INTERACTIVO: ACERCA DE --- */}
 {showAboutModal && (
-  <div className="e360-about-overlay" onClick={() => setShowAboutModal(false)}>
-    <div className="e360-about-card" onClick={(e) => e.stopPropagation()}>
-      <button className="e360-close-btn" onClick={() => setShowAboutModal(false)}>×</button>
-      
-      <div className="e360-modal-header">
-        {/* Logo imponente y protagonista */}
-        <img src={logoUrl} alt="Empres360 PRO" className="e360-modal-logo" />
-      </div>
-
-      <div className="e360-modal-body">
-        {/* 1. ¿Qué es el Portal? */}
-        <section className="e360-section">
-          <h3><Info size={18} /> 1. ¿Qué es Empres360 PRO?</h3>
-          <p>
-            Es una plataforma digital estratégica diseñada para fortalecer el vínculo entre nuestra comunidad académica y el sector productivo. Este ecosistema facilita el encuentro entre el talento de alta calidad y las organizaciones que buscan perfiles innovadores, éticos y con responsabilidad social.
-          </p>
-        </section>
-
-        {/* 2. Objetivos */}
-        <section className="e360-section">
-          <h3><Target size={18} /> 2. Objetivos</h3>
-          <p>
-            Dinamizar la empleabilidad de los <strong>Egresados UdeC</strong>, permitiéndoles gestionar sus perfiles profesionales de manera integral, acceder a ofertas exclusivas del sector y potenciar su trayectoria laboral mediante herramientas tecnológicas.
-          </p>
-        </section>
-
-        {/* 3. Nuestra Misión */}
-        <section className="e360-section">
-          <h3><Award size={18} /> 3. Nuestra Misión</h3>
-          <p>
-            Brindar una solución tecnológica eficiente y centralizada que simplifique los procesos de reclutamiento para las empresas y optimice la búsqueda de oportunidades para nuestros graduados, bajo los principios de transparencia y excelencia académica.
-          </p>
-        </section>
-
-        {/* 4. Nuestra Visión */}
-        <section className="e360-section">
-          <h3><Eye size={18} /> 4. Nuestra Visión</h3>
-          <p>
-            Consolidarnos para los proximos años como el principal ecosistema de vinculación laboral universitaria en la región, siendo reconocidos por la innovación en nuestros procesos de intermediación y por el alto impacto en el desarrollo profesional de nuestra comunidad de egresados.
-          </p>
-        </section>
-
-        {/* 5. Equipo de Desarrollo y Diseño */}
-        <section className="e360-section">
-          <h3><Users size={18} /> 5. Equipo de Desarrollo y Diseño</h3>
-          <p>
-            Esta plataforma ha sido desarrollada bajo estándares modernos de ingeniería de sistemas/software, integrando tecnologías de última generación para garantizar seguridad, velocidad y una experiencia de usuario intuitiva.
-          </p>
-          
-          <div className="e360-team-box">
-            <p><strong>• Dirección de Proyecto:</strong> Universidad de Cundinamarca.</p>
-            <p><strong>• Arquitectura y Desarrollo Full-stack:</strong> Empres360 PRO.</p>
-            <p><strong>• Diseño de Interfaz (UI/UX):</strong> Empres360 PRO.</p>
-          </div>
-        </section>
-      </div>
-
-      <div className="e360-modal-footer">
-        <p>Institución de Educación Superior sujeta a inspección y vigilancia por el Ministerio de Educación Nacional.</p>
-      </div>
-    </div>
-  </div>
+  <AcercaDeModal
+    logoUrl={logoUrl}
+    triggerRef={infoTriggerRef}
+    onClose={() => setShowAboutModal(false)}
+  />
 )}
+{/* --- MODAL: RECUPERAR CONTRASEÑA (precarga el correo ya escrito en el Login) --- */}
 {showResetModal && (
-  <div className="modal-overlay-reset fade-in">
-    <div className="modal-content-reset scale-up">
-      <button className="close-modal-btn" onClick={() => setShowResetModal(false)}>×</button>
-      
-      <h2>Recuperar Contraseña</h2>
-      <p>Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu clave.</p>
-
-      <form onSubmit={handleRequestReset}>
-        <input 
-          type="email" 
-          placeholder="tu-correo@ejemplo.com"
-          className="udec-input-field"
-          value={emailRecuperacion}
-          onChange={(e) => setEmailRecuperacion(e.target.value)}
-          required
-        />
-
-        {resetMessage.texto && (
-          <span className={`message-sutil-${resetMessage.tipo}`}>
-            {resetMessage.texto}
-          </span>
-        )}
-
-        <div className="modal-actions-reset">
-          <button 
-            type="submit" 
-            className="udec-green-btn btn-reset-submit"
-            disabled={resetLoading}
-          >
-            {resetLoading ? "Enviando..." : "ENVIAR ENLACE"}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <RecuperarModal
+    logoUrl={logoUrl}
+    correoInicial={correo}
+    triggerRef={forgotLinkRef}
+    onClose={() => setShowResetModal(false)}
+  />
 )}
     </div>
   );

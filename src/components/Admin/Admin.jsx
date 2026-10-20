@@ -24,7 +24,28 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointE
 
 const API_URL = "https://backend-ude-c.vercel.app/api";
 
+// Font Awesome sólo se usa dentro del panel de Admin: se carga aquí en vez de
+// globalmente en index.html, para no bloquear el primer render de Login/Landing.
+const FONT_AWESOME_HREF = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css";
+
+function useFontAwesome() {
+  useEffect(() => {
+    let link = document.querySelector(`link[href="${FONT_AWESOME_HREF}"]`);
+    const yaExistia = !!link;
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = FONT_AWESOME_HREF;
+      document.head.appendChild(link);
+    }
+    return () => {
+      if (!yaExistia) link.remove();
+    };
+  }, []);
+}
+
 const Admin = () => {
+  useFontAwesome();
   const [vistaActiva, setVistaActiva] = useState('inicio');
   const [vacantesRecientes, setVacantesRecientes] = useState([]);
   const [stats, setStats] = useState(null);
