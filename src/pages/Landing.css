@@ -16,26 +16,90 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 8%;
+  /* Vertical 8px -> 6px (combo "navbar-C" aprobado): junto con los logos
+     a 50px, libera ~14px para el panel de Doble Vitrina sin que la marca
+     se sienta suelta dentro de la barra. */
+  padding: 6px 8%;
   /* CAMBIO: Fondo verde institucional igual al footer */
-  background-color: var(--udec-verde); 
+  background-color: var(--udec-verde);
   /* Eliminamos el borde superior verde porque ya todo el bloque es verde */
-  border-top: none; 
+  border-top: none;
   border-bottom: 3px solid var(--udec-dorado);
 }
 
 .secondary-logo-img {
-  height: 60px; /* Mantén tu altura actual */
+  height: 50px; /* 60px -> 50px, ver nota de .navbar-udec arriba */
   width: auto;
   object-fit: contain;
   padding: 5px;
 
   /* --- AGREGA ESTA LÍNEA PARA VOLVERLO BLANCO --- */
-  filter: brightness(0) invert(1); 
+  filter: brightness(0) invert(1);
 }
 
 .navbar-logo img {
-  height: 60px;
+  height: 50px;
+}
+
+.navbar-right-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* --- BOTÓN DE CRÉDITOS (ⓘ Acerca de) --- */
+/* Área táctil de 44px (accesibilidad), glifo visual mucho más chico y liviano
+   que el escudo institucional para no competir con él. */
+.info-trigger-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.82);
+  flex-shrink: 0;
+}
+
+.info-trigger-visual {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.15s ease;
+}
+
+.info-trigger-btn:hover .info-trigger-visual,
+.info-trigger-btn:focus-visible .info-trigger-visual {
+  border-color: var(--udec-dorado);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.info-trigger-btn:active .info-trigger-visual {
+  transform: scale(0.88);
+}
+
+.info-trigger-btn:focus-visible {
+  outline: 2px solid var(--udec-dorado);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-trigger-visual {
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+  }
+  .info-trigger-btn:active .info-trigger-visual {
+    transform: none;
+  }
 }
 
 .navbar-nav ul {
@@ -126,7 +190,11 @@
 /* --- ACCIONES (LOGIN Y REGISTRO) --- */
 .actions-section-white {
   padding: 50px 0; /* Padding arriba/abajo, quitamos el horizontal anterior de 8% */
-  flex: 1; /* Mantenemos esto para el Sticky Footer */
+  flex: 1; /* Ya no hay footer fijo que "empujar" al fondo: en vez de dejar
+              este espacio sobrante como vacío, centramos el contenido en él. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .actions-section-grid {
@@ -264,10 +332,39 @@
   align-items: center;
 }
 
+/* Enlace "¿Olvidaste tu contraseña?" — tratamiento E1 (DESIGN.md §8):
+   verde de la pantalla y subrayado siempre, sutil en reposo (así se reconoce
+   como enlace en táctil, sin hover) y pleno al pasar el puntero. Área de 44px
+   de alto con margen negativo: en el flujo mide 22px, lo mismo que antes, y el
+   hover no cambia el peso de la letra (sin salto de layout). */
 .forgot-password-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -11px -8px;
+  padding: 0 8px;
+  border-radius: 6px;
   font-size: 0.85rem;
-  color: #666;
-  text-decoration: none;
+  font-weight: 600;
+  color: var(--udec-verde);
+  text-decoration: underline 1px rgba(0, 77, 44, 0.35);
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color 150ms ease, text-decoration-color 150ms ease, text-decoration-thickness 150ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .forgot-password-link:hover {
+    color: #00301b;
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+}
+.forgot-password-link:focus-visible {
+  outline: 2px solid var(--udec-verde);
+  outline-offset: -6px; /* ceñido al texto, no a los 44px del área táctil */
+}
+@media (prefers-reduced-motion: reduce) {
+  .forgot-password-link { transition: none; }
 }
 
 /* Botones con estilo de la imagen */
@@ -331,51 +428,6 @@
   display: inline-block;
 }
 
-/* --- FOOTER --- */
-.footer-dark-green {
-  background-color: var(--udec-verde);
-  color: var(--blanco);
-  padding: 20px 8%; /* Aumentamos un poco el padding para que se vea más profesional */
-  
-  display: flex;
-  /* CAMBIO 1: Cambiamos space-between por center */
-  justify-content: center; 
-  align-items: center;
-  
-  /* CAMBIO 2: Añadimos espacio entre el logo y el texto */
-  gap: 60px; 
-  border-top: 3px solid var(--udec-dorado);
-  /* CAMBIO 3: Aseguramos que las líneas de texto se alineen al centro entre ellas */
-  text-align: left; 
-}
-
-.footer-logo-and-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.footer-logo-small {
-  height: 40px;
-}
-
-.footer-info-text p {
-  font-size: 0.75rem;
-  line-height: 1.4;
-  text-align: left;
-}
-
-.footer-social-icons {
-  display: flex;
-  gap: 15px;
-}
-
-.social-icon {
-  color: white;
-  text-decoration: none;
-  font-size: 1.2rem;
-}
-
 /* Responsivo */
 /* =========================================
    MEDIA QUERIES (RESPONSIVO - MÓVILES)
@@ -383,11 +435,10 @@
 
 /* Dispositivos medianos (tablets y laptops pequeñas) */
 @media (max-width: 1024px) {
-  .navbar-udec, 
-  .hero-text-overlay, 
-  .actions-section-white, 
-  .highlights-section-white, 
-  .footer-dark-green {
+  .navbar-udec,
+  .hero-text-overlay,
+  .actions-section-white,
+  .highlights-section-white {
     padding-left: 5%;
     padding-right: 5%;
   }
@@ -405,9 +456,13 @@
   }
 
   /* Esto hará que el logo de la izquierda y el de la derecha se vean blancos */
-.navbar-logo img, 
+  /* Alto reducido de 60px a 40px: a 60px, el escudo UdeC y el botón ⓘ
+     terminaban empujados fuera del viewport en pantallas de 390/360px
+     (medido con boundingBox, no sólo "se ve" — el escudo quedaba
+     recortado y el botón ⓘ totalmente inalcanzable). */
+.navbar-logo img,
 .secondary-logo-img {
-  height: 60px;
+  height: 40px;
   filter: brightness(0) invert(1); /* Convierte el logo a color blanco */
 }
 
@@ -491,29 +546,6 @@
   .forgot-password-link {
     text-align: center;
   }
-
-  /* --- FOOTER --- */
-  .footer-dark-green {
-    flex-direction: column; /* Apilamos todo verticalmente */
-    gap: 20px;
-    padding: 30px 15px;
-    
-  }
-
-  .footer-logo-and-info {
-    flex-direction: column; /* Logo sobre texto */
-    gap: 10px;
-  }
-
-  .footer-info-text p {
-    font-size: 0.85rem; /* Texto un poco más grande para legibilidad */
-  }
-
-  .footer-social-icons {
-    justify-content: center;
-    width: 100%;
-    margin-top: 10px;
-  }
 }
 
 /* Teléfonos muy pequeños */
@@ -521,9 +553,20 @@
   .text-container h1 {
     font-size: 1.3rem;
   }
-  
+
   .udec-green-btn {
     padding: 10px 20px;
+  }
+
+  /* A 390/360px incluso 40px de alto deja muy poco margen junto al botón ⓘ;
+     se reduce un poco más y se acorta el espacio entre escudo y botón. */
+  .navbar-logo img,
+  .secondary-logo-img {
+    height: 32px;
+  }
+
+  .navbar-right-group {
+    gap: 8px;
   }
 }
 
@@ -532,6 +575,18 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh; /* Ocupa el 100% de la altura de la ventana (viewport height) */
+}
+
+/* Envuelve hero + acciones. Por defecto (apilado, <900px) crece para ocupar
+   el resto del alto disponible bajo el navbar — antes ese espacio lo
+   reclamaba el footer fijo ("sticky footer"); sin footer, si no se declara
+   flex aquí el excedente queda como vacío al fondo de la página en vez de
+   dejar que .actions-section-white lo centre (ver su `flex: 1`). */
+.vitrina-udec {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Estilo para el error sutil */
@@ -558,68 +613,8 @@
   }
 }
 
-/* --- MODAL DE RECUPERACIÓN --- */
-.modal-overlay-reset {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
-  backdrop-filter: blur(4px); /* Efecto de desenfoque profesional */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content-reset {
-  background: white;
-  padding: 40px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 450px;
-  position: relative;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  border-top: 5px solid #1b4332; /* El verde de la UdeC */
-}
-
-.modal-content-reset h2 {
-  color: #1b4332;
-  margin-bottom: 10px;
-  font-size: 24px;
-}
-
-.modal-content-reset p {
-  color: #4a5568;
-  font-size: 14px;
-  margin-bottom: 25px;
-}
-
-.close-modal-btn {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #a0aec0;
-  transition: color 0.3s;
-}
-
-.close-modal-btn:hover { color: #e53e3e; }
-
-.modal-actions-reset {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-/* Mensajes de éxito y error dentro del modal */
-.message-sutil-success { color: #38a169; font-size: 13px; display: block; margin-top: 10px; }
-.message-sutil-error { color: #e53e3e; font-size: 13px; display: block; margin-top: 10px; }
+/* (El modal de recuperación anterior —.modal-overlay-reset y compañía— se
+   reemplazó por RecuperarModal.jsx/.css, prefijo `recuperar-`.) */
 
 /* Animaciones */
 .fade-in { animation: fadeIn 0.3s ease; }
@@ -630,6 +625,12 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+/* ---------------------------------------------------------------
+   DEAD CSS (2026-10): todo el bloque `.e360-*` de aquí hasta
+   "DOBLE VITRINA" ya no se usa. El modal "Acerca de" se reemplazó
+   por AcercaDeModal.jsx/.css (dirección "Expediente", DESIGN.md §8).
+   Se deja marcado, no eliminado, para mantener revisable el diff.
+   --------------------------------------------------------------- */
 /* Estilo para el link en el footer */
 .e360-clickable-brand {
   color: var(--e360-blue-link);
@@ -672,6 +673,12 @@
   flex-direction: column;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
   overflow: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .e360-about-card {
+    animation: e360SlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
 
 .e360-close-btn {
@@ -732,6 +739,14 @@
   padding-top: 20px;
   text-align: center;
   flex-shrink: 0;
+}
+
+.e360-modal-footer .e360-copyright {
+  font-size: 0.8rem;
+  color: var(--e360-primary);
+  font-style: normal;
+  font-weight: 600;
+  margin-bottom: 6px;
 }
 
 .e360-modal-footer p {
@@ -828,12 +843,118 @@
   .e360-about-card {
     padding: 20px;
   }
-  
+
   .e360-modal-logo {
     max-width: 280px; /* Logo más pequeño en pantallas con poca altura */
   }
-  
+
   .e360-section:not(:first-child) {
     margin-top: 25px; /* Menos espacio entre secciones */
+  }
+}
+
+/* =========================================
+   DOBLE VITRINA (≥900px) — sin scroll
+   =========================================
+   Navbar arriba + panel de hero angosto (izquierda) y panel de
+   Iniciar sesión / Registrarse (derecha) comparten el alto disponible,
+   en vez de apilarse. Bajo los 900px se conserva el apilado de siempre
+   (hero arriba a lo ancho, acciones debajo, con scroll natural).
+   Créditos: ya no viven en un footer fijo, están en el modal "Acerca de"
+   que abre el botón ⓘ del navbar. */
+@media (min-width: 900px) {
+  .landing-udec-main {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .vitrina-udec {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+
+  /* Costura entre panel de hero y panel de acciones ("franja con blur",
+     aprobada sobre gradiente-al-fondo y sombra-interna): difumina una
+     banda angosta exactamente sobre la unión de los dos paneles sin
+     aclarar ni oscurecer la foto — se ancla al 38% (el mismo punto de
+     corte que separa .hero-udec de .actions-section-white), así que
+     escala junto con los paneles en vez de a un valor de píxeles fijo. */
+  .vitrina-udec::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(38% - 18px);
+    width: 36px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    z-index: 4;
+    pointer-events: none;
+    mask-image: linear-gradient(to right, transparent, black 40%, black 60%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 40%, black 60%, transparent);
+  }
+
+  /* --- Panel de hero (izquierda) --- */
+  .hero-udec {
+    flex: 0 0 38%;
+    width: 38%;
+    height: 100%;
+  }
+
+  .hero-half.right-side {
+    display: none;
+  }
+
+  .hero-half.left-side {
+    width: 100%;
+  }
+
+  .hero-green-overlay {
+    background: linear-gradient(
+      to top,
+      rgba(0, 51, 26, 0.92) 0%,
+      rgba(0, 51, 26, 0.45) 48%,
+      rgba(0, 51, 26, 0.12) 100%
+    );
+  }
+
+  .hero-text-overlay {
+    align-items: flex-end;
+    padding: 0 10% 14%;
+  }
+
+  .hero-text-overlay .text-container h1 {
+    font-size: 1.55rem;
+  }
+
+  .hero-text-overlay .text-container p {
+    font-size: 0.85rem;
+  }
+
+  /* --- Panel de acciones (derecha) --- */
+  .actions-section-white {
+    flex: 1 1 62%;
+    width: 62%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6%;
+    /* Válvula de seguridad: si algún contenido puntual no cupiera en un
+       alto muy reducido, este panel scrollea por dentro en vez de romper
+       la promesa de cero scroll en la página. */
+    overflow-y: auto;
+  }
+
+  .actions-section-grid {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+    width: 100%;
+    gap: 40px;
+    padding: 0;
+    margin: 0;
   }
 }

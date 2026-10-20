@@ -1,0 +1,480 @@
+/* =========================================================
+   Modal "Acerca de Empres360 PRO" — dirección "Expediente"
+   Panel verde de identidad (logo + índice + créditos) a la
+   izquierda; una sección a la vez a la derecha.
+   Prefijo propio `acerca-` (sin colisión con las clases
+   compartidas de los dashboards). Paleta de la pantalla de
+   Login: --udec-verde / --udec-dorado (Landing.css) + lima
+   del logo. Tipografía: Montserrat (self-hosted en main.jsx).
+   ========================================================= */
+
+.acerca-overlay {
+  --acerca-verde: var(--udec-verde, #004d2c);
+  --acerca-dorado: var(--udec-dorado, #a28945);
+  --acerca-lima: #a6e000; /* muestreado del degradado del logo (#98d810 → #b8f000) */
+  --acerca-tinta: #2b302d;
+  --acerca-tinta-suave: #5b625e;
+  --acerca-filete: rgba(0, 77, 44, 0.12);
+  --acerca-tinte: rgba(0, 77, 44, 0.05);
+  --acerca-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --acerca-margen: 24px;
+  --acerca-alto: 580px;
+
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--acerca-margen);
+  background: rgba(0, 24, 14, 0.58);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: 'Montserrat', 'Century Gothic', system-ui, 'Segoe UI', sans-serif;
+  color: var(--acerca-tinta);
+}
+
+/* EmpresaDashboard.css declara `* { font-family: 'Inter' }` sin ámbito y viaja
+   en el bundle global: sin esta línea, cada nodo del modal la heredaría. */
+.acerca-overlay * { font-family: inherit; }
+
+/* Alto fijo: cambiar de pestaña no hace saltar la tarjeta. */
+.acerca-tarjeta {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 960px;
+  height: min(var(--acerca-alto), calc(100dvh - 2 * var(--acerca-margen)));
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 32px 80px -12px rgba(0, 30, 18, 0.45);
+  overflow: hidden;
+  outline: none;
+}
+
+.acerca-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Panel de identidad ---------- */
+.acerca-identidad {
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 22px 18px 20px;
+  background: var(--acerca-verde);
+  border-right: 3px solid var(--acerca-dorado);
+  color: #fff;
+}
+
+.acerca-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-left: 10px;
+}
+
+.acerca-marca {
+  margin: 0;
+  line-height: 0;
+}
+.acerca-marca img {
+  display: block;
+  height: 38px;
+  width: auto;
+}
+
+.acerca-cerrar {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 160ms var(--acerca-ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .acerca-cerrar:hover { background: rgba(255, 255, 255, 0.2); }
+}
+.acerca-cerrar:active { transform: scale(0.97); }
+.acerca-cerrar:focus-visible {
+  outline: 2px solid var(--acerca-lima);
+  outline-offset: 2px;
+}
+
+.acerca-indice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 28px;
+}
+
+.acerca-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 160ms var(--acerca-ease);
+}
+.acerca-tab svg { flex-shrink: 0; opacity: 0.85; }
+/* Feedback de pulsación, igual que la X. */
+.acerca-tab:active { transform: scale(0.97); }
+/* El color sólo hace transición en :hover: el fondo entra suave al pasar el
+   puntero y sale en seco. Cambiar de selección (sobre todo con flechas) es
+   instantáneo, igual que la franja lima que lo acompaña. Cada regla repite
+   la transición de transform porque `transition` reemplaza la lista entera. */
+@media (hover: hover) and (pointer: fine) {
+  .acerca-tab:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    transition: background-color 150ms ease, color 150ms ease, transform 160ms var(--acerca-ease);
+  }
+}
+.acerca-tab[aria-selected='true'] {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-weight: 700;
+  transition: transform 160ms var(--acerca-ease);
+}
+.acerca-tab[aria-selected='true']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--acerca-lima);
+}
+.acerca-tab[aria-selected='true'] svg { color: var(--acerca-lima); opacity: 1; }
+.acerca-tab:focus-visible {
+  outline: 2px solid var(--acerca-lima);
+  outline-offset: -2px;
+}
+
+/* ---------- Créditos (pie) ---------- */
+.acerca-pie p { margin: 0; line-height: 1.55; }
+.acerca-pie-copy {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.acerca-pie-nota {
+  margin-top: 4px !important;
+  font-size: 0.72rem;
+  text-wrap: pretty;
+}
+
+.acerca-pie-panel { margin-top: auto; }
+.acerca-pie-panel .acerca-pie {
+  padding: 16px 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.acerca-pie-panel .acerca-pie-copy { color: #fff; }
+.acerca-pie-panel .acerca-pie-nota { color: rgba(255, 255, 255, 0.72); }
+
+.acerca-pie-lectura { display: none; }
+
+/* ---------- Área de lectura: el único contenedor con scroll ---------- */
+.acerca-lectura {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 48px 64px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--acerca-dorado) transparent;
+  /* Contenedor de las container queries del justificado (ver abajo). */
+  container: acerca-lectura / inline-size;
+}
+
+/* margin-block:auto centra en vertical mientras el contenido cabe y cae a
+   alineado arriba si no cabe (no recorta el inicio, a diferencia de
+   justify-content:center). Así una sección corta (Misión) no queda
+   colgada arriba de un panel vacío, y una larga (Equipo) llena el panel. */
+.acerca-panel {
+  margin-block: auto;
+  max-width: 34rem;
+}
+
+.acerca-icono {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--acerca-tinte);
+  color: var(--acerca-dorado);
+}
+
+.acerca-titulo {
+  margin: 18px 0 0;
+  font-size: clamp(1.75rem, 1.2vw + 1.2rem, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--acerca-verde);
+  text-wrap: balance;
+}
+/* Filete dorado bajo el título: ancla la jerarquía título → texto. */
+.acerca-titulo::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 3px;
+  margin-top: 18px;
+  border-radius: 3px;
+  background: var(--acerca-dorado);
+}
+
+.acerca-prosa { margin-top: 20px; }
+/* Justificado con partición silábica (lang="es" en .acerca-overlay):
+   la medida de ~48ch y los guiones evitan los ríos que tenía el modal
+   anterior. Sólo los párrafos de lectura; títulos, índice, pie y la lista
+   de Equipo quedan alineados a la izquierda. En móvil (≤600px) la línea
+   es demasiado corta para justificar sin huecos: alineado a la izquierda.
+   `text-wrap: wrap` a propósito: con `pretty`, Chromium acorta las últimas
+   líneas para evitar viudas y el justificado las estira (medido: huecos de
+   hasta 5.9× un espacio). Límites de partición en `auto` (los del idioma). */
+.acerca-prosa p {
+  margin: 0;
+  max-width: 48ch;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: auto;
+  text-wrap: wrap;
+  color: var(--acerca-tinta);
+}
+.acerca-prosa strong { color: var(--acerca-verde); font-weight: 700; }
+
+/* Justificado según el ancho real de la columna de lectura (container
+   query, no viewport). Calibración medida, no a ojo (raíz a 16px):
+   - Barrido del ancho del párrafo de 380 a 534px, paso 0.5px, las 5
+     pestañas: el justificado sólo es estable (hueco máximo entre palabras
+     ≤ 2.5 espacios) en dos mesetas, 469.5–486.5px y 528–534px. Fuera de
+     ellas es lotería: pasa en anchos sueltos y falla en el vecino (820
+     pasaba con 393.x px y fallaba con 393.0px: 3.29×).
+   - Por eso: columna < 478px → izquierda; 478–527px → párrafo fijo en
+     478px (centro de la meseta ancha, ±8px de tolerancia ante subpíxeles,
+     zoom o renderizado distinto); ≥ 528px (escritorio, columna de 532px)
+     → el párrafo ocupa toda la columna (dentro de la meseta 528–534).
+   - Sólo en el diseño de escritorio/tablet (≥ 641px); en el de móvil
+     manda la regla de ≤ 640px de más abajo. */
+@media (min-width: 641px) {
+  @container acerca-lectura (width < 478px) {
+    .acerca-prosa p {
+      text-align: left;
+      hyphens: manual;
+      -webkit-hyphens: manual;
+      text-wrap: pretty;
+    }
+  }
+  @container acerca-lectura (478px <= width < 528px) {
+    .acerca-prosa p { width: 478px; max-width: 100%; }
+  }
+  @container acerca-lectura (width >= 528px) {
+    .acerca-prosa p { max-width: none; }
+  }
+  /* Créditos de Equipo: con columna < 301px el valor ("Universidad de
+     Cundinamarca.") aplastaba la etiqueta hasta desbordarla (medido a
+     672–724px de pantalla). Bajo 330px se apilan etiqueta y valor, como en
+     móvil; 330 deja margen tanto al desborde (301) como a 768 (341). */
+  /* `.acerca-lectura` delante: la regla base de los créditos va más abajo en
+     el archivo y, a igual especificidad, ganaría a esta container query. */
+  @container acerca-lectura (width < 330px) {
+    .acerca-lectura .acerca-creditos > div { grid-template-columns: minmax(0, 1fr); }
+    .acerca-lectura .acerca-creditos dd { text-align: left; }
+  }
+}
+
+/* Equipo es la sección más larga (párrafo + créditos): el párrafo baja
+   un paso para que todo quepa en el mismo alto fijo. */
+.acerca-panel-equipo .acerca-prosa p { font-size: 1rem; }
+
+.acerca-creditos {
+  margin: 20px 0 0;
+  border-top: 1px solid var(--acerca-filete);
+}
+.acerca-creditos > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--acerca-filete);
+}
+.acerca-creditos dt {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--acerca-tinta-suave);
+}
+.acerca-creditos dd {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--acerca-verde);
+  text-align: right;
+}
+
+/* =========================================================
+   Movimiento (emil-design-eng): entra 240ms con ease-out
+   fuerte desde scale .97; sale más rápido (160ms) con la misma
+   curva. Modal centrado → transform-origin center. Pestañas:
+   fundido 180ms desde opacidad .5 sólo si el cambio vino del
+   puntero; con teclado (flechas/Inicio/Fin) no hay animación.
+   ========================================================= */
+/* Durante la salida el overlay ya no recibe clics (evita un segundo cierre). */
+.acerca-saliendo { pointer-events: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .acerca-overlay { animation: acerca-fundido 200ms var(--acerca-ease); }
+  .acerca-tarjeta { animation: acerca-entrada 240ms var(--acerca-ease); }
+  .acerca-panel[data-origen='puntero'] { animation: acerca-fundido-tab 180ms ease-out; }
+  .acerca-saliendo { animation: acerca-fundido-out 160ms var(--acerca-ease) forwards; }
+  .acerca-saliendo .acerca-tarjeta { animation: acerca-salida 160ms var(--acerca-ease) forwards; }
+}
+/* Reducido = más suave, no cero: sólo opacidad, entrando y saliendo. */
+@media (prefers-reduced-motion: reduce) {
+  .acerca-overlay { animation: acerca-fundido 150ms ease-out; }
+  .acerca-saliendo { animation: acerca-fundido-out 150ms ease-out forwards; }
+}
+
+@keyframes acerca-fundido { from { opacity: 0; } to { opacity: 1; } }
+@keyframes acerca-fundido-tab { from { opacity: 0.5; } to { opacity: 1; } }
+@keyframes acerca-fundido-out { to { opacity: 0; } }
+@keyframes acerca-entrada {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes acerca-salida { to { opacity: 0; transform: scale(0.98); } }
+
+/* =========================================================
+   Alturas bajas (conserva el ajuste histórico max-height:750px)
+   ========================================================= */
+@media (max-height: 750px) {
+  .acerca-overlay { --acerca-margen: 16px; --acerca-alto: 560px; }
+  .acerca-marca img { height: 34px; }
+  .acerca-indice { margin-top: 18px; }
+  .acerca-tab { min-height: 44px; padding-block: 8px; }
+  /* Sólo se compacta el eje vertical: el mismo ancho de columna que a
+     800px de alto da los mismos cortes de línea justificados. */
+  .acerca-lectura { padding: 36px 64px; }
+}
+
+/* =========================================================
+   Tablet (≤ 900px)
+   ========================================================= */
+@media (max-width: 900px) {
+  .acerca-identidad { flex-basis: 252px; }
+  .acerca-lectura { padding: 40px 40px; }
+}
+/* Con la columna de tablet más estrecha, Equipo (la sección más larga)
+   necesitaba ~29px más a 768–800px. Las tablets tienen alto de sobra:
+   la tarjeta crece, sin tocar el ancho (ni los cortes del justificado). */
+@media (max-width: 900px) and (min-width: 641px) and (min-height: 751px) {
+  .acerca-overlay { --acerca-alto: 612px; }
+}
+
+/* =========================================================
+   Móvil (≤ 640px): hoja casi a pantalla completa; el panel
+   pasa arriba y las 5 pestañas envuelven en filas, todas
+   visibles. Scroll sólo en el área de lectura.
+   ========================================================= */
+@media (max-width: 640px) {
+  .acerca-overlay { --acerca-margen: 8px; align-items: stretch; }
+  .acerca-tarjeta {
+    flex-direction: column;
+    height: auto;
+    border-radius: 18px;
+  }
+  .acerca-identidad {
+    flex: 0 0 auto;
+    padding: 10px 8px 0 18px;
+    border-right: 0;
+    border-bottom: 3px solid var(--acerca-dorado);
+  }
+  .acerca-cabeza { padding-left: 0; }
+  .acerca-marca img { height: 32px; }
+  .acerca-indice {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 0 10px 12px 0;
+  }
+  .acerca-tab {
+    flex: 0 0 auto;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
+    font-size: 0.78rem;
+  }
+  .acerca-tab svg { width: 15px; height: 15px; }
+  .acerca-tab[aria-selected='true'] { background: var(--acerca-lima); color: var(--acerca-verde); }
+  .acerca-tab[aria-selected='true']::before { display: none; }
+  .acerca-tab[aria-selected='true'] svg { color: var(--acerca-verde); }
+
+  .acerca-pie-panel { display: none; }
+  .acerca-pie-lectura { display: block; }
+  .acerca-pie-lectura .acerca-pie {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--acerca-filete);
+    text-align: center;
+  }
+  .acerca-pie-lectura .acerca-pie-copy { color: var(--acerca-verde); }
+  .acerca-pie-lectura .acerca-pie-nota { color: var(--acerca-tinta-suave); text-wrap: balance; }
+
+  .acerca-lectura { padding: 24px 20px 18px; }
+  /* En móvil la lectura se ancla arriba: centrar en vertical aquí
+     separaría el texto de las pestañas que lo controlan. */
+  .acerca-panel { margin-block: 0; max-width: none; }
+  .acerca-icono { width: 44px; height: 44px; border-radius: 12px; }
+  .acerca-titulo { margin-top: 14px; font-size: 1.5rem; }
+  .acerca-titulo::after { margin-top: 14px; }
+  .acerca-prosa { margin-top: 16px; }
+  .acerca-prosa p,
+  .acerca-panel-equipo .acerca-prosa p { font-size: 0.98rem; }
+
+  .acerca-creditos > div { grid-template-columns: minmax(0, 1fr); }
+  .acerca-creditos dd { text-align: left; }
+}
+
+/* Diseño de móvil (≤ 640px, el mismo corte que la hoja a pantalla completa):
+   párrafos alineados a la izquierda. Se extendió de 600 a 640px porque entre
+   601 y 640 el justificado medía huecos de 4.03× un espacio. */
+@media (max-width: 640px) {
+  .acerca-prosa p {
+    text-align: left;
+    hyphens: manual;
+    -webkit-hyphens: manual;
+    text-wrap: pretty;
+  }
+}

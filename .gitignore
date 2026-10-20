@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Evidencia visual local (Playwright) y respaldos
+tests/evidencia/
+test-results/
+playwright-report/
+_originals_backup_no_optimizadas/
+
+# Variables de entorno
+.env
+.env.*

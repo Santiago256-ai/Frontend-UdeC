@@ -1,10 +1,35 @@
 /* VacantesDashboard.css - VERSIÓN FINAL ESTILO MAQUETA UDEC */
 
 /* 1. VARIABLES INSTITUCIONALES Y RESET */
+/* Paleta según Manual de Imagen Institucional UdeC — ECOM002 V_17.
+   Contraste verificado WCAG 2.1 AA (mínimo exigido por el manual). */
 :root {
-  --udec-green: #006b3f;
-  --udec-green-dark: #004d2e;
-  --udec-orange: #f29400;
+  /* ---- Paleta principal (uso predominante institucional) ---- */
+  --udec-green:        #007B3E; /* Pantone 3536 C — base: texto, iconos, CTA, foco (5.38:1 sobre blanco) */
+  --udec-green-strong: #00482B; /* Pantone 3537 C — oscuro: hover CTA, estado activo, fondos (10.7:1) */
+  --udec-green-dark:   #00482B; /* alias retrocompatible de --udec-green-strong */
+  --udec-gold:         #DAAA00; /* Pantone 110 C — dorado: SOLO rellenos / decoración grande (no apto para texto, 2.16:1) */
+  --udec-gold-ink:     #8A6A00; /* dorado oscurecido para TEXTO / iconos / bordes dorados — AA (4.7–5.1:1) */
+  --udec-gold-bg:      #FBF6E6; /* fondo suave derivado del dorado (badge de salario) */
+  --udec-yellow:       #FBE122; /* Pantone 107 C — disponible, sin uso en este módulo */
+
+  /* ---- Paleta secundaria (colores oficiales de marca) ---- */
+  /* Naranja institucional (Pantone 144 C). ES color oficial de marca, no solo de alerta.
+     Decisión de UX en "Vacantes Disponibles" (Egresado): uso restringido a urgencia/alerta
+     para no competir con verde + dorado. NO usar como color de texto (2.30:1 sobre blanco). */
+  --udec-orange:    #F7931E; /* Pantone 144 C — relleno / punto de notificación (con borde) */
+  --alert-ink:      #9A3412; /* texto de alertas de urgencia — AA sobre fondo ámbar claro (6.9:1) */
+  --alert-bg:       #FFF7ED; /* fondo de badge de alerta */
+  --alert-critical: #DC2626; /* rojo — cupos críticos (≤2) */
+
+  /* Neutros — derivados del gris institucional Pantone 425 C (#4D4D4D) + blanco */
+  --udec-gray:  #4D4D4D;          /* Pantone 425 C */
+  --paper:      #FFFFFF;          /* superficie del documento */
+  --ink-body:   #4D4D4D;          /* texto corrido */
+  --ink-soft:   #5D6660;          /* texto secundario — AA (~5.6:1 s/blanco; el rgba(77,77,77,.70) anterior daba solo ~3.7:1) */
+  --hairline:   rgba(77,77,77,.14); /* filetes / bordes sutiles */
+  --ease-sello: cubic-bezier(0.16, 1, 0.3, 1);
+
   --white: #ffffff;
   --text-main: #1a202c;
   --text-muted: #718096;
@@ -19,17 +44,33 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', 'Segoe UI', sans-serif; /* Tipografía más moderna */
+}
+
+/* Montserrat: familia web institucional (Manual ECOM002 V_17), self-hosted vía @fontsource.
+   Century Gothic como 2º fallback institucional; luego fuentes del sistema.
+   Ámbito acotado al dashboard del Egresado para no alterar otras vistas en esta ronda. */
+.dashboard-egresados-container,
+.dashboard-egresados-container *,
+.vdp-modal-overlay,
+.vdp-modal-overlay * {
+  font-family: 'Montserrat', 'Century Gothic', system-ui, 'Segoe UI', sans-serif;
 }
 
 .dashboard-layout {
     display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100vh;
     overflow: hidden;
+    background: var(--bg-main);
 }
 
-/* 2. BARRA LATERAL (SIDEBAR) */
+/* [Rumbo B "Sello en Marcha": la barra lateral se reemplazó por la barra
+   superior `.ex-nav` (ver bloque al final del archivo). El CSS `.sidebar*`,
+   `.menu-item*`, `.main-header*`, `.header-*`, `.user-*`, `.nav-punto-naranja`
+   y el sistema de tooltips quedó dead — pendiente de limpieza, ver DESIGN.md §8.] */
+
+/* 2. BARRA LATERAL (SIDEBAR) — dead, ver nota anterior */
 .sidebar {
     position: fixed;
     left: 15px;
@@ -238,14 +279,36 @@
   color: #ff8a8a;      /* Un color sutilmente rojizo para advertir la acción */
 }
 
-/* 3. CONTENEDOR PRINCIPAL (GLASS EFFECT) */
+/* 3. CONTENEDOR PRINCIPAL */
 .glass-container {
-  flex-grow: 1;
-  margin: 0; /* Eliminamos margen para que se vea más integrado */
+  flex: 1;
+  min-height: 0;
+  margin: 0;
   background: transparent;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* El área de contenido scrollea por dentro; la barra `.ex-nav` queda fija arriba. */
+.content-inner {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* `.content-inner` NO está escopeada por módulo: EmpresaDashboard.css define su
+   propia `.content-inner { margin-left: 70px; padding: 20px 40px; }` para el
+   sidebar colapsable de Empresa. Como Vite empaqueta todo el CSS en una sola
+   hoja global, ambas reglas conviven y, según el orden de import, el margen
+   del sidebar de Empresa se filtraba aquí — era la causa real del gap lateral
+   asimétrico (142px izquierda / 72px derecha) reportado en Vacantes: 70px de
+   ese margen fantasma + el padding propio de .vacantes-grid-wrapper. Se
+   neutraliza aquí, escopeado con `.dashboard-egresados-container` (2 clases,
+   gana por especificidad sin depender del orden de import). */
+.dashboard-egresados-container .content-inner {
+  margin-left: 0;
+  padding: 0;
 }
 
 .main-header {
@@ -277,76 +340,8 @@
 
 .search-box input { border: none; outline: none; font-size: 13px; width: 100%; color: var(--text-muted); }
 
-/* 4. ÁREA DE CONTENIDO (LISTA + DETALLE) */
-.vacantes-view-container {
-  display: flex;
-  width: 100%;
-  height: calc(100vh - 70px);
-  padding: 0 20px 20px 20px;
-  gap: 20px;
-}
-
-/* Panel Izquierdo: Lista de Vacantes */
-.vacantes-list-panel {
-  width: 40%;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-.vacantes-list-panel h2 {
-  font-size: 18px;
-  margin-bottom: 20px;
-  color: var(--text-dark);
-}
-
-.vacante-card-item {
-  background: var(--white);
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: 0.3s;
-  border: 2px solid transparent;
-}
-
-.vacante-card-item:hover, .vacante-card-item.active {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--udec-green);
-}
-
-.vacante-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.btn-details-action {
-  background-color: var(--udec-green) !important;
-  color: white !important;
-  border: none;
-  padding: 6px 15px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* 5. PANEL DERECHO: DETALLE (EL EFECTO FLOTANTE) */
-.vacante-detail-panel {
-  width: 60%;
-  background: var(--white);
-  border-radius: 20px;
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  padding: 40px;
-  overflow-y: auto;
-}
+/* [Layout antiguo de dos paneles (lista + detalle) eliminado — el módulo usa
+   la grilla "Sello" y el modal .sello-sheet.] */
 
 .detail-header-info h3 {
   font-size: 26px;
@@ -386,20 +381,64 @@
   transition: 0.3s;
 }
 
-.btn-apply-main:hover {
+.btn-apply-main:hover:not(:disabled) {
   background: var(--udec-green-dark);
-  box-shadow: 0 4px 12px rgba(0, 107, 63, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 72, 43, 0.25);
 }
 
+.btn-apply-main:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-apply-main:focus-visible {
+  outline: 2px solid var(--udec-green-strong);
+  outline-offset: 3px;
+}
+
+.btn-apply-main:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+/* Estado de envío: spinner + texto */
+.btn-apply-main .btn-apply-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: -3px;
+  margin-right: 10px;
+  animation: btn-apply-spin 0.7s linear infinite;
+}
+
+@keyframes btn-apply-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Secundario en estilo "ghost": deja a "Postularme" como único botón relleno. */
 .btn-cv-secondary {
-  background: var(--udec-orange);
-  color: white;
+  background: transparent;
+  color: var(--udec-green);
   padding: 14px;
   border-radius: 10px;
   font-weight: 700;
-  border: none;
+  border: 1.5px solid var(--udec-green);
   cursor: pointer;
   text-transform: uppercase;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-cv-secondary:hover {
+  background: rgba(0, 123, 62, 0.08);
+  border-color: var(--udec-green-strong);
+  color: var(--udec-green-strong);
+}
+
+.btn-cv-secondary:focus-visible {
+  outline: 2px solid var(--udec-green);
+  outline-offset: 2px;
 }
 
 /* ÁREA DRAG AND DROP (Visto en imagen 1) */
@@ -423,141 +462,7 @@
 ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
 
-/* Estenedor de las etiquetas en la tarjeta y en el detalle */
-.card-meta-tags, .detail-meta-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-/* Estilo base para los Badges */
-.badge-cupos, .badge-date, .meta-tag-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  border: 1px solid transparent;
-}
-
-/* Badge de Cupos (Inspirado en el color naranja UDEC para resaltar urgencia) */
-.badge-cupos {
-  background-color: #fff9f0;
-  color: #bf6a02;
-  border-color: #fbd38d;
-}
-
-/* Badge cuando quedan pocos cupos (Crítico) */
-.badge-cupos.urgent {
-  background-color: #fff5f5;
-  color: #c53030;
-  border-color: #feb2b2;
-}
-
-/* Badge de Fechas (Gris azulado elegante) */
-.badge-date, .meta-tag-badge {
-  background-color: #f1f5f9;
-  color: #475569;
-  border-color: #e2e8f0;
-}
-
-/* Iconos dentro de los badges */
-.badge-icon {
-  color: inherit;
-  opacity: 0.8;
-}
-
-/* Ajuste para el detalle derecho */
-.detail-meta-row {
-  margin-bottom: 20px;
-}
-
-.meta-tag-badge b {
-  margin-right: 3px;
-  color: #1e293b;
-}
-
-/* Badge de Publicación (Verde UdeC suave) */
-.badge-published {
-    background-color: #e6f4ea !important; /* El !important asegura que se aplique */
-    color: #006b3f !important;
-    border: 1px solid #c2e0d1 !important;
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 6px;
-}
-
-/* Badge de Cierre (Azul grisáceo para neutralidad o Rojo si falta poco) */
-.badge-deadline {
-    background-color: #f1f5f9 !important;
-    color: #475569 !important;
-    border: 1px solid #e2e8f0 !important;
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 6px;
-}
-
-/* Badge de Cupos (Naranja UdeC para resaltar disponibilidad/escasez) */
-/* 1. ESTADO NORMAL (4 o más cupos) - Naranja UdeC suave */
-.badge-slots {
-    background-color: #f1f5f9 !important; /* El gris de los otros badges */
-    color: #475569 !important;           /* El color de texto gris oscuro */
-    border: 1px solid #e2e8f0 !important;
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-}
-
-/* 2. ESTADO ADVERTENCIA (Exactamente 3 cupos) - Amarillo */
-.badge-slots.cupos-warning {
-    background-color: #fff4e5 !important; /* Naranja UdeC suave */
-    color: #f29400 !important;           /* Texto naranja fuerte */
-    border: 1px solid #ffead0 !important;
-}
-
-
-/* 4. ESTILO PARA LAS NEGRITAS (¡Últimos! / ¡Alerta!) */
-.badge-slots b {
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 9px;
-    margin-left: 5px;
-}
-
-.badge-deadline.urgent, .badge-cupos.urgent {
-    background-color: #fff5f5;
-    color: #e53e3e;
-    border: 1px solid #feb2b2;
-    animation: pulse-red 2s infinite;
-}
-
-/* Efecto hover sutil para todos los badges */
-.meta-tag-badge:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: all 0.2s ease;
-}
-
-/* Badge de Cierre Urgente (Rojo suave) */
-.badge-deadline.urgent {
-    background-color: #fff5f5 !important;
-    color: #e53e3e !important;
-    border: 1px solid #feb2b2 !important;
-}
-
-/* Animación sutil de pulso para llamar la atención */
-@keyframes pulse-red {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
-}
+/* [Sistema de badges antiguo eliminado — reemplazado por el sistema "Sello".] */
 
 /* --- FOOTER DEL SIDEBAR --- */
 .sidebar-footer {
@@ -772,12 +677,13 @@
 
 .bar-green {
     flex: 2; /* Más ancha */
-    background-color: #006b3f;
+    background-color: var(--udec-green);
 }
 
+/* Franja dorada institucional (Pantone 110 C) — relleno decorativo, sin texto encima. */
 .bar-orange {
     flex: 1; /* Más angosta */
-    background-color: #f29400;
+    background-color: var(--udec-gold);
 }
 
 /* CONTENIDO BLANCO */
@@ -1163,38 +1069,6 @@
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* Animación de parpadeo suave para el icono de alerta */
-.blink-icon {
-    animation: simpleBlink 1.5s infinite;
-}
-
-@keyframes simpleBlink {
-    0% { opacity: 1; }
-    50% { opacity: 0.3; } /* Baja la opacidad suavemente */
-    100% { opacity: 1; }
-}
-
-/* Opcional: Si quieres que el badge entero sea más llamativo cuando es urgente */
-.meta-tag-badge.badge-deadline.urgent {
-    background-color: #fef2f2; /* Un fondo rojo muy tenue */
-    border-color: #fecaca;
-}
-
-/* Estado Urgente para la Fecha de Cierre */
-.badge-deadline.fecha-urgente {
-    background-color: #fef2f2 !important; /* Rojo suave de fondo */
-    color: #b91c1c !important;           /* Texto rojo fuerte */
-    border: 1px solid #fecaca !important;
-    
-    /* Aplicamos el parpadeo a TODO el badge */
-    animation: simpleBlink 1.5s infinite;
-}
-
-/* El estilo del icono de alerta dentro de la fecha */
-.badge-deadline.fecha-urgente .blink-icon {
-    color: #dc2626;
-}
-
 .tooltip-container {
     position: relative;
     display: inline-flex;
@@ -1537,12 +1411,23 @@
     to { transform: scale(1); opacity: 1; }
 }
 
-/* Contenedor principal de la rejilla */
+/* Contenedor principal de la rejilla.
+   Antes tenía max-width:1400px + margin:0 auto: en monitores anchos (>1440px
+   de ancho de contenido, algo común) eso dejaba un margen muerto a los lados
+   de TODO el panel (cabecera + filtros + tabla), justo lo que una vista de
+   trabajo densa no debe tener. .vacantes-grid-wrapper solo se usa en esta
+   vista (no es un contenedor compartido con Solicitudes/Empresas/Mensajes,
+   cada una tiene su propio CSS) — se puede ajustar aquí sin riesgo. */
 .vacantes-grid-wrapper {
-    padding: 20px;
-    max-width: 1400px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 32px;
+    max-width: 2200px; /* solo como tope de cordura en monitores ultra-anchos */
     margin: 0 auto;
 }
+@media (max-width: 1279px) { .vacantes-grid-wrapper { padding: 20px; } }
+@media (max-width: 767px)  { .vacantes-grid-wrapper { padding: 16px; } }
 
 .vacantes-grid-header {
     display: flex;
@@ -1555,652 +1440,9 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-/* LA REJILLA MÁGICA */
-.vacantes-main-grid-layout {
-    display: grid;
-    /* Esto crea columnas automáticas que se ajustan al ancho de la pantalla */
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 25px;
-    padding-bottom: 50px;
-}
-
-/* Estilo de la tarjeta individual */
-.vacante-card-grid-item {
-    background: white;
-    border-radius: 20px;
-    padding: 24px;
-    border: 1px solid #edf2f7;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 220px;
-}
-
-.vacante-card-grid-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
-    border-color: #006b3f;
-}
-
-.vacante-card-grid-item h3 {
-    color: #1a202c;
-    font-size: 1.1rem;
-    margin: 15px 0;
-}
-
-/* Estilos del Modal (Efecto EmpresaDashboard) */
-.modal-overlay-vacante {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-}
-
-.vacante-detail-modal {
-    background: white;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    border-radius: 24px;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-}
-
-.modal-vacante-header {
-    padding: 20px 30px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 10;
-}
-
-/* Contenedor de la Rejilla */
-.vacantes-main-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-    gap: 25px;
-    padding: 20px;
-}
-
-.dashboard-egresados-container .vacante-card-compact {
-    cursor: pointer;
-    /* Degradado sutil con el verde UdeC */
-    background: linear-gradient(135deg, rgba(0, 72, 43, 0.08) 0%, rgba(0, 72, 43, 0.02) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    
-    /* Borde refinado */
-    border: 1px solid rgba(0, 72, 43, 0.15);
-    border-radius: 24px; /* Un poco más redondeado para modernidad */
-    padding: 22px;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    position: relative;
-    overflow: hidden; /* Para el brillo del hover */
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 30px -10px rgba(0, 72, 43, 0.1);
-    flex-direction: row !important;
-    width: 100%;
-}
-
-.card-content-left {
-    flex: 1 1 auto;
-    min-width: 0; /* Importante para que Flexbox no se rompa */
-}
-
-/* El contenedor de la flecha SIEMPRE tiene el mismo ancho */
-.card-action-right {
-    flex: 0 0 50px; /* No crece, no se encoge, siempre mide 50px */
-    width: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* EFECTO HOVER PROFESIONAL */
-.vacante-card-compact:hover {
-    transform: translateY(-8px) scale(1.01);
-    background: linear-gradient(135deg, rgba(0, 72, 43, 0.12) 0%, rgba(0, 72, 43, 0.05) 100%);
-    border-color: rgba(0, 72, 43, 0.3);
-    box-shadow: 0 20px 40px -15px rgba(0, 72, 43, 0.2);
-}
-
-/* Sutil brillo que cruza la tarjeta al pasar el mouse */
-.vacante-card-compact::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: 0.6s;
-}
-
-.vacante-card-compact:hover::after {
-    left: 100%;
-}
-
-.titulo-vacante {
-    color: #00482b; /* Verde institucional */
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin: 0;
-    letter-spacing: -0.02em; 
-    line-height: 1.2;
-}
-
-.hub-icon-wrapper-mini {
-    background: rgba(0, 72, 43, 0.1);
-    color: #00482b;
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.detail-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #64748b; /* Gris azulado sutil */
-    font-size: 0.85rem;
-}
-
-.badge-salary {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px !important;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 12px;
-    
-    /* Estilo Oro UdeC Refinado */
-    background: linear-gradient(135deg, rgba(162, 137, 69, 0.1) 0%, rgba(162, 137, 69, 0.05) 100%);
-    color: #866d2d; /* Un tono de oro más oscuro para legibilidad */
-    border: 1px solid rgba(162, 137, 69, 0.3); /* Borde sutil */
-    
-    /* Sombra muy suave para darle relieve */
-    box-shadow: 0 2px 4px rgba(162, 137, 69, 0.05);
-    transition: all 0.3s ease;
-}
-
-.badge-salary:hover {
-    background: rgba(162, 137, 69, 0.15);
-    border-color: rgba(162, 137, 69, 0.5);
-    transform: translateY(-1px);
-}
-
-.badge-salary svg {
-    color: #a28945; /* El oro brillante para el icono */
-}
-
-.badge-pill {
-    background: rgba(226, 232, 240, 0.5);
-    padding: 4px 10px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    color: #475569;
-}
-
-.btn-ver-detalles-compact {
-    background: #00482b;
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: background 0.3s;
-}
-
-.btn-ver-detalles-compact:hover {
-    background: #00331e;
-    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.3);
-}
-/* La tarjeta con su diseño original */
-.vacante-card-grid-item {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.vacante-card-grid-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    border-color: #006b3f;
-}
-
-/* Recuperamos tus estilos de texto internos */
-.vacante-titulo-grid {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1a202c;
-    margin: 10px 0;
-    line-height: 1.2;
-}
-
-.company-badge {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: #006b3f;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-/* Filas de detalles (Ubicación, Modalidad) */
-.grid-details-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-}
-
-.detail-pill {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: #4a5568;
-    font-size: 12px;
-}
-
-/* Footer de la tarjeta con Precio y Botón */
-.card-grid-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-    padding-top: 15px;
-    border-top: 1px solid #f1f5f9;
-}
-
-.salary-info {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 6px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    font-size: 13px;
-    font-weight: 600;
-    color: #475569;
-}
-
-.btn-grid-action {
-    background: #00482b;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-grid-action:hover {
-    background: #003620;
-}
-
-.urgent-tag-mini {
-    background: #fff5f5;
-    color: #e53e3e;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.floating-cupos-badge {
-    margin-top: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 6px;
-    width: fit-content;
-}
-
-.cupos-warning { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
-
-/* Definición de la animación de pulso profundo */
-@keyframes deep-pulse-alert {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
-        background-color: rgba(254, 226, 226, 1); /* Rojo muy suave */
-    }
-    50% {
-        transform: scale(1.05); /* Crece ligeramente */
-        box-shadow: 0 0 15px 5px rgba(220, 38, 38, 0.2); /* Brillo exterior */
-        background-color: rgba(254, 202, 202, 1); /* Se intensifica el fondo */
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
-        background-color: rgba(254, 226, 226, 1);
-    }
-}
-
-/* La clase que aplicaremos cuando el cupo sea crítico */
-.cupos-critico {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 12px;
-    border-radius: 12px;
-    border: 1.5px solid #dc2626; /* Borde rojo sólido para definir */
-    color: #b91c1c;
-    font-weight: 700;
-    font-size: 0.8rem;
-    
-    /* Aplicamos la animación */
-    animation: deep-pulse-alert 1.5s infinite ease-in-out;
-    
-    /* Para que el icono también resalte */
-    svg {
-        stroke-width: 3px;
-    }
-}
-
-.cupos-warning { 
-    background: #fef3c7 !important; /* Naranja/Amarillo suave */
-    color: #d97706 !important;     /* Texto naranja */
-    border: 1px solid #fde68a;
-}
-
-/* Animación opcional para el badge de Alerta (si quieres que parpadee) */
-.cupos-critico b {
-    animation: pulse-red 2s infinite;
-}
-
-/* --- DISEÑO DE TARJETA LIMPIA --- */
-.vacante-card-clean {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 24px;
-    border: 1px solid #e2e8f0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-    position: relative;
-    overflow: hidden;
-}
-
-.action-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(0, 72, 43, 0.2); /* Verde UdeC muy suave */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #00482b;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.vacante-card-compact:hover .action-circle {
-    background: #00482b;
-    color: #ffffff;
-    border-color: #00482b;
-    transform: translateX(5px) scale(1.1);
-    box-shadow: 0 4px 15px rgba(0, 72, 43, 0.2);
-}
-
-.vacante-card-clean:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08);
-    border-color: #bee3f8; /* Un azul suave al hover */
-}
-
-/* 1. SECCIÓN SUPERIOR: TÍTULO Y EMPRESA */
-.card-section-top {
-    margin-bottom: 16px;
-}
-
-.vacante-titulo-clean {
-    font-size: 1.15rem; /* Título grande y destacado */
-    font-weight: 800;
-    color: #1a202c;
-    margin: 0 0 6px 0;
-    line-height: 1.3;
-    letter-spacing: -0.3px;
-}
-
-.company-info-clean {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    color: #006b3f; /* Verde UdeC solo para la empresa */
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* 2. SECCIÓN DETALLES (Gris sutil, sin bordes) */
-.card-section-details {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.detail-item-clean {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #64748b; /* Gris suave para info logística */
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.detail-item-clean svg {
-    color: #94a3b8; /* Iconos más claros que el texto */
-}
-
-/* 3. SECCIÓN META (Salario y Estados) */
-.card-section-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-    margin-bottom: 16px;
-}
-
-.meta-salary-clean {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #1e293b;
-    font-size: 1.05rem;
-    font-weight: 700;
-}
-
-.meta-salary-clean svg {
-    color: #006b3f;
-}
-
-.meta-right-clean {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-/* Badges de Estado (Rojo/Naranja) */
-.status-pill {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 20px; /* Bordes muy redondeados (pill) */
-    text-transform: uppercase;
-}
-
-/* Reutilizamos tus clases dinámicas pero con diseño pill */
-.status-pill.cupos-warning { background: #fef3c7; color: #d97706; }
-
-/* Nuevo estilo para Cierra Pronto */
-.status-pill.urgent {
-    background: #00482b; /* Verde UdeC invertido */
-    color: #ffffff;
-}
-
-/* 4. BOTÓN DE ACCIÓN */
-.btn-view-details-clean {
-    background: #f1f5f9;
-    color: #1e293b;
-    border: 1px solid #e2e8f0;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-    margin-top: auto;
-}
-
-.btn-view-details-clean:hover {
-    background: #e2e8f0;
-    border-color: #cbd5e0;
-}
-
-.detail-group.text-urgente {
-    color: #c2410c; /* Un naranja quemado elegante, no un rojo chillón */
-    font-weight: 600;
-}
-
-.detail-group.text-urgente svg {
-    color: #c2410c;
-    animation: simple-spin 4s linear infinite; /* Un giro muy lento opcional */
-}
-
-@keyframes simple-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* Estado Normal: Sutil y profesional */
-.fecha-normal {
-    background: rgba(226, 232, 240, 0.4);
-    color: #475569;
-    border: 1px solid rgba(203, 213, 225, 0.5);
-}
-
-/* Estado Alerta: < 2 días (Igual al estilo de cupos pero en Naranja/Rojo) */
-.fecha-alerta {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.75rem;
-    
-    /* Colores de urgencia */
-    border: 1.5px solid #ea580c; 
-    color: #9a3412;
-    background-color: #fff7ed;
-
-    /* Usamos la misma animación de pulso profundo pero más rápida para denotar tiempo */
-    animation: deep-pulse-orange 1.2s infinite ease-in-out;
-}
-
-/* Animación específica para tiempo (Naranja) */
-@keyframes deep-pulse-orange {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.3);
-    }
-    50% {
-        transform: scale(1.03);
-        box-shadow: 0 0 10px 3px rgba(234, 88, 12, 0.15);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(234, 88, 12, 0);
-    }
-}
-
-.text-alerta-inner {
-    margin-left: 8px;
-    font-size: 0.7rem; /* Un poco más grande */
-    font-weight: 900;    /* Máximo grosor para que resalte */
-    text-transform: uppercase; /* Opcional: En mayúsculas se ve más imponente */
-    letter-spacing: 0.5px;
-}
-
-/* Si quieres que el parpadeo del texto sea independiente */
-.cupos-critico .text-alerta-inner {
-    color: #b91c1c;
-    text-shadow: 0px 0px 8px rgba(220, 38, 38, 0.2);
-}
-
-.badge-pill, .badge-salary {
-    font-size: 0.75rem !important; /* Tamaño más pequeño y refinado */
-    padding: 4px 10px !important;
-    white-space: nowrap;
-    letter-spacing: 0.3px; /* Un poco de espacio entre letras para legibilidad */
-}
-
-.badge-pill svg, .badge-salary svg {
-    width: 12px !important;
-    height: 12px !important;
-}
-
-/* Quitamos el texto extra de los cupos si es muy largo para que quepa en una línea */
-.cupos-critico span {
-    text-transform: none; /* Evita que las mayúsculas ocupen demasiado espacio */
-}
-
-.badge-pill, .badge-salary, .badge-normal {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important; /* Espacio generoso entre icono y texto */
-    padding: 5px 12px !important;
-    transition: all 0.3s ease;
-}
-
-/* Estilo para el estado normal (grisáceo) para que no sea tan oscuro */
-.fecha-normal, .badge-normal {
-    background: rgba(226, 232, 240, 0.4);
-    color: #475569;
-    border: 1px solid rgba(203, 213, 225, 0.5);
-}
+/* [Sistemas de tarjeta antiguos (.vacante-card-compact / -grid-item / -clean),
+   sus badges y las animaciones de urgencia (deep-pulse, simple-spin, pulse-red)
+   eliminados — reemplazados por el sistema "Sello".] */
 
 /* =======================================================
    ESTILOS PARA RENDERIZAR EL CONTENIDO DEL EDITOR (EGRESADO)
@@ -2277,158 +1519,21 @@
 .ql-editor-view h2 { font-size: 20px !important; font-weight: 700; color: #00482b; }
 .ql-editor-view h3 { font-size: 18px !important; font-weight: 600; color: #00482b; }
 
-/* --- ESTADO VACÍO EXCLUSIVO (evd) --- */
-
-.evd-empty-state-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 450px;
-    width: 100%;
-    padding: 60px 20px;
-    background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
-    border-radius: 24px;
-    border: 1px solid #e2e8f0;
-}
-
-.evd-visual-wrapper {
-    position: relative;
-    margin-bottom: 40px;
-}
-
-.evd-glass-circle {
-    position: relative;
-    width: 160px;
-    height: 160px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 72, 43, 0.1);
-    overflow: hidden;
-}
-
-.evd-icon-search {
-    color: #00482b; /* Verde UdeC */
-    z-index: 2;
-    animation: evd-float 4s ease-in-out infinite;
-}
-
-/* Línea de escaneo láser sutil */
-.evd-scanner-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(to right, transparent, #ff8c00, transparent); /* Naranja UdeC */
-    opacity: 0.6;
-    animation: evd-scan 3s linear infinite;
-    z-index: 3;
-}
-
-/* Animación de puntos flotantes laterales */
-.evd-floating-dots {
-    position: absolute;
-    width: 220px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: space-between;
-    pointer-events: none;
-}
-
-.evd-floating-dots span {
-    width: 8px;
-    height: 8px;
-    background: #00482b;
-    border-radius: 50%;
-    opacity: 0.2;
-    animation: evd-dots-fade 2s infinite;
-}
-
-.evd-floating-dots span:nth-child(2) { animation-delay: 0.4s; }
-.evd-floating-dots span:nth-child(3) { animation-delay: 0.8s; }
-
-.evd-text-content {
-    text-align: center;
-    max-width: 450px;
-}
-
-.evd-main-title {
-    color: #1e293b;
-    font-size: 24px;
-    font-weight: 800;
-    margin-bottom: 12px;
-    letter-spacing: -0.5px;
-}
-
-.evd-description {
-    color: #64748b;
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 30px;
-}
-
-.evd-refresh-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: #00482b;
-    color: white;
-    padding: 14px 28px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 20px rgba(0, 72, 43, 0.2);
-}
-
-.evd-refresh-button:hover {
-    background: #006b3f;
-    transform: translateY(-2px);
-    box-shadow: 0 15px 25px rgba(0, 72, 43, 0.3);
-}
-
-.evd-refresh-button:active {
-    transform: translateY(0);
-}
-
-/* --- KEYFRAMES ÚNICOS --- */
-
-@keyframes evd-scan {
-    0% { top: -10%; }
-    100% { top: 110%; }
-}
-
-@keyframes evd-float {
-    0%, 100% { transform: translateY(0) rotate(0); }
-    50% { transform: translateY(-10px) rotate(5deg); }
-}
-
-@keyframes evd-dots-fade {
-    0%, 100% { opacity: 0.1; transform: scale(0.8); }
-    50% { opacity: 0.4; transform: scale(1.2); }
-}
+/* [Estado vacío antiguo "radar" (.evd-*) eliminado — reemplazado por .sello-empty. */
 
 /* Personalización de Toasts para que coincidan con Empres360 */
 .Toastify__toast--success {
-    background-color: #00482b !important; /* Verde UdeC */
+    background-color: var(--udec-green-strong) !important; /* Verde UdeC */
     border-radius: 12px !important;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Montserrat', 'Century Gothic', sans-serif;
     font-weight: 600;
 }
 
 .Toastify__toast--error {
-    background-color: #dc2626 !important; /* Rojo profesional */
+    background-color: var(--alert-critical) !important; /* Rojo profesional */
     border-radius: 12px !important;
+    font-family: 'Montserrat', 'Century Gothic', sans-serif;
+    font-weight: 600;
 }
 
 .Toastify__close-button {
@@ -2469,10 +1574,10 @@
     
     width: 10px;
     height: 10px;
-    background-color: #f39200;
+    background-color: var(--udec-orange);
     border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 0 5px rgba(243, 146, 0, 0.6);
+    border: 2px solid var(--udec-green-strong);
+    box-shadow: 0 0 5px rgba(247, 147, 30, 0.55);
     z-index: 999;
 }
 
@@ -2486,16 +1591,16 @@
     display: block !important; 
 }
 
-/* EL PUNTO NARANJA (INMUNE AL TOOLTIP) */
+/* EL PUNTO DE NOVEDAD (INMUNE AL TOOLTIP) */
 .nav-punto-naranja {
     position: absolute;
     top: -2px;    /* Sube un poquito respecto a la campana */
     right: -2px;  /* Se mueve a la derecha de la campana */
     width: 9px;
     height: 9px;
-    background-color: #f39200; /* Naranja institucional */
+    background-color: var(--udec-orange); /* Naranja institucional (Pantone 144 C) */
     border-radius: 50%;
-    border: 2px solid #ffffff; /* Borde blanco para separarlo de la campana */
+    border: 2px solid var(--udec-green-strong); /* Borde verde: 10.7:1 contra el header blanco (WCAG 1.4.11) */
     z-index: 10;
 }
 
@@ -2505,9 +1610,9 @@
 }
 
 @keyframes latidoPunto {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 146, 0, 0.7); }
-    70% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(243, 146, 0, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 146, 0, 0); }
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(247, 147, 30, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(247, 147, 30, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(247, 147, 30, 0); }
 }
 
 /* --- MODAL CAMBIOS SIN GUARDAR (Efecto Glassmorphism) --- */
@@ -2586,4 +1691,1236 @@
 
 .btn-glass-salir:hover {
     background: rgba(229, 62, 62, 0.1);
+}
+
+/* =======================================================
+   PREFERS-REDUCED-MOTION (Manual ECOM002 V_17 exige WCAG 2.1 AA)
+   Se conservan los cambios de opacidad y color que comunican estado;
+   se retira el movimiento y se detienen los bucles decorativos.
+   ======================================================= */
+@media (prefers-reduced-motion: reduce) {
+
+    /* Entradas: fundido corto sin desplazamiento ni escala */
+    .fade-in,
+    .scale-up,
+    .vdp-dropdown-menu,
+    .logout-modal,
+    .modal-glass-content,
+    .already-applied-banner {
+        animation: none !important;
+        transition: opacity 0.15s ease !important;
+    }
+
+    /* Bucles decorativos: se detienen por completo */
+    .nav-punto-naranja,
+    .icon-pulse-container {
+        animation: none !important;
+    }
+
+    /* El spinner de "Enviando…" se mantiene: es feedback esencial de carga.
+       El rediseño "Sello" trae su propio bloque reduced-motion más abajo. */
+}
+
+/* ============================================================================
+   RUMBO B · "SELLO" — Rediseño de la tarjeta de vacante y el modal.
+   Cada vacante es un documento oficial sellado por la oficina de egresados.
+   Solo tokens de marca (Manual ECOM002 V_17). Contrato de dirección en
+   frontend/.impeccable/surfaces/…
+   ============================================================================ */
+
+/* ---------- Barra de filtros ---------- */
+.tv-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 18px;
+    width: 100%;
+    margin: 0 0 18px;
+    padding: 16px 20px;
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(0, 72, 43, .04);
+}
+
+.tv-buscar {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1 1 240px;
+    min-width: 200px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #F6F8F6;
+    border: 1px solid transparent;
+    color: var(--ink-soft);
+    transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+.tv-buscar:focus-within { border-color: var(--udec-green); background: #fff; box-shadow: 0 0 0 3px rgba(0, 123, 62, .12); }
+.tv-buscar svg { flex-shrink: 0; }
+.tv-buscar input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font: inherit; font-size: .88rem; color: var(--ink-body); }
+.tv-buscar input::placeholder { color: var(--ink-soft); }
+
+.tv-filtros-controles { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+
+.tv-select { display: flex; flex-direction: column; gap: 3px; font-size: .68rem; font-weight: 700; letter-spacing: .04em; color: var(--ink-soft); }
+.tv-select select {
+    font: inherit;
+    font-size: .84rem;
+    font-weight: 600;
+    color: var(--udec-green-strong);
+    background-color: #F6F8F6;
+    border: 1px solid var(--hairline);
+    border-radius: 9px;
+    padding: 8px 30px 8px 11px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234D4D4D' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 11px center;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+.tv-select select:focus-visible { outline: none; border-color: var(--udec-green); box-shadow: 0 0 0 3px rgba(0, 123, 62, .12); }
+
+/* Filtro de Modalidad — mismo lenguaje visual que los <select> de al lado,
+   pero con checkboxes multi-selección en un panel flotante. */
+.tv-modalidad { position: relative; }
+.tv-modalidad-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-width: 140px;
+    font: inherit;
+    font-size: .84rem;
+    font-weight: 600;
+    color: var(--udec-green-strong);
+    background-color: #F6F8F6;
+    border: 1px solid var(--hairline);
+    border-radius: 9px;
+    padding: 8px 11px;
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+.tv-modalidad-btn-texto { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tv-modalidad-btn svg { flex-shrink: 0; color: var(--ink-soft); transition: transform .15s ease; }
+.tv-modalidad-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.tv-modalidad-btn:focus-visible { outline: none; border-color: var(--udec-green); box-shadow: 0 0 0 3px rgba(0, 123, 62, .12); }
+
+.tv-modalidad-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    transform-origin: top left;
+    z-index: 20;
+    min-width: 180px;
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    box-shadow: 0 14px 30px -12px rgba(0, 72, 43, .28);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    animation: tv-modalidad-in .16s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes tv-modalidad-in {
+    from { opacity: 0; transform: scale(.96) translateY(-2px); }
+    to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .tv-modalidad-panel { animation: none; }
+}
+.tv-modalidad-opcion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .86rem;
+    font-weight: 500;
+    color: var(--ink-body);
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+.tv-modalidad-opcion:hover { background: #F1F5F2; }
+.tv-modalidad-opcion input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--udec-green);
+    cursor: pointer;
+}
+
+.tv-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.tv-chip {
+    font: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 99px;
+    border: 1.5px solid var(--hairline);
+    background: var(--paper);
+    color: var(--ink-body);
+    cursor: pointer;
+    transition: border-color .2s ease, background-color .2s ease, color .2s ease;
+}
+.tv-chip:hover { border-color: var(--udec-green); }
+.tv-chip.is-active { background: var(--udec-green-strong); border-color: var(--udec-green-strong); color: #fff; }
+.tv-chip:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; }
+
+.tv-limpiar {
+    font: inherit;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--udec-green);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 6px 4px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.tv-limpiar:hover { color: var(--udec-green-strong); }
+.tv-limpiar:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; border-radius: 3px; }
+
+.tv-filtrar-movil {
+    display: none;
+    position: relative;
+    align-items: center;
+    gap: 8px;
+    font: inherit;
+    font-weight: 700;
+    font-size: .84rem;
+    color: var(--udec-green-strong);
+    background: #F6F8F6;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+.tv-filtrar-dot { position: absolute; top: 7px; right: 9px; width: 7px; height: 7px; border-radius: 99px; background: var(--udec-gold); }
+
+/* ---------- Tabla — grid accesible (role="table/row/cell") ---------- */
+.tv-tabla-wrap {
+    width: 100%;
+    min-width: 0; /* deja que se encoja dentro de contenedores flex ancestros (.content-inner) */
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    overflow: hidden; /* recorta solo las esquinas redondeadas */
+}
+
+/* Contenedor de scroll real: si la ventana es más angosta que el mínimo de
+   las 7 columnas, esto da scroll horizontal en vez de recortar contenido
+   en silencio (antes .tv-tabla-wrap tenía overflow:hidden directo sobre las
+   filas, y a ~1280-1366px de ancho — muy común — el botón "Postular", al
+   ser el último elemento de la última columna, quedaba recortado sin avisar). */
+.tv-tabla-scroll {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.tv-row {
+    display: grid;
+    grid-template-columns:
+        minmax(190px, 2fr) minmax(120px, 1.1fr) minmax(100px, .8fr)
+        minmax(100px, .8fr) minmax(110px, .9fr) minmax(130px, 1fr) minmax(112px, .6fr);
+    align-items: center;
+    column-gap: 12px;
+    /* width:100% (definido, no max-content): los mínimos en px de minmax()
+       son un piso fijo — si no caben, la fila se desborda de .tv-tabla-scroll
+       y esa da scroll horizontal, sin comprimir columnas por debajo del piso.
+       width:max-content se probó antes pero mide cada columna flexible por su
+       contenido SIN wrap (por definición de max-content), así que un cargo
+       largo ("Auxiliar de Ingeniería Ambiental y Sanitaria...") inflaba la
+       fila entera a ~3056px y sacaba "Postular" de pantalla incluso a 1920px. */
+    width: 100%;
+}
+
+.tv-head-row { padding: 0 20px; background: #FAFBFA; border-bottom: 1px solid var(--hairline); }
+.tv-head-row .tv-cell { padding: 13px 0; font-size: .7rem; font-weight: 700; letter-spacing: .03em; color: var(--udec-green-strong); }
+.tv-th-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: inherit;
+    font-weight: 700;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+.tv-th-btn:hover { color: var(--udec-gold-ink); }
+.tv-th-btn:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; border-radius: 3px; }
+
+.tv-fila {
+    padding: 0 20px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--hairline);
+    background-color: transparent;
+    transition: border-left-color .15s ease, background-color .15s ease;
+    animation: tv-row-in .22s var(--ease-sello) both;
+    animation-delay: calc(var(--i, 0) * 30ms);
+}
+.tv-body .tv-row:nth-child(even) { background-color: #FAFAF8; }
+.tv-fila:hover, .tv-fila:focus-visible {
+    border-left-color: var(--udec-green-strong);
+    background-color: #F1F5F2;
+}
+.tv-fila:focus-visible { outline: none; }
+.tv-fila:last-child { border-bottom: 0; }
+
+@keyframes tv-row-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.tv-cell { padding: 14px 0; min-width: 0; }
+
+.tv-col-cargo { display: flex; align-items: flex-start; gap: 10px; }
+.tv-cargo-textos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+/* "Verde interactivo" (elegido sobre la alternativa de chip): el ícono se
+   atenúa para no competir, y el título toma el verde institucional oscuro
+   con un subrayado que solo aparece junto con el hover/foco de la fila —
+   la misma señal que ya usa "Ver detalle", para que se lea como parte de
+   la misma superficie clicable en vez de una etiqueta suelta. */
+.tv-icon-cargo { color: var(--ink-soft); flex-shrink: 0; margin-top: 2px; }
+.tv-cargo-titulo {
+    font-size: .92rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--udec-green-strong);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+    transition: text-decoration-color .15s ease;
+}
+.tv-fila:hover .tv-cargo-titulo,
+.tv-fila:focus-visible .tv-cargo-titulo { text-decoration-color: currentColor; }
+@media (prefers-reduced-motion: reduce) {
+    .tv-cargo-titulo { transition: none; }
+}
+.tv-cargo-vigencia-tablet { display: none; font-size: .74rem; color: var(--ink-soft); }
+.tv-cargo-vigencia-tablet.is-urgent { color: var(--alert-ink); font-weight: 600; }
+.tv-empresa-movil, .tv-meta-movil { display: none; }
+.tv-cargo-textos > .tv-badge-mini { display: none; } /* pill de modalidad para la ficha móvil */
+
+/* Trato de "tag" clickeable, discreto — se distingue de Ver detalle/Postular
+   (las acciones principales) por ser solo borde, sin relleno. La flechita
+   solo aparece al hover/foco como señal de "esto te lleva a otro lado". */
+.tv-empresa-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--udec-green-strong);
+    background: none;
+    border: 1px solid var(--hairline);
+    border-radius: 7px;
+    padding: 4px 8px 4px 9px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+.tv-empresa-link span { overflow-wrap: anywhere; }
+.tv-empresa-icono {
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translate(-2px, 2px);
+    transition: opacity .15s ease, transform .15s ease;
+}
+.tv-empresa-link:hover,
+.tv-empresa-link:focus-visible { border-color: var(--udec-green); background: rgba(0, 123, 62, .06); }
+.tv-empresa-link:hover .tv-empresa-icono,
+.tv-empresa-link:focus-visible .tv-empresa-icono { opacity: 1; transform: translate(0, 0); }
+.tv-empresa-link:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    .tv-empresa-link, .tv-empresa-icono { transition: none; }
+}
+
+.tv-col-ubicacion { font-size: .86rem; color: var(--ink-body); overflow-wrap: anywhere; }
+.tv-col-salario { font-size: .88rem; font-weight: 600; color: var(--ink-body); font-variant-numeric: tabular-nums; }
+
+.tv-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: .76rem;
+    font-weight: 600;
+    background: var(--tv-badge-bg, rgba(77, 77, 77, .08));
+    color: var(--tv-badge-text, #4D4D4D);
+    white-space: nowrap;
+}
+.tv-badge i { width: 6px; height: 6px; border-radius: 99px; flex-shrink: 0; background: var(--tv-badge-dot, #4D4D4D); }
+.tv-badge-mini { padding: 3px 9px; font-size: .7rem; }
+
+.tv-col-vigencia { display: flex; flex-direction: column; gap: 2px; font-size: .86rem; color: var(--ink-body); }
+.tv-vigencia-urgente { color: var(--alert-ink); font-weight: 700; }
+.tv-cupos-critico { font-size: .68rem; font-weight: 700; color: var(--alert-critical); }
+
+.tv-col-acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-left: 14px;
+    border-left: 1px solid var(--hairline); /* separa la zona de acción del resto de la fila */
+}
+
+/* Botones de solo ícono con tooltip — reemplazan el par de botones de texto
+   "Ver detalle" / "Postular", que ocupaban demasiado ancho en la columna de
+   acciones. "Ver detalle" es la acción secundaria (contorno); "Postular" es
+   la primaria (relleno sólido) — la distinción de peso reemplaza a la de
+   antes (subrayado vs. botón). */
+.tv-accion-icono {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    background: var(--paper);
+    color: var(--udec-green-strong);
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .12s ease;
+}
+.tv-accion-ver:hover { background: rgba(0, 123, 62, .08); border-color: var(--udec-green); }
+.tv-accion-ver:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; }
+
+.tv-accion-postular {
+    background: var(--udec-green);
+    border-color: var(--udec-green);
+    color: #fff;
+}
+.tv-accion-postular:hover:not(:disabled) { background: var(--udec-green-strong); border-color: var(--udec-green-strong); }
+.tv-accion-postular:active:not(:disabled) { transform: scale(.94); }
+.tv-accion-postular:disabled { opacity: .6; cursor: not-allowed; }
+.tv-accion-postular:focus-visible { outline: 2px solid var(--udec-green-strong); outline-offset: 2px; }
+
+/* Tooltip — aparece arriba del botón, con una pequeña "flecha". Entrada:
+   opacidad + 4px de subida, 150ms — mismo lenguaje de movimiento que el
+   resto de la tabla (hover de fila, dropdown de modalidad). */
+.tv-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translate(-50%, 4px);
+    background: var(--udec-green-strong);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 6px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease;
+    z-index: 5;
+}
+.tv-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--udec-green-strong);
+}
+.tv-accion-icono:hover .tv-tooltip,
+.tv-accion-icono:focus-visible .tv-tooltip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+@media (prefers-reduced-motion: reduce) {
+    .tv-accion-icono, .tv-tooltip { transition: none; }
+}
+
+.tv-sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* Esqueleto de carga */
+.tv-row-skeleton { padding: 0 20px; border-bottom: 1px solid var(--hairline); }
+.tv-sk { display: block; height: 12px; border-radius: 4px; background: var(--hairline); position: relative; overflow: hidden; }
+.tv-sk-title { width: 70%; height: 14px; margin-bottom: 6px; }
+.tv-sk-line { width: 85%; }
+.tv-sk-line.short { width: 55%; }
+.tv-sk-badge { width: 60%; height: 22px; border-radius: 99px; }
+.tv-sk::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 28%, rgba(255, 255, 255, .6) 50%, transparent 72%);
+    transform: translateX(-100%);
+    animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+/* El estado vacío de la tabla reutiliza .sello-empty (documento + sello de lacre). */
+
+/* ---------- Filtros en móvil — bottom sheet ---------- */
+.tv-sheet-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: rgba(0, 40, 22, .42);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+.tv-sheet {
+    width: 100%;
+    max-width: 520px;
+    background: var(--paper);
+    border-radius: 20px 20px 0 0;
+    padding: 10px 22px 26px;
+    max-height: 82vh;
+    overflow-y: auto;
+    animation: tv-sheet-in .28s var(--ease-sello) both;
+}
+@keyframes tv-sheet-in { from { transform: translateY(24px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
+.tv-sheet-handle { width: 40px; height: 4px; border-radius: 99px; background: var(--hairline); margin: 6px auto 16px; }
+.tv-sheet h3 { margin: 0 0 16px; font-size: 1.05rem; font-weight: 800; color: var(--udec-green-strong); }
+.tv-select-block { width: 100%; margin-bottom: 14px; }
+.tv-select-block select { width: 100%; padding: 11px 30px 11px 12px; }
+.tv-sheet-label { display: block; font-size: .68rem; font-weight: 700; letter-spacing: .04em; color: var(--ink-soft); margin-bottom: 8px; }
+.tv-sheet-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+.tv-sheet-actions .tv-limpiar { align-self: center; }
+.tv-sheet-aplicar {
+    font: inherit;
+    font-weight: 800;
+    font-size: .88rem;
+    letter-spacing: .02em;
+    color: #fff;
+    background: var(--udec-green-strong);
+    border: 1.5px solid var(--udec-gold);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+}
+
+/* ---------- Responsive de la tabla ---------- */
+/* Tablet 768–1279px: se oculta la columna Vigencia como columna aparte;
+   su valor pasa a vivir como texto pequeño bajo el título del cargo. */
+@media (max-width: 1279px) {
+    /* 5 columnas explícitas — Cargo, Ubicación, Salario, Modalidad, Acciones.
+       Vigencia Y Empresa se pliegan como subtexto bajo el cargo (Empresa
+       reutiliza .tv-empresa-movil, ya en el DOM para móvil). Acciones ahora
+       son 2 botones de solo ícono (36px c/u) en vez de texto — el mínimo
+       necesario bajó de ~210px a ~100px. Ojo: el número de tracks debe = el
+       número de celdas role="gridcell" VISIBLES (display:none no cuenta
+       para el grid) — con 6 celdas visibles y solo 5 tracks, la última
+       (Acciones) caía en una columna implícita mal dimensionada. */
+    .tv-row {
+        grid-template-columns:
+            minmax(210px, 2.2fr) minmax(100px, .9fr)
+            minmax(100px, .9fr) minmax(110px, 1fr) minmax(100px, .6fr);
+    }
+    .tv-col-empresa { display: none; }
+    .tv-col-vigencia { display: none; }
+    .tv-cargo-vigencia-tablet { display: block; }
+    .tv-empresa-movil { display: block; font-size: .8rem; font-weight: 600; color: var(--udec-green-strong); margin-top: 2px; }
+}
+
+/* Móvil ≤767px (incluye 390 y 360): la tabla se vuelve una lista de fichas
+   compactas de una columna; los filtros colapsan en un bottom sheet. */
+@media (max-width: 767px) {
+    .tv-filtros-controles { display: none; }
+    .tv-filtrar-movil { display: inline-flex; }
+    .tv-buscar { flex: 1 1 100%; }
+
+    /* .tv-row primero, .tv-head-row después: mismo selector-específico (una clase),
+       así que el orden decide y la fila de encabezado debe quedar oculta. */
+    .tv-row { display: block; padding: 14px 16px; }
+    .tv-head-row { display: none; }
+    .tv-fila { border-left: 0; }
+    .tv-fila:hover, .tv-fila:focus-visible { background-color: #F1F5F2; }
+    .tv-cell { padding: 0; }
+    .tv-col-empresa,
+    .tv-col-ubicacion,
+    .tv-col-salario,
+    .tv-col-modalidad,
+    .tv-col-vigencia { display: none; }
+    .tv-cargo-vigencia-tablet { display: none; }
+
+    .tv-col-cargo { align-items: flex-start; justify-content: space-between; }
+    .tv-empresa-movil { display: block; font-size: .78rem; font-weight: 600; color: var(--ink-soft); margin-top: 1px; }
+    .tv-meta-movil {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: .8rem;
+        color: var(--ink-body);
+    }
+    .tv-meta-movil > span[aria-hidden] { color: var(--ink-soft); opacity: .6; }
+    .tv-cargo-textos > .tv-badge-mini { display: inline-flex; margin-top: 8px; align-self: flex-start; }
+
+    .tv-col-acciones {
+        display: block;
+        justify-content: initial;
+        margin-top: 12px;
+        padding-left: 0;
+        border-left: 0;
+        position: static;
+        background-color: transparent;
+    }
+    /* En móvil la fila completa ya es tappable (abre el detalle), así que el
+       botón "Ver detalle" es redundante — se oculta. "Postular" pasa de
+       icono-con-tooltip a botón normal de texto a todo ancho: el propio
+       span de tooltip se reutiliza como etiqueta visible (sin floatar). */
+    .tv-accion-ver { display: none; }
+    .tv-accion-postular {
+        width: 100%;
+        height: auto;
+        gap: 8px;
+        border-radius: 10px;
+        padding: 12px;
+    }
+    .tv-accion-postular .tv-tooltip {
+        position: static;
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+        background: none;
+        color: inherit;
+        padding: 0;
+        font-size: .86rem;
+        font-weight: 700;
+    }
+    .tv-accion-postular .tv-tooltip::after { display: none; }
+}
+
+/* ---------- Estado vacío ---------- */
+.sello-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 460px;
+    margin: 40px auto;
+    padding: 40px 24px 56px;
+}
+.sello-empty .doc {
+    position: relative;
+    width: 132px;
+    height: 168px;
+    border-radius: 8px;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--hairline), 0 20px 44px -22px rgba(0, 72, 43, .22);
+    margin-bottom: 34px;
+}
+.sello-empty .doc::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 28px; height: 28px;
+    background: linear-gradient(225deg, var(--hairline) 0 50%, transparent 50%);
+    border-radius: 0 8px 0 6px;
+}
+.sello-empty .doc .lines {
+    position: absolute;
+    left: 16px; right: 16px; top: 24px;
+    display: flex; flex-direction: column; gap: 9px;
+}
+.sello-empty .doc .lines span { height: 5px; background: var(--hairline); border-radius: 2px; }
+.sello-empty .doc .lines span:nth-child(4) { width: 58%; }
+.sello-empty .wax {
+    right: -14px; bottom: -14px;
+    width: 46px; height: 46px;
+    font-size: 1rem;
+    animation: sello-stamp .5s var(--ease-sello) .18s both;
+}
+.sello-empty h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--udec-green-strong);
+    letter-spacing: -.02em;
+    margin-bottom: 10px;
+}
+.sello-empty p {
+    font-size: .92rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+}
+.sello-empty .s-refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--udec-green-strong);
+    color: #fff;
+    border: 1.5px solid var(--udec-gold);
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: .8rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color .2s ease, transform .1s ease;
+}
+.sello-empty .s-refresh:hover { background: #00301c; }
+.sello-empty .s-refresh:active { transform: translateY(1px); }
+.sello-empty .s-refresh:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 3px; }
+
+/* ---------- Modal · hoja que se abre ---------- */
+.sello-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 40, 22, .42);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: max(24px, 4vh) 20px 40px;
+    overflow-y: auto;
+}
+.sello-sheet {
+    position: relative;
+    width: min(680px, 100%);
+    margin: auto 0;
+    background: var(--paper);
+    border-radius: 4px; /* hoja: esquinas casi rectas */
+    box-shadow: 0 44px 90px -26px rgba(0, 72, 43, .42), inset 0 0 0 1px var(--hairline);
+    padding-bottom: 34px;
+    transform-origin: center;
+}
+.sello-sheet .s-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    z-index: 3;
+    width: 38px; height: 38px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(77, 77, 77, .08);
+    color: var(--udec-gray);
+    cursor: pointer;
+    transition: background-color .2s ease, color .2s ease;
+}
+.sello-sheet .s-close:hover { background: var(--alert-bg); color: var(--alert-ink); }
+.sello-sheet .s-close:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; }
+
+.sello-sheet .s-head {
+    position: relative;
+    padding: 36px 40px 22px;
+    border-bottom: 1px solid var(--hairline);
+}
+.sello-sheet .s-head::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--udec-gold);
+    border-radius: 4px 4px 0 0;
+}
+.sello-sheet .s-modal-tab {
+    display: inline-block;
+    background: var(--udec-green-strong);
+    color: #fff;
+    font-size: .64rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+.sello-sheet .s-modal-title {
+    font-size: clamp(1.4rem, 3.4vw, 1.9rem);
+    font-weight: 800;
+    color: var(--udec-green-strong);
+    letter-spacing: -.025em;
+    line-height: 1.12;
+    margin: 0;
+    max-width: 88%;
+    text-wrap: balance;
+}
+.sello-sheet .s-modal-org {
+    margin-top: 12px;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+.sello-sheet .s-modal-org .s-empresa {
+    background: none; border: 0; padding: 0; font: inherit;
+    letter-spacing: inherit; text-transform: inherit;
+    color: var(--udec-green-strong); cursor: pointer;
+    transition: color .2s ease;
+}
+.sello-sheet .s-modal-org .s-empresa:hover { color: var(--udec-gold-ink); text-decoration: underline; text-underline-offset: 2px; }
+.sello-sheet .s-modal-org .s-empresa:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; border-radius: 3px; }
+
+/* Sello de lacre — comparte base con el de .sello-empty (estado vacío) */
+.sello-empty .wax,
+.sello-sheet .s-modal-wax {
+    position: absolute;
+    border-radius: 99px;
+    display: grid;
+    place-items: center;
+    color: var(--udec-green-strong);
+    font-weight: 900;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .60), rgba(255, 255, 255, 0) 46%),
+        var(--udec-gold);
+    box-shadow:
+        inset 0 2px 4px rgba(255, 255, 255, .5),
+        inset 0 -3px 7px rgba(0, 72, 43, .28),
+        0 5px 12px -4px rgba(0, 72, 43, .32);
+}
+.sello-sheet .s-modal-wax::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, .60) 50%, transparent 58%);
+    transform: translateX(-130%);
+}
+.sello-sheet:hover .s-modal-wax::after { animation: sello-sheen .7s var(--ease-sello) forwards; }
+
+@keyframes sello-stamp {
+    0%   { opacity: 0; transform: scale(1.35) rotate(-8deg); }
+    62%  { opacity: 1; transform: scale(.93) rotate(2deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+@keyframes sello-sheen { to { transform: translateX(130%); } }
+
+.sello-sheet .s-modal-wax {
+    top: auto;
+    bottom: 20px;
+    right: 34px;
+    width: 54px; height: 54px;
+    font-size: 1.2rem;
+}
+@media (max-width: 560px) {
+    .sello-sheet .s-modal-wax { right: 22px; bottom: 16px; width: 44px; height: 44px; font-size: 1rem; }
+    .sello-sheet .s-modal-title { max-width: 100%; padding-right: 54px; }
+}
+
+.sello-sheet .s-body { padding: 26px 40px 0; }
+
+.sello-sheet .s-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    column-gap: 22px;
+    margin-bottom: 28px;
+}
+.sello-sheet .s-detail-grid > div {
+    padding: 11px 0;
+    border-top: 1px solid var(--hairline);
+    min-width: 0;
+}
+.sello-sheet .s-detail-grid dt {
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--udec-gold-ink);
+    margin-bottom: 3px;
+}
+.sello-sheet .s-detail-grid dd {
+    margin: 0;
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--udec-green-strong);
+    overflow-wrap: anywhere;
+}
+.sello-sheet .s-detail-grid dd.is-urgent { color: var(--alert-ink); }
+.sello-sheet .s-detail-grid dd.is-critical { color: var(--alert-critical); }
+
+.sello-sheet .s-desc-label {
+    font-size: .66rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--udec-gold-ink);
+    margin-bottom: 12px;
+}
+.sello-sheet .s-desc { color: var(--ink-body); }
+/* Capitular dorada en la primera letra de la descripción */
+.sello-sheet .s-desc .ql-editor-view > p:first-of-type::first-letter,
+.sello-sheet .s-desc .ql-editor-view > *:first-child::first-letter {
+    float: left;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: .82;
+    margin: 6px 10px 0 0;
+    color: var(--udec-gold-ink);
+}
+
+.sello-sheet .s-actions {
+    padding: 26px 40px 0;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.btn-radicar {
+    flex: 1 1 240px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--udec-green-strong);
+    color: #fff;
+    border: 1.5px solid var(--udec-gold);
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: .9rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color .2s ease, transform .1s ease;
+}
+.btn-radicar:hover:not(:disabled) { background: #00301c; }
+.btn-radicar:active:not(:disabled) { transform: translateY(1px); }
+.btn-radicar:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 3px; }
+.btn-radicar:disabled { opacity: .7; cursor: progress; }
+.btn-radicar .btn-apply-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255, 255, 255, .4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    animation: btn-apply-spin .7s linear infinite;
+}
+
+.sello-sheet .s-applied {
+    flex: 1 1 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--udec-gold-bg);
+    color: var(--udec-gold-ink);
+    border: 1.5px solid var(--udec-gold);
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: .86rem;
+}
+
+.sello-sheet .s-ver-empresa {
+    margin: 20px 40px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--udec-green);
+    cursor: pointer;
+}
+.sello-sheet .s-ver-empresa:hover { color: var(--udec-green-strong); text-decoration: underline; text-underline-offset: 3px; }
+.sello-sheet .s-ver-empresa:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; border-radius: 3px; }
+.sello-sheet .s-ver-empresa .mini-seal {
+    width: 20px; height: 20px; border-radius: 99px;
+    background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.6), rgba(255,255,255,0) 46%), var(--udec-gold);
+    color: var(--udec-green-strong);
+    display: grid; place-items: center;
+    font-size: .6rem; font-weight: 900;
+}
+
+@media (max-width: 560px) {
+    .sello-sheet .s-head { padding: 30px 22px 20px; }
+    .sello-sheet .s-body,
+    .sello-sheet .s-actions { padding-left: 22px; padding-right: 22px; }
+    .sello-sheet .s-ver-empresa { margin-left: 22px; margin-right: 22px; }
+}
+
+/* ---------- Reduced motion (Sello + Tabla de Vacantes) ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .sello-empty .wax { animation: none !important; opacity: 1; }
+    .sello-sheet:hover .s-modal-wax::after { animation: none !important; }
+    /* La inclinación de la estampilla es identidad, no movimiento: se conserva. */
+
+    .tv-fila { animation: none !important; opacity: 1; }
+    .tv-fila:hover, .tv-fila:focus-visible { transition: background-color .15s ease, border-left-color .15s ease; }
+    .tv-sk::after { animation: none !important; opacity: .5; }
+    .tv-sheet { animation: none !important; }
+    .tv-postular:active:not(:disabled) { transform: none !important; }
+}
+/* ============================================================================
+   RUMBO B - "SELLO EN MARCHA" - Navegacion principal del Egresado.
+   El menu es el borde superior del expediente: cada destino es una pestana de
+   la carpeta; la pestana activa esta "sobre la mesa" (elevada) con su sello de
+   lacre estampado. Reemplaza la barra lateral .sidebar.
+   Solo tokens de marca (Manual ECOM002 V_17). Contrato de direccion en
+   frontend/.impeccable/surfaces/frontend-src-pages-egresadodashboard-navegacion.md
+   ============================================================================ */
+.ex-nav {
+  --exn-inactive: #5B6660;               /* AA sobre blanco (5.3:1) */
+  --exn-spring: cubic-bezier(.34, 1.3, .64, 1);
+  --exn-out:    cubic-bezier(.32, .72, 0, 1);
+  position: relative;
+  z-index: 20;
+  flex: none;
+  background: var(--paper);
+  box-shadow: 0 1px 0 var(--hairline), 0 12px 26px -22px rgba(0, 72, 43, .4);
+}
+
+/* Canto del expediente */
+.ex-nav-edge { display: flex; height: 6px; }
+.ex-edge-green { flex: 2; background: var(--udec-green); }
+.ex-edge-gold  { flex: 1; background: var(--udec-gold); }
+
+/* ---------- Fila 1 - identidad ---------- */
+.ex-nav-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 62px;
+  padding: 8px clamp(16px, 3vw, 32px);
+  border-bottom: 1px solid var(--hairline);
+}
+.ex-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.ex-brand-logo { height: 34px; width: auto; object-fit: contain; }
+.ex-brand-div  { width: 1px; height: 30px; background: var(--hairline); flex: none; }
+.ex-brand-udec { height: 40px; width: auto; object-fit: contain; }
+
+.ex-user { position: relative; display: flex; align-items: center; gap: 12px; }
+.ex-user-txt { display: flex; flex-direction: column; text-align: right; line-height: 1.3; }
+.ex-user-name { font-size: .84rem; font-weight: 700; color: var(--udec-green-strong); }
+.ex-user-role { font-size: .7rem; color: var(--udec-gray); }
+
+.ex-user-avatar {
+  width: 40px; height: 40px; flex: none;
+  border: 0; padding: 0; cursor: pointer;
+  border-radius: 50%;
+  background: var(--udec-green-strong);
+  color: #fff; font: inherit; font-weight: 700; font-size: .78rem;
+  display: grid; place-items: center; overflow: hidden;
+  transition: box-shadow .22s ease, transform .12s ease;
+}
+.ex-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ex-user-avatar:active { transform: scale(.96); }
+.ex-user-avatar:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; }
+@media (hover: hover) {
+  .ex-user-avatar:hover { box-shadow: 0 0 0 3px var(--udec-gold-bg); }
+}
+
+.ex-user-menu {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 40;
+  min-width: 190px; padding: 6px;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px -16px rgba(0, 72, 43, .3);
+  transform-origin: top right;
+}
+.ex-user-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 12px;
+  border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: .82rem; font-weight: 600;
+  color: var(--udec-green-strong);
+  border-radius: 8px;
+  transition: background-color .16s ease;
+}
+.ex-user-menu-item:hover { background: rgba(0, 123, 62, .07); }
+.ex-user-menu-item:focus-visible { outline: 2px solid var(--udec-green); outline-offset: -2px; }
+.ex-user-menu-item.is-logout { color: var(--alert-ink); }
+.ex-user-menu-item.is-logout:hover { background: var(--alert-bg); }
+.ex-user-menu-div { display: block; height: 1px; margin: 4px 8px; background: var(--hairline); }
+
+/* ---------- Fila 2 - pestanas del expediente ---------- */
+.ex-nav-row {
+  position: relative;
+  display: flex;
+  justify-content: safe center;   /* centra las pestañas; en angosto cae a flex-start sin cortarlas */
+  padding: 6px clamp(10px, 2vw, 24px) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.ex-nav-row::-webkit-scrollbar { display: none; }
+/* Regla dorada del expediente */
+.ex-nav-row::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 2px; background: var(--udec-gold);
+}
+.ex-tablist { display: flex; gap: 2px; list-style: none; margin: 0; padding: 0; }
+.ex-tablist li { display: flex; }
+
+/* Papel elevado compartido: se desliza y redimensiona bajo la pestana activa */
+.ex-glider {
+  position: absolute;
+  left: 0; top: 5px; bottom: -1px;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-bottom: 0;
+  border-radius: 9px 9px 0 0;
+  box-shadow: 0 -6px 16px -10px rgba(0, 72, 43, .28);
+  transform: translateX(0);
+  transition: transform .3s var(--exn-out), width .3s var(--exn-out), opacity .2s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ex-tab {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  padding: 15px 24px 16px 14px;
+  border: 0; background: none; cursor: pointer;
+  font: inherit;
+  font-size: .7rem; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase;
+  color: var(--exn-inactive);
+  transition: color .18s ease, transform .12s ease;
+}
+.ex-tab:active { transform: scale(.97); }
+.ex-tab:focus-visible { outline: 2px solid var(--udec-green); outline-offset: -3px; border-radius: 8px; }
+.ex-tab-icon { position: relative; display: flex; }
+.ex-tab-icon svg { transition: stroke-width .25s ease; }
+.ex-tab-label { line-height: 1; }
+
+/* Hover en pestana no activa: se dibuja un filete dorado de izq. a der. */
+.ex-tab:not(.is-active)::before {
+  content: "";
+  position: absolute; left: 12px; right: 12px; bottom: 6px;
+  height: 2px; background: var(--udec-gold-ink);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .16s ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ex-tab:not(.is-active):hover { color: var(--udec-green-strong); }
+  .ex-tab:not(.is-active):hover::before { clip-path: inset(0 0 0 0); }
+}
+
+/* Pestana activa: elevada + etiqueta verde fuerte */
+.ex-tab.is-active { color: var(--udec-green-strong); transform: translateY(-4px); }
+.ex-tab.is-active .ex-tab-icon svg { stroke-width: 2.3; }
+
+/* Badge numérico de conteo — hereda el look de lacre dorado del sello.
+   El JSX lo renderiza SÓLO si el conteo > 0, con o sin la pestaña activa.
+   `.is-bumped` (añadido por el efecto de React cuando el número AUMENTA)
+   dispara el "estampado". Anclado a la esquina, no desplaza el layout. */
+.ex-tab-seal {
+  position: absolute;
+  top: 6px; right: 3px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  font-size: .56rem; font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #5A3D00;
+  background: radial-gradient(circle at 34% 30%, #F1D77A, var(--udec-gold) 65%);
+  box-shadow:
+    inset 0 0 0 1px rgba(138, 106, 0, .5),
+    inset -2px -2px 3px rgba(138, 106, 0, .3),
+    0 1px 3px -1px rgba(0, 72, 43, .35);
+}
+.ex-tab-seal.is-bumped { animation: exn-stamp .3s var(--exn-spring); }
+
+@keyframes exn-stamp {
+  0%   { transform: scale(0) rotate(-12deg); }
+  60%  { transform: scale(1.18) rotate(6deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* Entrada en carga - escalonada */
+.ex-tablist li { animation: exn-tab-in .4s var(--exn-out) both; }
+.ex-tablist li:nth-child(1) { animation-delay: 30ms; }
+.ex-tablist li:nth-child(2) { animation-delay: 70ms; }
+.ex-tablist li:nth-child(3) { animation-delay: 110ms; }
+.ex-tablist li:nth-child(4) { animation-delay: 150ms; }
+.ex-tablist li:nth-child(5) { animation-delay: 190ms; }
+.ex-tablist li:nth-child(6) { animation-delay: 230ms; }
+.ex-tablist li:nth-child(7) { animation-delay: 270ms; }
+@keyframes exn-tab-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .ex-tab { font-size: .66rem; padding: 14px 20px 15px 11px; gap: 6px; }
+  .ex-nav-row {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  }
+}
+@media (max-width: 767px) {
+  .ex-nav-identity { min-height: 54px; padding: 6px 14px; }
+  .ex-brand-logo { height: 28px; }
+  .ex-brand-udec { height: 32px; }
+  .ex-user-txt { display: none; }
+
+  .ex-nav-row {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 60;
+    padding: 0 4px env(safe-area-inset-bottom, 0px);
+    background: var(--paper);
+    border-top: 1px solid var(--hairline);
+    box-shadow: 0 -8px 24px -16px rgba(0, 72, 43, .4);
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+  .ex-nav-row::after { top: 0; bottom: auto; }
+  .ex-tablist { flex: 1; gap: 0; }
+  .ex-tablist li { flex: 1; animation: none; }
+  .ex-glider { display: none; }
+
+  /* Barra inferior compacta: solo íconos (la etiqueta vive en aria-label) */
+  .ex-tab {
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 6px 2px;
+  }
+  .ex-tab-label { display: none; }
+  .ex-tab:not(.is-active)::before { display: none; }
+  /* El badge de conteo sí se mantiene en la barra inferior (esquina superior del ítem) */
+  .ex-tab-seal { top: 4px; right: 6px; }
+  .ex-tab.is-active { transform: none; color: var(--udec-green-strong); }
+  .ex-tab.is-active .ex-tab-icon svg { stroke-width: 2.4; }
+  .ex-tab.is-active::after {
+    content: "";
+    position: absolute; top: 0; left: 26%; right: 26%;
+    height: 3px; background: var(--udec-gold); border-radius: 0 0 3px 3px;
+  }
+  .content-inner { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---------- prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ex-glider { transition: opacity .12s ease; }
+  .ex-tab-seal.is-bumped { animation: none; }
+  .ex-tab:not(.is-active)::before { transition: none; }
+  .ex-tablist li { animation: none; opacity: 1; transform: none; }
 }

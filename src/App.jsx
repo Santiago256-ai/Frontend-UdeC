@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import API from "./services/api";
 
@@ -88,12 +88,28 @@ const NotificadorGlobal = () => {
   return null;
 };
 
+// --- COMPUERTA DE RUTAS PROTEGIDAS ---
+// NotificadorGlobal sólo debe correr donde tiene sentido (empresa autenticada):
+// antes vivía fuera de <Routes>, así que se montaba también en Landing/Login
+// y disparaba su chequeo inicial (y su sonido) sin que hubiera sesión activa de empresa.
+const RUTAS_PROTEGIDAS_NOTIFICADOR = ['/empresa-dashboard', '/mensajeria'];
+
+function NotificadorGlobalGate() {
+  const location = useLocation();
+  const enRutaProtegida = RUTAS_PROTEGIDAS_NOTIFICADOR.some((ruta) =>
+    location.pathname.startsWith(ruta)
+  );
+
+  if (!enRutaProtegida) return null;
+  return <NotificadorGlobal />;
+}
+
 // --- COMPONENTE PRINCIPAL APP ---
 function App() {
     return (
         <Router>
-            {/* Vigilante de sonido de mensajes */}
-            <NotificadorGlobal /> 
+            {/* Vigilante de sonido de mensajes (sólo en rutas de empresa autenticada) */}
+            <NotificadorGlobalGate />
             
             {/* 🟢 CONTENEDOR GLOBAL DE BURBUJAS (TOASTS) 
                 Al estar aquí, cualquier componente hijo (como PerfilEmpresa) 
