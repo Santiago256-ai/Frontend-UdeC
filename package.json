@@ -12,7 +12,8 @@
     "capturar:vacantes-tabla": "node scripts/capturar-vacantes-tabla.mjs",
     "capturar:login": "node scripts/capturar-login.mjs",
     "capturar:acerca": "node scripts/capturar-acerca.mjs",
-    "capturar:recuperar": "node scripts/capturar-recuperar.mjs"
+    "capturar:recuperar": "node scripts/capturar-recuperar.mjs",
+    "probar:interceptor": "node scripts/probar-interceptor-401.mjs"
   },
   "dependencies": {
     "@fontsource/montserrat": "^5.3.0",
