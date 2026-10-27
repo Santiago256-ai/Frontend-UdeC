@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Info } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Clock, Eye, EyeOff, Info } from 'lucide-react';
 import './Landing.css';
 import AcercaDeModal from './AcercaDeModal';
 import RecuperarModal from './RecuperarModal';
@@ -14,6 +14,14 @@ const negociosImgUrl = '/of3.jpg'; // Imagen de la derecha
 
 function Landing() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // services/api.js trae aquí a quien perdió la sesión (401) con ?motivo=expirada.
+  // El aviso se queda hasta que la persona vuelva a entrar; la URL se limpia para
+  // que recargar la página no lo repita.
+  const [sesionExpirada] = useState(() => new URLSearchParams(location.search).get('motivo') === 'expirada');
+  useEffect(() => {
+    if (sesionExpirada) navigate('/', { replace: true });
+  }, [sesionExpirada, navigate]);
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -140,6 +148,13 @@ const infoTriggerRef = useRef(null);
           {/* Columna de INICIAR SESIÓN */}
           <div className="action-column login-col">
             <h2>INICIAR SESIÓN</h2>
+
+            {sesionExpirada && (
+              <p className="landing-aviso-sesion" role="status">
+                <Clock size={18} strokeWidth={2} aria-hidden="true" />
+                <span>Tu sesión expiró, vuelve a entrar.</span>
+              </p>
+            )}
             
             <form className="login-form-udec" onSubmit={handleLogin}>
               <input 
