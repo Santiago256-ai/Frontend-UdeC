@@ -5,6 +5,7 @@ import {
     X, Globe, DollarSign, Briefcase 
 } from 'lucide-react';
 import styles from './SolicitudesEgresado.module.css';
+import { sanearDescripcion } from '../utils/sanearDescripcion';
 
 const SolicitudesEgresado = ({ vacantes, usuarioId, resaltarPostulacionId, setResaltarPostulacionId }) => {
     const [vacanteSeleccionada, setVacanteSeleccionada] = useState(null);
@@ -176,7 +177,7 @@ React.useEffect(() => {
             marginTop: '10px' 
         }}
         dangerouslySetInnerHTML={{ 
-            __html: vacanteSeleccionada.descripcion || "Sin descripción disponible." 
+            __html: sanearDescripcion(vacanteSeleccionada.descripcion) || "Sin descripción disponible."
         }} 
     />
 </div>

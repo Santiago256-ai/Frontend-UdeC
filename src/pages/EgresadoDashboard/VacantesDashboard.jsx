@@ -40,6 +40,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import VerPerfilEmpresa from './VerPerfilEmpresa';
 import EgresadosVerEmpresas from '../../components/EgresadosVerEmpresas';
+import { sanearDescripcion } from '../../utils/sanearDescripcion';
 
 const AlignStyle = Quill.import('attributors/class/align');
 Quill.register(AlignStyle, true);
@@ -1317,7 +1318,7 @@ return (
                         <div className="s-desc">
                             <div
                                 className="ql-editor-view"
-                                dangerouslySetInnerHTML={{ __html: selectedVacante.descripcion || 'Sin descripción disponible.' }}
+                                dangerouslySetInnerHTML={{ __html: sanearDescripcion(selectedVacante.descripcion) || 'Sin descripción disponible.' }}
                             />
                         </div>
                     </div>
