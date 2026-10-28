@@ -139,6 +139,39 @@ console.log('\nLogin con credenciales malas → se queda en la pantalla');
   await context.close();
 }
 
+// Egresado y empresa entran por el mismo formulario y el mismo POST /auth/login;
+// con credenciales malas el servidor real responde 200 { success: false } (no 401).
+// Se prueban las dos formas, sin sesión previa, para ver que no se escribe nada.
+console.log('\nCredenciales malas de egresado y de empresa (200 success:false y 401)');
+for (const [rol, correo] of [['egresado', 'laura@ejemplo.com'], ['empresa', 'talento@agroandes.co']]) {
+  for (const [forma, status, cuerpo] of [
+    ['200 { success: false }', 200, { success: false, message: 'Contraseña incorrecta' }],
+    ['401', 401, { message: 'Credenciales no encontradas' }],
+  ]) {
+    const pedidosLogin = [];
+    const { context, page, salidas } = await nuevaPagina(browser, {
+      respuesta: (req) => {
+        if (req.url().endsWith('/auth/login')) { pedidosLogin.push(req.postDataJSON()); return [status, cuerpo]; }
+        return [200, []];
+      },
+    });
+    await page.goto(BASE + '/');
+    await page.fill('input[type="email"]', correo);
+    await page.fill('input.password-field', 'clave-equivocada');
+    await page.click('.btn-login-submit');
+    const error = page.locator('.error-message-sutil');
+    const seVe = await error.waitFor({ timeout: 10000 }).then(() => true, () => false);
+    await page.waitForTimeout(500);
+    const a = await almacen(page);
+    const etiqueta = `${rol}, ${forma}`;
+    check(pedidosLogin.length === 1 && pedidosLogin[0].correo === correo, `${etiqueta}: un solo POST a /auth/login con el correo escrito`);
+    check(salidas.length === 0 && new URL(page.url()).pathname === '/', `${etiqueta}: sin salida, sigue en la landing`);
+    check(a.token === null && a.usuario === null, `${etiqueta}: no escribe token ni usuario`);
+    check(seVe && (await error.innerText()).trim() === cuerpo.message, `${etiqueta}: muestra el error`, seVe ? `"${(await error.innerText()).trim()}"` : 'no aparece');
+    await context.close();
+  }
+}
+
 console.log('\nExenciones (llamando al cliente API directamente)');
 {
   const { context, page, salidas } = await nuevaPagina(browser, { sesion: EGRESADO, respuesta: () => [401, { message: 'x' }] });
