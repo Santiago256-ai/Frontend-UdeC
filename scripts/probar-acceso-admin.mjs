@@ -425,6 +425,58 @@ for (const [caso, login, mensaje] of [
   await context.close();
 }
 
+// ---------------------------------------------------------------- movimiento (/review-animations)
+console.log('\n/admin/acceso: movimiento');
+const animacionDelError = (page) => page.evaluate(() => {
+  const e = document.querySelector('.acceso-admin-error');
+  return e ? getComputedStyle(e).animationName : null;
+});
+for (const [movimiento, esperadoServidor] of [['no-preference', 'acceso-admin-fundido'], ['reduce', 'acceso-admin-solo-opacidad']]) {
+  const { context, page } = await nuevaPagina(browser, { extra: { reducedMotion: movimiento } });
+  await page.goto(BASE + '/admin/acceso');
+  await page.locator('#acceso-admin-usuario').waitFor();
+  await page.click('.acceso-admin-boton'); // validación local con clic
+  await page.locator('.acceso-admin-error').waitFor();
+  const conClic = await animacionDelError(page);
+  await page.fill('#acceso-admin-usuario', 'admin.prueba');
+  await page.press('#acceso-admin-usuario', 'Enter'); // validación local con Enter (falta la contraseña)
+  await page.waitForTimeout(100);
+  const conEnter = await animacionDelError(page);
+  check(conClic === 'none' && conEnter === 'none', `${movimiento}: la validación local (clic y Enter) aparece sin animación`, `${conClic} / ${conEnter}`);
+  await page.fill('#acceso-admin-password', 'clave-de-prueba');
+  await page.press('#acceso-admin-password', 'Enter'); // respuesta del servidor (401 simulado)
+  await page.locator('.acceso-admin-error[data-origen="servidor"]').waitFor({ timeout: 10000 }).catch(() => {});
+  const servidor = await animacionDelError(page);
+  check(servidor === esperadoServidor, `${movimiento}: el error del servidor usa ${esperadoServidor}`, servidor);
+  await context.close();
+}
+{
+  const { context, page } = await nuevaPagina(browser);
+  await page.goto(BASE + '/admin/acceso');
+  await page.locator('#acceso-admin-usuario').waitFor();
+  const reglas = await page.evaluate(() => {
+    const todas = [...document.styleSheets].flatMap((h) => { try { return [...h.cssRules]; } catch { return []; } });
+    const ojo = todas.find((r) => r.selectorText === '.acceso-admin-ojo:active');
+    const fundido = todas.find((r) => r.type === CSSRule.KEYFRAMES_RULE && r.name === 'acceso-admin-fundido');
+    return { ojo: ojo?.style.transform || null, fundido: fundido?.cssText || '' };
+  });
+  check(reglas.ojo === 'scale(0.97)', 'el ojo al presionar: scale(0.97)', reglas.ojo);
+  check(reglas.fundido.includes('opacity') && !reglas.fundido.includes('transform'), 'el fundido del error es sólo de opacidad');
+  await context.close();
+}
+for (const [movimiento, esperado] of [['no-preference', 'se desplaza'], ['reduce', 'no se desplaza']]) {
+  const { context, page } = await nuevaPagina(browser, { extra: { reducedMotion: movimiento } });
+  await page.goto(BASE + '/admin/acceso');
+  await page.locator('.acceso-admin-boton').waitFor();
+  await page.waitForTimeout(400);
+  await page.hover('.acceso-admin-boton');
+  await page.waitForTimeout(400);
+  const t = await page.evaluate(() => getComputedStyle(document.querySelector('.acceso-admin-boton-icono')).transform);
+  const desplazada = t !== 'none' && !/^matrix\(1, 0, 0, 1, 0, 0\)$/.test(t);
+  check(movimiento === 'reduce' ? !desplazada : desplazada, `${movimiento}: la flecha del botón con el puntero ${esperado}`, t);
+  await context.close();
+}
+
 // ---------------------------------------------------------------- geometría
 console.log('\n/admin/acceso: geometría real en los 7 tamaños (normal y con error)');
 for (const [w, h] of TAMANOS) {

@@ -27,6 +27,9 @@ export default function AccesoAdmin() {
     const [password, setPassword] = useState('');
     const [verPassword, setVerPassword] = useState(false);
     const [error, setError] = useState('');
+    // 'local': validación del formulario (Enter o clic), aparece sin animación;
+    // 'servidor': respuesta del servidor, con el fundido corto.
+    const [origenError, setOrigenError] = useState('servidor');
     const [cargando, setCargando] = useState(false);
     const enVueloRef = useRef(false);
     const passwordRef = useRef(null);
@@ -43,6 +46,7 @@ export default function AccesoAdmin() {
         e.preventDefault();
         if (enVueloRef.current) return;
         if (!usuario.trim() || !password) {
+            setOrigenError('local');
             setError('Escribe tu usuario y tu contraseña.');
             (usuario.trim() ? passwordRef : usuarioRef).current?.focus();
             return;
@@ -57,12 +61,14 @@ export default function AccesoAdmin() {
                 { timeout: 15000 },
             );
             if (!guardarSesionAdmin(data)) {
+                setOrigenError('servidor');
                 setError('No pudimos iniciar sesión. Intenta de nuevo.');
                 return;
             }
             navigate('/admin', { replace: true });
         } catch (fallo) {
             const mensaje = mensajeDeError(fallo);
+            setOrigenError('servidor');
             setError(mensaje);
             if (mensaje === ERROR_CREDENCIALES) {
                 setPassword('');
@@ -150,7 +156,7 @@ export default function AccesoAdmin() {
                                 {/* Región viva siempre montada: el lector de pantalla anuncia cada error nuevo. */}
                                 <div className="acceso-admin-vivo" aria-live="assertive" aria-atomic="true">
                                     {error && (
-                                        <p id={idError} className="acceso-admin-error">
+                                        <p id={idError} className="acceso-admin-error" data-origen={origenError}>
                                             <AlertCircle size={18} strokeWidth={2} aria-hidden="true" />
                                             <span>{error}</span>
                                         </p>

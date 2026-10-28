@@ -121,6 +121,8 @@
   box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.25);
   animation: acceso-admin-fundido 160ms var(--aa-ease);
 }
+/* Validación del formulario (Enter o clic): respuesta inmediata a la acción, sin animación. */
+.acceso-admin-error[data-origen='local'] { animation: none; }
 .acceso-admin-vivo:not(:empty) { margin-top: 18px; }
 
 .acceso-admin-campo { margin-top: 22px; display: flex; flex-direction: column; gap: 8px; }
@@ -166,7 +168,7 @@
   transition: color 150ms ease, transform 160ms var(--aa-ease);
 }
 .acceso-admin-ojo:focus-visible { outline: 2px solid var(--aa-verde); outline-offset: -4px; }
-.acceso-admin-ojo:active { transform: scale(0.94); }
+.acceso-admin-ojo:active { transform: scale(0.97); }
 
 .acceso-admin-boton {
   margin-top: 24px;
@@ -231,7 +233,7 @@
 }
 
 @keyframes acceso-admin-giro { to { transform: rotate(360deg); } }
-@keyframes acceso-admin-fundido { from { opacity: 0; transform: translateY(-2px); } }
+@keyframes acceso-admin-fundido { from { opacity: 0; } }
 @keyframes acceso-admin-entrada { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
 
 @media (max-width: 480px) {
@@ -256,6 +258,8 @@
   .acceso-admin-envoltura,
   .acceso-admin-error { animation: acceso-admin-solo-opacidad 150ms ease; }
   .acceso-admin-boton-icono { transition: none; }
+  /* Sin el desplazamiento de la flecha (no sólo sin su transición). */
+  .acceso-admin-boton:hover:not(:disabled) .acceso-admin-boton-icono { transform: none; }
   .acceso-admin-spinner { animation-duration: 1.6s; } /* sigue girando: es la única señal de espera */
   .acceso-admin-boton:active:not(:disabled),
   .acceso-admin-ojo:active { transform: none; }
