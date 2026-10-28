@@ -38,23 +38,6 @@ const infoTriggerRef = useRef(null);
   e.preventDefault();
   setError('');
 
-  // 🟢 VALIDACIÓN DE ADMINISTRADOR ÚNICO (Hardcoded)
-  // Usamos el correo "admin@udec.edu.co" para que pase la validación de tipo email del navegador
-  if (correo === 'admin@udec.edu.co' && password === 'Password123!') {
-    const adminUser = {
-      nombres: 'Administrador',
-      apellidos: 'UdeC',
-      rol: 'admin',
-      correo: 'admin@udec.edu.co'
-    };
-
-    localStorage.setItem('token', 'token-falso-admin'); // Un token para sesión local
-    localStorage.setItem('usuario', JSON.stringify(adminUser));
-    
-    // Redirección directa al panel que ya creamos
-    navigate('/Admin'); 
-    return; // Detenemos la ejecución aquí para que no intente ir al backend
-  }
   try {
     // Usamos el dominio oficial que configuraste en Vercel
     const response = await fetch('https://backend-ude-c.vercel.app/api/auth/login', { 
