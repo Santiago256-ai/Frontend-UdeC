@@ -19,6 +19,8 @@ import EmpresaDashboard from './pages/EmpresaDashboard/EmpresaDashboard';
 import Mensajeria from './pages/Mensajeria';
 import CrearCV from './pages/CrearCV';
 import Admin from "./components/Admin/Admin";
+import RutaAdmin from "./components/Admin/RutaAdmin";
+import AccesoAdmin from "./pages/AccesoAdmin";
 import ResetPassword from './pages/ResetPassword';
 
 import "./App.css";
@@ -134,7 +136,8 @@ function App() {
                 <Route path="/register/company" element={<RegistrarCompany />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/estudiante" element={<Estudiante />} />
-                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/acceso" element={<AccesoAdmin />} />
+                <Route path="/admin" element={<RutaAdmin><Admin /></RutaAdmin>} />
                 <Route path="/crear-cv" element={<CrearCV />} />
                 <Route path="/empresa-dashboard" element={<EmpresaDashboard />} /> 
                 <Route path="/vacantes" element={<Vacantes />} />
