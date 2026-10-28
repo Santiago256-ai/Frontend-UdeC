@@ -589,6 +589,25 @@
   min-height: 0;
 }
 
+/* Aviso de sesión vencida (services/api.js lleva aquí con ?motivo=expirada tras un 401).
+   Dorado suave, no naranja: es información, no urgencia. Mismo par que el aviso de
+   /admin/acceso: tinta #5e4c12 sobre #fbf6e6 (7.7:1). */
+.landing-aviso-sesion {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fbf6e6;
+  box-shadow: inset 0 0 0 1px rgba(162, 137, 69, 0.35);
+  color: #5e4c12;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.landing-aviso-sesion svg { flex: none; margin-top: 1px; }
+
 /* Estilo para el error sutil */
 .error-message-sutil {
   color: #e53e3e; /* Rojo profesional, no chillón */
