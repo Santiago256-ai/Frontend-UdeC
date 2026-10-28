@@ -19,7 +19,7 @@
  * cierre de sesión conserva las demás claves; el aviso "Panel en habilitación" y
  * el toast informativo ante el 403 temporal del servidor (otro 403 sigue siendo
  * error); la pantalla /admin/acceso (éxito, 401,
- * 429, 5xx, red caída, aviso de sesión vencida), el campo Usuario en minúsculas
+ * 429, 5xx, sin respuesta con y sin conexión, aviso de sesión vencida), el campo Usuario en minúsculas
  * (mayúsculas, escribir en medio, pegar) y su geometría en los 7 tamaños.
  * Capturas en tests/evidencia/acceso-admin/.
  */
@@ -446,15 +446,18 @@ const entrar = async (page, usuario = '  Admin.Prueba ', clave = 'clave-de-prueb
   check((await almacen(page)).token === null, 'no escribe localStorage.token');
   await context.close();
 }
-for (const [caso, login, mensaje] of [
+for (const [caso, login, mensaje, sinConexion = false] of [
   ['401', () => [401, { message: 'Usuario o contraseña incorrectos' }], 'Usuario o contraseña incorrectos'],
   ['429', () => [429, { message: 'Demasiados intentos' }], 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.'],
   ['500', () => [500, { message: 'x' }], 'No pudimos iniciar sesión. Intenta de nuevo.'],
-  ['red caída', () => ['red'], 'No se pudo conectar con el servidor.'],
+  // Sin respuesta legible (red caída o el 429 del Firewall de Vercel sin cabeceras CORS).
+  ['sin respuesta, con conexión', () => ['red'], 'No se pudo conectar con el servidor o hubo demasiados intentos. Espera un minuto y vuelve a intentarlo.'],
+  ['sin respuesta, sin conexión', () => ['red'], 'Sin conexión a internet. Revisa tu red y vuelve a intentarlo.', true],
 ]) {
   const { context, page } = await nuevaPagina(browser, { login });
   await page.goto(BASE + '/admin/acceso');
   await page.locator('#acceso-admin-usuario').waitFor();
+  if (sinConexion) await context.setOffline(true); // navigator.onLine pasa a false
   await entrar(page);
   await page.locator('.acceso-admin-error').waitFor({ timeout: 10000 }).catch(() => {});
   const texto = await page.locator('.acceso-admin-vivo').innerText().catch(() => '');

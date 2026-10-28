@@ -15,7 +15,13 @@ const mensajeDeError = (error) => {
     const status = error.response?.status;
     if (status === 401) return ERROR_CREDENCIALES;
     if (status === 429) return 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.';
-    if (!error.response) return 'No se pudo conectar con el servidor.'; // red caída o tiempo agotado
+    // Sin respuesta legible: red caída, tiempo agotado o el 429 del Firewall de Vercel,
+    // que llega sin cabeceras CORS y axios no puede leer.
+    if (!error.response) {
+        return navigator.onLine === false
+            ? 'Sin conexión a internet. Revisa tu red y vuelve a intentarlo.'
+            : 'No se pudo conectar con el servidor o hubo demasiados intentos. Espera un minuto y vuelve a intentarlo.';
+    }
     return 'No pudimos iniciar sesión. Intenta de nuevo.';
 };
 
