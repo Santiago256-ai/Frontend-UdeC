@@ -9,9 +9,8 @@
  * se responde con page.route. Sesiones y tokens inventados (los JWT de prueba no
  * están firmados: el frontend sólo lee su "exp").
  *
- * Las credenciales del acceso antiguo de Landing.jsx nunca se escriben aquí: si se
- * quiere probar que ya no llevan al panel, se pasan por variables de entorno
- * locales ADMIN_ANTIGUO_CORREO y ADMIN_ANTIGUO_CLAVE (sin ellas, ese caso se omite).
+ * La landing ya no tiene entrada de administrador: se comprueba en su fuente y en
+ * cada respuesta posible de /auth/login, sin escribir ninguna credencial aquí.
  *
  * Cubre: (1) el formulario público siempre consulta /auth/login; (2) /admin sin
  * sesión, con sesión de egresado o vencida termina en /admin/acceso; (3) con las dos
@@ -25,7 +24,7 @@
  * Capturas en tests/evidencia/acceso-admin/.
  */
 import { chromium } from 'playwright';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -140,18 +139,58 @@ console.log('\n(1) Formulario público: siempre consulta /auth/login, nunca entr
   void pedidos;
   await context.close();
 }
-if (process.env.ADMIN_ANTIGUO_CORREO && process.env.ADMIN_ANTIGUO_CLAVE) {
+{
+  // La fuente de la landing ya no compara el formulario contra valores fijos, no navega
+  // al panel ni escribe un rol de administrador; sólo guarda lo que devuelve /auth/login.
+  const fuente = await readFile(path.resolve(__dirname, '../src/pages/Landing.jsx'), 'utf8');
+  const escrituras = [...fuente.matchAll(/localStorage\.setItem\(([^;]*)\)\s*;/g)].map((m) => m[1].replace(/\s+/g, ' ').trim());
+  check(!/\b(correo|password)\s*===?\s*['"`]/.test(fuente), 'Landing.jsx: no compara correo ni contraseña con valores fijos');
+  check(!/navigate\(\s*['"`]\/admin/i.test(fuente) && !/to=\s*['"`{]*\/admin/i.test(fuente), 'Landing.jsx: ningún enlace ni navegación a /admin');
+  check(!/\brol\s*:\s*['"`]admin/i.test(fuente), 'Landing.jsx: no construye un usuario con rol de administrador');
+  check(escrituras.length === 2 && escrituras.every((x) => x === "'token', data.token" || x === "'usuario', JSON.stringify(data.usuario)"),
+    'Landing.jsx: sólo guarda el token y el usuario que devuelve /auth/login', `${escrituras.length} escritura(s)`);
+}
+for (const [caso, respuesta, destino] of [
+  ['egresado', [200, { success: true, token: 'token-egresado', tipo: 'egresado', usuario: { id: 7, nombres: 'Laura' } }], '/vacantes-dashboard'],
+  ['empresa', [200, { success: true, token: 'token-empresa', tipo: 'empresa', usuario: { id: 3, nombre: 'Agro Andes' } }], '/empresa-dashboard'],
+  ['success:false', [200, { success: false, message: 'Credenciales no encontradas' }], '/'],
+  ['401', [401, { message: 'Contraseña incorrecta' }], '/'],
+  ['500', [500, { message: 'x' }], '/'],
+  ['red caída', ['red'], '/'],
+]) {
+  // Cada envío del formulario va al backend; ninguno lleva al panel ni escribe un rol de administrador.
   const { context, page } = await nuevaPagina(browser);
+  // Las escrituras se anotan fuera de la página: sobreviven a una recarga completa.
+  const escrituras = [];
+  let consultas = 0;
+  await context.exposeBinding('__anotarEscritura', (_, clave, valor) => { escrituras.push([clave, valor]); });
+  await context.addInitScript(() => {
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (clave, valor) {
+      if (this === window.localStorage) window.__anotarEscritura(clave, String(valor));
+      return original.call(this, clave, valor);
+    };
+  });
+  await context.route(/\/api\/auth\/login$/, (r) => (consultas++, respuesta[0] === 'red'
+    ? r.abort('internetdisconnected')
+    : r.fulfill({ status: respuesta[0], contentType: 'application/json', body: JSON.stringify(respuesta[1]) })));
+  const visitadas = [];
+  page.on('framenavigated', (f) => { if (f === page.mainFrame()) visitadas.push(new URL(f.url()).pathname); });
   await page.goto(BASE + '/');
-  await page.fill('input[type="email"]', process.env.ADMIN_ANTIGUO_CORREO);
-  await page.fill('input.password-field', process.env.ADMIN_ANTIGUO_CLAVE);
+  await page.fill('input[type="email"]', 'alguien@ejemplo.com');
+  await page.fill('input.password-field', 'clave-de-prueba');
   await page.click('.btn-login-submit');
-  await page.waitForTimeout(1500);
-  check(!/^\/admin\/?$/i.test(new URL(page.url()).pathname) && !(await page.locator('.admin-layout-wrapper').count()),
-    'credenciales del acceso antiguo: no abren el panel', ruta(page));
+  if (destino && destino !== '/') await esperar(page, (u) => u.pathname === destino);
+  else await page.waitForTimeout(1200);
+  await page.waitForTimeout(300); // que lleguen las últimas anotaciones
+  const enRutas = [...visitadas, ...(await page.evaluate(() => [location.pathname]))];
+  const rolAdmin = escrituras.some(([, v]) => /"rol"\s*:\s*"admin"/i.test(v));
+  const panel = enRutas.some((r) => /^\/admin(\/|$)/i.test(r)) || (await page.locator('.admin-layout-wrapper').count()) > 0;
+  check(consultas === 1 && !panel && !rolAdmin,
+    `landing, ${caso}: consulta /auth/login, no abre el panel ni escribe rol de administrador`, enRutas.join(' → '));
+  // El panel de destino, con el backend simulado, puede devolver a la landing: basta con que llegue.
+  if (destino && destino !== '/') check(visitadas.includes(destino), `landing, ${caso}: sigue llevando a ${destino}`, enRutas.join(' → '));
   await context.close();
-} else {
-  console.log('  · credenciales del acceso antiguo: omitido (sin ADMIN_ANTIGUO_CORREO / ADMIN_ANTIGUO_CLAVE)');
 }
 
 // ---------------------------------------------------------------- 6.2 (2)
