@@ -1,0 +1,267 @@
+/* Acceso de administrador (/admin/acceso), concepto A · "Portería" (DESIGN.md §8,
+   contrato en .impeccable/surfaces/frontend-src-pages-accesoadmin-jsx.md).
+   Campo verde completo con la tarjeta de la familia "Ventanilla" en un marco de
+   doble bisel. Paleta del Login: --udec-verde / --udec-dorado (Landing.css) + lima
+   del logo sólo como foco. Prefijo acceso-admin- en todas las clases. */
+
+.acceso-admin {
+  --aa-verde: var(--udec-verde, #004d2c);
+  --aa-hondo: #00301b;
+  --aa-dorado: var(--udec-dorado, #a28945);
+  --aa-lima: #a6e000;
+  --aa-tinta: #1f2622;
+  --aa-tinta-suave: #545c57;           /* 6.6:1 sobre blanco */
+  --aa-borde: #8f9a94;                 /* 3.0:1 sobre blanco: borde de control */
+  --aa-error: #b42318;
+  --aa-error-fondo: #fdf2f1;
+  --aa-error-tinta: #8f1d14;
+  --aa-aviso-fondo: #fbf6e6;
+  --aa-aviso-tinta: #5e4c12;           /* 7.7:1 sobre el fondo del aviso */
+  --aa-ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(120% 70% at 50% 0%, #0b5a36 0%, transparent 60%),
+    linear-gradient(to bottom, #00402a, var(--aa-hondo));
+  font-family: 'Montserrat', 'Century Gothic', system-ui, 'Segoe UI', sans-serif;
+  color: var(--aa-tinta);
+  -webkit-font-smoothing: antialiased;
+}
+/* Neutraliza `* { font-family: 'Inter' }` de EmpresaDashboard.css (DESIGN.md §9). */
+.acceso-admin *,
+.acceso-admin *::before,
+.acceso-admin *::after { font-family: inherit; box-sizing: border-box; }
+.acceso-admin ::selection { background: rgba(166, 224, 0, 0.45); color: var(--aa-hondo); }
+
+/* ---------- Tarjeta en marco de doble bisel ---------- */
+.acceso-admin-envoltura {
+  width: 100%;
+  max-width: 432px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  animation: acceso-admin-entrada 240ms var(--aa-ease);
+}
+/* La tarjeta descansa en un marco translúcido con filete propio; radios concéntricos 22 / 16. */
+.acceso-admin-marco {
+  width: 100%;
+  padding: 6px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 32px 64px -28px rgba(0, 16, 9, 0.75);
+}
+.acceso-admin-tarjeta {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.acceso-admin-banda {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  background: var(--aa-verde);
+  border-bottom: 3px solid var(--aa-dorado);
+}
+.acceso-admin-logo { height: 26px; width: auto; display: block; }
+.acceso-admin-divisor { width: 1px; height: 26px; background: rgba(255, 255, 255, 0.3); }
+.acceso-admin-udec { height: 28px; width: auto; display: block; filter: brightness(0) invert(1); } /* mismo trato que el navbar del Login */
+.acceso-admin-cuerpo { padding: 28px 28px 30px; }
+
+/* ---------- Formulario ---------- */
+.acceso-admin-form { display: flex; flex-direction: column; }
+.acceso-admin-titulo {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--aa-verde);
+  text-wrap: balance;
+}
+.acceso-admin-lead {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--aa-tinta-suave);
+  text-wrap: pretty;
+}
+.acceso-admin-aviso,
+.acceso-admin-error {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.acceso-admin-aviso svg,
+.acceso-admin-error svg { flex: none; margin-top: 1px; }
+.acceso-admin-aviso {
+  margin-top: 20px;
+  background: var(--aa-aviso-fondo);
+  color: var(--aa-aviso-tinta);
+  box-shadow: inset 0 0 0 1px rgba(162, 137, 69, 0.35);
+}
+.acceso-admin-error {
+  background: var(--aa-error-fondo);
+  color: var(--aa-error-tinta);
+  box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.25);
+  animation: acceso-admin-fundido 160ms var(--aa-ease);
+}
+/* Validación del formulario (Enter o clic): respuesta inmediata a la acción, sin animación. */
+.acceso-admin-error[data-origen='local'] { animation: none; }
+.acceso-admin-vivo:not(:empty) { margin-top: 18px; }
+
+.acceso-admin-campo { margin-top: 22px; display: flex; flex-direction: column; gap: 8px; }
+.acceso-admin-campo + .acceso-admin-campo { margin-top: 18px; }
+.acceso-admin-label { font-size: 0.85rem; font-weight: 700; color: var(--aa-tinta); }
+.acceso-admin-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  font-size: 1rem;              /* 16px: sin zoom en iOS */
+  font-weight: 500;
+  color: var(--aa-tinta);
+  background: #fff;
+  border: 1px solid var(--aa-borde);
+  border-radius: 10px;
+  caret-color: var(--aa-verde);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.acceso-admin-input:focus {
+  outline: none;
+  border-color: var(--aa-verde);
+  box-shadow: 0 0 0 3px rgba(0, 77, 44, 0.18);
+}
+.acceso-admin-input[aria-invalid='true'] { border-color: var(--aa-error); }
+.acceso-admin-input[aria-invalid='true']:focus { box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.16); }
+
+.acceso-admin-password { position: relative; }
+.acceso-admin-password .acceso-admin-input { padding-right: 52px; }
+.acceso-admin-ojo {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--aa-tinta-suave);
+  cursor: pointer;
+  transition: color 150ms ease, transform 160ms var(--aa-ease);
+}
+.acceso-admin-ojo:focus-visible { outline: 2px solid var(--aa-verde); outline-offset: -4px; }
+.acceso-admin-ojo:active { transform: scale(0.97); }
+
+.acceso-admin-boton {
+  margin-top: 24px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(to bottom, #104e32, var(--aa-hondo));
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -6px rgba(0, 48, 27, 0.55);
+  transition: transform 160ms var(--aa-ease), box-shadow 160ms ease, opacity 150ms ease;
+}
+.acceso-admin-boton:active:not(:disabled) { transform: scale(0.97); }
+.acceso-admin-boton:focus-visible { outline: 3px solid var(--aa-lima); outline-offset: 2px; }
+.acceso-admin-boton:disabled { cursor: progress; opacity: 0.85; }
+.acceso-admin-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: acceso-admin-giro 700ms linear infinite;
+}
+/* Flecha anidada en su propio círculo. */
+.acceso-admin-boton-icono {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: -6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 200ms var(--aa-ease);
+}
+
+.acceso-admin-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+  text-underline-offset: 4px;
+}
+.acceso-admin-volver:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 4px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .acceso-admin-ojo:hover { color: var(--aa-verde); }
+  .acceso-admin-boton:hover:not(:disabled) { box-shadow: 0 8px 20px -6px rgba(0, 48, 27, 0.7); }
+  .acceso-admin-boton:hover:not(:disabled) .acceso-admin-boton-icono { transform: translateX(2px); }
+  .acceso-admin-volver:hover { text-decoration-color: currentColor; }
+}
+
+@keyframes acceso-admin-giro { to { transform: rotate(360deg); } }
+@keyframes acceso-admin-fundido { from { opacity: 0; } }
+@keyframes acceso-admin-entrada { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+
+@media (max-width: 480px) {
+  .acceso-admin-cuerpo { padding: 24px 20px 26px; }
+  .acceso-admin-banda { padding: 16px 20px; }
+  .acceso-admin-titulo { font-size: 1.45rem; }
+}
+
+/* Alturas bajas (360×640, 1280×650): que el botón y el error quepan sin desplazar. */
+@media (max-height: 700px) {
+  .acceso-admin { padding-block: 16px; }
+  .acceso-admin-banda { padding-block: 13px; }
+  .acceso-admin-cuerpo { padding-top: 20px; padding-bottom: 22px; }
+  .acceso-admin-titulo { font-size: 1.35rem; }
+  .acceso-admin-campo { margin-top: 16px; }
+  .acceso-admin-campo + .acceso-admin-campo { margin-top: 14px; }
+  .acceso-admin-boton { margin-top: 18px; }
+  .acceso-admin-vivo:not(:empty) { margin-top: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acceso-admin-envoltura,
+  .acceso-admin-error { animation: acceso-admin-solo-opacidad 150ms ease; }
+  .acceso-admin-boton-icono { transition: none; }
+  /* Sin el desplazamiento de la flecha (no sólo sin su transición). */
+  .acceso-admin-boton:hover:not(:disabled) .acceso-admin-boton-icono { transform: none; }
+  .acceso-admin-spinner { animation-duration: 1.6s; } /* sigue girando: es la única señal de espera */
+  .acceso-admin-boton:active:not(:disabled),
+  .acceso-admin-ojo:active { transform: none; }
+}
+@keyframes acceso-admin-solo-opacidad { from { opacity: 0; } }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { APIAdmin } from '../../services/api';
+import { avisarAccionBloqueada, avisarBloqueoTemporal, esBloqueoTemporal } from './bloqueoTemporal';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -10,7 +11,7 @@ import ModalDetalleEmpresa from './ModalDetalleEmpresa';
 
 const Icon = ({ name }) => <i className={`fa-solid fa-${name}`}></i>;
 
-const ItemEmpresas = ({ API_URL }) => {
+const ItemEmpresas = () => {
     const [empresas, setEmpresas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
@@ -33,11 +34,12 @@ const handleVerDetalles = (empresa) => {
     const cargarEmpresas = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${API_URL}/empresas/admin/todas`);
+            const res = await APIAdmin.get(`/empresas/admin/todas`);
             setEmpresas(res.data);
         } catch (error) {
             console.error("Error al cargar empresas:", error);
-            toast.error("Error al conectar con el listado de empresas");
+            if (esBloqueoTemporal(error)) avisarBloqueoTemporal();
+            else toast.error("Error al conectar con el listado de empresas");
         } finally {
             setLoading(false);
         }
@@ -65,7 +67,7 @@ const handleVerDetalles = (empresa) => {
         const nuevoEstado = empresa.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
         try {
             // Asegúrate de tener esta ruta en tu backend
-            await axios.put(`${API_URL}/empresas/admin/estado/${empresa.id}`, { 
+            await APIAdmin.put(`/empresas/admin/estado/${empresa.id}`, { 
                 estado: nuevoEstado 
             });
             
@@ -75,7 +77,8 @@ const handleVerDetalles = (empresa) => {
             
             toast.success(`Empresa ${nuevoEstado === "ACTIVO" ? 'activada' : 'desactivada'}`);
         } catch (error) {
-            toast.error("No se pudo cambiar el estado de la empresa");
+            if (esBloqueoTemporal(error)) avisarAccionBloqueada("Cambiar el estado");
+            else toast.error("No se pudo cambiar el estado de la empresa");
         }
     };
 
@@ -91,14 +94,18 @@ const ejecutarEliminacion = async () => {
 
     try {
         // La URL con /admin/ que ya habíamos corregido
-        await axios.delete(`${API_URL}/empresas/admin/${empresaParaEliminar.id}`); 
+        await APIAdmin.delete(`/empresas/admin/${empresaParaEliminar.id}`); 
         
         setEmpresas(empresas.filter(e => e.id !== empresaParaEliminar.id));
         toast.success(`La empresa "${empresaParaEliminar.nombre}" ha sido eliminada correctamente`);
     } catch (error) {
         console.error("Error al eliminar:", error);
-        const mensajeError = error.response?.data?.error || "No se pudo eliminar la empresa";
-        toast.error(mensajeError);
+        if (esBloqueoTemporal(error)) {
+            avisarAccionBloqueada("Eliminar");
+        } else {
+            const mensajeError = error.response?.data?.error || "No se pudo eliminar la empresa";
+            toast.error(mensajeError);
+        }
     } finally {
         // Cerramos el modal y limpiamos el estado
         setIsModalOpen(false);
@@ -369,7 +376,6 @@ const exportarPDF = () => {
                 setEmpresaSeleccionada(null);
             }}
             empresa={empresaSeleccionada}
-            API_URL={API_URL}        
             onUpdate={cargarEmpresas} 
         />
 

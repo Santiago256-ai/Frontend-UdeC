@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { APIAdmin } from '../../services/api';
+import { avisarAccionBloqueada, avisarBloqueoTemporal, esBloqueoTemporal } from './bloqueoTemporal';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -12,7 +13,7 @@ const Icon = ({ name }) => <i className={`fa-solid fa-${name}`}></i>;
 // ==========================================
 // SUB-COMPONENTE: MODAL PERFIL (EDICIÓN HORIZONTAL)
 // ==========================================
-const ModalPerfil = ({ usuario, onClose, onUpdate, API_URL }) => {
+const ModalPerfil = ({ usuario, onClose, onUpdate }) => {
     const [editando, setEditando] = useState(false);
     const [datosEditados, setDatosEditados] = useState(usuario ? { ...usuario } : {});
 
@@ -26,7 +27,7 @@ const ModalPerfil = ({ usuario, onClose, onUpdate, API_URL }) => {
 
     const handleGuardar = async () => {
         try {
-            const res = await axios.put(`${API_URL}/usuarios/${usuario.id}`, datosEditados);
+            const res = await APIAdmin.put(`/usuarios/${usuario.id}`, datosEditados);
             if (res.status === 200) {
                 toast.success("Expediente actualizado correctamente");
                 if (onUpdate) onUpdate(); 
@@ -34,7 +35,8 @@ const ModalPerfil = ({ usuario, onClose, onUpdate, API_URL }) => {
             }
         } catch (error) {
             console.error("Error al actualizar:", error);
-            toast.error("No se pudo actualizar el expediente");
+            if (esBloqueoTemporal(error)) avisarAccionBloqueada("Guardar los cambios");
+            else toast.error("No se pudo actualizar el expediente");
         }
     };
 
@@ -143,7 +145,7 @@ const ModalPerfil = ({ usuario, onClose, onUpdate, API_URL }) => {
 // ==========================================
 // COMPONENTE PRINCIPAL: ITEM USUARIOS
 // ==========================================
-const ItemUsuarios = ({ API_URL }) => {
+const ItemUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
@@ -159,11 +161,12 @@ const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
     const cargarUsuarios = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${API_URL}/usuarios/admin/todos`);
+            const res = await APIAdmin.get(`/usuarios/admin/todos`);
             setUsuarios(res.data);
         } catch (error) {
             console.error("Error al cargar usuarios:", error);
-            toast.error("No se pudo conectar con la base de datos");
+            if (esBloqueoTemporal(error)) avisarBloqueoTemporal();
+            else toast.error("No se pudo conectar con la base de datos");
         } finally {
             setLoading(false);
         }
@@ -231,7 +234,7 @@ const toggleEstado = async (usuario) => {
     
     try {
         // Usamos el endpoint de actualización que ya creamos
-        await axios.put(`${API_URL}/usuarios/${usuario.id}`, {
+        await APIAdmin.put(`/usuarios/${usuario.id}`, {
             ...usuario,
             estado: nuevoEstado
         });
@@ -244,7 +247,8 @@ const toggleEstado = async (usuario) => {
         toast.success(`Usuario ${nuevoEstado === "ACTIVO" ? 'activado' : 'desactivado'}`);
     } catch (error) {
         console.error("Error al cambiar estado:", error);
-        toast.error("No se pudo cambiar el estado");
+        if (esBloqueoTemporal(error)) avisarAccionBloqueada("Cambiar el estado");
+        else toast.error("No se pudo cambiar el estado");
     }
 };
 
@@ -262,12 +266,13 @@ const ejecutarEliminacion = async () => {
     if (!usuarioParaEliminar) return;
 
     try {
-        await axios.delete(`${API_URL}/usuarios/${usuarioParaEliminar.id}`);
+        await APIAdmin.delete(`/usuarios/${usuarioParaEliminar.id}`);
         setUsuarios(usuarios.filter(u => u.id !== usuarioParaEliminar.id));
         toast.success(`El perfil de "${usuarioParaEliminar.nombre}" ha sido eliminado correctamente`);
     } catch (error) {
         console.error("Error al eliminar:", error);
-        toast.error("No se pudo eliminar el usuario");
+        if (esBloqueoTemporal(error)) avisarAccionBloqueada("Eliminar");
+        else toast.error("No se pudo eliminar el usuario");
     } finally {
         // Cerramos y limpiamos siempre
         setIsModalOpen(false);
@@ -321,7 +326,6 @@ return (
             <ModalPerfil 
                 key={usuarioSeleccionado.id} 
                 usuario={usuarioSeleccionado} 
-                API_URL={API_URL}
                 onClose={() => setUsuarioSeleccionado(null)} 
                 onUpdate={cargarUsuarios} 
             />
