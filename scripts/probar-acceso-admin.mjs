@@ -20,7 +20,8 @@
  * cierre de sesión conserva las demás claves; el aviso "Panel en habilitación" y
  * el toast informativo ante el 403 temporal del servidor (otro 403 sigue siendo
  * error); la pantalla /admin/acceso (éxito, 401,
- * 429, 5xx, red caída, aviso de sesión vencida) y su geometría en los 7 tamaños.
+ * 429, 5xx, red caída, aviso de sesión vencida), el campo Usuario en minúsculas
+ * (mayúsculas, escribir en medio, pegar) y su geometría en los 7 tamaños.
  * Capturas en tests/evidencia/acceso-admin/.
  */
 import { chromium } from 'playwright';
@@ -422,6 +423,43 @@ for (const [caso, login, mensaje] of [
   check(texto.includes(mensaje) && st.vivo === 'assertive', `${caso}: "${mensaje}" anunciado`, texto || 'sin mensaje');
   check(ruta(page) === '/admin/acceso' && (await almacen(page)).admin === null, `${caso}: se queda y no guarda sesión`);
   if (caso === '401') check(st.foco === 'acceso-admin-password', '401: el foco vuelve a la contraseña');
+  await context.close();
+}
+
+// ---------------------------------------------------------------- campo Usuario en minúsculas
+console.log('\n/admin/acceso: Usuario en minúsculas');
+{
+  const { context, page } = await nuevaPagina(browser, { extra: { permissions: ['clipboard-read', 'clipboard-write'] } });
+  await page.goto(BASE + '/admin/acceso');
+  const campo = page.locator('#acceso-admin-usuario');
+  await campo.waitFor();
+  const estado = () => campo.evaluate((el) => ({ valor: el.value, inicio: el.selectionStart, fin: el.selectionEnd }));
+
+  // Mayúsculas al teclear (lo mismo que llega con el bloqueo de mayúsculas activo).
+  await campo.click();
+  await page.keyboard.type('ADMIN.Prueba');
+  let e = await estado();
+  check(e.valor === 'admin.prueba' && e.inicio === 12, 'mayúsculas al teclear → el valor queda en minúsculas', JSON.stringify(e));
+  const atributos = await campo.evaluate((el) => [el.getAttribute('autocapitalize'), el.getAttribute('autocorrect'), el.getAttribute('spellcheck')]);
+  check(atributos.join(',') === 'none,off,false', 'autoCapitalize="none", autoCorrect="off", spellCheck={false}', atributos.join(','));
+
+  // Escribir en medio de la palabra: el cursor se queda donde se escribe.
+  await campo.fill('admin');
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.type('XY');
+  e = await estado();
+  check(e.valor === 'adxymin' && e.inicio === 4 && e.fin === 4, 'mayúsculas en medio → minúsculas sin que el cursor salte al final', JSON.stringify(e));
+
+  // Pegar (Ctrl+V) en medio: minúsculas y cursor al final de lo pegado.
+  await campo.fill('ab');
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowRight');
+  await page.evaluate(() => navigator.clipboard.writeText('PEGADO.Admin'));
+  await page.keyboard.press('Control+V');
+  e = await estado();
+  check(e.valor === 'apegado.adminb' && e.inicio === 13 && e.fin === 13, 'pegar en mayúsculas en medio → minúsculas y cursor tras lo pegado', JSON.stringify(e));
   await context.close();
 }
 
