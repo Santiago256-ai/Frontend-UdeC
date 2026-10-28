@@ -1,8 +1,11 @@
 // src/services/api.js
 import axios from "axios";
+import { ACCESO_ADMIN_EXPIRADA, cerrarSesionAdmin, leerSesionAdmin } from "./sesionAdmin";
+
+const URL_BASE = "https://backend-ude-c.vercel.app/api";
 
 const API = axios.create({
-  baseURL: "https://backend-ude-c.vercel.app/api",
+  baseURL: URL_BASE,
 });
 
 // Interceptor para agregar token automáticamente
@@ -44,6 +47,39 @@ API.interceptors.response.use((respuesta) => respuesta, (error) => {
     localStorage.removeItem("usuario");
     // Recarga completa: no queda estado de la sesión en memoria.
     window.location.assign(AVISO_SESION_EXPIRADA);
+  }
+  return Promise.reject(error);
+});
+
+// Cliente del panel de administración. Sólo envía el token de admin-sesion
+// (sessionStorage) y nunca el de egresado o empresa; el cliente API de arriba
+// nunca envía el de administrador. Un 401 de una petición que llevaba token
+// (vencido, o { codigo: "sesion_invalida" } si la cuenta se desactivó) borra sólo
+// admin-sesion y lleva a /admin/acceso con el aviso. En /auth/admin/login un 401
+// son credenciales incorrectas: no actúa. Un 403 nunca redirige.
+export const APIAdmin = axios.create({
+  baseURL: URL_BASE,
+});
+
+APIAdmin.interceptors.request.use((config) => {
+  const sesion = leerSesionAdmin();
+  if (sesion) config.headers.Authorization = `Bearer ${sesion.token}`;
+  return config;
+});
+
+let redirigiendoAdmin = false;
+
+APIAdmin.interceptors.response.use((respuesta) => respuesta, (error) => {
+  const config = error.config || {};
+  if (
+    error.response?.status === 401 &&
+    Boolean(config.headers?.Authorization) &&
+    !/^\/?auth\//.test(config.url || "") &&
+    !redirigiendoAdmin
+  ) {
+    redirigiendoAdmin = true;
+    cerrarSesionAdmin();
+    window.location.assign(ACCESO_ADMIN_EXPIRADA);
   }
   return Promise.reject(error);
 });
