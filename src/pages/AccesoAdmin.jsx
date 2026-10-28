@@ -80,6 +80,27 @@ export default function AccesoAdmin() {
         }
     };
 
+    // Usuario siempre en minúsculas mientras se escribe o se pega (mismo criterio que
+    // el correo de la landing). Se escribe en el DOM antes del estado y se devuelve
+    // el cursor a su sitio: así React no reasigna el valor y el cursor no salta al final.
+    const cambiarUsuario = (e) => {
+        const campo = e.target;
+        const valor = campo.value;
+        const minusculas = valor.toLowerCase();
+        if (minusculas !== valor) {
+            const { selectionStart: inicio, selectionEnd: fin } = campo;
+            campo.value = minusculas;
+            // toLowerCase puede cambiar la longitud (p. ej. "İ"): se mide sobre el prefijo.
+            if (inicio !== null && fin !== null) {
+                campo.setSelectionRange(
+                    valor.slice(0, inicio).toLowerCase().length,
+                    valor.slice(0, fin).toLowerCase().length,
+                );
+            }
+        }
+        setUsuario(minusculas);
+    };
+
     const idError = 'acceso-admin-error';
 
     return (
@@ -120,7 +141,7 @@ export default function AccesoAdmin() {
                                         value={usuario}
                                         aria-invalid={error ? 'true' : undefined}
                                         aria-describedby={error ? idError : undefined}
-                                        onChange={(e) => setUsuario(e.target.value)}
+                                        onChange={cambiarUsuario}
                                     />
                                 </div>
 
