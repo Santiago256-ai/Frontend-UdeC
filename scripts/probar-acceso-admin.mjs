@@ -17,7 +17,9 @@
  * sesión, con sesión de egresado o vencida termina en /admin/acceso; (3) con las dos
  * sesiones cargadas, las 13 llamadas del panel llevan el token de admin y ninguna el
  * del egresado; (4) 401 en el panel borra sólo admin-sesion, 403 no redirige y el
- * cierre de sesión conserva las demás claves; la pantalla /admin/acceso (éxito, 401,
+ * cierre de sesión conserva las demás claves; el aviso "Panel en habilitación" y
+ * el toast informativo ante el 403 temporal del servidor (otro 403 sigue siendo
+ * error); la pantalla /admin/acceso (éxito, 401,
  * 429, 5xx, red caída, aviso de sesión vencida) y su geometría en los 7 tamaños.
  * Capturas en tests/evidencia/acceso-admin/.
  */
@@ -68,8 +70,10 @@ const check = (ok, etiqueta, detalle = '') => {
 /** Datos de prueba del panel; `modo` cambia la respuesta de las rutas del panel. */
 function respuestaPanel(url, metodo, modo) {
   if (modo === '401') return [401, { codigo: 'sesion_invalida' }];
-  if (modo === '403') return [403, { error: 'Esta acción está deshabilitada temporalmente mientras se habilita el acceso de administrador.' }];
-  if (metodo !== 'GET') return [200, { message: 'ok' }];
+  const bloqueo = [403, { error: 'Esta acción está deshabilitada temporalmente mientras se habilita el acceso de administrador.' }];
+  if (modo === '403') return bloqueo; // el bloqueo temporal de hoy, en todas las rutas del panel
+  if (modo === 'otro403') return [403, { error: 'No tienes permiso para realizar esta acción.' }];
+  if (metodo !== 'GET') return modo === 'accion-bloqueada' ? bloqueo : [200, { message: 'ok' }];
   if (url.includes('/vacantes/stats')) return [200, STATS];
   if (url.includes('/usuarios/admin/todos')) return [200, USUARIOS];
   if (url.includes('/empresas/admin/todas')) return [200, EMPRESAS];
@@ -301,6 +305,77 @@ console.log('\n(4) 401 en el panel, 403 y cierre de sesión');
   check(await panelVisible(page), 'sesión a punto de vencer: el panel se monta primero');
   const llego = await esperar(page, (u) => u.pathname + u.search === '/admin/acceso?motivo=expirada', 15000);
   check(llego, 'la sesión vence con el panel abierto → /admin/acceso?motivo=expirada', ruta(page));
+  await context.close();
+}
+
+// ---------------------------------------------------------------- "Panel en habilitación"
+console.log('\nPanel en habilitación (403 temporal del servidor)');
+const banda = (page) => page.locator('.admin-panel-habilitacion');
+const toasts = (page, tipo) => page.locator(`.Toastify__toast--${tipo}`);
+{
+  const { context, page } = await nuevaPagina(browser, { admin: sesionAdmin(), modo: '403' });
+  await page.goto(BASE + '/admin');
+  await panelVisible(page);
+  await banda(page).waitFor({ timeout: 10000 }).catch(() => {});
+  const texto = await banda(page).innerText().catch(() => '');
+  check(texto.includes('Panel en habilitación') && texto.includes('temporalmente deshabilitadas'), 'Inicio: muestra el aviso general');
+  check((await banda(page).getAttribute('role').catch(() => null)) === 'status', 'el aviso se anuncia (role="status")');
+  await page.locator('.admin-menu-item').nth(1).click();
+  await page.waitForTimeout(1200);
+  check((await toasts(page, 'error').count()) === 0, 'listados bloqueados: ningún toast de error', `${await toasts(page, 'error').count()}`);
+  check((await banda(page).count()) === 1, 'el aviso sigue visible al cambiar de vista (uno solo)');
+  await page.locator('.admin-menu-item').nth(5).click();
+  await page.waitForTimeout(1200);
+  check((await page.locator('.adm-metrics-error').innerText().catch(() => '')).includes('Las métricas estarán disponibles cuando se habilite el acceso de administrador.'),
+    'Métricas: explica el bloqueo en lugar de "no se pudo conectar"');
+  await page.locator('.admin-menu-item').nth(0).click();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: path.join(OUT, 'panel-habilitacion-1280x800.png') });
+  await context.close();
+}
+{
+  const { context, page } = await nuevaPagina(browser, { admin: sesionAdmin(), modo: 'accion-bloqueada' });
+  await page.goto(BASE + '/admin');
+  await panelVisible(page);
+  await page.locator('.admin-menu-item').nth(1).click();
+  await page.waitForTimeout(1200);
+  check((await banda(page).count()) === 0, 'con los listados abiertos no hay aviso hasta que una acción se bloquea');
+  await page.locator('button[title="Eliminar"]').first().click();
+  await page.locator('[class*="btnEliminar"]').click();
+  // Se cuenta apenas aparece cualquier toast (duran 3 s: esperar sólo el informativo
+  // dejaría cerrarse un toast de error y la prueba pasaría en falso).
+  await page.locator('.Toastify__toast').first().waitFor({ timeout: 10000 }).catch(() => {});
+  const info = await toasts(page, 'info').allInnerTexts();
+  check(info.some((t) => t.includes('Eliminar está temporalmente deshabilitado mientras se habilita el acceso de administrador.')),
+    'eliminar bloqueado: toast informativo con el mensaje', info.join(' | ') || 'sin toast');
+  check((await toasts(page, 'error').count()) === 0, 'eliminar bloqueado: sin toast de error');
+  check((await banda(page).count()) === 1, 'eliminar bloqueado: aparece el aviso general');
+  await page.locator('button[title^="Click para"]').first().click();
+  await page.waitForTimeout(800);
+  const info2 = await toasts(page, 'info').allInnerTexts();
+  check(info2.some((t) => t.includes('Cambiar el estado está temporalmente deshabilitado')), 'cambiar estado bloqueado: toast informativo');
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: path.join(OUT, 'panel-accion-bloqueada-1280x800.png') });
+  await context.close();
+}
+{
+  const { context, page } = await nuevaPagina(browser, { admin: sesionAdmin(), modo: 'otro403' });
+  await page.goto(BASE + '/admin');
+  await panelVisible(page);
+  await page.locator('.admin-menu-item').nth(1).click();
+  await toasts(page, 'error').first().waitFor({ timeout: 10000 }).catch(() => {});
+  check((await toasts(page, 'error').count()) > 0 && (await banda(page).count()) === 0,
+    'control: un 403 que no es el bloqueo temporal sigue siendo error y no muestra el aviso');
+  await context.close();
+}
+for (const [w, h] of TAMANOS) {
+  const movil = w < 640;
+  const { context, page } = await nuevaPagina(browser, { admin: sesionAdmin(), modo: '403', viewport: { width: w, height: h }, extra: { deviceScaleFactor: movil ? 2 : 1, isMobile: movil, hasTouch: movil } });
+  await page.goto(BASE + '/admin');
+  await banda(page).waitFor({ timeout: 15000 }).catch(() => {});
+  const r = await banda(page).boundingBox().catch(() => null);
+  check(r && r.x >= 0 && r.x + r.width <= w + 0.5, `${w}×${h}: el aviso cabe a lo ancho`, r ? `${Math.round(r.x)}–${Math.round(r.x + r.width)}, alto ${Math.round(r.height)}` : 'no aparece');
+  if (w === 390) await page.screenshot({ path: path.join(OUT, `panel-habilitacion-${w}x${h}.png`) });
   await context.close();
 }
 
