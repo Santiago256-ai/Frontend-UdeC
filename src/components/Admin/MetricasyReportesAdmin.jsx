@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'; // 🟢 Añadimos useRef
-import axios from 'axios';
+import { APIAdmin } from '../../services/api';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, Legend
@@ -14,7 +14,6 @@ import * as XLSX from 'xlsx';
 
 import './MetricasyReportesAdmin.css';
 
-const API_URL = "https://backend-ude-c.vercel.app/api";
 
 // Paletas de colores corporativas UdeC (Verdes institucionales y Naranjas)
 const COLORS_MAIN = ['#00482b', '#f7931e', '#16a34a', '#fbbf24', '#064e3b', '#d97706'];
@@ -153,7 +152,7 @@ const MetricasyReportesAdmin = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/vacantes/stats`);
+      const response = await APIAdmin.get(`/vacantes/stats`);
       setData(response.data);
       console.log("DATOS DEL BACKEND RECIÉN LLEGADOS:", response.data);
       setError(null);

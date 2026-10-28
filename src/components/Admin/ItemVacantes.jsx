@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { APIAdmin } from '../../services/api';
 import { toast } from 'react-toastify';
 import styles from './ItemVacantes.module.css';
 
 const Icon = ({ name }) => <i className={`fa-solid fa-${name}`}></i>;
 
-const ItemVacantes = ({ API_URL }) => {
+const ItemVacantes = () => {
     const [vacantes, setVacantes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filtroEstado, setFiltroEstado] = useState("TODAS");
@@ -13,7 +13,7 @@ const ItemVacantes = ({ API_URL }) => {
     const cargarVacantes = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${API_URL}/vacantes/admin/todas`);
+            const res = await APIAdmin.get(`/vacantes/admin/todas`);
             setVacantes(res.data);
         } catch (error) {
             console.error("Error al cargar vacantes:", error);

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { APIAdmin } from '../../services/api';
 import { toast } from 'react-toastify';
 import { Star, MessageCircle, X, ThumbsUp, ThumbsDown, Info } from 'lucide-react'; 
 import styles from './ItemPostulaciones.module.css';
 
 const Icon = ({ name }) => <i className={`fa-solid fa-${name}`}></i>;
 
-const ItemPostulaciones = ({ API_URL }) => {
+const ItemPostulaciones = () => {
     const [postulaciones, setPostulaciones] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -28,7 +28,7 @@ const ItemPostulaciones = ({ API_URL }) => {
     const cargarPostulaciones = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${API_URL}/postulaciones/admin/todas`);
+            const res = await APIAdmin.get(`/postulaciones/admin/todas`);
             setPostulaciones(res.data);
         } catch (error) {
             console.error("Error al cargar postulaciones:", error);

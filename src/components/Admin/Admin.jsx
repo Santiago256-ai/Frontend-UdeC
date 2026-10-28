@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { APIAdmin } from '../../services/api';
+import { ACCESO_ADMIN, cerrarSesionAdmin } from '../../services/sesionAdmin';
 import { useNavigate } from 'react-router-dom';
 import './Admin.css';
 
@@ -22,7 +23,6 @@ import MetricasyReportesAdmin from './MetricasyReportesAdmin';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Filler);
 
-const API_URL = "https://backend-ude-c.vercel.app/api";
 
 // Font Awesome sólo se usa dentro del panel de Admin: se carga aquí en vez de
 // globalmente en index.html, para no bloquear el primer render de Login/Landing.
@@ -61,8 +61,8 @@ const [hoverLogout, setHoverLogout] = useState(false);
       try {
         setLoading(true);
         const [resVacantes, resStats] = await Promise.all([
-          axios.get(`${API_URL}/vacantes/admin/todas`),
-          axios.get(`${API_URL}/vacantes/stats`)
+          APIAdmin.get(`/vacantes/admin/todas`),
+          APIAdmin.get(`/vacantes/stats`)
         ]);
         setVacantesRecientes(resVacantes.data.slice(0, 5));
         setStats(resStats.data);
@@ -79,16 +79,13 @@ const [hoverLogout, setHoverLogout] = useState(false);
   }, [vistaActiva]);
 
   const handleLogout = () => {
-    // 1. Limpiamos TODO el almacenamiento local (Tokens, datos de usuario, roles)
-    // Esto garantiza que nadie pueda volver a entrar dándole al botón "Atrás"
-    localStorage.clear(); 
-    sessionStorage.clear();
+    // Sólo se borra la sesión del panel (admin-sesion): una sesión de egresado o
+    // empresa en el mismo navegador y la espera de "Recuperar contraseña" siguen.
+    // Al volver con "Atrás", RutaAdmin ya no encuentra sesión y lleva al acceso.
+    cerrarSesionAdmin();
 
-    // 2. Redirigimos a la Landing Page (Raíz)
-    // Usamos window.location.href en lugar de navigate('/') para forzar
-    // una recarga total del navegador. Esto destruye todos los estados
-    // de React que pudieran quedar en la memoria RAM.
-    window.location.href = '/';
+    // Recarga completa (no navigate): no queda estado del panel en memoria.
+    window.location.assign(ACCESO_ADMIN);
 };
 
   if (loading && vistaActiva === 'inicio') {
@@ -188,10 +185,10 @@ const [hoverLogout, setHoverLogout] = useState(false);
         <main className="admin-content-panel">
           
           {/* RENDERIZADO POR COMPONENTES INDEPENDIENTES */}
-          {vistaActiva === 'usuarios' && <ItemUsuarios API_URL={API_URL} />}
-          {vistaActiva === 'empresas' && <ItemEmpresas API_URL={API_URL} />}
-          {vistaActiva === 'vacantes' && <ItemVacantes API_URL={API_URL} />}
-          {vistaActiva === 'postulaciones' && <ItemPostulaciones API_URL={API_URL} />}
+          {vistaActiva === 'usuarios' && <ItemUsuarios />}
+          {vistaActiva === 'empresas' && <ItemEmpresas />}
+          {vistaActiva === 'vacantes' && <ItemVacantes />}
+          {vistaActiva === 'postulaciones' && <ItemPostulaciones />}
 {/* AÑADE ESTA LÍNEA: */}
 {vistaActiva === 'metricas' && <MetricasyReportesAdmin />}
 
@@ -223,7 +220,7 @@ const [hoverLogout, setHoverLogout] = useState(false);
                   <div className="card-icon" style={{ background: '#eff6ff', color: '#2563eb', padding: '15px', borderRadius: '12px' }}><Briefcase size={24} /></div>
                   <div className="card-info">
                     <h3 style={{ fontSize: '13px', color: '#64748b', margin: '0 0 5px 0' }}>Vacantes Activas</h3>
-                    <p style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: '0' }}>{stats?.vacantesAbiertas || 0}</p>
+                    <p style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: '0' }}>{stats?.vacantesActivas || 0}</p>
                   </div>
                 </div>
                 

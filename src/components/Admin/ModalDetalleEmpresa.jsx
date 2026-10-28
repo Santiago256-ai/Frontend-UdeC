@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { APIAdmin } from '../../services/api';
 import { toast } from 'react-toastify';
 import styles from './ModalDetalle.module.css';
 
 const Icon = ({ name }) => <i className={`fa-solid fa-${name}`}></i>;
 
-const ModalDetalleEmpresa = ({ isOpen, onClose, empresa, onUpdate, API_URL }) => {
+const ModalDetalleEmpresa = ({ isOpen, onClose, empresa, onUpdate }) => {
     const [isEditingCorp, setIsEditingCorp] = useState(false);
     const [corpFormData, setCorpFormData] = useState({});
     
@@ -31,7 +31,7 @@ const ModalDetalleEmpresa = ({ isOpen, onClose, empresa, onUpdate, API_URL }) =>
 
     const handleSaveCorpData = async () => {
         try {
-            const res = await axios.put(`${API_URL}/empresas/admin/${empresa.id}`, corpFormData);
+            const res = await APIAdmin.put(`/empresas/admin/${empresa.id}`, corpFormData);
             if (res.status === 200) {
                 toast.success("Expediente corporativo actualizado correctamente");
                 if (onUpdate) onUpdate(); 

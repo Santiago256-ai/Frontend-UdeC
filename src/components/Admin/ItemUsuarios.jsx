@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { APIAdmin } from '../../services/api';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -12,7 +12,7 @@ const Icon = ({ name }) => <i className={`fa-solid fa-${name}`}></i>;
 // ==========================================
 // SUB-COMPONENTE: MODAL PERFIL (EDICIÓN HORIZONTAL)
 // ==========================================
-const ModalPerfil = ({ usuario, onClose, onUpdate, API_URL }) => {
+const ModalPerfil = ({ usuario, onClose, onUpdate }) => {
     const [editando, setEditando] = useState(false);
     const [datosEditados, setDatosEditados] = useState(usuario ? { ...usuario } : {});
 
@@ -26,7 +26,7 @@ const ModalPerfil = ({ usuario, onClose, onUpdate, API_URL }) => {
 
     const handleGuardar = async () => {
         try {
-            const res = await axios.put(`${API_URL}/usuarios/${usuario.id}`, datosEditados);
+            const res = await APIAdmin.put(`/usuarios/${usuario.id}`, datosEditados);
             if (res.status === 200) {
                 toast.success("Expediente actualizado correctamente");
                 if (onUpdate) onUpdate(); 
@@ -143,7 +143,7 @@ const ModalPerfil = ({ usuario, onClose, onUpdate, API_URL }) => {
 // ==========================================
 // COMPONENTE PRINCIPAL: ITEM USUARIOS
 // ==========================================
-const ItemUsuarios = ({ API_URL }) => {
+const ItemUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
@@ -159,7 +159,7 @@ const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
     const cargarUsuarios = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${API_URL}/usuarios/admin/todos`);
+            const res = await APIAdmin.get(`/usuarios/admin/todos`);
             setUsuarios(res.data);
         } catch (error) {
             console.error("Error al cargar usuarios:", error);
@@ -231,7 +231,7 @@ const toggleEstado = async (usuario) => {
     
     try {
         // Usamos el endpoint de actualización que ya creamos
-        await axios.put(`${API_URL}/usuarios/${usuario.id}`, {
+        await APIAdmin.put(`/usuarios/${usuario.id}`, {
             ...usuario,
             estado: nuevoEstado
         });
@@ -262,7 +262,7 @@ const ejecutarEliminacion = async () => {
     if (!usuarioParaEliminar) return;
 
     try {
-        await axios.delete(`${API_URL}/usuarios/${usuarioParaEliminar.id}`);
+        await APIAdmin.delete(`/usuarios/${usuarioParaEliminar.id}`);
         setUsuarios(usuarios.filter(u => u.id !== usuarioParaEliminar.id));
         toast.success(`El perfil de "${usuarioParaEliminar.nombre}" ha sido eliminado correctamente`);
     } catch (error) {
@@ -321,7 +321,6 @@ return (
             <ModalPerfil 
                 key={usuarioSeleccionado.id} 
                 usuario={usuarioSeleccionado} 
-                API_URL={API_URL}
                 onClose={() => setUsuarioSeleccionado(null)} 
                 onUpdate={cargarUsuarios} 
             />
