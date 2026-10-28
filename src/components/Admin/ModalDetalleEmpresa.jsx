@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { APIAdmin } from '../../services/api';
+import { avisarAccionBloqueada, esBloqueoTemporal } from './bloqueoTemporal';
 import { toast } from 'react-toastify';
 import styles from './ModalDetalle.module.css';
 
@@ -39,7 +40,8 @@ const ModalDetalleEmpresa = ({ isOpen, onClose, empresa, onUpdate }) => {
             }
         } catch (error) {
             console.error("Error al actualizar empresa:", error);
-            toast.error("No se pudo actualizar la información");
+            if (esBloqueoTemporal(error)) avisarAccionBloqueada("Guardar los cambios");
+            else toast.error("No se pudo actualizar la información");
         }
     };
 

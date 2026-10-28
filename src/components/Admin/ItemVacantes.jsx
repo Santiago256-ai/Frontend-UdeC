@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { APIAdmin } from '../../services/api';
+import { avisarBloqueoTemporal, esBloqueoTemporal } from './bloqueoTemporal';
 import { toast } from 'react-toastify';
 import styles from './ItemVacantes.module.css';
 
@@ -17,7 +18,8 @@ const ItemVacantes = () => {
             setVacantes(res.data);
         } catch (error) {
             console.error("Error al cargar vacantes:", error);
-            toast.error("No se pudieron obtener las vacantes reales");
+            if (esBloqueoTemporal(error)) avisarBloqueoTemporal();
+            else toast.error("No se pudieron obtener las vacantes reales");
         } finally {
             setLoading(false);
         }

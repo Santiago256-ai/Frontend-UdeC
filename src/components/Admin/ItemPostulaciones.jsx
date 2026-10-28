@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { APIAdmin } from '../../services/api';
+import { avisarBloqueoTemporal, esBloqueoTemporal } from './bloqueoTemporal';
 import { toast } from 'react-toastify';
 import { Star, MessageCircle, X, ThumbsUp, ThumbsDown, Info } from 'lucide-react'; 
 import styles from './ItemPostulaciones.module.css';
@@ -32,7 +33,8 @@ const ItemPostulaciones = () => {
             setPostulaciones(res.data);
         } catch (error) {
             console.error("Error al cargar postulaciones:", error);
-            toast.error("Error al conectar con el historial de aplicaciones");
+            if (esBloqueoTemporal(error)) avisarBloqueoTemporal();
+            else toast.error("Error al conectar con el historial de aplicaciones");
         } finally {
             setLoading(false);
         }

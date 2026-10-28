@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { APIAdmin } from '../../services/api';
+import { avisarAccionBloqueada, avisarBloqueoTemporal, esBloqueoTemporal } from './bloqueoTemporal';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -34,7 +35,8 @@ const ModalPerfil = ({ usuario, onClose, onUpdate }) => {
             }
         } catch (error) {
             console.error("Error al actualizar:", error);
-            toast.error("No se pudo actualizar el expediente");
+            if (esBloqueoTemporal(error)) avisarAccionBloqueada("Guardar los cambios");
+            else toast.error("No se pudo actualizar el expediente");
         }
     };
 
@@ -163,7 +165,8 @@ const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
             setUsuarios(res.data);
         } catch (error) {
             console.error("Error al cargar usuarios:", error);
-            toast.error("No se pudo conectar con la base de datos");
+            if (esBloqueoTemporal(error)) avisarBloqueoTemporal();
+            else toast.error("No se pudo conectar con la base de datos");
         } finally {
             setLoading(false);
         }
@@ -244,7 +247,8 @@ const toggleEstado = async (usuario) => {
         toast.success(`Usuario ${nuevoEstado === "ACTIVO" ? 'activado' : 'desactivado'}`);
     } catch (error) {
         console.error("Error al cambiar estado:", error);
-        toast.error("No se pudo cambiar el estado");
+        if (esBloqueoTemporal(error)) avisarAccionBloqueada("Cambiar el estado");
+        else toast.error("No se pudo cambiar el estado");
     }
 };
 
@@ -267,7 +271,8 @@ const ejecutarEliminacion = async () => {
         toast.success(`El perfil de "${usuarioParaEliminar.nombre}" ha sido eliminado correctamente`);
     } catch (error) {
         console.error("Error al eliminar:", error);
-        toast.error("No se pudo eliminar el usuario");
+        if (esBloqueoTemporal(error)) avisarAccionBloqueada("Eliminar");
+        else toast.error("No se pudo eliminar el usuario");
     } finally {
         // Cerramos y limpiamos siempre
         setIsModalOpen(false);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { APIAdmin } from '../../services/api';
 import { ACCESO_ADMIN, cerrarSesionAdmin } from '../../services/sesionAdmin';
+import { avisarBloqueoTemporal, esBloqueoTemporal, escucharBloqueoTemporal } from './bloqueoTemporal';
 import { useNavigate } from 'react-router-dom';
 import './Admin.css';
 
@@ -11,7 +12,7 @@ import { Doughnut, Line } from 'react-chartjs-2';
 // Importación de Iconos Premium (Lucide React)
 import { 
   Home, Users, Building2, Briefcase, CheckCircle, 
-  MessageSquare, BarChart3, Settings, LogOut, User
+  MessageSquare, BarChart3, Settings, LogOut, User, Clock
 } from 'lucide-react';
 
 // Importación de Componentes Independientes
@@ -50,6 +51,9 @@ const Admin = () => {
   const [vacantesRecientes, setVacantesRecientes] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Aviso general: alguna ruta del panel respondió con el 403 temporal del servidor.
+  const [panelEnHabilitacion, setPanelEnHabilitacion] = useState(false);
+  useEffect(() => escucharBloqueoTemporal(() => setPanelEnHabilitacion(true)), []);
   const [showDropdown, setShowDropdown] = useState(false); // Estado para el menú del avatar
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false); // Nuevo estado
@@ -68,6 +72,7 @@ const [hoverLogout, setHoverLogout] = useState(false);
         setStats(resStats.data);
       } catch (error) {
         console.error("Error al conectar con la base de datos real:", error);
+        if (esBloqueoTemporal(error)) avisarBloqueoTemporal();
       } finally {
         setLoading(false);
       }
@@ -183,6 +188,17 @@ const [hoverLogout, setHoverLogout] = useState(false);
 
         {/* PANEL DE CONTENIDO PRINCIPAL */}
         <main className="admin-content-panel">
+          {panelEnHabilitacion && (
+            <div className="admin-panel-habilitacion" role="status">
+              <Clock size={18} strokeWidth={2} aria-hidden="true" />
+              <div>
+                <p className="admin-panel-habilitacion-titulo">Panel en habilitación</p>
+                <p className="admin-panel-habilitacion-texto">
+                  Algunas funciones del panel están temporalmente deshabilitadas mientras el servidor habilita el acceso de administrador. Los datos no se han perdido.
+                </p>
+              </div>
+            </div>
+          )}
           
           {/* RENDERIZADO POR COMPONENTES INDEPENDIENTES */}
           {vistaActiva === 'usuarios' && <ItemUsuarios />}

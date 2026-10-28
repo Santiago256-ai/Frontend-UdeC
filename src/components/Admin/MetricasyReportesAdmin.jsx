@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'; // 🟢 Añadimos useRef
 import { APIAdmin } from '../../services/api';
+import { avisarBloqueoTemporal, esBloqueoTemporal } from './bloqueoTemporal';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, Legend
@@ -157,7 +158,12 @@ const MetricasyReportesAdmin = () => {
       console.log("DATOS DEL BACKEND RECIÉN LLEGADOS:", response.data);
       setError(null);
     } catch (err) {
-      setError("No se pudo conectar con el servidor de métricas.");
+      if (esBloqueoTemporal(err)) {
+        avisarBloqueoTemporal();
+        setError("Las métricas estarán disponibles cuando se habilite el acceso de administrador.");
+      } else {
+        setError("No se pudo conectar con el servidor de métricas.");
+      }
     } finally {
       setLoading(false);
     }

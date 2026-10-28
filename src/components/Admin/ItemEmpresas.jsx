@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { APIAdmin } from '../../services/api';
+import { avisarAccionBloqueada, avisarBloqueoTemporal, esBloqueoTemporal } from './bloqueoTemporal';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -37,7 +38,8 @@ const handleVerDetalles = (empresa) => {
             setEmpresas(res.data);
         } catch (error) {
             console.error("Error al cargar empresas:", error);
-            toast.error("Error al conectar con el listado de empresas");
+            if (esBloqueoTemporal(error)) avisarBloqueoTemporal();
+            else toast.error("Error al conectar con el listado de empresas");
         } finally {
             setLoading(false);
         }
@@ -75,7 +77,8 @@ const handleVerDetalles = (empresa) => {
             
             toast.success(`Empresa ${nuevoEstado === "ACTIVO" ? 'activada' : 'desactivada'}`);
         } catch (error) {
-            toast.error("No se pudo cambiar el estado de la empresa");
+            if (esBloqueoTemporal(error)) avisarAccionBloqueada("Cambiar el estado");
+            else toast.error("No se pudo cambiar el estado de la empresa");
         }
     };
 
@@ -97,8 +100,12 @@ const ejecutarEliminacion = async () => {
         toast.success(`La empresa "${empresaParaEliminar.nombre}" ha sido eliminada correctamente`);
     } catch (error) {
         console.error("Error al eliminar:", error);
-        const mensajeError = error.response?.data?.error || "No se pudo eliminar la empresa";
-        toast.error(mensajeError);
+        if (esBloqueoTemporal(error)) {
+            avisarAccionBloqueada("Eliminar");
+        } else {
+            const mensajeError = error.response?.data?.error || "No se pudo eliminar la empresa";
+            toast.error(mensajeError);
+        }
     } finally {
         // Cerramos el modal y limpiamos el estado
         setIsModalOpen(false);

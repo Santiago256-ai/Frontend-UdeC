@@ -498,3 +498,24 @@ transform: scale(1.05);
     max-width: 1400px;
     margin: 0 auto;
 }
+
+/* Aviso general "Panel en habilitación": alguna ruta del panel respondió con el 403
+   temporal del servidor (bloqueoTemporal.js). Dorado suave, no naranja: es
+   información, no urgencia. Tinta #5e4c12 sobre #fbf6e6 = 7.7:1. Estático. */
+.admin-panel-habilitacion {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #fbf6e6;
+  box-shadow: inset 0 0 0 1px rgba(162, 137, 69, 0.35);
+  color: #5e4c12;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.admin-panel-habilitacion svg { flex: none; margin-top: 2px; }
+.admin-panel-habilitacion p { margin: 0; }
+.admin-panel-habilitacion .admin-panel-habilitacion-titulo { font-weight: 700; color: #3f3209; margin-bottom: 2px; }
+.admin-panel-habilitacion-texto { overflow-wrap: anywhere; }
