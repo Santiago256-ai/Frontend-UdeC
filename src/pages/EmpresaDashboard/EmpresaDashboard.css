@@ -52,6 +52,11 @@ html, body {
     pointer-events: auto !important; /* Asegura que puedas hacer clic */
 }
 
+/* [CSS MUERTO desde menu-empresa-sello] La barra lateral (.sidebar*, .logo-section, .logo-*-expanded/collapsed,
+   .menu-item*, .sidebar-footer, .collapse-btn-footer) se reemplazó por la barra
+   superior de EmpresaNav.jsx/.css (Rumbo B "Sello en Marcha"). Ya no la usa ningún
+   JSX. Se conserva sin borrar para que el diff sea revisable; la limpieza va en un
+   commit aparte. Ojo: VacantesDashboard.css declara las mismas clases sin ámbito. */
 /* 2. SIDEBAR (Estructura idéntica) */
 .sidebar {
     position: fixed;
@@ -189,6 +194,13 @@ html, body {
   width: 100%;
 }
 
+/* [CSS MUERTO desde menu-empresa-sello] Cabecera vieja de Empresa (.main-header-container, .header-content,
+   .header-left-brands, .header-brand-logo, .brand-divider, .header-udec-logo,
+   .header-center, .header-right, .header-*-logo*, .search-wrapper,
+   .user-profile-info, .user-avatar-initials): la reemplazó la fila de identidad
+   de EmpresaNav. EXCEPCIÓN — siguen VIVAS y NO se borran en la limpieza:
+   .header-top-bar, .bar-green y .bar-orange, que usa Admin.jsx:113-115.
+   (.glass-container sí está vivo.) */
 /* 3. CONTENEDOR MAESTRO DEL HEADER */
 .glass-container {
     width: 100%;
@@ -320,6 +332,8 @@ html, body {
   font-weight: 600; transition: all 0.3s ease;
 }
 
+/* Nota (menu-empresa-sello): el margin-left: 70px de .content-inner esquivaba la
+   barra lateral; EmpresaNav.css lo anula con ámbito .dashboard-empresa-container. */
 /* 4. ÁREA DE CONTENIDO (LISTA + DETALLE) */
 .content-inner {
     /* Ajustamos el margen para que el contenido no quede tan lejos */
@@ -429,6 +443,7 @@ html, body {
 .badge-slots { background-color: #fff4e5; color: var(--udec-orange); border: 1px solid #ffead0; }
 .badge-deadline { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
+/* [CSS MUERTO desde menu-empresa-sello] La regla .main-header-container de abajo (el resto del bloque, .modal-overlay, está vivo). */
 /* 7. MODAL OVERLAY (Logout y otros) */
 /* El Header debe estar por debajo del Modal */
 .main-header-container {
@@ -1278,6 +1293,7 @@ html, body {
     color: #166534 !important; /* Texto verde oscuro para legibilidad */
 }
 
+/* [CSS MUERTO desde menu-empresa-sello] .user-full-name-empresa y .user-details: cabecera vieja (ver EmpresaNav). */
 .user-full-name-empresa {
     font-weight: 700;
     color: #1e293b;
@@ -1727,6 +1743,8 @@ html, body {
     transform: translateY(1px);
 }
 
+/* [CSS MUERTO desde menu-empresa-sello] Menú del avatar viejo (.profile-dropdown-container, .dropdown-item*,
+   .dropdown-divider): ahora es .emp-nav-user-menu en EmpresaNav.css. */
 /* Contenedor del menú que sale del avatar */
 .profile-dropdown-container {
     position: absolute;
@@ -2888,6 +2906,10 @@ html, body {
     width: 22px;
 }
 
+/* [CSS MUERTO desde menu-empresa-sello] Hasta .icon-wrapper inclusive: punto naranja de Notificaciones
+   (.icon-with-badge, .notification-dot-orange, @keyframes latidoPuntoEmpresa),
+   reglas .sidebar.collapsed y .icon-wrapper. El aviso es ahora el badge de conteo
+   dorado de EmpresaNav. (.hub-icon-wrapper y demás *-icon-wrapper son otras clases.) */
 /* Contenedor para posicionar el badge */
 .icon-with-badge {
     position: relative;
