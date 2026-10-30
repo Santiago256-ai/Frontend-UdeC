@@ -239,6 +239,50 @@ console.log('\nColisión de clases');
     '.error-message-sutil se conserva para EmpresaDashboard y Landing ya no la usa');
 }
 
+// ---------------------------------------------------------------- barrida de altos (Doble Vitrina)
+// La pantalla real del usuario es 1276×551 con Windows al 150 % (deviceScaleFactor 1.5).
+// En ningún estado puede haber scroll en la página ni dentro del panel derecho.
+console.log('\nBarrida de altos en escritorio (sin scroll en página ni panel)');
+const BARRIDA = [[1276, 551, 1.5]];
+for (const w of [1280, 1366, 1536, 1920]) for (const h of [540, 551, 600, 650, 700, 800]) BARRIDA.push([w, h, 1]);
+const desbordes = (page) => page.evaluate(() => {
+  const doc = document.documentElement;
+  const panel = document.querySelector('.actions-section-white');
+  const titulo = document.querySelector('.login-col h2').getBoundingClientRect();
+  const empresa = [...document.querySelectorAll('button, a')].find((b) => /SOY EMPRESA/i.test(b.textContent)).getBoundingClientRect();
+  return {
+    pagina: doc.scrollHeight - doc.clientHeight,
+    panel: panel.scrollHeight - panel.clientHeight,
+    titulo: Math.round(titulo.top),
+    empresa: Math.round(empresa.bottom),
+    alto: innerHeight,
+  };
+});
+for (const [w, h, dpr] of BARRIDA) {
+  for (const [estado, opciones, conEnvio] of [
+    ['reposo', {}, false],
+    ['error', {}, true],
+    ['largo', { respuesta: () => json(200, { success: false, message: INACTIVA }) }, true],
+    ['expirada', { url: '/?motivo=expirada' }, false],
+    ['expirada+error', { url: '/?motivo=expirada' }, true],
+  ]) {
+    const { context, page } = await nuevaPagina(browser, { viewport: { width: w, height: h }, extra: { deviceScaleFactor: dpr, reducedMotion: 'reduce' }, ...opciones });
+    await page.waitForTimeout(350);
+    if (conEnvio) {
+      await enviar(page);
+      await esperarAviso(page);
+      await page.evaluate(() => document.activeElement?.blur());
+      await page.waitForTimeout(250);
+    }
+    const d = await desbordes(page);
+    const nombre = `${w}×${h}${dpr !== 1 ? ` @${dpr}x` : ''} ${estado}`;
+    check(d.pagina <= 0 && d.panel <= 0 && d.titulo >= 0 && d.empresa <= d.alto,
+      `${nombre}: sin scroll, INICIAR SESIÓN y SOY EMPRESA enteros`, `página ${d.pagina}, panel ${d.panel}, título en ${d.titulo}, SOY EMPRESA hasta ${d.empresa} de ${d.alto}`);
+    if (dpr !== 1 && ['reposo', 'error', 'largo'].includes(estado)) await page.screenshot({ path: path.join(OUT, `${w}x${h}-dpr${dpr}-${estado}.png`) });
+    await context.close();
+  }
+}
+
 // ---------------------------------------------------------------- geometría
 console.log('\nGeometría (7 tamaños + 1920×830)');
 const medir = (page) => page.evaluate(() => {
