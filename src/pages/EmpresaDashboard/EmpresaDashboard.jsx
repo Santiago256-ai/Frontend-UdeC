@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; 
 import API from "../../services/api"; 
-import logoUdec from '../../assets/UdeC2.png';
-import logoGrande from '../../assets/Logo2.png'; 
 import logoPequeño from '../../assets/Logo3.png';
 import ListaPostulacionesTable from "../../components/ListaPostulacionesTable";
 import TotalPostulaciones from "./TotalPostulaciones"; // Ajusta la ruta si es necesario
 import { 
-    LogOut, MessageSquare, Briefcase, PlusCircle, 
-    Building2, Users, Edit3, Trash2, Eye, MapPin, 
-    FileText, CheckCircle, XCircle, Clock, ArrowLeft, BarChart3,
-    Search, ChevronRight, Home, Bell, ClipboardList, User, Calendar, AlertTriangle, Sparkles, X, Filter, ChevronDown
+    LogOut, Briefcase, PlusCircle,
+    Building2, Users, Edit3, Trash2, Eye, MapPin,
+    FileText, CheckCircle, XCircle, Clock, ArrowLeft,
+    Search, ChevronRight, Calendar, AlertTriangle, Sparkles, X, Filter, ChevronDown
 } from 'lucide-react';
-import "./EmpresaDashboard.css"; 
+import "./EmpresaDashboard.css";
+import EmpresaNav from "./EmpresaNav";
+import { obtenerMisChatsEmpresa } from "../../services/mensajeriaEmpresa";
 import ChatSidebar from "../../components/ChatSidebar"; 
 import ChatWidget from "../../components/ChatWidget";
 import VerCV from "../../components/verCV";
@@ -61,12 +61,12 @@ export default function EmpresaDashboard() {
 const [fechaHasta, setFechaHasta] = useState("");
 const [showFilters, setShowFilters] = useState(true); 
 const [estadosSeleccionados, setEstadosSeleccionados] = useState([]); 
-const [showProfileMenu, setShowProfileMenu] = useState(false); 
 const [confirmarEliminar, setConfirmarEliminar] = useState({ visible: false, vacanteId: null, titulo: "" });
 const [vacanteAnimadaId, setVacanteAnimadaId] = useState(null);
 const conteoReferencia = React.useRef({});
 const [vacantesConNovedad, setVacantesConNovedad] = useState([]);
-const [tieneNotifPendientes, setTieneNotifPendientes] = useState(false);
+const [notifSinLeer, setNotifSinLeer] = useState(0); // badge numérico de "Avisos"
+const [mensajesSinLeer, setMensajesSinLeer] = useState(0); // badge numérico de "Mensajes"
 const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
 const insertarPlantilla = (tipo) => {
@@ -109,7 +109,6 @@ const insertarPlantilla = (tipo) => {
     RECHAZADO: { label: 'Descartado', color: '#ef4444', bg: '#fef2f2' }    // Rojo
 };
     // --- ESTADOS ---
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
     const [empresa, setEmpresa] = useState(() => {
         const storedUser = localStorage.getItem('usuario');
         const initialUser = location.state?.usuario || (storedUser ? JSON.parse(storedUser) : null);
@@ -190,9 +189,8 @@ const consultarPendientes = useCallback(async () => {
     if (!empresa?.id) return;
     try {
         const res = await API.get(`/notificaciones/empresa/${empresa.id}`);
-        // Verificamos si existe al menos una notificación con vista: false
-        const pendientes = res.data.some(n => !n.vista);
-        setTieneNotifPendientes(pendientes);
+        // Conteo de notificaciones sin leer (vista: false) — alimenta el badge de "Avisos"
+        setNotifSinLeer(Array.isArray(res.data) ? res.data.filter(n => !n.vista).length : 0);
     } catch (error) {
         console.error("Error al consultar pendientes:", error);
     }
@@ -205,12 +203,29 @@ useEffect(() => {
     return () => clearInterval(interval);
 }, [consultarPendientes]);
 
+// Badge de "Mensajes": conversaciones con mensajes sin leer. Misma función y endpoint
+// que ChatSidebar; poll ligero siempre activo, mismo intervalo que el de Egresado (20s).
+const consultarMensajesSinLeer = useCallback(async () => {
+    if (!empresa?.id) return;
+    try {
+        const res = await obtenerMisChatsEmpresa(empresa.id);
+        setMensajesSinLeer(Array.isArray(res.data) ? res.data.filter(c => c.pendientes > 0).length : 0);
+    } catch (error) {
+        console.error("Error al consultar mensajes sin leer:", error);
+    }
+}, [empresa?.id]);
+
+useEffect(() => {
+    consultarMensajesSinLeer();
+    const iv = setInterval(consultarMensajesSinLeer, 20000);
+    return () => clearInterval(iv);
+}, [consultarMensajesSinLeer]);
+
     // 3. TODOS los useEffect (MUEVE EL DE CLOSEALL AQUÍ ARRIBA)
     useEffect(() => {
     const closeAll = () => {
         setOpenDropdown(null);
         setShowStatusDropdown(false); // 👈 Agrega esto
-        setShowProfileMenu(false);
     };
     window.addEventListener('click', closeAll);
     return () => window.removeEventListener('click', closeAll);
@@ -333,19 +348,6 @@ const handleVacanteBlur = (e) => {
         }
     }, [empresa, navigate, cargarVacantes]);
 
-    // Control de Sidebar Responsive corregido
-useEffect(() => {
-    const handleResize = () => {
-        // Solo forzamos el colapso si la pantalla es pequeña (móvil/tablet)
-        // Pero si es grande, dejamos que el estado inicial (true) mande.
-        if (window.innerWidth <= 1024) {
-            setIsSidebarCollapsed(true);
-        }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-}, []);
 
 // 👇 Recibe el nuevo parámetro "vieneDeNotificacion" (por defecto es false)
 const handleVerPostulaciones = async (vacanteId, vieneDeNotificacion = false) => {
@@ -689,7 +691,6 @@ const verificarSalida = (proximaTab) => {
             // 🌟 CLAVE: Limpiamos por completo la vistaActiva al volver al panel
             setVistaActiva({ vista: 'gestion', chatData: null }); 
         }
-        setShowProfileMenu(false); 
     }
 };
 
@@ -716,16 +717,6 @@ useEffect(() => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
 }, [tieneCambios, activeTab, nuevaVacante.titulo, nuevaVacante.descripcion]);
 
-  // --- CORRECCIÓN 3: Iniciales seguras ---
-    const obtenerIniciales = (nombreInput) => {
-        const nombreFinal = nombreInput || empresa?.nombres || empresa?.nombre;
-        if (!nombreFinal) return "UA"; 
-        const partes = nombreFinal.trim().split(/\s+/); 
-        if (partes.length >= 2) {
-            return (partes[0][0] + partes[1][0]).toUpperCase();
-        }
-        return nombreFinal.substring(0, 2).toUpperCase();
-    };
 
     // ❌ (Aquí borramos el if (loading) que tenías)
 
@@ -857,108 +848,15 @@ const formatearMoneda = (valor) => {
     // Y ya de aquí en adelante arranca tu diseño normal sin problemas
     return (
         <div className="dashboard-layout dashboard-empresa-container">
-            {/* SIDEBAR LIMPIO SIN BOTÓN DE CERRAR SESIÓN */}
-        {/* SIDEBAR LIMPIO SIN BOTÓN DE CERRAR SESIÓN */}
-        <nav 
-            className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}
-            onMouseEnter={() => setIsSidebarCollapsed(false)}
-            onMouseLeave={() => setIsSidebarCollapsed(true)}
-        >
-            <div className="sidebar-top">
-                <div className="sidebar-menu">
-                    <button className={`menu-item ${activeTab === 'gestion' ? 'active' : ''}`} onClick={() => verificarSalida('gestion')}>
-                        <Home size={22}/> <span>PANEL DE GESTIÓN</span>
-                    </button>
-                    <button className={`menu-item ${activeTab === 'creacion' ? 'active' : ''}`} onClick={() => verificarSalida('creacion')}>
-                        <PlusCircle size={22}/> <span>PUBLICAR VACANTE</span>
-                    </button>
-                    <button className={`menu-item ${activeTab === 'metricas' ? 'active' : ''}`} onClick={() => verificarSalida('metricas')}>
-                        <BarChart3 size={22}/> <span>MÉTRICAS Y REPORTES</span>
-                    </button>
-                    <button 
-    className={`menu-item ${activeTab === 'notificaciones' ? 'active' : ''}`} 
-    onClick={() => verificarSalida('notificaciones')}
->
-    <div className="icon-wrapper"> 
-        <Bell size={22} />
-        {tieneNotifPendientes && <div className="notification-dot-orange"></div>}
-    </div>
-    <span>NOTIFICACIONES</span>
-</button>
-                    <button className={`menu-item ${activeTab === 'mensajes' ? 'active' : ''}`} onClick={() => verificarSalida('mensajes')}>
-                        <MessageSquare size={22}/> <span>MENSAJES / CHAT</span>
-                    </button>
-                    <button className={`menu-item ${activeTab === 'total_postulaciones' ? 'active' : ''}`} onClick={() => verificarSalida('total_postulaciones')}>
-                        <ClipboardList size={22}/> <span>LISTADO POSTULADOS</span>
-                    </button>
-                    {/* ... otros botones del menú ... */}
-<button className={`menu-item ${activeTab === 'eliminadas' ? 'active' : ''}`} onClick={() => verificarSalida('eliminadas')}>
-    <Trash2 size={22}/> <span>VACANTES ELIMINADAS</span>
-</button>
-                </div>
-            </div>
-            {/* Se eliminó el sidebar-footer de aquí */}
-        </nav>
-
    <div className="glass-container">
-    <header className="main-header-container">
-        <div className="header-top-bar">
-            <div className="bar-green"></div>
-            <div className="bar-orange"></div>
-        </div>
-        <div className="header-content">
-            {/* Lado Izquierdo: Ambos logos con divisoria */}
-            <div className="header-left-brands">
-                <img src={logoGrande} alt="Empres 360 Pro" className="header-brand-logo" />
-                <div className="brand-divider"></div>
-                <img src={logoUdec} alt="UdeC" className="header-udec-logo" />
-            </div>
-
-            {/* El centro queda vacío para que respire el diseño */}
-            <div className="header-center"></div>
-
-            <div className="header-right">
-                <div className="user-profile-info" style={{ position: 'relative' }}>
-                    <div className="user-details">
-                        <span className="user-full-name-empresa">
-                            {empresa?.nombres || empresa?.nombre || "Cargando..."}
-                        </span>
-                        <span className="user-career">Empresa Aliada</span>
-                    </div>
-
-                    <div
-                        className="user-avatar-initials"
-                        style={{ backgroundColor: '#006b3f', cursor: 'pointer' }}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowProfileMenu(!showProfileMenu);
-                        }}
-                    >
-                        <span>{obtenerIniciales(empresa?.nombres || empresa?.nombre)}</span>
-                    </div>
-
-                    {showProfileMenu && (
-                        <div className="profile-dropdown-container fade-in">
-                            <button className="dropdown-item" onClick={() => {
-                                setActiveTab("perfil");
-                                setShowProfileMenu(false);
-                            }}>
-                                <User size={16} /> Ver Perfil
-                            </button>
-                            <div className="dropdown-divider"></div>
-                            {/* Lógica unificada: abre el modal de confirmación */}
-                            <button className="dropdown-item logout" onClick={() => {
-                                setShowLogoutModal(true);
-                                setShowProfileMenu(false);
-                            }}>
-                                <LogOut size={16} /> Cerrar Sesión
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    </header>
+    <EmpresaNav
+        empresa={empresa}
+        activeTab={activeTab}
+        counts={{ gestion: vacantes.length, notificaciones: notifSinLeer, mensajes: mensajesSinLeer }}
+        onNavegar={verificarSalida}
+        onVerPerfil={() => setActiveTab("perfil")}
+        onCerrarSesion={() => setShowLogoutModal(true)}
+    />
 
                 <main className="content-inner">
                     {/* VISTA GESTIÓN */}
