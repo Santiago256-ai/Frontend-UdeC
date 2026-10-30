@@ -1043,6 +1043,41 @@
     width: 100%;
     gap: 40px;
     padding: 0;
-    margin: 0;
+    /* Centrado "seguro": los márgenes automáticos centran mientras sobra alto y
+       caen a 0 si faltara, así el título nunca queda recortado arriba (con
+       justify-content: center, el desborde se repartía y cortaba los dos bordes). */
+    margin: auto 0;
   }
+}
+
+/* Doble Vitrina en altos bajos (≤680px, p. ej. 1276×551 con Windows al 150 %):
+   el panel derecho no tiene alto para el formulario, el aviso de error o el de
+   sesión vencida y los dos botones de registro con los espacios de siempre.
+   Se compactan sólo los espacios verticales (entre bloques, bajo los títulos,
+   entre campos y entre botones) y el alto de SOY GRADUADO / SOY EMPRESA. El
+   enlace "¿Olvidaste tu contraseña?" y la fila del botón INGRESAR no cambian.
+   Medido en probar:login-error (barrida de 540 a 800px de alto). */
+@media (min-width: 900px) and (max-height: 680px) {
+  .actions-section-grid { gap: 20px; }
+  /* Bajo los dos títulos se conserva el margen de siempre (25px: 18px entre la raya
+     dorada y lo que sigue), igual en INICIAR SESIÓN y REGISTRARSE. */
+  .landing-aviso-sesion { margin-bottom: 12px; padding: 8px 14px; }
+  .login-form-udec .udec-input-field { margin-bottom: 12px; }
+  .login-form-udec .password-input-wrapper { margin-bottom: 12px; }
+  /* El campo de contraseña no lleva margen propio (.password-field { margin: 0 });
+     la regla de arriba, más específica, se lo devolvería. */
+  .login-form-udec .password-input-wrapper .udec-input-field { margin-bottom: 0; }
+  .landing-error { margin-bottom: 12px; padding: 8px 14px; }
+  .register-buttons-group { gap: 12px; }
+  .register-big-btn { padding-top: 13px; padding-bottom: 13px; }
+}
+/* Segundo escalón (≤600px): deja ~25px de holgura con el mensaje más largo a 540px
+   sin quitar aire bajo los títulos ni acercar REGISTRARSE a la fila de INGRESAR
+   (12px entre bloques, igual que antes). */
+@media (min-width: 900px) and (max-height: 600px) {
+  .actions-section-grid { gap: 12px; }
+  .login-form-udec .udec-input-field { margin-bottom: 10px; }
+  .login-form-udec .password-input-wrapper { margin-bottom: 10px; }
+  .register-buttons-group { gap: 10px; }
+  .register-big-btn { padding-top: 9px; padding-bottom: 9px; }
 }
