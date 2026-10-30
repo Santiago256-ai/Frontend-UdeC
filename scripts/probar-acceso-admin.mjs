@@ -133,7 +133,7 @@ console.log('\n(1) Formulario público: siempre consulta /auth/login, nunca entr
   await page.fill('input[type="email"]', 'alguien@ejemplo.com');
   await page.fill('input.password-field', 'clave-de-prueba');
   await page.click('.btn-login-submit');
-  await page.locator('.error-message-sutil').waitFor({ timeout: 10000 }).catch(() => {});
+  await page.locator('.landing-error').waitFor({ timeout: 10000 }).catch(() => {});
   const a = await almacen(page);
   check(ruta(page) === '/' && a.token === null, 'credenciales cualesquiera: sigue en la landing y no escribe token');
   void pedidos;

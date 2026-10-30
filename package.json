@@ -14,7 +14,8 @@
     "capturar:acerca": "node scripts/capturar-acerca.mjs",
     "capturar:recuperar": "node scripts/capturar-recuperar.mjs",
     "probar:interceptor": "node scripts/probar-interceptor-401.mjs",
-    "probar:acceso-admin": "node scripts/probar-acceso-admin.mjs"
+    "probar:acceso-admin": "node scripts/probar-acceso-admin.mjs",
+    "probar:login-error": "node scripts/probar-login-error.mjs"
   },
   "dependencies": {
     "@fontsource/montserrat": "^5.3.0",
