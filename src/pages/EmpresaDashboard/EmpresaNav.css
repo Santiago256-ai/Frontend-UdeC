@@ -1,0 +1,294 @@
+/* ============================================================================
+   RUMBO B - "SELLO EN MARCHA" - Navegacion principal de Empresa.
+   Misma pieza que el menu de Egresado (VacantesDashboard.css, prefijo .ex-):
+   mismas medidas, curvas y estados; solo cambian los destinos. Prefijo propio
+   .emp-nav- para no chocar con las clases compartidas sin ambito (.sidebar,
+   .glass-container, .content-inner...) ni con las fugas de EmpresaDashboard.css.
+   Solo tokens de marca (Manual ECOM002 V_17). Contrato de direccion en
+   frontend/.impeccable/surfaces/frontend-src-pages-empresadashboard-navegacion.md
+   ============================================================================ */
+
+/* Montserrat: neutraliza `* { font-family: 'Inter' }` de EmpresaDashboard.css
+   (una clase gana al selector universal sin depender del orden de carga). */
+.emp-nav,
+.emp-nav * {
+  font-family: 'Montserrat', 'Century Gothic', system-ui, 'Segoe UI', sans-serif;
+}
+
+/* ---------- Contexto del panel de Empresa ---------- */
+/* El panel hace scroll del documento. `.glass-container` hereda
+   `overflow: hidden` de VacantesDashboard.css (sin ambito), que anula el
+   `position: sticky` del menu; se devuelve a `visible` solo aqui. */
+.dashboard-empresa-container .glass-container { overflow: visible; }
+/* `html, body { overflow-y: auto; overflow-x: hidden }` (EmpresaDashboard.css)
+   convierte a <body> en contenedor de scroll que nunca se desplaza, y el sticky
+   se pegaria a el. `clip` recorta igual sin crear contenedor de scroll. */
+body:has(.dashboard-empresa-container) { overflow: clip visible !important; }
+/* Sin la barra lateral ya no hace falta el margen de 70px para esquivarla. */
+.dashboard-empresa-container .content-inner { margin-left: 0; }
+
+.emp-nav {
+  --empn-inactive: #5B6660;               /* AA sobre blanco (5.3:1) */
+  --empn-spring: cubic-bezier(.34, 1.3, .64, 1);
+  --empn-out:    cubic-bezier(.32, .72, 0, 1);
+  position: sticky;
+  top: 0;
+  z-index: 100;                           /* sobre la cabecera de filtros (50), bajo los modales (>=1000) */
+  flex: none;
+  background: var(--paper);
+  box-shadow: 0 1px 0 var(--hairline), 0 12px 26px -22px rgba(0, 72, 43, .4);
+}
+
+/* Canto del expediente */
+.emp-nav-edge { display: flex; height: 6px; }
+.emp-nav-edge-green { flex: 2; background: var(--udec-green); }
+.emp-nav-edge-gold  { flex: 1; background: var(--udec-gold); }
+
+/* ---------- Fila 1 - identidad ---------- */
+.emp-nav-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 62px;
+  padding: 8px clamp(16px, 3vw, 32px);
+  border-bottom: 1px solid var(--hairline);
+}
+.emp-nav-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.emp-nav-brand-logo { height: 34px; width: auto; object-fit: contain; }
+.emp-nav-brand-div  { width: 1px; height: 30px; background: var(--hairline); flex: none; }
+.emp-nav-brand-udec { height: 40px; width: auto; object-fit: contain; }
+
+.emp-nav-user { position: relative; display: flex; align-items: center; gap: 12px; }
+.emp-nav-user-txt { display: flex; flex-direction: column; text-align: right; line-height: 1.3; }
+.emp-nav-user-name { font-size: .84rem; font-weight: 700; color: var(--udec-green-strong); }
+.emp-nav-user-role { font-size: .7rem; color: var(--udec-gray); }
+
+.emp-nav-user-avatar {
+  width: 40px; height: 40px; flex: none;
+  border: 0; padding: 0; cursor: pointer;
+  border-radius: 50%;
+  background: var(--udec-green-strong);
+  color: #fff; font: inherit; font-weight: 700; font-size: .78rem;
+  display: grid; place-items: center; overflow: hidden;
+  transition: box-shadow .22s ease, transform .12s ease;
+}
+.emp-nav-user-avatar:active { transform: scale(.96); }
+.emp-nav-user-avatar:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; }
+@media (hover: hover) {
+  .emp-nav-user-avatar:hover { box-shadow: 0 0 0 3px var(--udec-gold-bg); }
+}
+
+.emp-nav-user-menu {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 40;
+  min-width: 190px; padding: 6px;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px -16px rgba(0, 72, 43, .3);
+  transform-origin: top right;
+}
+.emp-nav-user-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 12px;
+  border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: .82rem; font-weight: 600;
+  color: var(--udec-green-strong);
+  border-radius: 8px;
+  transition: background-color .16s ease;
+}
+.emp-nav-user-menu-item:hover { background: rgba(0, 123, 62, .07); }
+.emp-nav-user-menu-item:focus-visible { outline: 2px solid var(--udec-green); outline-offset: -2px; }
+.emp-nav-user-menu-item.is-logout { color: var(--alert-ink); }
+.emp-nav-user-menu-item.is-logout:hover { background: var(--alert-bg); }
+.emp-nav-user-menu-div { display: block; height: 1px; margin: 4px 8px; background: var(--hairline); }
+
+/* ---------- Fila 2 - pestanas del expediente ---------- */
+.emp-nav-row {
+  position: relative;
+  display: flex;
+  justify-content: safe center;   /* centra las pestañas; en angosto cae a flex-start sin cortarlas */
+  padding: 6px clamp(10px, 2vw, 24px) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.emp-nav-row::-webkit-scrollbar { display: none; }
+/* Regla dorada del expediente */
+.emp-nav-row::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 2px; background: var(--udec-gold);
+}
+.emp-nav-tablist { display: flex; gap: 2px; list-style: none; margin: 0; padding: 0; }
+.emp-nav-tablist li { display: flex; }
+
+/* Papel elevado compartido: se desliza y redimensiona bajo la pestana activa */
+.emp-nav-glider {
+  position: absolute;
+  left: 0; top: 5px; bottom: -1px;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-bottom: 0;
+  border-radius: 9px 9px 0 0;
+  box-shadow: 0 -6px 16px -10px rgba(0, 72, 43, .28);
+  transform: translateX(0);
+  transition: transform .3s var(--empn-out), width .3s var(--empn-out), opacity .2s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.emp-nav-tab {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  padding: 15px 24px 16px 14px;
+  border: 0; background: none; cursor: pointer;
+  font: inherit;
+  font-size: .7rem; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase;
+  color: var(--empn-inactive);
+  transition: color .18s ease, transform .12s ease;
+}
+.emp-nav-tab:active { transform: scale(.97); }
+.emp-nav-tab:focus-visible { outline: 2px solid var(--udec-green); outline-offset: -3px; border-radius: 8px; }
+.emp-nav-tab-icon { position: relative; display: flex; }
+.emp-nav-tab-icon svg { transition: stroke-width .25s ease; }
+.emp-nav-tab-label { line-height: 1; }
+
+/* Hover en pestana no activa: se dibuja un filete dorado de izq. a der. */
+.emp-nav-tab:not(.is-active)::before {
+  content: "";
+  position: absolute; left: 12px; right: 12px; bottom: 6px;
+  height: 2px; background: var(--udec-gold-ink);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .16s ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .emp-nav-tab:not(.is-active):hover { color: var(--udec-green-strong); }
+  .emp-nav-tab:not(.is-active):hover::before { clip-path: inset(0 0 0 0); }
+}
+
+/* Pestana activa: elevada + etiqueta verde fuerte */
+.emp-nav-tab.is-active { color: var(--udec-green-strong); transform: translateY(-4px); }
+.emp-nav-tab.is-active .emp-nav-tab-icon svg { stroke-width: 2.3; }
+
+/* Badge numerico de conteo — look de lacre dorado del sello. El JSX lo
+   renderiza SOLO si el conteo > 0. `.is-bumped` (el numero AUMENTO) dispara
+   el "estampado". Anclado a la esquina, no desplaza el layout. */
+.emp-nav-tab-seal {
+  position: absolute;
+  top: 6px; right: 3px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  font-size: .56rem; font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #5A3D00;
+  background: radial-gradient(circle at 34% 30%, #F1D77A, var(--udec-gold) 65%);
+  box-shadow:
+    inset 0 0 0 1px rgba(138, 106, 0, .5),
+    inset -2px -2px 3px rgba(138, 106, 0, .3),
+    0 1px 3px -1px rgba(0, 72, 43, .35);
+}
+.emp-nav-tab-seal.is-bumped { animation: empn-stamp .3s var(--empn-spring); }
+
+@keyframes empn-stamp {
+  0%   { transform: scale(0) rotate(-12deg); }
+  60%  { transform: scale(1.18) rotate(6deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* Entrada en carga - escalonada */
+.emp-nav-tablist li { animation: empn-tab-in .4s var(--empn-out) both; }
+.emp-nav-tablist li:nth-child(1) { animation-delay: 30ms; }
+.emp-nav-tablist li:nth-child(2) { animation-delay: 70ms; }
+.emp-nav-tablist li:nth-child(3) { animation-delay: 110ms; }
+.emp-nav-tablist li:nth-child(4) { animation-delay: 150ms; }
+.emp-nav-tablist li:nth-child(5) { animation-delay: 190ms; }
+.emp-nav-tablist li:nth-child(6) { animation-delay: 230ms; }
+.emp-nav-tablist li:nth-child(7) { animation-delay: 270ms; }
+@keyframes empn-tab-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .emp-nav-tab { font-size: .66rem; padding: 14px 20px 15px 11px; gap: 6px; }
+  .emp-nav-row {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  }
+}
+@media (max-width: 767px) {
+  .emp-nav-identity { min-height: 54px; padding: 6px 14px; }
+  .emp-nav-brand-logo { height: 28px; }
+  .emp-nav-brand-udec { height: 32px; }
+  .emp-nav-user-txt { display: none; }
+}
+
+/* Barra inferior de solo íconos. En Egresado empieza en 767px; aquí empieza
+   donde la fila de 7 pestañas deja de caber completa, para que en tablet se
+   vean siempre los 7. Medido con Playwright: a .66rem la lista mide 820.7px y
+   la fila deja 2vw de relleno por lado → cabe desde 855px; corte en 860px
+   (5px de holgura por redondeo/zoom). */
+@media (max-width: 859px) {
+  .emp-nav-row {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 100;
+    padding: 0 4px env(safe-area-inset-bottom, 0px);
+    background: var(--paper);
+    border-top: 1px solid var(--hairline);
+    box-shadow: 0 -8px 24px -16px rgba(0, 72, 43, .4);
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+  .emp-nav-row::after { top: 0; bottom: auto; }
+  .emp-nav-tablist { flex: 1; gap: 0; }
+  .emp-nav-tablist li { flex: 1; animation: none; }
+  .emp-nav-glider { display: none; }
+
+  /* Solo íconos (la etiqueta completa vive en aria-label) */
+  .emp-nav-tab {
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 6px 2px;
+  }
+  .emp-nav-tab-label { display: none; }
+  .emp-nav-tab:not(.is-active)::before { display: none; }
+  .emp-nav-tab-seal { top: 4px; right: 6px; }
+  .emp-nav-tab.is-active { transform: none; color: var(--udec-green-strong); }
+  .emp-nav-tab.is-active .emp-nav-tab-icon svg { stroke-width: 2.4; }
+  .emp-nav-tab.is-active::after {
+    content: "";
+    position: absolute; top: 0; left: 26%; right: 26%;
+    height: 3px; background: var(--udec-gold); border-radius: 0 0 3px 3px;
+  }
+  .dashboard-empresa-container .content-inner { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+
+  /* Flotantes anclados abajo (ChatWidget y toasts): se apoyan sobre la barra
+     (52px + 1px de borde + área segura) en vez de taparla. Solo en el panel de
+     Empresa; ToastContainer vive fuera del panel, de ahí el :has(). El toast
+     conserva los 25px de separación que hoy le fija VacantesDashboard.css:1544
+     (`bottom: 25px !important`, sin ámbito), pero medidos desde la barra. */
+  .dashboard-empresa-container .chat-widget-container { bottom: calc(53px + env(safe-area-inset-bottom, 0px)); }
+  body:has(.dashboard-empresa-container) .Toastify__toast-container--bottom-right {
+    bottom: calc(53px + 25px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ---------- prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .emp-nav-glider { transition: opacity .12s ease; }
+  .emp-nav-tab-seal.is-bumped { animation: none; }
+  .emp-nav-tab:not(.is-active)::before { transition: none; }
+  .emp-nav-tablist li { animation: none; opacity: 1; transform: none; }
+}
