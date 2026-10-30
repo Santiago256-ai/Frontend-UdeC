@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Clock, Eye, EyeOff, Info } from 'lucide-react';
+import { AlertCircle, Clock, Eye, EyeOff, Info } from 'lucide-react';
 import './Landing.css';
 import AcercaDeModal from './AcercaDeModal';
 import RecuperarModal from './RecuperarModal';
+import { validarCorreo } from './recuperarCorreo';
 
 // URLs de Imágenes:
 // Asegúrate de mover tus fotos a la carpeta /public/ con estos nombres
@@ -11,6 +12,22 @@ const logoUrl = '/Logo.png'; // Logo con escudo circular
 const logoSecundarioUrl = '/UdeC2.png';
 const graduadosImgUrl = '/grad1.jpg'; // Imagen de la izquierda
 const negociosImgUrl = '/of3.jpg'; // Imagen de la derecha
+
+// Aviso de error del login, concepto A "Renglón" (DESIGN.md §8). Un rechazo de
+// credenciales siempre dice lo mismo, exista o no el correo: así la pantalla no
+// revela qué cuentas están registradas.
+const ERRORES_LOGIN = {
+  credenciales: 'Correo o contraseña incorrectos.',
+  vacios: 'Escribe tu correo y tu contraseña.',
+  sinPassword: 'Escribe tu contraseña.',
+  servidor: 'No pudimos iniciar sesión. Intenta de nuevo.',
+  sinConexion: 'Sin conexión a internet. Revisa tu red y vuelve a intentarlo.',
+  sinRespuesta: 'No se pudo conectar con el servidor. Espera un momento y vuelve a intentarlo.',
+};
+// Mientras el backend no envíe un código propio, la cuenta desactivada se reconoce
+// por su texto (authController.js) y conserva su mensaje.
+const esCuentaInactiva = (mensaje) => typeof mensaje === 'string' && /desactivada/i.test(mensaje);
+const ID_ERROR_LOGIN = 'landing-login-error';
 
 function Landing() {
   const navigate = useNavigate();
@@ -25,7 +42,15 @@ function Landing() {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  // error: { texto, origen: 'local' | 'servidor', correo, password } (los dos últimos
+  // marcan qué campos quedan con aria-invalid). 'local' aparece sin animación.
+  const [error, setError] = useState(null);
+  // Contador de rechazos: remonta el aviso para que un mismo texto se anuncie otra vez.
+  const [intento, setIntento] = useState(0);
+  // El aviso de sesión vencida ya cumplió su función en cuanto la persona intenta entrar.
+  const [intentoLogin, setIntentoLogin] = useState(false);
+  const correoRef = useRef(null);
+  const passwordRef = useRef(null);
   // Modal "Recuperar contraseña" (RecuperarModal): el envío, la validación y el
   // enfriamiento viven en el componente; aquí sólo se abre y se le devuelve el foco.
 const [showResetModal, setShowResetModal] = useState(false);
@@ -34,9 +59,34 @@ const [showAboutModal, setShowAboutModal] = useState(false); // Estado para el "
 const infoTriggerRef = useRef(null);
 
   // ESTA ES LA FUNCIÓN DONDE VA EL CÓDIGO
+  const mostrarError = (texto, origen, campos = {}) => {
+    setError({ texto, origen, correo: false, password: false, ...campos });
+    setIntento((n) => n + 1);
+  };
+
   const handleLogin = async (e) => {
   e.preventDefault();
-  setError('');
+  setIntentoLogin(true);
+  setError(null);
+
+  // Validación propia (el formulario lleva noValidate), con los mismos mensajes de
+  // correo que la Ventanilla (recuperarCorreo.js).
+  const fallaCorreo = validarCorreo(correo);
+  if (!correo.trim() && !password) {
+    mostrarError(ERRORES_LOGIN.vacios, 'local', { correo: true, password: true });
+    correoRef.current?.focus();
+    return;
+  }
+  if (fallaCorreo) {
+    mostrarError(fallaCorreo, 'local', { correo: true });
+    correoRef.current?.focus();
+    return;
+  }
+  if (!password) {
+    mostrarError(ERRORES_LOGIN.sinPassword, 'local', { password: true });
+    passwordRef.current?.focus();
+    return;
+  }
 
   try {
     // Usamos el dominio oficial que configuraste en Vercel
@@ -46,7 +96,12 @@ const infoTriggerRef = useRef(null);
       body: JSON.stringify({ correo, password }),
     });
 
-    const data = await response.json();
+    // Un 5xx o una página de error de Vercel puede no traer JSON.
+    const data = await response.json().catch(() => null);
+    if (!data) {
+      mostrarError(ERRORES_LOGIN.servidor, 'servidor');
+      return;
+    }
 
     if (response.ok && data.success !== false) {
         // 1. Guardamos el token
@@ -61,13 +116,19 @@ const infoTriggerRef = useRef(null);
         } else if (data.tipo === "empresa") {
           navigate('/empresa-dashboard');
         }
+      } else if (response.status >= 500) {
+        mostrarError(ERRORES_LOGIN.servidor, 'servidor');
+      } else if (esCuentaInactiva(data.message)) {
+        mostrarError(data.message, 'servidor');
       } else {
-        // ❌ Si success es false (o la respuesta no es ok), mostramos el mensaje sutil
-        setError(data.message || "Credenciales no encontradas");
+        // Rechazo de credenciales: se vacía la contraseña y se vuelve a ella.
+        mostrarError(ERRORES_LOGIN.credenciales, 'servidor', { correo: true, password: true });
+        setPassword('');
+        passwordRef.current?.focus();
       }
-    } catch (error) {
-      console.error("Error de conexión:", error);
-      setError("No se pudo conectar con el servidor.");
+    } catch {
+      // Sin respuesta legible: red caída, tiempo agotado o un rechazo sin cabeceras CORS.
+      mostrarError(navigator.onLine === false ? ERRORES_LOGIN.sinConexion : ERRORES_LOGIN.sinRespuesta, 'servidor');
     }
   };
 
@@ -132,38 +193,44 @@ const infoTriggerRef = useRef(null);
           <div className="action-column login-col">
             <h2>INICIAR SESIÓN</h2>
 
-            {sesionExpirada && (
+            {sesionExpirada && !intentoLogin && (
               <p className="landing-aviso-sesion" role="status">
                 <Clock size={18} strokeWidth={2} aria-hidden="true" />
                 <span>Tu sesión expiró, vuelve a entrar.</span>
               </p>
             )}
             
-            <form className="login-form-udec" onSubmit={handleLogin}>
-              <input 
-  type="email" 
-  placeholder="Correo electrónico" 
-  className="udec-input-field" 
+            <form className="login-form-udec" onSubmit={handleLogin} noValidate>
+              <input
+  ref={correoRef}
+  type="email"
+  placeholder="Correo electrónico"
+  className="udec-input-field"
   value={correo}
+  aria-invalid={error?.correo ? 'true' : undefined}
+  aria-describedby={error?.correo ? ID_ERROR_LOGIN : undefined}
   onChange={(e) => {
     // Forzamos minúsculas en tiempo real
-    setCorreo(e.target.value.toLowerCase()); 
-    if (error) setError('');
+    setCorreo(e.target.value.toLowerCase());
+    if (error) setError(null);
   }}
-  required 
+  required
 />
               
               {/* Contenedor para el campo de contraseña con el icono de ojo */}
               {/* Contenedor para el campo de contraseña */}
 <div className="password-input-wrapper">
-  <input 
-    type={showPassword ? "text" : "password"} 
-    placeholder="Contraseña" 
-    className="udec-input-field password-field" 
+  <input
+    ref={passwordRef}
+    type={showPassword ? "text" : "password"}
+    placeholder="Contraseña"
+    className="udec-input-field password-field"
     value={password}
+    aria-invalid={error?.password ? 'true' : undefined}
+    aria-describedby={error?.password ? ID_ERROR_LOGIN : undefined}
     onChange={(e) => {
       setPassword(e.target.value); // Guarda el cambio
-      if (error) setError('');     // <--- ¡ESTO TAMBIÉN BORRA EL MENSAJE!
+      if (error) setError(null);   // escribir de nuevo limpia el aviso
     }}
     required 
   />
@@ -187,6 +254,24 @@ const infoTriggerRef = useRef(null);
 </button>
 </div>
               
+              {/* Renglón del error: región viva siempre montada (anuncia cada error nuevo);
+                  se despliega sólo cuando hay error, así que en reposo no ocupa espacio. */}
+              <div
+                className="landing-error-vivo"
+                data-visible={error ? error.origen : undefined}
+                aria-live="assertive"
+                aria-atomic="true"
+              >
+                <div className="landing-error-marco">
+                  {error && (
+                    <p key={intento} id={ID_ERROR_LOGIN} className="landing-error" data-origen={error.origen}>
+                      <AlertCircle size={18} strokeWidth={2} aria-hidden="true" />
+                      <span>{error.texto}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
               {/* Busca la sección del formulario de login */}
 <div className="login-form-extras">
   <a
@@ -197,9 +282,6 @@ const infoTriggerRef = useRef(null);
 >
   ¿Olvidaste tu contraseña?
 </a>
-
-  {/* 🔴 AGREGAMOS EL MENSAJE DE ERROR AQUÍ */}
-  {error && <span className="error-message-sutil">{error}</span>}
 
   <button type="submit" className="udec-green-btn btn-login-submit">
     INGRESAR

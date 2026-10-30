@@ -608,6 +608,75 @@
 }
 .landing-aviso-sesion svg { flex: none; margin-top: 1px; }
 
+/* Error del login, concepto A "Renglón" (DESIGN.md §8). Gemelo del aviso de sesión
+   (misma geometría) en el rojo de la Ventanilla (--recuperar-*): dorado informa
+   arriba, rojo señala el fallo junto a los campos. Tokens con alcance de la landing. */
+.landing-udec-main {
+  --landing-error: #b42318;          /* 6.57:1 sobre blanco; bordes e icono */
+  --landing-error-fondo: #fdf2f1;
+  --landing-error-tinta: #8f1d14;    /* 8.13:1 sobre --landing-error-fondo */
+  --landing-error-anillo: rgba(180, 35, 24, 0.22);
+  --landing-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.landing-udec-main .udec-input-field[aria-invalid='true'] {
+  border-color: var(--landing-error);
+}
+.landing-udec-main .udec-input-field[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.14);
+}
+
+/* Fila propia a todo el ancho, entre la contraseña y la fila del enlace: el enlace
+   "¿Olvidaste tu contraseña?" ya no comparte espacio con el error. En reposo la fila
+   mide 0 (0fr); con error se despliega a la altura del aviso (1fr). */
+.landing-error-vivo {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+.landing-error-vivo[data-visible] { grid-template-rows: 1fr; }
+.landing-error-marco { min-height: 0; overflow: hidden; }
+
+.landing-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--landing-error-fondo);
+  box-shadow: inset 0 0 0 1px var(--landing-error-anillo);
+  color: var(--landing-error-tinta);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+}
+.landing-error svg { flex: none; margin-top: 1px; color: var(--landing-error); }
+
+/* Sólo la respuesta del servidor se anima: la validación local responde a la propia
+   tecla o clic y aparece al instante. Al limpiarse, la fila se cierra sin transición. */
+@media (prefers-reduced-motion: no-preference) {
+  .landing-error-vivo[data-visible='servidor'] {
+    transition: grid-template-rows 200ms var(--landing-ease);
+  }
+  .landing-error[data-origen='servidor'] {
+    animation: landing-error-aparece 200ms var(--landing-ease) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-error[data-origen='servidor'] {
+    animation: landing-error-solo-opacidad 200ms ease both;
+  }
+}
+@keyframes landing-error-aparece {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes landing-error-solo-opacidad {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Estilo para el error sutil */
 .error-message-sutil {
   color: #e53e3e; /* Rojo profesional, no chillón */
