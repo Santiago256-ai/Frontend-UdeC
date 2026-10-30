@@ -52,155 +52,6 @@ html, body {
     pointer-events: auto !important; /* Asegura que puedas hacer clic */
 }
 
-/* [CSS MUERTO desde menu-empresa-sello] La barra lateral (.sidebar*, .logo-section, .logo-*-expanded/collapsed,
-   .menu-item*, .sidebar-footer, .collapse-btn-footer) se reemplazó por la barra
-   superior de EmpresaNav.jsx/.css (Rumbo B "Sello en Marcha"). Ya no la usa ningún
-   JSX. Se conserva sin borrar para que el diff sea revisable; la limpieza va en un
-   commit aparte. Ojo: VacantesDashboard.css declara las mismas clases sin ámbito. */
-/* 2. SIDEBAR (Estructura idéntica) */
-.sidebar {
-    position: fixed;
-    left: 15px;
-    top: 108px;
-    bottom: auto;
-    
-    /* 🤏 Mucho más sutil */
-    width: 55px; 
-    height: fit-content;
-    
-    padding: 8px 0;
-    background: rgba(255, 255, 255, 0.85); /* Un poco más de transparencia */
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 18px; /* Bordes un poco más finos */
-    z-index: 1000;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); /* Sombra casi invisible */
-    overflow: hidden;
-}
-
-.sidebar:hover {
-    width: 190px; /* 👈 Antes 220px, ahora mucho más estrecho */
-}
-
-.sidebar.collapsed {
-    width: 75px;
-    background: rgba(255, 255, 255, 0.7);
-}
-
-.sidebar-top {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.logo-section {
-  padding: 20px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 10px;
-}
-
-.logo-full-expanded { height: 45px; object-fit: contain; }
-.logo-icon-collapsed { height: 35px; object-fit: contain; }
-
-.sidebar-menu { display: flex; flex-direction: column; }
-
-.menu-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 0;
-    margin: 4px auto;
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-    /* 🌟 Tu línea mágica que debe estar sí o sí */
-    overflow: visible !important; 
-}
-.menu-item:hover { color: white; background: rgba(255, 255, 255, 0.1); }
-.menu-item.active {
-    background: #00482b; /* Verde UdeC */
-    color: #ffffff !important; /* 👈 Forzamos el texto a blanco puro */
-    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.2);
-}
-
-.menu-item.active svg {
-    color: #ffffff !important;
-}
-
-.menu-item.active span {
-    color: #ffffff !important;
-    opacity: 1; /* Asegura que se vea al expandir */
-}
-
-.menu-item.active:hover {
-    background: #003620; /* Un verde un pelín más oscuro al pasar el mouse */
-    color: #ffffff !important;
-}
-
-.sidebar:hover .menu-item {
-    justify-content: flex-start;
-    padding-left: 14px;
-    width: calc(100% - 12px);
-}
-
-.menu-item:hover:not(.active) {
-    background: rgba(0, 72, 43, 0.04);
-    scale:(1.02);
-    transform: translateX(6px);
-}
-
-.menu-item span {
-    display: none;
-    font-size: 0.8rem; /* 👈 Fuente más pequeña */
-    font-weight: 500; /* Menos peso visual */
-    letter-spacing: 0.3px;
-    color: #475569;
-}
-
-.sidebar:hover .menu-item span {
-    display: block;
-    margin-left: 12px;
-}
-
-.menu-item svg {
-    min-width: 20px; /* 👈 Iconos más pequeños y finos */
-    height: 20px;
-    stroke-width: 1.8px; /* Menos grueso para mayor sutileza */
-    color: #64748b; /* Gris más suave que el negro */
-}
-
-.sidebar.collapsed .menu-item span {
-    opacity: 0; /* Desaparece el texto cuando se cierra */
-    pointer-events: none;
-}
-
-.sidebar-footer {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding: 10px;
-}
-
-.collapse-btn-footer {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  padding: 12px;
-  width: 100%;
-}
-
-/* [CSS MUERTO desde menu-empresa-sello] Cabecera vieja de Empresa (.main-header-container, .header-content,
-   .header-left-brands, .header-brand-logo, .brand-divider, .header-udec-logo,
-   .header-center, .header-right, .header-*-logo*, .search-wrapper,
-   .user-profile-info, .user-avatar-initials): la reemplazó la fila de identidad
-   de EmpresaNav. EXCEPCIÓN — siguen VIVAS y NO se borran en la limpieza:
-   .header-top-bar, .bar-green y .bar-orange, que usa Admin.jsx:113-115.
-   (.glass-container sí está vivo.) */
 /* 3. CONTENEDOR MAESTRO DEL HEADER */
 .glass-container {
     width: 100%;
@@ -212,15 +63,7 @@ html, body {
     pointer-events: auto; /* Asegura que el contenido sea clicable */
 }
 
-.main-header-container {
-    width: 100%;
-    position: relative;
-    top: 0;
-    margin-top: 0 !important; /* 👈 Asegura que no haya margen superior */
-    z-index: 10;
-    background: white;
-}
-
+/* .header-top-bar, .bar-green y .bar-orange: franja del panel de administración (Admin.jsx). */
 .header-top-bar {
     height: 20px; /* Tu barra verde/naranja */
     display: flex;
@@ -229,108 +72,6 @@ html, body {
 }
 .bar-green { flex: 2; background-color: var(--udec-green); }
 .bar-orange { flex: 1; background-color: var(--udec-orange); }
-
-.header-content {
-    display: flex;
-    justify-content: flex-start; /* 👈 Alinea todo al inicio (izquierda) */
-    align-items: center;
-    gap: 40px; /* Espacio entre el bloque de logos y el resto del header */
-    padding: 0 30px;
-    height: 100%;
-}
-
-.header-project-logo {
-    height: 45px; /* Ajusta el tamaño según prefieras */
-    width: auto;
-    object-fit: contain;
-}
-
-.header-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Logo UdeC centrado */
-.header-udec-logo-centered {
-    height: 55px; /* Un poco más grande para que resalte */
-    width: auto;
-    object-fit: contain;
-}
-
-/* Alineación de la derecha */
-.header-right {
-    display: flex;
-    justify-content: flex-end;
-    margin-left: auto;
-}
-
-/* Responsivo: Si la pantalla es pequeña, ocultamos el del centro o ajustamos */
-@media (max-width: 768px) {
-    .brand-divider, .header-udec-logo {
-        display: none; /* En móviles muy pequeños dejamos solo tu logo principal */
-    }
-}
-
-.header-left-brands {
-    display: flex;
-    align-items: center;
-    gap: 0; /* 👈 Ponemos el gap en 0 para controlar el espacio manualmente */
-    margin-left: -10px; /* 👈 Opcional: mueve todo el grupo un poco más a la izquierda si quieres */
-}
-
-.header-brand-logo {
-    height: 58px; /* 👈 Antes estaba en 40px, lo subimos a 55px */
-    width: auto;
-    object-fit: contain;
-    /* Un pequeño filtro de brillo lo hará resaltar más sobre el fondo claro */
-    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.05)); 
-    margin-right: -10px;
-    transition: transform 0.3s ease;
-}
-.header-brand-logo:hover {
-    transform: scale(1.05); /* Efecto sutil al pasar el mouse */
-}
-
-/* ➖ La línea divisoria */
-.brand-divider {
-    width: 2px; /* Un poquito más gruesa */
-    height: 38px; 
-    background-color: #cbd5e1; /* Un gris un poco más oscuro para que se note */
-    opacity: 0.8;
-    margin-left: -5px;
-}
-
-.header-udec-logo {
-    height: 48px; /* 👈 Bajamos un poco este para que el tuyo destaque más */
-    width: auto;
-    object-fit: contain;
-    margin-left: 14px;
-    opacity: 0.9; /* Un toque de transparencia para que sea secundario */
-}
-.header-logo-img { height: 60px; object-fit: contain; }
-
-.search-wrapper {
-  background: #f1f3f6;
-  border-radius: 20px;
-  padding: 8px 15px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  max-width: 450px;
-}
-
-.search-wrapper input { background: transparent; border: none; outline: none; width: 100%; }
-
-.user-profile-info { display: flex; align-items: center; gap: 12px; }
-.user-avatar-initials {
-  width: 48px; height: 48px;
-  background-color: var(--udec-green);
-  color: white; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 600; transition: all 0.3s ease;
-}
 
 /* Nota (menu-empresa-sello): el margin-left: 70px de .content-inner esquivaba la
    barra lateral; EmpresaNav.css lo anula con ámbito .dashboard-empresa-container. */
@@ -443,14 +184,7 @@ html, body {
 .badge-slots { background-color: #fff4e5; color: var(--udec-orange); border: 1px solid #ffead0; }
 .badge-deadline { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
-/* [CSS MUERTO desde menu-empresa-sello] La regla .main-header-container de abajo (el resto del bloque, .modal-overlay, está vivo). */
 /* 7. MODAL OVERLAY (Logout y otros) */
-/* El Header debe estar por debajo del Modal */
-.main-header-container {
-    position: relative; /* o sticky/fixed */
-    z-index: 10; /* Un valor bajo */
-}
-
 /* El Overlay del Modal DEBE ser el rey de la pantalla */
 .modal-overlay {
     position: fixed;
@@ -1293,28 +1027,6 @@ html, body {
     color: #166534 !important; /* Texto verde oscuro para legibilidad */
 }
 
-/* [CSS MUERTO desde menu-empresa-sello] .user-full-name-empresa y .user-details: cabecera vieja (ver EmpresaNav). */
-.user-full-name-empresa {
-    font-weight: 700;
-    color: #1e293b;
-    font-size: 14px;
-    /* 🟢 Esto evita que el nombre largo desplace el avatar */
-    max-width: 180px; 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    text-transform: uppercase; /* 🟢 Todo a mayúsculas automáticamente */
-    letter-spacing: 0.5px;
-}
-
-.user-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end; /* Alinea el texto a la derecha junto al avatar */
-    margin-right: 12px;
-}
-
 /* Contenedor de filtros */
 .search-filters-container {
     display: flex;
@@ -1741,53 +1453,6 @@ html, body {
 
 .btn-delete-danger:active {
     transform: translateY(1px);
-}
-
-/* [CSS MUERTO desde menu-empresa-sello] Menú del avatar viejo (.profile-dropdown-container, .dropdown-item*,
-   .dropdown-divider): ahora es .emp-nav-user-menu en EmpresaNav.css. */
-/* Contenedor del menú que sale del avatar */
-.profile-dropdown-container {
-    position: absolute;
-    top: 60px; /* Ajusta según la altura de tu header */
-    right: 0;
-    width: 180px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-    border: 1px solid #e2e8f0;
-    padding: 6px;
-    z-index: 9999; /* Para que esté por encima de todo */
-}
-
-.dropdown-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border: none;
-    background: none;
-    color: #475569;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background 0.2s;
-}
-
-.dropdown-item:hover {
-    background: #f1f5f9;
-    color: #006b3f;
-}
-
-.dropdown-item.logout:hover {
-    background: #fff1f2;
-    color: #e11d48;
-}
-
-.dropdown-divider {
-    height: 1px;
-    background: #e2e8f0;
-    margin: 4px 0;
 }
 
 /* Badge flotante de nueva postulación */
@@ -2904,64 +2569,6 @@ html, body {
 
 .Toastify__toast-icon {
     width: 22px;
-}
-
-/* [CSS MUERTO desde menu-empresa-sello] Hasta .icon-wrapper inclusive: punto naranja de Notificaciones
-   (.icon-with-badge, .notification-dot-orange, @keyframes latidoPuntoEmpresa),
-   reglas .sidebar.collapsed y .icon-wrapper. El aviso es ahora el badge de conteo
-   dorado de EmpresaNav. (.hub-icon-wrapper y demás *-icon-wrapper son otras clases.) */
-/* Contenedor para posicionar el badge */
-.icon-with-badge {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* No le pongas width/height fijo aquí para que no recorte */
-}
-
-/* El punto naranja dinámico */
-/* EL PUNTO NARANJA (Ajustado a tus 42px de botón) */
-.notification-dot-orange {
-    position: absolute;
-    /* 🌟 Coordenadas respecto a los 22px del icon-wrapper */
-    top: -3px;
-    right: -3px;
-    width: 9px;
-    height: 9px;
-    background-color: #ea580c; /* Naranja UdeC */
-    border: 2px solid #ffffff; /* Borde blanco para que resalte */
-    border-radius: 50%;
-    z-index: 100;
-    animation: latidoPuntoEmpresa 2s infinite;
-}
-
-/* 2. REGLA MAESTRA: Evita que el sidebar recorte el punto cuando está cerrado */
-.sidebar.collapsed .menu-item {
-    overflow: visible !important;
-}
-
-/* 3. Asegura que el contenedor del icono no recorte el brillo */
-.sidebar.collapsed .menu-item div {
-    overflow: visible !important;
-}
-
-/* 4. Animación de latido (basada en tu referencia) */
-@keyframes latidoPuntoEmpresa {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.7); }
-    70% { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(234, 88, 12, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
-}
-
-.icon-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* 🌟 IMPORTANTE: Debe medir lo mismo que el icono Lucide (22px) */
-    width: 22px;
-    height: 22px;
-    /* Aseguramos que nada lo recorte */
-    overflow: visible !important;
 }
 
 /* Badge para vacante desactivada */
