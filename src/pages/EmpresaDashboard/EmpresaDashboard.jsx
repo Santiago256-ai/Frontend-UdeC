@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import "./EmpresaDashboard.css";
 import EmpresaNav from "./EmpresaNav";
+import { obtenerMisChatsEmpresa } from "../../services/mensajeriaEmpresa";
 import ChatSidebar from "../../components/ChatSidebar"; 
 import ChatWidget from "../../components/ChatWidget";
 import VerCV from "../../components/verCV";
@@ -64,7 +65,8 @@ const [confirmarEliminar, setConfirmarEliminar] = useState({ visible: false, vac
 const [vacanteAnimadaId, setVacanteAnimadaId] = useState(null);
 const conteoReferencia = React.useRef({});
 const [vacantesConNovedad, setVacantesConNovedad] = useState([]);
-const [tieneNotifPendientes, setTieneNotifPendientes] = useState(false);
+const [notifSinLeer, setNotifSinLeer] = useState(0); // badge numérico de "Avisos"
+const [mensajesSinLeer, setMensajesSinLeer] = useState(0); // badge numérico de "Mensajes"
 const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
 const insertarPlantilla = (tipo) => {
@@ -187,9 +189,8 @@ const consultarPendientes = useCallback(async () => {
     if (!empresa?.id) return;
     try {
         const res = await API.get(`/notificaciones/empresa/${empresa.id}`);
-        // Verificamos si existe al menos una notificación con vista: false
-        const pendientes = res.data.some(n => !n.vista);
-        setTieneNotifPendientes(pendientes);
+        // Conteo de notificaciones sin leer (vista: false) — alimenta el badge de "Avisos"
+        setNotifSinLeer(Array.isArray(res.data) ? res.data.filter(n => !n.vista).length : 0);
     } catch (error) {
         console.error("Error al consultar pendientes:", error);
     }
@@ -201,6 +202,24 @@ useEffect(() => {
     const interval = setInterval(consultarPendientes, 30000);
     return () => clearInterval(interval);
 }, [consultarPendientes]);
+
+// Badge de "Mensajes": conversaciones con mensajes sin leer. Misma función y endpoint
+// que ChatSidebar; poll ligero siempre activo, mismo intervalo que el de Egresado (20s).
+const consultarMensajesSinLeer = useCallback(async () => {
+    if (!empresa?.id) return;
+    try {
+        const res = await obtenerMisChatsEmpresa(empresa.id);
+        setMensajesSinLeer(Array.isArray(res.data) ? res.data.filter(c => c.pendientes > 0).length : 0);
+    } catch (error) {
+        console.error("Error al consultar mensajes sin leer:", error);
+    }
+}, [empresa?.id]);
+
+useEffect(() => {
+    consultarMensajesSinLeer();
+    const iv = setInterval(consultarMensajesSinLeer, 20000);
+    return () => clearInterval(iv);
+}, [consultarMensajesSinLeer]);
 
     // 3. TODOS los useEffect (MUEVE EL DE CLOSEALL AQUÍ ARRIBA)
     useEffect(() => {
@@ -833,6 +852,7 @@ const formatearMoneda = (valor) => {
     <EmpresaNav
         empresa={empresa}
         activeTab={activeTab}
+        counts={{ gestion: vacantes.length, notificaciones: notifSinLeer, mensajes: mensajesSinLeer }}
         onNavegar={verificarSalida}
         onVerPerfil={() => setActiveTab("perfil")}
         onCerrarSesion={() => setShowLogoutModal(true)}

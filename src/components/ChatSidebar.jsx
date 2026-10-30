@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Send, Briefcase, MessageSquareOff, MessageSquare, User } from 'lucide-react';
 import API from "../services/api";
+import { obtenerMisChatsEmpresa } from "../services/mensajeriaEmpresa";
 import "./ChatSidebar.css";
 
 // 1. FUNCIÓN DE FORMATEO (Fuera del componente)
@@ -93,7 +94,7 @@ useEffect(() => {
     const fetchMisChats = async () => {
         if (!empresaId) return;
         try {
-            const res = await API.get(`/mensajeria/mis-chats/empresa/${empresaId}`);
+            const res = await obtenerMisChatsEmpresa(empresaId);
             setListaChats(res.data); // Solo actualizamos la lista
         } catch (err) {
             console.error("Error al cargar chats:", err);
