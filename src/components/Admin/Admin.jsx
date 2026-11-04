@@ -93,19 +93,22 @@ const [hoverLogout, setHoverLogout] = useState(false);
     window.location.assign(ACCESO_ADMIN);
 };
 
-  if (loading && vistaActiva === 'inicio') {
-    return (
+  // Mientras carga Inicio, la pantalla de carga cubre el panel en lugar de
+  // reemplazarlo: el menú sigue montado (no repite su entrada ni el glider) y
+  // `inert` saca el panel de debajo del clic y del Tab, como cuando no existía.
+  const cargandoInicio = loading && vistaActiva === 'inicio';
+
+  return (
+    <>
+    {cargandoInicio && (
       <div className="admin-loading-screen">
         <div className="admin-loading-content">
           <div className="udec-spinner"></div>
           <h2>Cargando Panel Administrativo</h2>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="admin-layout-wrapper">
+    )}
+    <div className="admin-layout-wrapper" inert={cargandoInicio}>
       
       <AdminNav
         activeTab={vistaActiva}
@@ -354,6 +357,7 @@ const [hoverLogout, setHoverLogout] = useState(false);
         </div>
       )}
     </div>
+    </>
   );
 };
 
