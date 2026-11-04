@@ -14,6 +14,7 @@
     "capturar:acerca": "node scripts/capturar-acerca.mjs",
     "capturar:recuperar": "node scripts/capturar-recuperar.mjs",
     "capturar:menu-empresa": "node scripts/capturar-menu-empresa.mjs",
+    "capturar:menu-admin": "node scripts/capturar-menu-admin.mjs",
     "probar:interceptor": "node scripts/probar-interceptor-401.mjs",
     "probar:acceso-admin": "node scripts/probar-acceso-admin.mjs",
     "probar:login-error": "node scripts/probar-login-error.mjs"

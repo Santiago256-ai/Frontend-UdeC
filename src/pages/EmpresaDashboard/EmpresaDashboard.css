@@ -63,7 +63,9 @@ html, body {
     pointer-events: auto; /* Asegura que el contenido sea clicable */
 }
 
-/* .header-top-bar, .bar-green y .bar-orange: franja del panel de administración (Admin.jsx). */
+/* CSS MUERTO (menu-admin-sello): .header-top-bar, .bar-green y .bar-orange eran la
+   franja del panel de administración; Admin.jsx ya no las usa (la franja vive en
+   AdminNav.css). Se dejan sin borrar. */
 .header-top-bar {
     height: 20px; /* Tu barra verde/naranja */
     display: flex;

@@ -286,6 +286,11 @@
 .action-btn:hover { color: var(--udec-green-primary); }
 .action-btn.delete-btn:hover { color: var(--danger-color); }
 
+/* CSS MUERTO (menu-admin-sello): la cabecera vieja salió del JSX; la
+   reemplaza AdminNav (AdminNav.css). Desde aquí hasta el fin de la barra
+   lateral nada se usa: .admin-main-header-container, .header-top-bar,
+   .admin-header-*, .admin-brand-*, .admin-udec-logo, .admin-role-text,
+   .admin-avatar-*, .admin-dropdown-*, .admin-logout-btn. Se deja sin borrar. */
 /* =========================================
    HEADER Y AVATAR
 ========================================= */
@@ -400,6 +405,9 @@ transform: scale(1.05);
 }
 
 
+/* CSS MUERTO (menu-admin-sello): la barra lateral salió del JSX; la
+   reemplaza AdminNav. Nada usa .admin-glass-sidebar, .admin-sidebar-menu ni
+   .admin-menu-item. Se deja sin borrar. */
 /* =========================================
    SIDEBAR (CORRECCIÓN DEL DISEÑO ROTO)
 ========================================= */
@@ -489,7 +497,7 @@ transform: scale(1.05);
    CONTENEDOR PRINCIPAL
 ========================================= */
 .admin-main-container {
-    padding-left: 80px; /* Evita que el sidebar pise el contenido */
+    padding-left: 80px; /* Evita que el sidebar pise el contenido. Sin uso: AdminNav.css lo deja en 20px */
     padding-top: 20px;
     padding-right: 20px;
 }

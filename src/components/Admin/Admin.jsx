@@ -11,11 +11,12 @@ import { Doughnut, Line } from 'react-chartjs-2';
 
 // Importación de Iconos Premium (Lucide React)
 import { 
-  Home, Users, Building2, Briefcase, CheckCircle, 
-  MessageSquare, BarChart3, Settings, LogOut, User, Clock
+  Users, Building2, Briefcase, CheckCircle, 
+  MessageSquare, LogOut, Clock
 } from 'lucide-react';
 
 // Importación de Componentes Independientes
+import AdminNav from './AdminNav';
 import ItemUsuarios from './ItemUsuarios';
 import ItemEmpresas from './ItemEmpresas';
 import ItemVacantes from './ItemVacantes';
@@ -54,7 +55,6 @@ const Admin = () => {
   // Aviso general: alguna ruta del panel respondió con el 403 temporal del servidor.
   const [panelEnHabilitacion, setPanelEnHabilitacion] = useState(false);
   useEffect(() => escucharBloqueoTemporal(() => setPanelEnHabilitacion(true)), []);
-  const [showDropdown, setShowDropdown] = useState(false); // Estado para el menú del avatar
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false); // Nuevo estado
   const [hoverCancelar, setHoverCancelar] = useState(false);
@@ -93,98 +93,30 @@ const [hoverLogout, setHoverLogout] = useState(false);
     window.location.assign(ACCESO_ADMIN);
 };
 
-  if (loading && vistaActiva === 'inicio') {
-    return (
+  // Mientras carga Inicio, la pantalla de carga cubre el panel en lugar de
+  // reemplazarlo: el menú sigue montado (no repite su entrada ni el glider) y
+  // `inert` saca el panel de debajo del clic y del Tab, como cuando no existía.
+  const cargandoInicio = loading && vistaActiva === 'inicio';
+
+  return (
+    <>
+    {cargandoInicio && (
       <div className="admin-loading-screen">
         <div className="admin-loading-content">
           <div className="udec-spinner"></div>
           <h2>Cargando Panel Administrativo</h2>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="admin-layout-wrapper">
+    )}
+    <div className="admin-layout-wrapper" inert={cargandoInicio}>
       
-      {/* HEADER PROFESIONAL (Con líneas de colores) */}
-      <header className="admin-main-header-container">
-        {/* Franja superior de colores institucionales */}
-        <div className="header-top-bar">
-            <div className="bar-green" style={{flex: 2, backgroundColor: '#00482b', height: '15px'}}></div>
-            <div className="bar-orange" style={{width: '30%', backgroundColor: '#f7931e', height: '15px'}}></div>
-        </div>
-
-        <div className="admin-header-content">
-          {/* LOGOS LIMPIOS A LA IZQUIERDA */}
-          <div className="admin-header-left">
-            <img src="/Logo.png" alt="Portal Admin" className="admin-brand-logo" />
-            <div className="admin-brand-divider"></div>
-            <img src="/UdeC2.png" alt="Logo UdeC" className="admin-udec-logo" />
-          </div>
-          
-          {/* TEXTO Y AVATAR A LA DERECHA */}
-          <div className="admin-header-right">
-            <div className="admin-user-details">
-              <span className="admin-role-text">Panel de Control - Administrador</span>
-            </div>
-            
-            {/* AVATAR Y DROPDOWN */}
-            <div className="admin-avatar-container">
-              <div className="admin-avatar-circle" onClick={() => setShowDropdown(!showDropdown)}>
-                <User size={20} />
-              </div>
-              
-              {/* Busca esta parte en tu código y cámbiala así: */}
-{showDropdown && (
-  <div className="admin-dropdown-menu fade-in">
-    <button 
-      className="admin-dropdown-item admin-logout-btn" 
-      onClick={() => {
-        setShowLogoutModal(true); // Abrimos el modal
-        setShowDropdown(false);   // Cerramos el dropdown
-      }}
-    >
-      <LogOut size={16} /> Cerrar Sesión
-    </button>
-  </div>
-)}
-            </div>
-          </div>
-        </div>
-      </header>
+      <AdminNav
+        activeTab={vistaActiva}
+        onNavegar={setVistaActiva}
+        onCerrarSesion={() => setShowLogoutModal(true)}
+      />
 
       <div className="admin-main-container">
-        
-        {/* SIDEBAR SUTIL TIPO GLASSMORPHISM */}
-        <aside className="admin-glass-sidebar">
-          <div className="admin-sidebar-menu">
-            <button className={`admin-menu-item ${vistaActiva === 'inicio' ? 'active' : ''}`} onClick={() => setVistaActiva('inicio')}>
-              <Home size={18} /> <span>INICIO</span>
-            </button>
-            <button className={`admin-menu-item ${vistaActiva === 'usuarios' ? 'active' : ''}`} onClick={() => setVistaActiva('usuarios')}>
-              <Users size={18} /> <span>GESTIÓN EGRESADOS</span>
-            </button>
-            <button className={`admin-menu-item ${vistaActiva === 'empresas' ? 'active' : ''}`} onClick={() => setVistaActiva('empresas')}>
-              <Building2 size={18} /> <span>GESTIÓN EMPRESAS</span>
-            </button>
-            <button className={`admin-menu-item ${vistaActiva === 'vacantes' ? 'active' : ''}`} onClick={() => setVistaActiva('vacantes')}>
-              <Briefcase size={18} /> <span>VACANTES ACTIVAS</span>
-            </button>
-            <button className={`admin-menu-item ${vistaActiva === 'postulaciones' ? 'active' : ''}`} onClick={() => setVistaActiva('postulaciones')}>
-              <CheckCircle size={18} /> <span>POSTULACIONES</span>
-            </button>
-            <button 
-  className={`admin-menu-item ${vistaActiva === 'metricas' ? 'active' : ''}`} 
-  onClick={() => setVistaActiva('metricas')}
->
-  <BarChart3 size={18} /> <span>MÉTRICAS Y REPORTES</span>
-</button>
-            <button className="admin-menu-item">
-              <Settings size={18} /> <span>CONFIGURACIÓN</span>
-            </button>
-          </div>
-        </aside>
 
         {/* PANEL DE CONTENIDO PRINCIPAL */}
         <main className="admin-content-panel">
@@ -425,6 +357,7 @@ const [hoverLogout, setHoverLogout] = useState(false);
         </div>
       )}
     </div>
+    </>
   );
 };
 
