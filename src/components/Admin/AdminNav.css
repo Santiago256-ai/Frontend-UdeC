@@ -170,8 +170,11 @@ body:has(.admin-layout-wrapper) { overflow: clip visible !important; }
 .adm-nav-tab.is-active .adm-nav-tab-icon svg { stroke-width: 2.3; }
 
 /* "Proximamente" (aria-disabled): apagada, sin hover ni pulsacion; sigue en el
-   orden de Tab y conserva el foco visible. */
-.adm-nav-tab.is-soon { cursor: default; opacity: .5; }
+   orden de Tab. La opacidad va solo al icono y al texto: en el boton atenuaria
+   tambien el anillo de foco, que debe tener el contraste de las demas pestanas. */
+.adm-nav-tab.is-soon { cursor: default; }
+.adm-nav-tab.is-soon .adm-nav-tab-icon,
+.adm-nav-tab.is-soon .adm-nav-tab-label { opacity: .5; }
 .adm-nav-tab.is-soon:active { transform: none; }
 .adm-nav-tab.is-soon::before { display: none; }
 
