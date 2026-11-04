@@ -1,0 +1,259 @@
+/* ============================================================================
+   RUMBO B - "SELLO EN MARCHA" - Navegacion principal del Administrador.
+   Copia de EmpresaNav.css (prefijo .emp-nav-) con prefijo propio .adm-nav-:
+   mismas medidas, curvas y estados; cambian los destinos, el corte de la barra
+   inferior (926px) y no hay insignias. Solo tokens de marca (Manual ECOM002 V_17).
+   Contrato de direccion en
+   frontend/.impeccable/surfaces/frontend-src-components-admin-navegacion.md
+   ============================================================================ */
+
+/* Montserrat: neutraliza `* { font-family: 'Inter' }` de EmpresaDashboard.css
+   (una clase gana al selector universal sin depender del orden de carga). */
+.adm-nav,
+.adm-nav * {
+  font-family: 'Montserrat', 'Century Gothic', system-ui, 'Segoe UI', sans-serif;
+}
+
+/* ---------- Contexto del panel de Administrador ---------- */
+/* `html, body { overflow-y: auto; overflow-x: hidden }` (EmpresaDashboard.css,
+   sin ambito) convierte a <body> en contenedor de scroll que nunca se desplaza,
+   y el sticky se pegaria a el. `clip` recorta igual sin crear contenedor. */
+body:has(.admin-layout-wrapper) { overflow: clip visible !important; }
+/* Sin la barra lateral ya no hace falta el padding de 80px para esquivarla. */
+.admin-layout-wrapper .admin-main-container { padding-left: 20px; }
+
+.adm-nav {
+  --admn-inactive: #5B6660;               /* AA sobre blanco (5.3:1) */
+  --admn-out:    cubic-bezier(.32, .72, 0, 1);
+  position: sticky;
+  top: 0;
+  z-index: 100;                           /* bajo los modales del panel (>=2000) y la pantalla de carga (9999) */
+  flex: none;
+  background: var(--paper);
+  box-shadow: 0 1px 0 var(--hairline), 0 12px 26px -22px rgba(0, 72, 43, .4);
+}
+
+/* Canto del expediente */
+.adm-nav-edge { display: flex; height: 6px; }
+.adm-nav-edge-green { flex: 2; background: var(--udec-green); }
+.adm-nav-edge-gold  { flex: 1; background: var(--udec-gold); }
+
+/* ---------- Fila 1 - identidad ---------- */
+.adm-nav-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 62px;
+  padding: 8px clamp(16px, 3vw, 32px);
+  border-bottom: 1px solid var(--hairline);
+}
+.adm-nav-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.adm-nav-brand-logo { height: 34px; width: auto; object-fit: contain; }
+.adm-nav-brand-div  { width: 1px; height: 30px; background: var(--hairline); flex: none; }
+.adm-nav-brand-udec { height: 40px; width: auto; object-fit: contain; }
+
+.adm-nav-user { position: relative; display: flex; align-items: center; gap: 12px; }
+.adm-nav-user-txt { display: flex; flex-direction: column; text-align: right; line-height: 1.3; }
+.adm-nav-user-name { font-size: .84rem; font-weight: 700; color: var(--udec-green-strong); }
+.adm-nav-user-role { font-size: .7rem; color: var(--udec-gray); }
+
+.adm-nav-user-avatar {
+  width: 40px; height: 40px; flex: none;
+  border: 0; padding: 0; cursor: pointer;
+  border-radius: 50%;
+  background: var(--udec-green-strong);
+  color: #fff; font: inherit; font-weight: 700; font-size: .78rem;
+  display: grid; place-items: center; overflow: hidden;
+  transition: box-shadow .22s ease, transform .12s ease;
+}
+.adm-nav-user-avatar:active { transform: scale(.96); }
+.adm-nav-user-avatar:focus-visible { outline: 2px solid var(--udec-green); outline-offset: 2px; }
+@media (hover: hover) {
+  .adm-nav-user-avatar:hover { box-shadow: 0 0 0 3px var(--udec-gold-bg); }
+}
+
+.adm-nav-user-menu {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 40;
+  min-width: 190px; padding: 6px;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px -16px rgba(0, 72, 43, .3);
+  transform-origin: top right;
+}
+.adm-nav-user-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 12px;
+  border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: .82rem; font-weight: 600;
+  color: var(--udec-green-strong);
+  border-radius: 8px;
+  transition: background-color .16s ease;
+}
+.adm-nav-user-menu-item:hover { background: rgba(0, 123, 62, .07); }
+.adm-nav-user-menu-item:focus-visible { outline: 2px solid var(--udec-green); outline-offset: -2px; }
+.adm-nav-user-menu-item.is-logout { color: var(--alert-ink); }
+.adm-nav-user-menu-item.is-logout:hover { background: var(--alert-bg); }
+
+/* ---------- Fila 2 - pestanas del expediente ---------- */
+.adm-nav-row {
+  position: relative;
+  display: flex;
+  justify-content: safe center;   /* centra las pestañas; en angosto cae a flex-start sin cortarlas */
+  padding: 6px clamp(10px, 2vw, 24px) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.adm-nav-row::-webkit-scrollbar { display: none; }
+/* Regla dorada del expediente */
+.adm-nav-row::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 2px; background: var(--udec-gold);
+}
+.adm-nav-tablist { display: flex; gap: 2px; list-style: none; margin: 0; padding: 0; }
+.adm-nav-tablist li { display: flex; }
+
+/* Papel elevado compartido: se desliza y redimensiona bajo la pestana activa */
+.adm-nav-glider {
+  position: absolute;
+  left: 0; top: 5px; bottom: -1px;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-bottom: 0;
+  border-radius: 9px 9px 0 0;
+  box-shadow: 0 -6px 16px -10px rgba(0, 72, 43, .28);
+  transform: translateX(0);
+  transition: transform .3s var(--admn-out), width .3s var(--admn-out), opacity .2s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.adm-nav-tab {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  padding: 15px 24px 16px 14px;
+  border: 0; background: none; cursor: pointer;
+  font: inherit;
+  font-size: .7rem; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase;
+  color: var(--admn-inactive);
+  transition: color .18s ease, transform .12s ease;
+}
+.adm-nav-tab:active { transform: scale(.97); }
+.adm-nav-tab:focus-visible { outline: 2px solid var(--udec-green); outline-offset: -3px; border-radius: 8px; }
+.adm-nav-tab-icon { position: relative; display: flex; }
+.adm-nav-tab-icon svg { transition: stroke-width .25s ease; }
+.adm-nav-tab-label { line-height: 1; }
+
+/* Hover en pestana no activa: se dibuja un filete dorado de izq. a der. */
+.adm-nav-tab:not(.is-active)::before {
+  content: "";
+  position: absolute; left: 12px; right: 12px; bottom: 6px;
+  height: 2px; background: var(--udec-gold-ink);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .16s ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .adm-nav-tab:not(.is-active):not(.is-soon):hover { color: var(--udec-green-strong); }
+  .adm-nav-tab:not(.is-active):not(.is-soon):hover::before { clip-path: inset(0 0 0 0); }
+}
+
+/* Pestana activa: elevada + etiqueta verde fuerte */
+.adm-nav-tab.is-active { color: var(--udec-green-strong); transform: translateY(-4px); }
+.adm-nav-tab.is-active .adm-nav-tab-icon svg { stroke-width: 2.3; }
+
+/* "Proximamente" (aria-disabled): apagada, sin hover ni pulsacion; sigue en el
+   orden de Tab y conserva el foco visible. */
+.adm-nav-tab.is-soon { cursor: default; opacity: .5; }
+.adm-nav-tab.is-soon:active { transform: none; }
+.adm-nav-tab.is-soon::before { display: none; }
+
+/* Entrada en carga - escalonada */
+.adm-nav-tablist li { animation: admn-tab-in .4s var(--admn-out) both; }
+.adm-nav-tablist li:nth-child(1) { animation-delay: 30ms; }
+.adm-nav-tablist li:nth-child(2) { animation-delay: 70ms; }
+.adm-nav-tablist li:nth-child(3) { animation-delay: 110ms; }
+.adm-nav-tablist li:nth-child(4) { animation-delay: 150ms; }
+.adm-nav-tablist li:nth-child(5) { animation-delay: 190ms; }
+.adm-nav-tablist li:nth-child(6) { animation-delay: 230ms; }
+.adm-nav-tablist li:nth-child(7) { animation-delay: 270ms; }
+@keyframes admn-tab-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .adm-nav-tab { font-size: .66rem; padding: 14px 20px 15px 11px; gap: 6px; }
+  .adm-nav-row {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  }
+}
+@media (max-width: 767px) {
+  .adm-nav-identity { min-height: 54px; padding: 6px 14px; }
+  .adm-nav-brand-logo { height: 28px; }
+  .adm-nav-brand-udec { height: 32px; }
+  .adm-nav-user-txt { display: none; }
+}
+
+/* Barra inferior de solo íconos donde la fila de 7 pestañas no cabe completa.
+   Medido con Playwright en el panel real: a .66rem la lista mide 884.3px y la
+   fila deja 2vw de relleno por lado → cabe desde 921px; corte en 926px (5px de
+   holgura, como en Empresa). */
+@media (max-width: 925px) {
+  .adm-nav-row {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 100;
+    padding: 0 4px env(safe-area-inset-bottom, 0px);
+    background: var(--paper);
+    border-top: 1px solid var(--hairline);
+    box-shadow: 0 -8px 24px -16px rgba(0, 72, 43, .4);
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+  .adm-nav-row::after { top: 0; bottom: auto; }
+  .adm-nav-tablist { flex: 1; gap: 0; }
+  .adm-nav-tablist li { flex: 1; animation: none; }
+  .adm-nav-glider { display: none; }
+
+  /* Solo íconos (la etiqueta completa vive en aria-label) */
+  .adm-nav-tab {
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 6px 2px;
+  }
+  .adm-nav-tab-label { display: none; }
+  .adm-nav-tab:not(.is-active)::before { display: none; }
+  .adm-nav-tab.is-active { transform: none; color: var(--udec-green-strong); }
+  .adm-nav-tab.is-active .adm-nav-tab-icon svg { stroke-width: 2.4; }
+  .adm-nav-tab.is-active::after {
+    content: "";
+    position: absolute; top: 0; left: 26%; right: 26%;
+    height: 3px; background: var(--udec-gold); border-radius: 0 0 3px 3px;
+  }
+  .admin-layout-wrapper .admin-main-container { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+
+  /* Toasts (ToastContainer vive fuera del panel, de ahí el :has()): se apoyan
+     sobre la barra (52px + 1px de borde + área segura) en vez de taparla,
+     con los 25px de separación de VacantesDashboard.css:1544. */
+  body:has(.admin-layout-wrapper) .Toastify__toast-container--bottom-right {
+    bottom: calc(53px + 25px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ---------- prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .adm-nav-glider { transition: opacity .12s ease; }
+  .adm-nav-tab:not(.is-active)::before { transition: none; }
+  .adm-nav-tablist li { animation: none; opacity: 1; transform: none; }
+}
