@@ -255,14 +255,21 @@ async function verificarTamano(browser, t) {
     if (await p.evaluate(() => document.activeElement?.classList.contains('adm-nav-tab'))) llegadas = 1;
   }
   ok(llegadas === 1, `${etiqueta}: Tab llega a la primera pestaña`);
+  let focoRef = null;
   for (let i = 0; i < 7; i++) {
     if (i > 0) await p.keyboard.press('Tab');
     const f = await p.evaluate((i) => {
       const a = document.activeElement, t = document.querySelectorAll('.adm-nav-tab')[i];
       const s = getComputedStyle(a);
-      return { esEsta: a === t, outline: `${s.outlineStyle} ${s.outlineWidth}`, focusVisible: a.matches(':focus-visible') };
+      // Opacidad efectiva del anillo: producto de la opacidad del botón y de sus ancestros.
+      let opa = 1;
+      for (let e = a; e; e = e.parentElement) opa *= parseFloat(getComputedStyle(e).opacity);
+      return { esEsta: a === t, outline: `${s.outlineStyle} ${s.outlineWidth}`, color: s.outlineColor, opa, focusVisible: a.matches(':focus-visible') };
     }, i);
     ok(f.esEsta && f.focusVisible && f.outline === 'solid 2px', `${etiqueta}: foco visible en destino ${i + 1} (${f.outline})`);
+    if (i === 0) focoRef = f;
+    else ok(f.color === focoRef.color && Math.abs(f.opa - focoRef.opa) < 0.001,
+      `${etiqueta}: el foco del destino ${i + 1} tiene el contraste del primero (${f.color}, opacidad ${f.opa})`);
     if (i === 2) await shot(p, `${etiqueta}-foco-teclado`);
     if (i === PROXIMAMENTE) await shot(p, `${etiqueta}-foco-configuracion`);
     const antes = await vista(p);
@@ -296,11 +303,13 @@ async function verificarProximamente(browser) {
     const gl = document.querySelector('.adm-nav-glider').getBoundingClientRect(), t = document.querySelectorAll('.adm-nav-tab');
     const ini = t[0].getBoundingClientRect(), conf = t[6].getBoundingClientRect();
     const filete = getComputedStyle(t[6], '::before').display;
-    return { gliderEnInicio: Math.abs(gl.left - ini.left) < 1, gliderEnConf: Math.abs(gl.left - conf.left) < 1, filete, opacidad: getComputedStyle(t[6]).opacity };
+    const op = (sel) => getComputedStyle(t[6].querySelector(sel)).opacity;
+    return { gliderEnInicio: Math.abs(gl.left - ini.left) < 1, gliderEnConf: Math.abs(gl.left - conf.left) < 1, filete,
+      boton: getComputedStyle(t[6]).opacity, icono: op('.adm-nav-tab-icon'), texto: op('.adm-nav-tab-label') };
   });
   ok(g.gliderEnInicio && !g.gliderEnConf, 'el glider se queda en la pestaña activa al pasar sobre Configuración');
   ok(g.filete === 'none', 'sin filete dorado al pasar el ratón');
-  console.log(`    opacidad ${g.opacidad}`);
+  ok(g.boton === '1' && g.icono === '0.5' && g.texto === '0.5', `apagada solo en ícono y texto (botón ${g.boton}, ícono ${g.icono}, texto ${g.texto}): el anillo de foco no se atenúa`);
   await shot(p, 'estado-configuracion-hover', { clip: { x: 0, y: 0, width: 1276, height: 140 } });
   await c.close();
 }
